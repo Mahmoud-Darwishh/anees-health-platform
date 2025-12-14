@@ -237,7 +237,7 @@ const SectionSpeciality: React.FC = () => {
                                 <h6>
                                     <Link href={`/${locale}/doctors`}>{t('home.specialities.nephrology')}</Link>
                                 </h6>
-                                <p className="mb-0">{t('home.specialities.doctors_count', { count: 39 })}</p>
+                                
                             
                             </div>
                             <div className="spaciality-item">

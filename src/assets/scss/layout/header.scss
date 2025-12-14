@@ -123,12 +123,23 @@
 	display: -ms-flexbox;
 	display: flex;
 			@include mixins.margin-padding(0, 0);
+			gap: 25px;
+			align-items: center;
+
+			@include mixins.respond-below(xl) {
+				gap: 20px;
+			}
+
+			@include mixins.respond-below(custom1399) {
+				gap: 13px;
+			}
 
 			@include mixins.respond-below(lg) {
 				-ms-flex-direction: column;
 				flex-direction: column;
 				margin-bottom: 0;
 				list-style: none;
+				gap: 0;
 				@include mixins.margin-padding(null, 0);
 			}
 
@@ -182,17 +193,6 @@
 			}
 
 			&>li {
-				@include mixins.respond-below(xl) {
-					margin-right: 20px;
-				}
-
-				@include mixins.respond-below(custom2000) {
-					margin-right: 25px;
-				}
-
-				@include mixins.respond-below (custom1399) {
-					margin-right: 13px;
-				}
 				@include mixins.respond-below(lg) {
 					border-bottom: 1px solid colors.$steel__blue;
 					margin: 0;
@@ -202,6 +202,10 @@
 					@include mixins.respond-above(lg) {
 						line-height: 85px;
 						@include mixins.margin-padding(null, 0 !important);
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						text-align: center;
 					}
 
 					@include mixins.respond-below(lg) {
@@ -2560,6 +2564,11 @@ header {
 		}
 	}
 }
+
+.language-globe-icon {
+	color: variables.$primary !important;
+}
+
 header.inner-header .header-nav .header-navbar-rht li.noti-nav {
 	> a {
 		width: 24px;

@@ -322,7 +322,7 @@ h6 {
 }
 
 .primary {
-  background-color: #FFB800;
+  background-color: #aa8642;
 }
 
 body {
@@ -934,7 +934,7 @@ p:last-child  {
 }
 
 .bg-secondary {
-  background-color: #822BD4 !important;
+  background-color: #163155 !important;
 }
 
 .bg-info {
@@ -1301,11 +1301,11 @@ p:last-child  {
 
 .bg-secondary-transparent {
   background-color: #F8F5FE !important;
-  color: #822BD4 !important;
+  color: #163155 !important;
 }
 .bg-secondary-transparent:hover {
   background-color: #F8F5FE !important;
-  color: #822BD4 !important;
+  color: #163155 !important;
 }
 
 .bg-info-transparent {
@@ -1663,8 +1663,8 @@ button:focus {
   color: #FFF;
 }
 .btn.btn-secondary {
-  background-color: #822BD4;
-  border: 1px solid #822BD4;
+  background-color: #163155;
+  border: 1px solid #163155;
   color: #FFF;
 }
 .btn.btn-secondary:hover, .btn.btn-secondary:focus, .btn.btn-secondary.focus, .btn.btn-secondary:active, .btn.btn-secondary.active {

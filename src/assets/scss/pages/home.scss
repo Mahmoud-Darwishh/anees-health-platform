@@ -1711,8 +1711,16 @@
     background-position: right top;
     background-repeat: no-repeat;
     border-radius: 6px;
-    padding: 40px 0 0 80px;
+    padding: 40px 0 0;
+    padding-inline-start: 80px;
     position: relative;
+    
+    [dir="rtl"] & {
+        background-position: left top;
+        padding-inline-start: 0;
+        padding-inline-end: 80px;
+    }
+    
     &::before {
         content: "";
         background: url('/src/assets/img/bg/app-bgs.png');
@@ -1725,6 +1733,12 @@
         background-repeat: no-repeat;
         background-position: top right;
         background-size: 100%;
+        
+        [dir="rtl"] & {
+            right: auto;
+            left: 0;
+            background-position: top left;
+        }
     }
     @include mixins.respond-below(xl) {
         @include mixins.margin-padding(0, 30px);
@@ -1796,17 +1810,20 @@
 }
 .google-imgs {
     a {
-        margin-right: 24px;
+        margin-inline-end: 24px;
+        
         &:last-child {
-            margin-right: 0;
+            margin-inline-end: 0;
         }
+        
         img {
             @include mixins.respond-below(md) {
                 width: 120px;
             }
         }
+        
         @include mixins.respond-below(md) {
-            margin-right: 10px;
+            margin-inline-end: 10px;
         }
     }
 }

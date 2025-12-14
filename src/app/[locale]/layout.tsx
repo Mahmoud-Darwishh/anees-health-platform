@@ -40,7 +40,6 @@ export default async function LocaleLayout({
         <link rel="stylesheet" href="/assets/css/custom.css" />
         <link rel="stylesheet" href="/assets/css/customstyleclient.css" />
         <link rel="stylesheet" href="/assets/css/blog-grid.css" />
-        <link rel="stylesheet" href="/assets/css/rtl.css" />
         
         {/* Meta Pixel NoScript */}
         <noscript>

@@ -242,13 +242,17 @@ const Header: React.FC = () => {
                     </div>
                   </li>
 
-                  <li className="d-flex gap-2">
-                    <Link href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}>
+                  <li className="d-flex gap-2 align-items-center ms-3">
+                    <Link 
+                      href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}
+                      className="d-inline-flex align-items-center gap-2"
+                    >
+                      <i className="feather-globe language-globe-icon" />
                       {locale === 'en' ? 'العربية' : 'English'}
                     </Link>
                   </li>
 
-                  <li>
+                  <li className="ms-3">
                     <Link
                       href={`/${locale}/login`}
                       className="btn btn-md btn-primary-gradient d-inline-flex align-items-center rounded-pill"
@@ -257,7 +261,7 @@ const Header: React.FC = () => {
                       {t('header.login')}
                     </Link>
                   </li>
-                  <li>
+                  {/* <li>
                     <Link
                       href={`/${locale}/register`}
                       className="btn btn-md btn-dark d-inline-flex align-items-center rounded-pill"
@@ -265,7 +269,7 @@ const Header: React.FC = () => {
                       <i className="isax isax-user-tick me-1" />
                       {t('header.register')}
                     </Link>
-                  </li>
+                  </li> */}
                 </ul>
               </div>
             </nav>
