@@ -110,9 +110,7 @@ const SectionBook: React.FC = () => {
                                             <div className="accordion-body">
                                                 <div className="accordion-content">
                                                     <p>
-                                                        We envision a community where everyone has access to
-                                                        high-quality healthcare and the resources they need to
-                                                        lead healthy, fulfilling lives.
+                                                        {t('home.booking.mission_text')}
                                                     </p>
                                                 </div>
                                             </div>

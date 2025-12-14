@@ -592,6 +592,16 @@
         }
     }
 }
+
+[dir="rtl"] {
+    .book-item {
+        .way-icon {
+            right: auto;
+            left: -35%;
+            @include mixins.transform(scaleX(-1));
+        }
+    }
+}
 .company-section {
     padding: 60px 0;
     @include mixins.rounded(0 0 30px 30px);
@@ -760,6 +770,13 @@
                 @include mixins.respond-below(lg) {
                     padding: 0;
                 }
+            }
+            [dir="rtl"] & .app-content {
+                padding-left: 0 !important;
+                padding-right: 64px !important;
+            }
+            [dir="rtl"] & .app-bg {
+                padding-right: 48px !important;
             }
             .app-header {                
                 margin-bottom: 24px;

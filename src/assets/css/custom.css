@@ -15320,7 +15320,7 @@ header.inner-header .header-nav .header-navbar-rht li.noti-nav > a i {
   }
 }
 .app-bg .app-content {
-  margin: 0;
+  margin: 40px;
   padding: 40px 0 80px;
 }
 @media (max-width: 1199.96px) {

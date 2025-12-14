@@ -1,3 +1,8 @@
+/* Force gold color for active nav item in custom header */
+.nav-list > li.active > a,
+.nav-list > li.active > a:visited {
+  color: #aa8642 !important;
+}
 @charset "UTF-8";
 /****** UTILS ******/
 /*** default values ***/
@@ -8869,6 +8874,46 @@ header.inner-header .togglesearch button {
   padding: 6px 12px;
 }
 
+@media (max-width: 991.98px) {
+  header .header-nav,
+  header.inner-header .header-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    height: auto;
+    min-height: clamp(68px, 8vw, 84px);
+    padding: 0 15px;
+  }
+
+  header .header-nav .navbar-header,
+  header.inner-header .header-nav .navbar-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+  }
+
+  header .header-nav .navbar-header #mobile_btn,
+  header.inner-header .header-nav .navbar-header #mobile_btn {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    right: auto;
+  }
+
+  header .header-nav .navbar-brand.logo,
+  header.inner-header .header-nav .navbar-brand.logo {
+    margin-left: auto;
+    margin-right: 0;
+    text-align: right;
+    display: block;
+  }
+}
+
 .header-topbar {
   background: #F9F9F9;
   padding: 8px 0;
@@ -15320,7 +15365,7 @@ header.inner-header .header-nav .header-navbar-rht li.noti-nav > a i {
   }
 }
 .app-bg .app-content {
-  margin: 0;
+  margin: 40px;
   padding: 40px 0 80px;
 }
 @media (max-width: 1199.96px) {
@@ -58366,6 +58411,12 @@ ul li {
   .book-item .way-icon {
     display: none;
   }
+}
+
+[dir="rtl"] .book-item .way-icon {
+  right: auto;
+  left: -35%;
+  transform: scaleX(-1);
 }
 
 .company-section {

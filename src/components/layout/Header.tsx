@@ -28,19 +28,19 @@ export default function Header() {
           
           <nav className="nav">
             <ul className="nav-list">
-              <li>
+              <li className={(pathname === `/${locale}` || pathname === `/${locale}/`) ? 'active' : ''}>
                 <Link href={`/${locale}`}>{t('home')}</Link>
               </li>
-              <li>
+              <li className={pathname === `/${locale}/about` ? 'active' : ''}>
                 <Link href={`/${locale}/about`}>{t('about')}</Link>
               </li>
-              <li>
+              <li className={pathname === `/${locale}/services` ? 'active' : ''}>
                 <Link href={`/${locale}/services`}>{t('services')}</Link>
               </li>
-              <li>
+              <li className={pathname === `/${locale}/doctors` ? 'active' : ''}>
                 <Link href={`/${locale}/doctors`}>{t('doctors')}</Link>
               </li>
-              <li>
+              <li className={pathname === `/${locale}/contact` ? 'active' : ''}>
                 <Link href={`/${locale}/contact`}>{t('contact')}</Link>
               </li>
             </ul>
