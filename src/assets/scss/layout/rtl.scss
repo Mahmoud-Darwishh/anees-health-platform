@@ -1,0 +1,821 @@
+// ============================================
+// RTL Support - Professional Implementation
+// ============================================
+
+@use "../utils/mixins";
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+
+  // Typography
+  body, h1, h2, h3, h4, h5, h6, p, span, a, li {
+    font-family: 'Cairo', 'Inter', sans-serif !important;
+  }
+
+  // Header & Navigation
+  .header {
+    direction: rtl;
+
+    .navbar-brand {
+      margin-right: 0;
+      margin-left: auto;
+    }
+
+    .navbar-header #mobile_btn {
+      left: 15px;
+      right: auto;
+    }
+
+    .main-nav {
+      li {
+        &:not(:last-child) {
+          margin-left: 25px;
+          margin-right: 0;
+        }
+
+        &.has-submenu {
+          > a i.fas.fa-chevron-down {
+            margin-left: 0;
+            margin-right: 5px;
+          }
+
+          .submenu {
+            left: 0;
+            right: auto;
+            text-align: right;
+
+            li a {
+              text-align: right;
+              padding-right: 20px;
+              padding-left: 10px;
+            }
+          }
+        }
+      }
+    }
+
+    .header-navbar-rht {
+      margin-right: auto;
+      margin-left: 0;
+
+      li:not(:last-child) {
+        margin-left: 15px;
+        margin-right: 0;
+      }
+
+      .nav-link i {
+        margin-right: 0;
+        margin-left: 0.5rem;
+      }
+    }
+  }
+
+  .menu-header .menu-close {
+    left: 20px;
+    right: auto;
+  }
+
+  // Spacing Utilities
+  .me-1 { margin-left: 0.25rem !important; margin-right: 0 !important; }
+  .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+  .me-3 { margin-left: 1rem !important; margin-right: 0 !important; }
+  .me-4 { margin-left: 1.5rem !important; margin-right: 0 !important; }
+  .me-5 { margin-left: 3rem !important; margin-right: 0 !important; }
+  .me-auto { margin-left: auto !important; margin-right: 0 !important; }
+
+  .ms-1 { margin-right: 0.25rem !important; margin-left: 0 !important; }
+  .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
+  .ms-3 { margin-right: 1rem !important; margin-left: 0 !important; }
+  .ms-4 { margin-right: 1.5rem !important; margin-left: 0 !important; }
+  .ms-5 { margin-right: 3rem !important; margin-left: 0 !important; }
+  .ms-auto { margin-right: auto !important; margin-left: 0 !important; }
+
+  .pe-1 { padding-left: 0.25rem !important; padding-right: 0 !important; }
+  .pe-2 { padding-left: 0.5rem !important; padding-right: 0 !important; }
+  .pe-3 { padding-left: 1rem !important; padding-right: 0 !important; }
+  .ps-1 { padding-right: 0.25rem !important; padding-left: 0 !important; }
+  .ps-2 { padding-right: 0.5rem !important; padding-left: 0 !important; }
+  .ps-3 { padding-right: 1rem !important; padding-left: 0 !important; }
+
+  .text-start { text-align: right !important; }
+  .text-end { text-align: left !important; }
+
+  // Sliders
+  .slick-slider {
+    &[dir="rtl"] {
+      .slick-list {
+        direction: rtl;
+      }
+
+      .slick-track {
+        display: flex;
+      }
+    }
+  }
+
+  // Navigation arrows - flip chevron direction only
+  .spciality-nav.nav-bottom.owl-nav,
+  .doctor-nav.nav-bottom.owl-nav {
+    text-align: center;
+    margin-top: 40px;
+
+    .owl-prev,
+    .owl-next {
+      position: relative;
+      bottom: auto;
+      left: auto;
+      right: auto;
+      margin: 0 6px;
+      display: inline-block;
+      vertical-align: middle;
+      
+      i { transform: scaleX(-1); }
+    }
+  }
+
+  .owl-nav {
+    .owl-prev { left: auto; right: 0; }
+    .owl-next { right: auto; left: 0; }
+  }
+
+  // Book appointment section - flip way icons and position between steps
+  .bookus-sec {
+    .row {
+      justify-content: center;
+    }
+
+    .col-lg-3 {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .way-icon {
+      position: absolute;
+      right: 110px;
+      top: calc(50% - 40px);
+      transform: translateY(-50%);
+      z-index: 5;
+      width: auto;
+
+      img {
+        transform: scaleX(-1);
+        display: block;
+      }
+    }
+
+    .col-lg-3:last-child .way-icon {
+      display: none;
+    }
+  }
+
+  // App section - centered layout
+  .app-section {
+    .row {
+      justify-content: center;
+    }
+
+    .col-lg-6 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  // Footer - RTL adjustments
+  .footer {
+    .footer-widget {
+      h6.footer-title {
+        text-align: right;
+      }
+
+      ul {
+        padding-right: 0;
+        padding-left: 0;
+
+        li {
+          text-align: right;
+          margin-bottom: 8px;
+
+          a {
+            text-align: right;
+          }
+        }
+      }
+    }
+
+    .subscribe-input {
+      form {
+        display: flex;
+        gap: 10px;
+        flex-direction: row-reverse;
+
+        input {
+          text-align: right;
+          padding-right: 15px;
+          padding-left: 10px;
+        }
+
+        button {
+          i {
+            margin-left: 0;
+            margin-right: 0.5rem;
+            order: 2;
+          }
+        }
+      }
+    }
+
+    .social-icon {
+      h6 {
+        text-align: right;
+      }
+
+      ul {
+        justify-content: flex-end;
+      }
+    }
+  }
+
+  // Forms
+  .form-control, .form-select, input, textarea {
+    text-align: right;
+    direction: rtl;
+  }
+
+  .form-label { text-align: right; }
+
+  input[type="checkbox"], input[type="radio"] {
+    margin-left: 0.5rem;
+    margin-right: 0;
+  }
+
+  // Buttons & Icons
+  .btn i, .btn svg {
+    &.me-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+    &.ms-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+  }
+
+  i.fas, i.far, i.fab {
+    &.me-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+  }
+
+  // Dropdowns
+  .dropdown-menu {
+    text-align: right;
+    right: 0;
+    left: auto;
+  }
+
+  .dropdown-toggle::after {
+    margin-left: 0;
+    margin-right: 0.255em;
+  }
+
+  // Lists
+  ul, ol {
+    padding-left: 0;
+    padding-right: 2rem;
+  }
+
+  li { text-align: right; }
+
+  // Tables
+  table th, table td { text-align: right; }
+
+  // Cards & Badges
+  .card { text-align: right; }
+  .badge { font-family: 'Cairo', sans-serif !important; }
+
+  // Modal
+  .modal-header .btn-close {
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  // Floats
+  .float-start { float: right !important; }
+  .float-end { float: left !important; }
+
+  // Borders
+  .border-start { border-left: 0 !important; border-right: 1px solid #dee2e6 !important; }
+  .border-end { border-right: 0 !important; border-left: 1px solid #dee2e6 !important; }
+
+  // Position
+  .start-0 { right: 0 !important; left: auto !important; }
+  .end-0 { left: 0 !important; right: auto !important; }
+
+  // ============================================
+  // DOCTORS GRID - COMPREHENSIVE RTL
+  // ============================================
+
+  // Search Box
+  .doctors-search-box {
+    direction: rtl;
+
+    .search-box-one form {
+      direction: rtl;
+      flex-direction: row-reverse;
+    }
+
+    .search-input {
+      text-align: right;
+      direction: rtl;
+
+      i {
+        right: auto;
+        left: 10px;
+      }
+    }
+
+    input, .ant-picker {
+      text-align: right;
+      padding-right: 40px;
+      padding-left: 12px;
+    }
+
+    .form-search-btn {
+      margin-right: auto;
+      margin-left: 0;
+    }
+  }
+
+  // Filter Panel
+  .filter-lists {
+    text-align: right;
+    direction: rtl;
+
+    .card-header {
+      text-align: right;
+    }
+
+    .filter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      direction: rtl;
+    }
+
+    .filter-input {
+      direction: rtl;
+      text-align: right;
+
+      .input-icon {
+        span {
+          right: 10px;
+          left: auto;
+        }
+
+        input {
+          padding-right: 40px;
+          padding-left: 12px;
+          text-align: right;
+        }
+      }
+    }
+
+    .accordion-button {
+      text-align: right;
+      direction: rtl;
+      padding-right: 15px;
+      padding-left: 15px;
+
+      &::after {
+        margin-right: 0;
+        margin-left: auto;
+      }
+    }
+
+    .form-check {
+      text-align: right;
+      padding-right: 1.5em;
+      padding-left: 0;
+      direction: rtl;
+    }
+
+    .form-check-input {
+      float: right;
+      margin-right: -1.5em;
+      margin-left: 0;
+    }
+
+    .form-check-label {
+      padding-right: 0.5rem;
+      padding-left: 0;
+    }
+
+    .view-all {
+      text-align: right;
+    }
+  }
+
+  // Ant Design Components RTL
+  .ant-slider {
+    direction: rtl;
+
+    .ant-slider-handle {
+      transform: translateX(50%);
+    }
+
+    .ant-slider-mark {
+      direction: rtl;
+    }
+  }
+
+  .ant-picker {
+    direction: rtl;
+
+    &-input {
+      text-align: right;
+    }
+
+    &-suffix {
+      margin-right: 0;
+      margin-left: 4px;
+    }
+  }
+
+  // Sorting & Results
+  .sort-dropdown {
+    direction: rtl;
+    text-align: right;
+
+    span {
+      margin-left: 10px;
+      margin-right: 0;
+    }
+  }
+
+  // Doctor Cards
+  .doctor-card-enhanced {
+    text-align: right;
+    direction: rtl;
+
+    .card-body {
+      direction: rtl;
+    }
+  }
+
+  .active-bar {
+    &::after {
+      right: 0;
+      left: auto;
+    }
+  }
+
+  .doctor-info-content {
+    text-align: right;
+    direction: rtl;
+  }
+
+  .doctor-name,
+  .professional-title,
+  .experience-badge {
+    text-align: right;
+
+    i {
+      margin-left: 0.25rem;
+      margin-right: 0;
+    }
+  }
+
+  // Service Chips
+  .services-offered {
+    direction: rtl;
+  }
+
+  .service-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    direction: rtl;
+    justify-content: flex-start;
+  }
+
+  .service-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 12px;
+    direction: rtl;
+  }
+
+  // Price & Location Sections
+  .price-section,
+  .location-section {
+    text-align: right;
+    direction: rtl;
+  }
+
+  .location-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      margin-left: 0.5rem;
+      margin-right: 0;
+    }
+  }
+
+  // Verified Badge
+  .verified-badge-overlay {
+    left: 10px;
+    right: auto;
+  }
+
+  // Grid Overlay
+  .grid-overlay-item {
+    left: auto;
+    right: 0;
+    padding: 0 20px;
+
+    .fav-icon {
+      margin-right: auto;
+      margin-left: 0;
+    }
+  }
+
+  // Pagination
+  .pagination {
+    direction: rtl;
+
+    ul {
+      display: flex;
+      flex-direction: row-reverse;
+      direction: rtl;
+    }
+  }
+
+  // ============================================
+  // HEADER ENHANCEMENTS
+  // ============================================
+
+  .header {
+    direction: rtl !important;
+    font-family: 'Cairo', sans-serif !important;
+  }
+
+  .navbar {
+    direction: rtl;
+    padding: 0.5rem 0;
+
+    &-nav {
+      flex-direction: row;
+      padding: 0;
+      margin: 0;
+      direction: rtl;
+    }
+
+    &-header {
+      direction: rtl;
+      display: flex;
+      align-items: center;
+    }
+
+    &-brand {
+      margin: 0 0 0 auto;
+      padding: 0;
+    }
+  }
+
+  // Navigation Links
+  .main-nav {
+    direction: rtl;
+    display: flex;
+    flex-direction: row;
+
+    > li {
+      margin: 0 0.5rem;
+      padding: 0;
+
+      &:first-child {
+        margin-right: 0;
+      }
+
+      &:last-child {
+        margin-left: 0;
+      }
+
+      .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: right;
+        direction: rtl;
+        font-family: 'Cairo', sans-serif !important;
+      }
+    }
+  }
+
+  // Submenu
+  .has-submenu {
+    .submenu {
+      right: 0;
+      left: auto;
+      text-align: right;
+      direction: rtl;
+
+      li {
+        text-align: right;
+
+        a {
+          text-align: right;
+          padding-right: 20px;
+          padding-left: 10px;
+          direction: rtl;
+          font-family: 'Cairo', sans-serif !important;
+        }
+      }
+    }
+
+    > a i {
+      margin-right: 0;
+      margin-left: 5px;
+    }
+  }
+
+  // Header Right Side
+  .header-navbar-rht {
+    margin-right: auto;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    direction: rtl;
+
+    li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-link {
+      padding: 0.5rem 1rem;
+      font-family: 'Cairo', sans-serif !important;
+      font-weight: 500;
+
+      i {
+        margin-right: 0;
+        margin-left: 0.5rem;
+      }
+    }
+  }
+
+  // Language Switcher
+  .language-switcher {
+    direction: rtl;
+
+    button {
+      direction: rtl;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Cairo', sans-serif !important;
+    }
+  }
+
+  // Login Buttons
+  .login-in {
+    margin: 0 0.5rem;
+  }
+
+  .sign-btn,
+  .reg-btn {
+    font-family: 'Cairo', sans-serif !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 44px;
+    font-weight: 500;
+    direction: rtl;
+
+    i {
+      margin-right: 0;
+      margin-left: 0.5rem;
+    }
+  }
+
+  // Mobile Menu
+  #mobile_btn {
+    right: 15px;
+    left: auto;
+  }
+
+  .menu-header {
+    right: 0;
+    left: auto;
+    text-align: right;
+    direction: rtl;
+
+    .menu-close {
+      right: 20px;
+      left: auto;
+    }
+  }
+
+  // Header Contact Info
+  .header-contact {
+    direction: rtl;
+    text-align: right;
+
+    li {
+      margin: 0 1rem 0 0;
+    }
+
+    i {
+      margin-left: 0.5rem;
+      margin-right: 0;
+    }
+  }
+
+  // Header Top Bar
+  .header-top-bar {
+    direction: rtl;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .social-icon {
+    direction: rtl;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  // ============================================
+  // BREADCRUMB ENHANCEMENTS
+  // ============================================
+
+  .breadcrumb-bar {
+    text-align: center;
+    direction: rtl;
+  }
+
+  .breadcrumb {
+    direction: rtl;
+    padding-right: 0;
+    justify-content: center;
+
+    &-item {
+      font-family: 'Cairo', sans-serif !important;
+
+      + .breadcrumb-item {
+        padding-right: 0.5rem;
+        padding-left: 0;
+
+        &::before {
+          float: right;
+          padding-right: 0;
+          padding-left: 0.5rem;
+          content: "/";
+        }
+      }
+    }
+
+    &-title {
+      font-family: 'Cairo', sans-serif !important;
+      text-align: center;
+      font-weight: 700;
+    }
+  }
+
+  // ============================================
+  // RESPONSIVE MOBILE RTL
+  // ============================================
+
+  @include mixins.respond-below(lg) {
+    .main-nav {
+      flex-direction: column;
+
+      > li {
+        margin: 0.5rem 0;
+        width: 100%;
+      }
+    }
+
+    .header-navbar-rht {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .navbar-header {
+      justify-content: space-between;
+      width: 100%;
+    }
+  }
+
+  @include mixins.respond-below(md) {
+    .doctors-search-box .search-box-one form {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .doctors-search-box {
+      .search-input,
+      .form-search-btn {
+        width: 100%;
+      }
+    }
+  }
+}
+

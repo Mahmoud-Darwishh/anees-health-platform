@@ -1,0 +1,166 @@
+@use "sass:color";
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+
+.header {
+    &.header-fourteen {
+        &.header-fixed {
+            display: variables.$block;
+            width: variables.$full__width;
+            z-index: 9999;
+            background: colors.$white;
+            box-shadow: variables.$inherit;
+            position: relative;
+            &.pharmacy-header {
+                position: fixed;
+                background: colors.$white !important;
+            } 
+        }  
+        .header-nav {
+            background-color: transparent;
+            border-bottom: none;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 0;
+            height: 74px;
+            .logo {
+                @include mixins.respond-below(xl) {
+                    margin-right: 0;
+                }
+            }
+            .navbar-header .bar-icon span {
+                background: variables.$primary;
+            }
+            @include mixins.respond-below(lg) {
+                justify-content: space-between;
+            }
+            .main-menu-wrapper {
+                .main-nav {
+                    .has-submenu {
+                        @include mixins.respond-below(xl) {
+                            margin-right: 10px;
+                        }
+                        a {
+                            color: colors.$midnight_black;
+                             @include mixins.respond-below(lg) {
+                                color: colors.$white;
+                            }
+                        }
+                        .submenu {
+                            a {
+                                color: colors.$midnight_black;
+                                @include mixins.respond-below(lg) {
+                                    color: colors.$white;
+                                }
+                            }
+                        }
+                        &.active {
+                            a {
+                                color: variables.$primary;
+                            }
+                            .submenu {
+                                a {
+                                    color: colors.$midnight_black;
+                                    font-weight: variables.$font-weight-medium;
+                                    &.active {
+                                        color: variables.$primary;
+                                        font-weight: variables.$font-weight-medium;
+                                        
+                                   }
+                                }
+                               
+                                a {
+                                    color: colors.$midnight_black;  
+                                    @include mixins.respond-below(lg) {
+                                        color: colors.$white;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    & > li {                        
+                        &.searchbar-fourteen {
+                            display: flex;
+                            align-items: center;
+                            a {
+                                @extend %flex-align-center;
+                                background: variables.$gray-transparent;
+                                width: 40px;
+                                height: 40px;
+                                border-radius: 6px;
+                                @include mixins.margin-padding(null, 0);
+                                transition: 0.5s;
+                                color: variables.$gray-900;
+                                font-size: variables.$font-size-16;
+                                &:hover {
+                                    background: color.adjust(variables.$gray-transparent, $lightness: -5%);
+                                    color: variables.$gray-900;
+                                    transition: 0.5s;
+                                }
+                                i {
+                                    margin: 0;
+                                    font-size: variables.$font-size-16;
+                                }
+                            }
+                            @include mixins.respond-below(xl) {
+                                display: none;
+                            }
+                        }
+                        & > a {
+                            @include mixins.respond-above(lg) {
+                                line-height: 74px;
+                            }
+                            @include mixins.respond-below(lg) {
+                                color: colors.$white;
+                            }
+                        }
+                    }
+                }
+            }
+            .header-navbar-rht {
+                padding: 0;
+                margin: 0;
+                li {
+                    @include mixins.margin-padding(null, 0 10px 0 0);
+                    &:last-child {
+                        padding-right: 0;
+                    }
+                    &.login-link { 
+                        display: none;
+                    }
+                    &.login-in-fourteen {
+                        .reg-btn {
+                            transition: 0.5s;
+                            display: variables.$flex;
+                            align-items: variables.$center;
+                            i {
+                                margin-right: 8px;
+                            }
+                            @include mixins.respond-below(xl) {
+                                padding: 8px 8px;
+                                font-size: variables.$font-size-14;
+                            }
+                            &.reg-btn-fourteen {
+                                transition: 0.5s;
+                                i {
+                                    margin-right: 8px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    &.header-fixed {
+        position: variables.$fixed;
+        display: variables.$block;
+        width: variables.$full__width;
+        z-index: 999;
+        box-shadow: variables.$inherit;
+        background: variables.$gray-transparent;
+    } 
+}

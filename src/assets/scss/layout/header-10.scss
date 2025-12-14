@@ -1,0 +1,97 @@
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+
+.header {
+    &.header-fourteen {
+        &.header-fifteen {
+            &.ent-header {
+                background: colors.$white !important;
+            }
+            .header-nav {
+                .logo {
+                    @include mixins.respond-below(xl) {
+                        margin-right: 0;
+                    }
+                }
+                @include mixins.respond-below(lg) {
+                    justify-content: space-between;
+                }
+                .main-menu-wrapper {
+                    .main-nav {
+                        >li {
+                            @include mixins.respond-below(xxl) {
+                                margin-right: 15px;
+                            }
+                            @include mixins.respond-below(xl) {
+                                margin-right: 10px;
+                            }
+                            a {
+                                color: colors.$midnight_black;
+                                @include mixins.respond-below(lg) {
+                                    color: colors.$white
+                                }
+                            }
+                        }
+                    }
+                }
+                .header-navbar-rht {
+                    .login-in-fourteen {
+                        .reg-btn {
+                            @include mixins.margin-padding(null, 10px 15px);
+                            display: variables.$flex;
+                            align-items: variables.$center;
+                            @include mixins.respond-below(xl) {
+                                @include mixins.margin-padding(null, 10px 5px);
+                            }
+                            @include mixins.respond-below(lg) {
+                                @include mixins.margin-padding(null, 13px 10px);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.header-fourteen.header-fifteen {
+    .header-dropdown {
+        &.country-flag {
+            margin-top: 20px;
+            img {
+                width: 18px;
+                height: 16px;
+                margin-right: 5px;
+            }
+            a {
+                color: variables.$gray-900;
+                font-size: variables.$font-size-14;
+                &.dropdown-toggle {
+                    background: variables.$gray-transparent;
+                    border-color: variables.$gray-transparent;
+                    display: inline-flex;
+                    align-items: center;
+                }
+            }
+        }
+        @include mixins.respond-below(xl) {
+            display: none;
+        }
+    }
+    .searchbar {
+        margin-right: 14px;
+        a {
+            width: 40px;
+            height: 40px;
+            background: variables.$gray-transparent;
+            color: variables.$gray-900;
+            @include mixins.rounded(10px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}

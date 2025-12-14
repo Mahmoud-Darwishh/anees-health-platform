@@ -1,0 +1,103 @@
+@use "../utils/mixins";
+@use "../utils/variables";
+
+.footer {
+    &.footer-one {
+        &.footer-sixteen {
+            background: variables.$dark;
+            border-top: 0;
+            position: relative;
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: top center;
+            .footer-top {
+                background: variables.$dark;
+                .footer-widget  {
+                    .footer-about-content {
+                        max-width: none;
+                        margin-bottom: 30px;
+                        p {
+                            color: variables.$white;
+                        }
+                    }
+                    .footer-title {
+                        color: variables.$white;
+                    }
+                    &.footer-menu {
+                        ul {
+                            li {
+                                a {
+                                    color: variables.$white;
+                                }
+                            }
+                        }
+                    }
+                    .subscribe-form {
+                        margin-bottom: 0;
+                        .btn {
+                            border: 1px solid variables.$primary;
+                            background: variables.$primary;
+                            border-radius: 0 6px 6px 0;
+                            &:hover {
+                                border: 1px solid variables.$primary;
+                            }
+                        }
+                        input {
+                            border-radius: 6px;
+                        }
+                    }
+                }
+            }
+            
+            .footer-bottom {
+                background: variables.$dark;
+                .copyright {
+                    background: variables.$dark;
+                    border-top: 1px solid variables.$light;
+                    .copyright-text {
+                        p {
+                            margin-bottom: 0;
+                            color: variables.$white;
+                        }
+                        @include mixins.respond-below (sm) {
+                           margin-bottom: 10px;
+                        }
+                    }
+                    .copyright-menu {
+                        ul {
+                            list-style: none;
+                            padding: 0;
+                            margin: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: end;
+                            @include mixins.respond-below (md) {
+                                justify-content: center;
+                            }
+                            li {
+                                margin-right: 8px;
+                                &:last-child {
+                                    margin-right: 0;
+                                }
+                                a {
+                                    width: 32px;
+                                    height: 32px;
+                                    border-radius: 50%;
+                                    background: variables.$white;
+                                    color: variables.$primary;
+                                    @extend %flex-align-center;
+                                    font-size: variables.$font-size-16;
+                                    &:hover {
+                                        background: variables.$primary;
+                                        color: variables.$white;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
+}

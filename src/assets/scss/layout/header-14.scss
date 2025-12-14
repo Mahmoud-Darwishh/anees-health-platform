@@ -1,0 +1,56 @@
+@use "../base/colors";
+@use "../utils/variables";
+
+.header.header-ten.header-fixed.home-care-header {
+	&.dentist-header {
+		.header-top-wrap {
+			background:variables.$indigo;
+			.header-contact {
+				li {
+					.question-mark-icon {
+						width: 16px;
+						height: 16px;
+						border-radius: 50%;
+						background: colors.$white;
+						display: flex;
+						align-self: center;
+						justify-content: center;
+						color: colors.$purple__dark;
+						font-weight: variables.$font-weight-semibold;
+						margin-right: 5px;
+						i {
+							margin-right: 0;
+							display: flex;
+							align-items: center;
+							font-size: variables.$font-size-14;
+						}
+					}
+				}
+			}
+		}
+		.header-nav .header-navbar-rht li {
+			.btn.reg-btn {
+				background: variables.$indigo;
+				border-color: variables.$indigo;
+				border-radius: 44px;
+				padding: 8px 16px;
+				&:hover {
+					background: variables.$white;
+					color: variables.$indigo;
+				}
+			}
+			.log-btn {
+				border-radius: 44px;
+				padding: 8px 16px;
+				&:hover {
+					background: variables.$indigo;
+					border-color: variables.$indigo;
+					box-shadow: none;
+				}
+			}
+		}
+		.main-nav > li.active > a {
+			color: colors.$purple__dark !important;
+		}
+	}
+} 

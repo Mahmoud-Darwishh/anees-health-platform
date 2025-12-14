@@ -1,0 +1,100 @@
+@use "../utils/mixins";
+@use "../utils/variables";
+
+.speciality-item {
+    .speciality-icon {
+        width: 60px;
+        height: 60px;
+        background: variables.$light-transparent;
+        @include mixins.rounded(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    h6 {
+        font-size: variables.$font-size-16;
+        font-weight: variables.$font-weight-medium;
+    }
+    .link-icon {
+        color: variables.$gray-transparent;
+        font-size: variables.$font-size-16;
+    }
+}
+.clinic-item {
+    .clinic-icon {
+        width: 60px;
+        height: 60px;
+        border: 1px solid variables.$border-color;
+        @include mixins.rounded(10px);
+        img {
+            @include mixins.rounded(10px);
+        }
+    }
+    .clinic-location {
+        p {
+            position: relative;
+            padding-right: 14px;
+            display: inline-flex;
+            align-items: center;
+            i {
+                color: variables.$gray-900;
+            }
+            &:last-child {
+                padding: 0;
+                &::before {
+                    content: none;
+                }
+            }
+            &::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                @include mixins.transform(translateY(-50%));
+                right: 0;
+                width: 6px;
+                height: 6px;
+                @include mixins.rounded(50%);
+                background: variables.$orange;
+            }
+        }
+    }
+}
+.hospital-tab {
+    &.settings-tab {
+        margin-bottom: 24px;
+    }
+}
+.result-wrap {
+    .select2-container {
+        width: auto !important;
+    }
+    .dash-search-input {
+        max-width: 400px;
+    }
+}
+.hospital-item {
+    .hospital-icon {
+        display: block;
+        margin-bottom: 20px;
+    }
+    p {
+        display: inline-flex;
+        align-items: center;
+        i {
+            color: variables.$gray-900;
+        }
+    }
+}
+.hospital-form {
+    .form-check {
+        margin: 0 24px 24px 0;
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+}
+.virtual-hospital, .appointment-hospital,
+.appointment-hospital, .all-clinic {
+    display: none;
+}

@@ -1,0 +1,403 @@
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+
+.footer {
+    &.footer-eleven {
+        background: colors.$thunderblue;
+        position: relative;
+        z-index: 1;
+        .sec-bg-img {
+            img {
+                position: absolute;
+                left: 0;
+                top: 0;
+                z-index: -1;
+                height: 400px;
+            }
+        }
+        .footer-top {
+            background: variables.$cyan;
+            @include mixins.margin-padding(null, 50px 0 15px);   
+            .footer-title {
+                font-size: variables.$font-size-18;
+                font-weight: variables.$font-weight-semibold;
+                @include mixins.margin-padding(0 0 10px, null);
+            }
+            .footer-content {
+                p {
+                    color: variables.$white;
+                    @include mixins.margin-padding(0 0 25px, null);
+                }
+            }
+            .subscribe-form {
+                margin-bottom: 25px;
+                .form-control {
+                    min-height: 59px;                
+                    @include mixins.margin-padding(0, 10px 155px 10px 15px);
+                    background: rgba(11, 219, 252, 0.1019607843);
+                    border: 0;
+                    border-radius: 50px;
+                    &::placeholder {
+                        color: variables.$white;
+                    }
+                    color: variables.$white;
+                }
+                .btn {
+                    margin-right: 10px;
+                    border-radius: 30px;
+                    font-size: variables.$font-size-16;
+                    font-weight: variables.$font-weight-normal;
+                    background: variables.$white;
+                    color: variables.$gray-900;
+                    border-color: variables.$white;
+                    font-weight: variables.$font-weight-medium;
+                    @include mixins.margin-padding(null, 6px 23px);
+                    &:hover {
+                        background: variables.$cyan-400;
+                        color: variables.$white;
+                        box-shadow: inset 0 0 0 50px variables.$cyan-400;
+                        border-color: variables.$cyan-400;
+                    }
+                }
+            }
+            .footer-payment {
+                @include mixins.respond-below (custom767) {
+                    @include mixins.margin-padding(0 0 15px 0, null);
+                }
+                h6 {
+                    font-size: variables.$font-size-16;
+                    @include mixins.margin-padding(0 0 15px, null);
+                    color: variables.$white;
+                }
+            }
+            .footer-widget {
+                .footer-widget-title {
+                    h4 {
+                        color: variables.$white;
+                        font-size: variables.$font-size-20;
+                        position: relative;
+                        margin-bottom: 15px;
+                        padding-bottom: 15px;
+                        &::after {
+                            content: "";
+                            width: 30px;
+                            height: 2px;
+                            background: #ffffff;
+                            position: absolute;
+                            left: 0;
+                            bottom: 0;
+                        }
+                    }
+                }
+                p {
+                    color: colors.$gray-50;
+                }
+                ul {
+                    li {
+                        display: flex !important;
+                        align-items: center;
+                        margin-bottom: 15px;
+                        &:last-child {
+                            margin-bottom: 0;
+                        }
+                        span {
+                            &.icon-contact {
+                                border: 1px solid #FFFFFF;
+                                width: 32px;
+                                height: 32px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                margin-right: 10px;
+                                border-radius: 50%;
+                                color: variables.$white;
+                            }
+                        }
+                        p {
+                            font-weight: variables.$font-weight-normal;
+                            margin-bottom: 0;
+                            span {
+                                color: variables.$gray-transparent; 
+                                font-weight: variables.$font-weight-normal;
+                                display: block;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .footer-bottom {
+            border-top: 1px solid #E2EDFF;
+            background: variables.$cyan;
+            .copyright {
+                border-top: 0;
+                @include mixins.margin-padding(null, 25px 0);
+                .copyright-text {
+                    p {
+                        font-size: variables.$font-size-14;
+                        font-weight: variables.$font-weight-medium;
+                        margin-bottom: 0;
+                        @include mixins.respond-below (xl) {
+                            margin-bottom: 10px;
+                            text-align: center;
+                        }
+                        a {
+                            color: colors.$light__celeste;
+                        }
+                    }
+                }
+                .policy-menu {
+                    @include mixins.respond-below (xl) {
+                        text-align: center;
+                        margin-top: 10px;
+                    }
+                    li {
+                        font-size: variables.$font-size-16;
+                        @include mixins.respond-below (sm) {
+                            margin: 0 10px 10px 0;
+                        }
+                        &::after {
+                            display: none;
+                        }
+                        a {                            
+                            &:hover {
+                                color: colors.$light__celeste;
+                            }
+                        }                        
+                        @include mixins.respond-below(xxl) {
+                            font-size: variables.$font-size-15;
+                        }
+                    }
+                }
+            }
+        }
+        .social-icon {
+            ul {
+                list-style: none;
+                @include mixins.margin-padding(0, 0);
+                text-align: center;
+                @include mixins.respond-below(xl) {
+                    text-align: center !important;
+                }
+                li {
+                    display: inline-block;
+                    @include mixins.margin-padding(0 8px 0 0, null);
+                    a {
+                        padding: 8px;
+                        background: variables.$white;
+                        color: variables.$cyan;
+                        font-size: variables.$font-size-16;
+                        border-radius: 60px;
+                        display: flex;
+                        align-items: center;
+                        &:hover {
+                            color: variables.$primary;
+                        }
+                    }
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+        }
+        .footer-widget {
+            &.footer-menu {
+                @include mixins.margin-padding(0 0 25px, null);
+                ul {
+                    list-style: none;
+                    @include mixins.margin-padding(0, 0);
+                    li {
+                        display: inline-block;              
+                        a {
+                            font-size: variables.$font-size-16;
+                            padding-left: 0;
+                            color: variables.$white;
+                            &:hover {
+                                color: colors.$light__celeste;
+                                padding-left: 0;
+                                letter-spacing: normal;
+                            }
+                            &::before {
+                                content: none !important;
+                            }
+                        }
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                    }
+                }
+            }
+        }
+        &.dentist-footer {
+            background:#F9FCFF;
+            .footer-top {
+                .footer-widget {
+                    .footer-widget-title {
+                        h4 {
+                            color: variables.$white;
+                            font-weight: variables.$font-weight-semibold;
+                            &:after {
+                                background: variables.$white;
+                            }
+                        }
+                    }
+                    p {
+                        color: variables.$white;
+                    }
+                    &.footer-menu {
+                        ul {
+                            li {
+                                a {
+                                    color: variables.$white;
+                                    font-weight: variables.$font-weight-normal; 
+                                    &:hover{
+                                        color: variables.$primary;
+                                        letter-spacing: 1px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ul {
+                        li {
+                            p {
+                                color: variables.$white;
+                                font-weight: 400;
+                                font-size: 14px;
+                                span {
+                                    color: variables.$white;
+                                    font-weight: variables.$font-weight-normal;
+                                }
+                            }
+                            .icon-contact {
+                                border-color: variables.$white;
+                                color: variables.$white;
+                            }
+                        }
+                    }
+                } 
+                .subscribe-form {
+                    .form-control {
+                        background: #FFFFFF1A;
+                        color: variables.$white;
+                        border: 1px solid #FFFFFF1A;
+                        &::placeholder {
+                            color: variables.$white;
+                        }
+                    }
+                }
+            } 
+            .footer-bottom {
+                border-top: 1px solid variables.$gray-transparent;
+                background: variables.$indigo;
+                .copyright {
+                    padding: 15px 0;
+                    .copyright-text {
+                        p {
+                            color: variables.$white;
+                            font-size: variables.$font-size-16;
+                        }
+                    }
+                    .policy-menu {
+                        li {
+                            a {
+                                color: variables.$white;
+                                &:hover{
+                                    color: variables.$primary;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .social-icon {
+                ul {
+                    li {
+                        margin-right: 10px;
+                        &:last-child {
+                            margin-right: 0;
+                        }
+                        a {
+                            width: 40px;
+                            height: 40px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            background:  white;
+                            color: variables.$indigo;
+                            border-radius: 50%;
+                            &:hover {
+                                background: colors.$sky-700;
+                                color: variables.$white;
+                            }
+                           
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+.footer-language {
+    position: variables.$relative;
+    width: 173px;
+    float: variables.$right;
+    @include mixins.respond-below (custom767) {
+        float: variables.$left !important;
+    }
+    .select2-container {
+        .select2-selection--single {
+            border: 1px solid variables.$white;
+            background-color: transparent;
+            border-radius: 10px;
+            height: 44px;
+            .select2-selection__rendered {
+                padding-left: 34px;
+                color: variables.$white;
+            }
+        }
+    }
+    .icon-lang {
+        @include mixins.position(variables.$absolute, 50%, null, null, 10px);
+        @include mixins.transform(translateY(-50%));
+        color: variables.$white;
+        line-height: 0;
+    }
+}
+.footer-contacts {
+    @include mixins.margin-padding(0 0 26px, null);
+    .footer-wrap {
+        background: rgba(240, 244, 246, 0.16);
+        backdrop-filter: blur(50px);
+        border-radius: 10px;
+        @include mixins.margin-padding(0 0 24px, 15px);
+        @extend %flex__center;
+        .footer-icon {
+            width: 55px;
+            height: 55px;
+            background: colors.$white;
+            border-radius: 100px;
+            @extend %flex-align-center;
+            @include mixins.margin-padding(0 15px 0 0, null);
+            flex-shrink: 0;
+            color: colors.$cyan_color;
+            font-size: variables.$font-size-24;
+        }
+        .footer-info {
+            h6 {
+                font-size: variables.$font-size-16;
+                font-weight: variables.$font-weight-semibold;
+                color: variables.$white;
+                @include mixins.margin-padding(0 0 10px, null);
+            }
+            p {
+                @include mixins.margin-padding(0, null);
+                color: variables.$white;
+            }
+        }
+    }
+}
+

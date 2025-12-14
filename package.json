@@ -1,0 +1,32 @@
+{
+  "name": "anees-health-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "aos": "^2.3.4",
+    "next": "16.0.10",
+    "next-intl": "^4.6.0",
+    "react": "19.2.1",
+    "react-countup": "^6.5.3",
+    "react-dom": "19.2.1",
+    "react-slick": "^0.31.0",
+    "sass": "^1.96.0",
+    "slick-carousel": "^1.8.1"
+  },
+  "devDependencies": {
+    "@types/aos": "^3.0.7",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-slick": "^0.23.13",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.10",
+    "typescript": "^5"
+  }
+}

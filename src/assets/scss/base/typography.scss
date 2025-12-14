@@ -1,0 +1,132 @@
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@font-face {
+	font-family: 'Material Icons';
+	font-style: variables.$normal;
+	font-weight: 400;
+	src: url(../fonts/MaterialIcons-Regular.eot); /* For IE6-8 */
+	src: local('Material Icons'),
+	local('MaterialIcons-Regular'),
+	url(../fonts/MaterialIcons-Regular.woff2) format('woff2'),
+	url(../fonts/MaterialIcons-Regular.woff) format('woff'),
+	url(../fonts/MaterialIcons-Regular.ttf) format('truetype');
+}
+.material-icons {
+	font-family: 'Material Icons';
+	font-weight: variables.$normal;
+	font-style: variables.$normal;
+	font-size: 24px;
+	display: variables.$inline__block;
+	line-height: 1;
+	text-transform: none;
+	letter-spacing: variables.$normal;
+	word-wrap: variables.$normal;
+	white-space: variables.$nowrap;
+	direction: ltr;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	-moz-osx-font-smoothing: grayscale;
+	font-feature-settings: 'liga';
+}
+
+$__body__font__family:'Inter', sans-serif;
+$home_ten__font__family:'Inter', sans-serif;
+$feather__font__family:"feather";
+$fontawesome__family: "Font Awesome 5 Free";
+
+$__bolder:900;
+$bold:700;
+$semibold:600;
+$__medium:500;
+$regular:400;
+$light:300;
+
+$__body__font__size:0.9375rem;
+$__menu__font__size:16px;
+$__button__font__size:18px;
+$__font__size__6:6px;
+$__font__size__9:9px;
+$font__size__10:10px;
+$font__size__11:11px;
+$font__size__12:12px;
+$font__size__13:13px;
+$font__size__14:14px;
+$font__size__15:15px;
+$font__size__16:16px;
+$font__size__17:17px;
+$__font__size__19:19px;
+$font__size__18:18px;
+$font__size__20:20px;
+$font__size__22:22px;
+$__font__size__23:23px;
+$font__size__24:24px;
+$font__size__26:26px;
+$font__size__28:28px;
+$font__size__30:30px;
+$font__size__32:32px;
+$font__size__34:34px;
+$font__size__36:36px;
+$font__size__38:38px;
+$font__size__40:40px;
+$font__size__42:42px;
+$__font__size__44:44px;
+$font__size__46:46px;
+$__font__size__48:48px;
+$font__size__50:50px;
+$font__size__54:54px;
+$font__size__60:60px;
+$__font__size__62:62px;
+$__font__size__76:76px;
+
+h1{
+	font-weight:variables.$normal;
+	font-size:$font__size__40;
+	@include mixins.respond-below(md){
+		font-size:$font__size__26 + 1;
+	}
+}
+h2{
+	font-weight:variables.$normal;
+	font-size:$font__size__30;
+	@include mixins.respond-below(md){
+		font-size:$font__size__22 + 1;
+	}
+}
+h3{
+	font-weight:variables.$normal;
+	font-size:$font__size__24;
+	@include mixins.respond-below(custom1023){
+		font-size:$font__size__20;
+	}
+	@include mixins.respond-below(md){
+		font-size:$font__size__16;
+	}
+}
+h4{
+	font-weight:variables.$normal;
+	font-size:$font__size__18;
+	@include mixins.respond-below(custom1023){
+		font-size:$font__size__18;
+	}
+	@include mixins.respond-below(md){
+		font-size:$font__size__18;
+	}
+}
+h5{
+	font-weight:variables.$normal;
+	font-size:$font__size__18 + 1;
+	@include mixins.respond-below(custom1023){
+		font-size:$font__size__18;
+	}
+}
+h6{
+	font-weight:variables.$normal;
+	font-size:$font__size__18;
+	@include mixins.respond-below(custom1023){
+		font-size:$font__size__16;
+	}
+}

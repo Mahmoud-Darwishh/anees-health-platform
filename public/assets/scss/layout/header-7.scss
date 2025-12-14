@@ -1,0 +1,234 @@
+@use "../base/colors";
+@use "../base/typography";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+.header {
+    &.veterinary-header {
+        background: variables.$white !important;
+        &.pharmacy-header {
+            .veterinary-top-head {
+                opacity: 0;
+                height: 0;
+                width: 0;
+                display: none;
+                transition: 0.5s all;
+            }
+        }
+    }
+    .veterinary-top-head {
+        background: variables.$cyan;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 40px;
+        border-radius: 0 0 20px 20px;
+        transition: 0.5s all;
+        @include mixins.respond-below(lg) {
+            display: none;
+        }
+        ul {
+            display: flex;
+            align-items: center;
+            li {
+                color: variables.$white;
+                margin-right: 20px;
+                display: flex;
+                align-items: center;
+                font-size: variables.$font-size-14;
+                font-weight: variables.$font-weight-medium;
+                &:last-child {
+                    margin-right: 0;
+                }
+                a {
+                    color: variables.$white;
+                    margin-right: 15px;
+                    &:hover {
+                        color: variables.$primary;
+                    }
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+        }
+    }
+    &.header-fourteen {
+        &.header-twelve {
+            .header-nav {
+                background-color: transparent;
+                border-bottom: none;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                padding: 0;
+                .logo {
+                    @include mixins.respond-below(xl) {
+                        margin-right: 0;
+                    }
+                }
+                @include mixins.respond-below(xl) {
+                    justify-content: start;
+                }
+                @include mixins.respond-below(lg) {
+                    justify-content: space-between;
+                }
+                .main-menu-wrapper {
+                    @include mixins.respond-below(lg) {
+                        background-color: colors.$ghost_white;
+                    }
+                    .main-nav {
+                        li {
+                            @include mixins.respond-below(xl) {
+                                margin-right: 10px;
+                            }
+                            @include mixins.respond-below(lg) {
+                                border-bottom: 1px solid colors.$white;
+                            }
+                            a {
+                                color: variables.$gray-900;
+                                font-weight: variables.$font-weight-medium;
+                            }
+                            .submenu {
+                                @include mixins.respond-below(lg) {
+                                    background-color: colors.$ghost_white;
+                                }
+                                a {
+                                    color: variables.$gray-900;
+                                    &:hover {
+                                        color: variables.$primary;
+                                    }
+                                }
+                            }
+                            &.active {
+                                a {
+                                    color: variables.$primary;
+                                    font-weight: typography.$bold;
+                                }
+                                .submenu {
+                                    a {
+                                        color: colors.$midnight_black;
+                                        font-weight: variables.$font-weight-medium;
+                                        &.active {
+                                            color: colors.$laysgreen;
+                                            font-weight: variables.$font-weight-medium;  
+                                       }
+                                    }
+                                   
+                                    a {
+                                        color: colors.$midnight_black;  
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .header-navbar-rht {
+                    padding: 0;
+                    margin: 0;
+                    li {
+                        @include mixins.margin-padding(null, 0 10px 0 0);
+                        &.login-link { 
+                            display: none;
+                        }
+                        &.searchbar-fourteen {
+                            @extend %flex-align-center;                 
+                            @include mixins.margin-padding(null, 0);
+                            transition: 0.5s;
+                            color: variables.$white;
+                            width: 46px;
+                            height: 46px;
+                            a {
+                                background: variables.$warning;
+                                border: 1px solid variables.$warning;
+                                color: variables.$white;
+                                width: 46px;
+                                height: 46px;
+                                border-radius: 10px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                &:hover {
+                                    background: variables.$dark;
+                                    border-color: variables.$dark;
+                                    color: variables.$white;
+                                    transition: 0.5s;
+                                    border-radius: 10px;
+                                }
+                            }
+                            a {
+                                background: variables.$warning;
+                            }
+                        }
+                        &.login-in-fourteen.log-in-vet-head {
+                                background: variables.$primary-gradient;
+                                border-color: variables.$primary-gradient;
+                                color: variables.$white;
+                                box-shadow: none;
+                                border-radius: 44px;
+                                font-size: variables.$font-size-15;
+                                font-weight: variables.$font-weight-semibold;
+                                padding: 8px 16px;
+                                transition: 0.5s;
+                                display: flex;
+                                align-items: center;
+                                margin-right: 15px;
+                                &:hover {
+                                    background: variables.$dark;
+                                    border-color: variables.$dark;
+                                }
+                                a {
+                                    color: variables.$white;
+                                    font-size: variables.$font-size-15;
+                                }
+                            .reg-btn {
+                                background: colors.$sky-600;
+                                color: variables.$white;
+                                box-shadow: none;
+                                border-radius: 6px;
+                                font-size: variables.$font-size-15;
+                                font-weight: variables.$font-weight-semibold;
+                                padding: 10px 15px;
+                                transition: 0.5s;
+                                display: flex;
+                                align-items: center;
+                                @include mixins.respond-below(xl) {
+                                    padding: 10px 5px;
+                                }
+                                @include mixins.respond-below(lg) {
+                                    padding: 10px 12px;
+                                }
+                                &:hover {
+                                    background: variables.$primary;
+                                    color: variables.$white;
+                                    transition: 0.5s;
+                                }
+                                &.reg-btn-fourteen {
+                                    background: variables.$primary;
+                                    color: variables.$white;
+                                    transition: 0.5s;
+                                    border: 1px solid colors.$blue__14;
+                                    font-size: variables.$font-size-15;
+                                    font-weight: variables.$font-weight-semibold;
+                                    &:hover {
+                                        background: colors.$white;
+                                        color: variables.$primary;
+                                        transition: 0.5s;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        &.header-fixed {
+            position: variables.$fixed;
+            display: variables.$block;
+            width: variables.$full__width;
+            z-index: 9999;
+            box-shadow: variables.$inherit;
+            // background: rgb(14, 130, 253);
+        }
+    }
+}

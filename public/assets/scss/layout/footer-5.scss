@@ -1,0 +1,209 @@
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+.footer {
+    &.footer-three {
+        &.footer-ten {
+            background: colors.$blue__17;
+            position: relative;
+            overflow: hidden;
+            .social-icon {
+                position: relative;
+            }
+            .footer-ten-bg {
+                img {
+                    position: absolute;
+                    &:nth-child(1) {
+                        left: 0;
+                        bottom: 0;
+                    }
+                    &:nth-child(2) {
+                        right:0;
+                        bottom: 0;
+                    }
+                    &:nth-child(3) {
+                        left: 50%;
+                        transform: translate(-50%, 100%);
+                    }
+                }
+            }
+            .footer-top {
+                padding: 60px 0;
+                background: variables.$primary;
+                @include mixins.respond-below (lg) {
+                    padding: 40px 0 10px;
+                }
+                @include mixins.respond-below (md) {
+                    padding: 30px 0 0;
+                }
+                .footer-widget {
+                    .footer-title {
+                        padding-bottom: 15px;
+                        position: relative;
+                        &::before {
+                            content: "";
+                            position: absolute;
+                            bottom: 0;
+                            left: 0;
+                            background: colors.$white;
+                            width: 31px;
+                            height: 2px;
+                        }
+                    }
+                    &.footer-menu {
+                        ul {
+                            li {
+                                margin-bottom: 15px;
+                                a {
+                                    font-weight: variables.$font-weight-medium;
+                                }
+                                &:last-child {
+                                    margin-bottom: 0;
+                                }
+                            }
+                        }
+                    }
+                   .footer-about-content {
+                    p {
+                        font-size: variables.$font-size-16;
+                        font-weight: variables.$font-weight-medium;
+                        margin-bottom: 40px;
+                        color: colors.$gray-50;
+                        @include mixins.respond-below (lg) {
+                            margin-bottom: 20px;
+                        }
+                    }
+                   }
+                }
+            }
+            .subscribe-form {
+                margin-bottom: 0;
+                .form-control {
+                    background: #FFFFFF1A;
+                    border-radius: 50px;
+                    color: variables.$white;
+                    border: 0;
+                    padding: 15px;
+                    font-size: variables.$font-size-14;
+                    font-weight: variables.$font-weight-normal;
+                    &::placeholder {
+                        color: variables.$white;
+                    }
+                }
+                .btn {
+                    color: variables.$gray-900;
+                    font-size: variables.$font-size-16;
+                    font-weight: variables.$font-weight-medium;
+                    padding: 9px 16px;
+                    background: variables.$white;
+                    right: 6px;
+                }
+            }
+            .mail-note {
+                color: #6B7280;
+            }
+            .footer-map {
+                border-radius: 35px;
+                overflow: hidden;
+                img {
+                    width: 100%;
+                }
+            }
+            .footer-contact-info {
+                .footer-address {
+                    border-bottom: 1px solid variables.$white;
+                    padding-bottom: 15px;
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    span {
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        border: 1px solid colors.$white;
+                        color: variables.$white;
+                        margin-right: 8px;
+                        @extend %flex-align-center;
+                    }
+                    .addr-info {
+                        h6 {
+                            font-size: variables.$font-size-14;
+                            font-weight: variables.$font-weight-normal;
+                            margin-bottom: 0;
+                            color: colors.$athens_grey;
+                        }
+                        p {
+                            color: variables.$white;
+                            font-size: variables.$font-size-14;
+                            font-weight: variables.$font-weight-semibold;
+                            margin-bottom: 0;
+                        }
+                    }
+                    &:last-child {
+                        border: 0;
+                        @include mixins.margin-padding(0, 0);
+                    }
+                }
+            }
+            .social-icon {
+                text-align: right;
+                ul {
+                    li {
+                        a {
+                            background: variables.$light;
+                            color: variables.$gray-900;
+                            border-color: variables.$light;
+                            &:hover {
+                                background: variables.$white;
+                                color: variables.$primary;
+                                border-color: variables.$white;
+                            }
+                        }
+                    }
+                }
+            }
+            .footer-bottom {
+                border-top: 1px solid variables.$gray-transparent;
+                background: variables.$primary;
+                .copyright {
+                    border: 0;
+                    padding: 15px 0;
+                    display: flex;
+                    display: -webkit-flex;
+                    align-items:center;
+                    -webkit-align-items:center;
+                    justify-content: space-between;
+                    -webkit-justify-content: space-between;
+                    @include mixins.respond-below (lg) {
+                        flex-direction: column;
+                    }
+                    .copyright-text {
+                        p {
+                            font-size: variables.$font-size-16;
+                            font-weight: variables.$font-weight-medium;
+                        }
+                        @include mixins.respond-below (lg) {
+                            margin-bottom: 15px;
+                        }
+                    }
+                    .policy-menu {
+                        li {
+                            a {
+                                font-size: variables.$font-size-16;
+                                color: variables.$white;
+                                font-weight: variables.$font-weight-medium;
+                                &:hover {
+                                    color: colors.$athens_grey;
+                                }
+                            }
+                            &::after {
+                                content: none;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } 
+}

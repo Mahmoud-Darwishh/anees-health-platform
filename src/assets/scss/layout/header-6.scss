@@ -1,0 +1,113 @@
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+
+.header-trans.header-eleven {
+    .header-nav {
+        border-bottom: 0;
+        .navbar-header {
+            @include mixins.respond-below (sm) {
+                #mobile_btn {
+                    left: 0;
+                }
+            }
+        }
+        .main-menu-wrapper {
+            margin-left: auto;
+            margin-right: unset;
+        }
+        .main-nav {
+            & > li {
+                @include mixins.respond-below (xl) {
+                    margin-right: 10px;
+                }
+                & > a {
+                    color: variables.$white;
+                    font-size: variables.$font-size-16;
+                    font-weight: variables.$font-weight-semibold;
+                    @include mixins.respond-below(xxl) {
+                        font-size: variables.$font-size-14;
+                    }
+                }
+                &.has-submenu {
+                    &.active {
+                        & > a {
+                            color: #0CE0FF;
+                        }
+                    }
+                }
+                &.submenu {
+                    a {
+                        &:hover {
+                            color: #0CE0FF;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    .header-navbar-rht {
+        li {
+            border-right: 0;
+            padding-right: 0;
+            a {
+                &.header-login {
+                    background: colors.$light__celeste;
+                    border-radius: 5px;
+                    font-size: variables.$font-size-16;
+                    font-weight: variables.$font-weight-normal;
+                    padding: 13px 15px !important;
+                    text-transform: none;
+                    box-shadow: inset 0 0 0 0 variables.$white;
+                    @include mixins.transition(all 0.7s);
+                    display: flex;
+                    align-items: center;
+                    &:hover {        
+                        background: variables.$white;
+                        color: variables.$primary;
+                        box-shadow: inset 0 60px 0 0 variables.$white;
+                        @include mixins.transition(all 0.7s);
+                    }
+                    &.white-bg {
+                        color: variables.$primary;
+                        box-shadow: inset 0 0 0 0 variables.$primary;
+                        @include mixins.transition(all 0.7s);
+                        &:hover {        
+                            background: variables.$primary;
+                            color: variables.$white;
+                            box-shadow: inset 0 60px 0 0 variables.$primary;
+                            @include mixins.transition(all 0.7s);
+                        }
+                    }
+                }
+            }
+            &.login-in-fourteen {
+                background: variables.$white;
+                color: variables.$gray-900;
+                padding: 8px 16px;
+                border-radius: 44px;
+                height: auto;
+                font-size: variables.$font-size-16;
+                font-weight: variables.$font-weight-semibold;
+                @include mixins.respond-below(xxl) {
+                    font-size: variables.$font-size-14;
+                }
+                a {
+                    color: variables.$gray-900;
+                    
+                }
+                &:hover {
+                    background: variables.$primary;
+                    a {
+                        color: variables.$white;
+                    }
+                }
+            }
+        }
+    }
+    .header-theme .theme-toggle {
+        color: #fff;
+    }
+}

@@ -1,0 +1,16 @@
+// ============================================
+// Legacy CSS/SCSS Imports from Old Website
+// All old website styling compiled into one file
+// ============================================
+
+// Font Awesome Icons - CDN imported in head via next/script
+// Bootstrap - CDN imported in head via next/script
+
+// Import all legacy CSS files as raw strings
+// These are the compiled CSS files from the old Vite website
+
+// Note: CSS files with encoding issues are served directly from public/
+// Bootstrap 5.3 and Font Awesome 6.4 are loaded from CDN for best practices
+
+// Legacy styling will be applied via link tags in layout.tsx
+// This structure allows for future refactoring and modularization

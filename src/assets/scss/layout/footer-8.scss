@@ -1,0 +1,213 @@
+@use "../base/colors";
+@use "../base/typography";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+
+.footer {
+    &.footer-thirteen {
+        background: variables.$primary;
+        background-repeat: no-repeat;
+        background-position: center;
+        position: variables.$relative;
+        .social-icon {
+            text-align: right;            
+            @include mixins.respond-below (custom767) {
+                text-align: left;  
+            }
+            ul {
+                list-style: none;
+                @include mixins.margin-padding(0, 0);
+                li {
+                    display: variables.$inline__block;
+                    margin-right: 8px;
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                    a {
+                        width: 32px;
+                        height: 32px;
+                        color: variables.$primary;
+                        background: variables.$white;
+                        border: 1px solid variables.$white;
+                        border-radius: 50%;
+                        @extend %flex-align-center;
+                        font-size: variables.$font-size-16;
+                        @include mixins.transition(all 0.4s ease 0s);
+                        &:hover {
+                            border: 1px solid variables.$dark;
+                            background: variables.$dark;
+                            color: variables.$white;
+                        }
+                        @include mixins.respond-below(lg) { 
+                            width: 30px;
+                            height: 30px;
+                            font-size: variables.$font-size-14;
+                        }
+                    }
+                }
+            }
+        }
+        .footer-top {
+            @include mixins.margin-padding (0, 40px 0);
+            .footer-widget {
+                .footer-title {
+                    font-size: variables.$font-size-18;
+                    font-weight: variables.$font-weight-semibold;
+                    color: colors.$white;
+                    margin-bottom: 16px;
+                    @include mixins.respond-below(lg) {
+                        font-size: variables.$font-size-16;
+                    }
+                }
+                ul {
+                    li {
+                        margin-bottom: 4px;
+                        a {
+                            color: variables.$white;
+                            font-size: variables.$font-size-14;
+                            padding-left: 0;
+                            &::before {
+                                content: '';
+                            }
+                            &:hover {
+                                color: variables.$white;
+                                padding-left: 5px;
+                            }
+                        }
+                    }
+                }
+            }
+            .footer-menu-thirteen {
+                margin-top: 43px;
+                .footer-title {
+                    display: none;
+                }
+                @include mixins.respond-below(lg) {
+                    margin-top: 0;
+                    .footer-title {
+                        display: variables.$block;
+                    }
+                }
+            }
+            .footer-contents-thirteen-main {
+                @include mixins.margin-padding (40px 0 0 0, null);
+                @include mixins.respond-below(lg) {
+                    @include mixins.margin-padding (0, null);
+                }
+                .footer-thirt-inner {
+                    position: relative;
+                    @include mixins.respond-below(lg) {
+                        margin-bottom: 10px;
+                    }
+                    h4 {
+                        font-weight: variables.$font-weight-semibold;
+                        color: #00438A;
+                        margin-bottom: 6px;
+                    }
+                    p {
+                        font-size: variables.$font-size-14;
+                        color: rgba(147, 163, 180, 0.8);
+                        font-weight: typography.$regular;
+                        margin-bottom: 0;
+                        @include mixins.respond-below(lg) {
+                            margin-bottom: 10px;
+                        }
+                    }
+                }
+                .subscribe-form {
+                    margin-bottom: 0;
+                    max-width: 100%;
+                    @include mixins.respond-below (custom767) {
+                        margin-bottom: 20px;
+                    }
+                    .form-control {
+                        border: 1px solid variables.$border-color;
+                        background: colors.$white;
+                        border-radius: 30px;
+                        color: variables.$gray-900;
+                        border: 0;
+                        font-size: variables.$font-size-14;
+                        font-weight: variables.$font-weight-normal;
+                        min-height: 50px;
+                        &::placeholder {
+                            color: variables.$gray-900;
+                        }
+                    }
+                    .btn {
+                        font-size: variables.$font-size-14;
+                        font-weight: variables.$font-weight-medium;
+                        padding: 8px 16px;
+                        right: 5px;
+                        @include mixins.rounded(44px);
+                    }
+                }
+            }
+        }
+        .footer-bottom {
+            .copyright {
+                border-top: 1px solid variables.$primary-100;
+                padding: 18px 0;
+                @include mixins.respond-below(lg) {
+                    text-align: variables.$center;
+                }
+                .copyright-img {
+                    @include mixins.respond-below(lg) {
+                        margin-bottom: 15px;
+                    }
+                }
+                .copyright-text {
+                    p {
+                        font-size: variables.$font-size-14;
+                        text-align: variables.$center;
+                        color: variables.$light;
+                        margin-bottom: 0;
+                    }
+                }
+                .copyright-menu {
+                    @include mixins.respond-below(lg) {
+                        margin-bottom: 15px;
+                    }
+                    ul {
+                        @include mixins.respond-below(lg) {
+                            text-align: center;
+                        }
+                        li {
+                            a {
+                                color: #00438A;
+                                font-size: typography.$font__size__18;
+                                &:hover {
+                                    color: variables.$primary;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .footer-bg-icon {
+
+            img {
+                position: variables.$absolute;
+                z-index: 0;
+                &:nth-child(1) {
+                    top: 10%;
+                    right: 5%;
+                    @include mixins.respond-below(md) {
+                        display: none;
+                    }
+                }
+                &:nth-child(2) {
+                    top: 20%;
+                    right: -7%;
+                    @include mixins.respond-below(lg) {
+                        display: none;
+                    }
+                    @include mixins.respond-below(xl) {
+                        display: none;
+                    }
+                }
+            }
+        }
+    }
+}

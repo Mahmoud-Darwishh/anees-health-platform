@@ -1,0 +1,554 @@
+@use "../base/colors";
+@use "../base/typography";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+.breadcrumb-bar-two {
+	background: variables.$gray-transparent;
+	background-repeat: no-repeat;
+	padding-top: 70px;
+	position: relative;
+	overflow: hidden;
+	z-index: 1;   
+    .inner-banner {
+        @include mixins.margin-padding(0, 60px 0);
+        .breadcrumb-title {
+            font-weight: variables.$font-weight-semibold;
+            font-size: variables.$font-size-40;
+            margin-bottom: 6px;
+            color: variables.$gray-900;
+            @include mixins.respond-below(lg) { 
+                font-size: variables.$font-size-36;
+            }
+            @include mixins.respond-below(md) {
+                font-size: variables.$font-size-26;
+            }
+        }
+        @include mixins.respond-below(md) {
+            @include mixins.margin-padding(0, 50px 0);
+        }
+    }
+    @include mixins.respond-below(lg) { 
+        padding-top: 40px;
+        min-height: 260px;
+    }
+    @include mixins.respond-below(md) {
+        min-height: auto;
+    }
+    .page-breadcrumb {
+        ol {
+            background-color: transparent;
+            font-weight: variables.$font-weight-medium;
+            @include mixins.margin-padding(0, 0);
+            @extend %display-inline-flex;
+            li {
+                a {
+                    font-size: variables.$font-size-12;
+                    font-weight: variables.$font-weight-medium;
+                    color: variables.$gray-600;
+                }
+                &.active {
+                    color: variables.$gray-900;
+                }
+            }
+            @include mixins.respond-below(md) {
+                font-size: variables.$font-size-15;
+            }
+        }
+        .breadcrumb {
+            a {
+                &:hover {
+                    color: variables.$primary;
+                }
+            }
+        }
+        .breadcrumb-item {
+            & + .breadcrumb-item {
+                font-size: variables.$font-size-12;
+                font-weight: variables.$font-weight-medium;
+                color: variables.$gray-900;
+                padding-left: 10px;
+                display: flex;
+                align-items: baseline;
+            }
+        }
+    }
+    .breadcrumb-item {
+        & + .breadcrumb-item {
+            &::before {
+                content: "/";
+                font-family: typography.$feather__font__family;
+                float: variables.$left;
+                padding-right: 10px;
+                color: colors.$gulf_gray;
+                font-size: variables.$font-size-14;
+                font-weight: variables.$font-weight-semibold;
+            }
+        }
+    }
+}
+.about-section {
+    background-color: variables.$white;
+    padding: 60px 0;
+    .about-img-info {
+        padding-right: 30px;
+        .about-img {
+            border-radius: 8px;
+            margin-bottom: 25px;
+            &:last-child {
+                margin-bottom: 0;
+            }
+            img {
+                border-radius: 8px;
+            }
+        }
+        .about-box {
+            background: variables.$primary;
+            border-radius: 8px;
+            margin: 15px 0 25px;
+            padding: 45px 10px;
+            text-align: variables.$center;
+            h4 {
+                font-weight: variables.$font-weight-semibold;
+                font-size: variables.$font-size-20;
+                color: variables.$white;
+                max-width: 208px;
+                @include mixins.margin-padding(0 variables.$auto 0, 0);
+            }
+        }        
+        @include mixins.respond-below(lg) { 
+            display: none;
+        }
+    }
+    @include mixins.respond-below(lg) { 
+        padding: 40px 0;
+    }
+}
+.section-inner-header {
+	margin-bottom: 40px;
+	h6 {
+		font-weight: variables.$font-weight-semibold;
+		font-size: variables.$font-size-16;
+		color: variables.$primary;
+		margin-bottom: 0;
+	}
+	h2 {
+		font-size: variables.$font-size-32;
+		margin-bottom: 0;    
+        @include mixins.respond-below(lg) { 
+            font-size: variables.$font-size-26;
+            max-width: inherit;
+        }  
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-24;  
+        }
+	}     
+    @include mixins.respond-below(lg) { 
+        margin-bottom: 40px;
+    }
+}
+.about-inner-header {
+	margin-bottom: 20px;
+}
+.about-content-details {
+	padding-bottom: 25px;
+	p {
+		font-size: variables.$font-size-16;
+		margin-bottom: 16px;
+		&:last-child {
+			margin-bottom: 0;
+		}   
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-15;
+        }
+	}
+}
+.about-contact {
+	@extend %flex__center;
+}
+.about-contact-icon {
+	margin-right: 16px;
+	span {
+		width: 47px;
+		height: 47px;
+		border-radius: 50px;
+		color: variables.$white;
+		background: variables.$primary;
+		@extend %flex-align-center;
+        font-size: variables.$font-size-24;
+	}
+}
+.about-contact-text {
+	p {
+		font-weight: variables.$font-weight-medium;
+		font-size: variables.$font-size-16;
+		margin-bottom: 4px;
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-14;
+        }
+	}
+	h4 {
+		font-weight: variables.$font-weight-semibold;
+		font-size: variables.$font-size-20;
+		margin-bottom: 0;
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-18;
+        }
+	}
+}
+.why-choose-section {
+    background-color: variables.$white;
+    padding-bottom: 36px;
+    @include mixins.respond-below(lg) { 
+        padding-bottom: 16px;
+    }  
+}
+.why-choose-card {
+	border-radius: 8px;
+    @include mixins.transition(0.7s);
+	&:hover {
+		box-shadow: variables.$box-shadow;
+        @include mixins.transition(0.7s);
+		.why-choose-icon {
+			span {
+				img {
+                    @include mixins.transform(rotateY(360deg));
+                    @include mixins.transition(0.7s);
+				}
+			}
+		}
+	}
+	.card-body {
+        padding: 25px;
+        @include mixins.respond-below(lg) { 
+            padding: 20px;
+        }  
+        @include mixins.respond-below(md) { 
+            padding: 15px;
+        }
+	}
+}
+.why-choose-icon {
+	padding-bottom: 20px;
+	span {
+		width: 80px;
+		height: 80px;
+		border-radius: 50px;
+		color: variables.$white;
+		background: variables.$primary;
+		@extend %flex-align-center;
+		img {
+            @include mixins.transition(0.7s);
+		}
+	}
+    @include mixins.respond-below(md) { 
+        padding-bottom: 20px; 
+    }
+}
+.why-choose-content {
+	h4 {
+		font-weight: variables.$font-weight-semibold;
+		font-size: variables.$font-size-20;
+		margin-bottom: 12px;
+	}
+	p {
+		font-size: variables.$font-size-16;
+		margin-bottom: 0;
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-14;
+        }
+	}
+}
+.way-section {
+    background-color: variables.$white;
+    padding-bottom: 60px;
+    .way-bg {
+        background: variables.$primary;
+        border-radius: 25px;
+        position: variables.$relative;
+        overflow: variables.$hidden;
+        .way-shapes-img {
+            position: variables.$relative;
+            .way-shapes-left {
+                @include mixins.position(variables.$absolute, 60px, 200px, null, null);
+            }
+            .way-shapes-right {
+                @include mixins.position(variables.$absolute, null, 0, null, null);
+            }
+            @include mixins.respond-below(lg) { 
+                display: none;
+            }
+        }
+        @include mixins.respond-below(lg) { 
+            border-radius: 10px;
+        }
+
+    }
+    @include mixins.respond-below(lg) { 
+        @include mixins.margin-padding(0, 0 0 40px);
+    }
+}
+.way-inner-header {
+    @include mixins.margin-padding(0, 80px);
+	h2 {
+		color: variables.$white;
+		margin-bottom: 20px;
+	}
+	p {
+		font-weight: variables.$font-weight-medium;
+		font-size: variables.$font-size-16;
+		color: variables.$light;
+		margin-bottom: 40px;   
+        @include mixins.respond-below(md) { 
+            margin-bottom: 15px;
+        }
+	}
+	.btn {
+		font-size: variables.$font-size-16;
+        @include mixins.margin-padding(null, 8px 16px);
+		color: variables.$gray-900;
+		background: variables.$white;
+		border: 1px solid variables.$white;
+		border-radius: 44px;
+		@extend %display-inline-flex;
+		&:hover {
+			color: variables.$white;
+			border: 1px solid variables.$white;
+			background: variables.$primary;
+			box-shadow: inset 0 0 0 50px colors.$blue__14;
+		} 
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-14;
+            @include mixins.margin-padding(0, 10px 15px);
+        }
+	}
+    @include mixins.respond-below(lg) { 
+        @include mixins.margin-padding(0, 30px);
+    }
+    @include mixins.respond-below(md) { 
+        @include mixins.margin-padding(0, 20px);
+    }
+}
+.way-img {
+	position: relative;
+	top: 10px;
+    @include mixins.respond-below(lg) { 
+        display: none;
+    }
+}
+.professional-section {
+    padding-bottom: 36px;
+	background: variables.$white;
+	.doctor-profile-widget {
+		margin-bottom: 24px; 
+	}
+    @include mixins.respond-below(lg) { 
+       padding-bottom: 16px;
+    }
+}
+.testimonial-section {
+	background: variables.$light-300;
+    padding: 60px 0;
+	position: variables.$relative;
+	overflow: variables.$hidden;
+	z-index: 1;
+	&::after {
+		content: '';
+		background: url(/src/assets/img/bg/doctor-shape-img1.png);
+        @include mixins.background-properties(variables.$cover, variables.$no_repeat, variables.$left);
+        @include mixins.position(variables.$absolute, 0, null, null, 0);
+		width: 213px;
+		height: 335px;
+		opacity: 0.5;
+		z-index: -1;
+		@include mixins.respond-below(lg) {
+			display: none;
+		}
+	}
+	&::before {
+		content: '';
+		background: url(/src/assets/img/bg/doctor-shape-img2.png);
+        @include mixins.background-properties(variables.$cover, variables.$no_repeat, variables.$right);
+        @include mixins.position(variables.$absolute, null, 0, 0, null);
+        opacity: 0.5;
+		width: 213px;
+		height: 335px;
+		z-index: -1;
+		@include mixins.respond-below(lg) {
+			display: none;
+		}
+	}
+    .testimonial-shape-img {
+        position: variables.$relative;
+        .testimonial-shape-left {
+            @include mixins.position(variables.$absolute, -30px, null, null, -40px);
+            -webkit-animation-name: blinker;
+            -webkit-animation-duration: 0.6s;
+            -webkit-animation-iteration-count: infinite;
+            -webkit-animation-timing-function: ease-in-out;
+            -webkit-animation-direction: alternate;
+            img {
+                width: 100px;
+            }
+        }
+        .testimonial-shape-right {
+            @include mixins.position(variables.$absolute, 60px, 0, null, null);
+            -webkit-animation-name: blinker;
+            -webkit-animation-duration: 0.6s;
+            -webkit-animation-iteration-count: infinite;
+            -webkit-animation-timing-function: ease-in-out;
+            -webkit-animation-direction: alternate;
+            img {
+                width: 100px;
+            }
+        }
+        @include mixins.respond-below(lg) { 
+            display: none;
+        }
+    }
+    @include mixins.respond-below(lg) { 
+        padding: 40px 0;
+    }
+}
+.testimonial-info {
+	@extend %flex__center;    
+    @include mixins.respond-below(md) { 
+        flex-direction: column;
+    }
+}
+.testimonial-img {
+	border-radius: 50%;
+	margin-right: 24px;
+	width: 220px;
+	-ms-flex: 0 0 220px;
+	flex: 0 0 220px;
+    @include mixins.respond-below(md) { 
+        @include mixins.margin-padding(0 0 30px 0, 0);
+        width: 200px;
+        -ms-flex: 0 0 100%;
+        flex: 0 0 100%;
+    }
+	img {
+		border-radius: 50%;
+		width: variables.$full__width;
+	}
+}
+.testimonial-header {
+	margin-bottom: 16px;
+}
+.testimonial-details {
+	p {
+		font-size: variables.$font-size-16;
+		margin-bottom: 16px;
+        @include mixins.respond-below(md) { 
+            font-size: variables.$font-size-14;
+        }
+	}
+	h6 {
+		font-weight: variables.$font-weight-normal;
+		font-size: variables.$font-size-12;
+		margin-bottom: 0;
+		color: variables.$gray-600;
+		span {
+			font-weight: variables.$font-weight-medium;
+			font-size: variables.$font-size-16;
+            color: variables.$gray-900;
+            display: block;
+		}
+	}
+}
+.testimonial-grid {
+    @include mixins.margin-padding(0, 0 60px);
+    @include mixins.respond-below(md) { 
+        @include mixins.margin-padding(0, 0 25px);
+    }
+}
+.testimonial-slider {
+    .slick-prev, .slick-next {
+        width: 30px;
+        height: 30px;
+        font-size: 0;
+        color: variables.$gray-900;
+        background: variables.$gray-transparent;
+        box-shadow: variables.$box-shadow;
+        @extend %inlineflex-align-center;
+        &:hover {
+            color: variables.$white;
+            background: variables.$primary;
+        }
+        &:focus {
+            color: variables.$white;
+            background: variables.$primary;
+            opacity: 1;
+        }
+    }
+	.slick-prev {
+		&:before {
+			font-family: variables.$font-awesome;
+			content: "\f053";
+			font-size: variables.$font-size-16;
+			font-weight: variables.$font-weight-bold;
+		}
+	}
+	.slick-next {
+		&:before {
+			font-family: variables.$font-awesome;
+			content: "\f054";
+			font-size: variables.$font-size-16;
+			font-weight: variables.$font-weight-bold;
+		}
+	}
+}
+.faq-section-inner {
+   padding: 60px 0;
+    @include mixins.respond-below(lg) {
+        padding: 40px 0;
+    }   
+}
+.faq-inner-page {
+    background-color: variables.$white;
+    padding: 60px 0 36px;
+    @include mixins.respond-below(lg) {
+        padding: 40px 0 16px;
+    }
+}
+.faq-inner-info {
+	.accordion-item {
+		margin-bottom: 24px;
+        background: variables.$light-transparent;
+        border: 1px solid variables.$border-color;
+        @include mixins.rounded(10px);
+		&:last-child {
+			margin-bottom: 24px;
+		}
+        .accordion-button {
+            &::after {
+                background: variables.$gray-transparent;
+                color: variables.$gray-900;
+            }
+            &:not(.collapsed)::after {
+                color: variables.$white;
+                background: variables.$primary;
+            }
+        }
+        .accordion-body {
+            margin-top: 16px;
+            padding: 16px 0 0;
+            border-top: 1px solid variables.$border-color;
+        }
+	}
+}
+@include mixins.respond-below(sm) {
+    .testimonial-content {
+        text-align: center;
+    }
+}
+@include mixins.respond-below(custom479) {
+.testimonial-content {
+    .section-inner-header {
+        h2 {
+            font-size: 16px;
+        }
+    }
+}
+}

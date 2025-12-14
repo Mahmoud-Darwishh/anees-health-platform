@@ -1,0 +1,179 @@
+'use client';
+
+import React, { useState } from 'react'
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
+
+const HomeBanner: React.FC = () => {
+    const t = useTranslations();
+    const router = useRouter();
+    const locale = useLocale();
+    const [serviceType, setServiceType] = useState('');
+    const [specialty, setSpecialty] = useState('');
+    const [doctorQuery, setDoctorQuery] = useState('');
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        // Build query string
+        const params = new URLSearchParams();
+        if (doctorQuery) params.append('doctor', doctorQuery);
+        if (specialty) params.append('specialty', specialty);
+        if (serviceType) params.append('service', serviceType);
+        
+        // Navigate to doctors page with query params
+        router.push(`/${locale}/doctors${params.toString() ? '?' + params.toString() : ''}`);
+    };
+
+    return (
+
+        <>
+            {/* Home Banner */}
+            <section className="banner-section banner-sec-one">
+                <div className="container">
+                    <div className="row align-items-center">
+                        <div className="col-lg-7">
+                            <div className="banner-content">
+                                
+                                <h1 className="display-5">
+                                    <span style={{ color: '#aa8642' }}>{t('home.banner.title_highlight')}</span><span>{t('home.banner.title_rest')}</span>
+                                </h1>
+                                <div className="search-box-one">
+                                    <form onSubmit={handleSearch}>
+                                        <div className="search-input search-calendar-line">
+                                            <i className="isax isax-user-search" style={{zIndex:99}}/>
+                                            <div className=" mb-0">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    placeholder={t('home.banner.search_doctor')}
+                                                    value={doctorQuery}
+                                                    onChange={(e) => setDoctorQuery(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="search-input search-map-line">
+                                            <div className=" mb-0">
+                                                <select
+                                                    className="form-control"
+                                                    value={specialty}
+                                                    onChange={(e) => setSpecialty(e.target.value)}
+                                                >
+                                                    <option value="">{t('home.banner.specialty')}</option>
+                                                    <option value="cardiology">{t('home.specialities.cardiology')}</option>
+                                                    <option value="orthopedics">{t('home.specialities.orthopedics')}</option>
+                                                    <option value="gastroenterology">{t('home.specialities.gastroenterology')}</option>
+                                                    <option value="geriatrics">{t('home.specialities.geriatrics')}</option>
+                                                    <option value="psychiatry">{t('home.specialities.psychiatry')}</option>
+                                                    <option value="endocrinology">{t('home.specialities.endocrinology')}</option>
+                                                    <option value="pulmonology">{t('home.specialities.pulmonology')}</option>
+                                                    <option value="nephrology">{t('home.specialities.nephrology')}</option>
+                                                    <option value="neurology">{t('home.specialities.neurology')}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="search-input search-line">
+                                            <div className=" mb-0">
+                                                <select
+                                                    className="form-control"
+                                                    value={serviceType}
+                                                    onChange={(e) => setServiceType(e.target.value)}
+                                                >
+                                                    <option value="">{t('home.banner.service_type')}</option>
+                                                    <option value="telemedicine">{t('home.list.telemedicine')}</option>
+                                                    <option value="doctor_visit">{t('home.list.doctor_visit')}</option>
+                                                    <option value="nursing">{t('home.list.nursing')}</option>
+                                                    <option value="physiotherapy">{t('home.list.physiotherapy')}</option>
+                                                    <option value="lab_testing">{t('home.list.lab_testing')}</option>
+                                                    <option value="home_radiology">{t('home.list.home_radiology')}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="form-search-btn">
+                                            <button className="btn btn-primary" type="submit">
+                                                <i className="isax isax-search-normal5 me-2" />
+                                                {t('common.search')}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col-lg-5">
+                            <div className="banner-img">
+                                <img
+                                    src="assets/img/banner/012.png"
+                                    className="img-fluid"
+                                    alt="patient-image"
+                                />
+                                {/*
+                                <div className="banner-appointment">
+                                    <h6>1K</h6>
+                                    <p>
+                                        Appointments <span className="d-block">Completed</span>
+                                    </p>
+                                </div>
+                                <div className="banner-patient">
+                                    <div className="avatar-list-stacked avatar-group-sm">
+                                        <span className="avatar avatar-rounded">
+                                            <img src="assets/img/patients/patient19.jpg" alt="img" />
+                                        </span>
+                                        <span className="avatar avatar-rounded">
+                                            <img src="assets/img/patients/patient16.jpg" alt="img" />
+                                        </span>
+                                        <span className="avatar avatar-rounded">
+                                            <img src="assets/img/patients/patient18.jpg" alt="img" />
+                                        </span>
+                                    </div>
+                                    <p>15K+</p>
+                                    <p>Satisfied Patients</p>
+                                </div>*/}
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+                {/* BG Texture and Icons */}
+                {/*
+                <div className="banner-bg">
+                    <img
+                        src="assets/img/bg/banner-bg-02.png"
+                        alt="img"
+                        className="banner-bg-01"
+                    />
+                    <img
+                        src="assets/img/bg/banner-bg-03.png"
+                        alt="img"
+                        className="banner-bg-02"
+                    />
+                    <img
+                        src="assets/img/bg/banner-bg-04.png"
+                        alt="img"
+                        className="banner-bg-03"
+                    />
+                    <img
+                        src="assets/img/bg/banner-bg-05.png"
+                        alt="img"
+                        className="banner-bg-04"
+                    />
+                    <img
+                        src="assets/img/bg/banner-icon-01.svg"
+                        alt="img"
+                        className="banner-bg-05"
+                    />
+                    <img
+                        src="assets/img/bg/banner-icon-01.svg"
+                        alt="img"
+                        className="banner-bg-06"
+                    />
+                </div> */}
+            </section>
+            {/* /Home Banner */}
+        </>
+
+
+    )
+}
+
+export default HomeBanner
+
+

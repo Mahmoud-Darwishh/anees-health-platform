@@ -1,0 +1,148 @@
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../utils/variables";
+
+.doc-review {
+	&.review-listing {
+		@include mixins.margin-padding(0, null);
+	}
+}
+.doc-review {
+	& > ul {
+		& > li {
+			background-color: variables.$white;
+			border: 1px solid variables.$gray-transparent;
+			border-radius: 10px;
+			box-shadow: 0px 7.5px 17.5px 0px #0000000D;
+			padding: 0;
+			margin-bottom: 24px;
+			.review-content {
+				padding: 24px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				.daterange-wraper {
+					margin-bottom: 0;
+				}
+			}
+			.star-rated {
+				display: flex;
+				align-items: center;
+				span {
+					color: variables.$gray-900;
+					font-size: variables.$font-size-30;
+					margin-right: 10px;
+					font-weight: variables.$font-weight-semibold;
+				}
+				i {
+					color: variables.$gray-transparent;
+					margin: 0 2px;
+					&.filled {
+						color: variables.$warning;
+					}
+				}
+			}
+			ul {
+				li {
+					padding: 0 24px 24px;
+					.replied-comment {
+						padding: 15px;
+						background: variables.$light-transparent;
+						border-radius: 10px;
+						.patient-info {
+							span {
+								display: block;
+								color: variables.$gray-900;
+								font-size: variables.$font-size-14;
+							}
+						}
+						.review-info {
+							margin-top: 10px;
+						}
+					}
+					.comment-reply {
+						display: flex;
+						align-items: center;
+						.reply-text {
+							color: variables.$primary;
+							font-size: variables.$font-size-14;
+							margin-right: 15px;
+							font-weight: variables.$font-weight-medium;
+							&.replied-text {
+								color: #1E293B;
+							}
+						}
+						span {
+							font-size: variables.$font-size-14;
+							font-weight: variables.$font-weight-medium;
+							&.no-views {
+								color: colors.$grey_white__01;
+							}
+							&.replied-views {
+								color: variables.$primary;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+	}
+}
+.comments {
+	width: 100%;
+	.comment-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 15px;
+		border-bottom: 1px solid #E2E8F0;
+		.patinet-information {
+			.patient-info {
+				span {
+					display: block;
+					color: variables.$gray-600;
+				}
+			}
+		}
+	}
+	.review-info {
+		padding: 24px;
+		p {
+			color: variables.$gray-600;
+			margin-bottom: 15px;
+		}
+	}
+	.comment-reply {
+		display: flex;
+		align-items: center;
+		.reply-text {
+			color: variables.$gray-900;
+			font-size: variables.$font-size-14;
+			margin-right: 15px;
+			font-weight: variables.$font-weight-medium;
+			&:hover {
+				color: variables.$primary;
+			}
+			&.replied-text {
+				color: variables.$gray-900;
+			}
+			i {
+				line-height: inherit;
+			}
+		}
+		span {
+			font-size: variables.$font-size-14;
+			font-weight: variables.$font-weight-medium;
+			&.no-views {
+				color: colors.$grey_white__01;
+			}
+			&.replied-views {
+				color: variables.$primary;
+			}
+		}
+	}
+}
+.durations {
+	margin-bottom: 5px;
+}
