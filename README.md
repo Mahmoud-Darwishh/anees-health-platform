@@ -23,7 +23,7 @@ anees-health-platform/
        layout.tsx       # Root layout
     components/
        layout/          # Header, Footer
-       Patients/          # to be chnaged to doctors
+       Patients/          # to be chnaged to doctors later
        sections/        # Page sections (Hero, Features, etc.)
     features/            # Future feature modules
     i18n/                # Internationalization config
