@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react'
+import Image from 'next/image'
 import CountUp from "react-countup";
 import Slider from "react-slick";
 import { useTranslations } from 'next-intl';
@@ -121,28 +122,31 @@ const SectionTestimonial: React.FC = () => {
                     <div className=" company-slider slick-margins">
                         <Slider {...TestimonialSlider}>
                             <div>
-                                <img src="assets/img/company/saudi-german-hospital.png" alt="img" />
+                                <Image src="/assets/img/clients/alahly.png" alt="Al Ahly" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/cleopatra.png" alt="img" />
+                                <Image src="/assets/img/clients/almehwar.png" alt="Almehwar Hospital" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/as-salam.png" alt="img" />
+                                <Image src="/assets/img/clients/andalusia.jpeg" alt="Andalusia Hospital" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/dar-elfouad.png" alt="img" />
+                                <Image src="/assets/img/clients/asslam.webp" alt="As-Salam International" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/andalusia.png" alt="img" />
+                                <Image src="/assets/img/clients/cairo-university.png" alt="Cairo University" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/57357.png" alt="img" />
+                                <Image src="/assets/img/clients/cleopatra.jpg" alt="Cleopatra Hospitals Group" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/Ganzouri.png" alt="img" />
+                                <Image src="/assets/img/clients/dar-foaud.png" alt="Dar El Fouad" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                             <div>
-                                <img src="assets/img/company/Shifa.png" alt="img" />
+                                <Image src="/assets/img/clients/saudi-german.png" alt="Saudi German Hospital" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
+                            </div>
+                            <div>
+                                <Image src="/assets/img/clients/shifa.png" alt="Shifa" width={220} height={110} sizes="(max-width: 768px) 120px, 180px" />
                             </div>
                         </Slider>
 
