@@ -1,84 +1,77 @@
 ﻿# Anees Health Platform
 
-A modern, scalable Next.js telemedicine platform with full bilingual support (English and Arabic).
+A bilingual (English/Arabic) health-tech platform built with Next.js (App Router) and TypeScript, designed for long-term scalability across telemedicine, booking, and real-time chat.
 
-## Features
+## Highlights
 
--  **Next.js 14+ with App Router** - Modern React framework with server components
--  **Bilingual Support** - Full internationalization with English and Arabic
--  **RTL/LTR Layouts** - Automatic right-to-left layout for Arabic
--  **TypeScript** - Type-safe development
--  **Sass/SCSS** - Advanced styling with existing design system
--  **Scalable Architecture** - Future-proof structure for telemedicine features
+- **Next.js App Router** with server components by default; client components only when needed.
+- **Internationalization** via `next-intl`, locale prefixes (`/en`, `/ar`), and RTL/LTR support from layout.
+- **Strict TypeScript** and SCSS-based design system; no ad-hoc inline styles unless there is no viable alternative.
+- **Motion** powered by `data-reveal` + `useReveal`/`Reveal` (IntersectionObserver); respects `prefers-reduced-motion`.
+- **Shared layout chrome** (Header, Footer) from `components/layout`, avoiding per-page duplicates.
+- **Domain-ready** for booking, telemedicine, and chat with modular `features/` structure.
 
 ## Project Structure
 
 ```
 anees-health-platform/
- src/
-    app/
-       [locale]/        # Locale-based routing
-          layout.tsx   # Locale layout with RTL/LTR
-          page.tsx     # Home page
-       layout.tsx       # Root layout
-    components/
-       layout/          # Header, Footer
-       Patients/          # to be changed to doctors later
-       sections/        # Page sections (Hero, Features, etc.)
-    features/            # Future feature modules
-    i18n/                # Internationalization config
-    lib/                 # Utility functions
-    styles/              # Global styles
-    types/               # TypeScript types
- messages/                # Translation files (en.json, ar.json)
- public/
-    assets/              # Images, fonts, CSS, SCSS from old website
- next.config.ts           # Next.js configuration
+├── src/
+│   ├── app/
+│   │   ├── [locale]/          # Locale-scoped layouts/pages (RTL/LTR handled here)
+│   │   └── layout.tsx         # Root layout
+│   ├── components/
+│   │   ├── common/            # Shared primitives (e.g., Reveal)
+│   │   ├── layout/            # Header, Footer (single source of truth)
+│   │   └── sections/          # Page sections (home, etc.)
+│   ├── features/              # Future modules (booking, telemedicine, chat, payments, dashboards)
+│   ├── hooks/                 # Reusable hooks (e.g., useReveal)
+│   ├── i18n/                  # next-intl setup
+│   ├── lib/                   # Shared utilities/config
+│   ├── styles/                # Global styles, tokens, legacy imports
+│   └── types/                 # Shared TypeScript types
+├── messages/                  # Translation bundles (en.json, ar.json)
+├── public/                    # Static assets, legacy css/scss, images, fonts
+├── next.config.ts
+├── tsconfig.json
+├── package.json
+└── README.md
 ```
 
-## Getting Started
+## Conventions & Best Practices
 
-### Development
+- **Styling:** SCSS/CSS modules and shared tokens; avoid inline styles unless no alternative. No `!important` unless justified.
+- **Motion:** Use `data-reveal` + `Reveal`/`useReveal`; centralize motion tokens; respect `prefers-reduced-motion`.
+- **Accessibility:** Semantic HTML, proper aria labels, focus states; ensure bilingual/RTL content remains accessible.
+- **Internationalization:** All text comes from message bundles; derive direction from route locale; no hardcoded LTR assumptions.
+- **Architecture:** Keep UI thin; business logic in API routes/services. Prefer server components unless interactivity is required.
+- **Security/Privacy:** Plan for PHI; keep secrets off the client; enforce role-based access (patient/doctor/admin) in auth flows.
+- **Branching:** `main` stays production-ready; use feature branches for booking/telemed/chat/payments/dashboards.
 
-Start the development server:
+## Current Implementation Notes
+
+- Home page sections wrap with `Reveal` for lightweight scroll animations.
+- Layout-level Header/Footer are the only chrome; removed home-specific duplicates.
+- RTL/LTR set at layout based on locale; `next-intl` provides messages.
+
+## Running & Building
 
 ```bash
-npm run dev
-```
-
-Visit:
-- English: http://localhost:3000/en
-- Arabic: http://localhost:3000/ar
-
-### Build
-
-```bash
+npm install
+npm run dev      # http://localhost:3000/en and /ar
 npm run build
 npm start
 ```
 
-## Current Implementation
+## Roadmap
 
-### Home Page
-1. **Hero Section** - Welcome message with CTA
-2. **Features Section** - Video consultations, easy booking, 24/7 support
-3. **Services Section** - Healthcare solutions overview
-4. **About Section** - Platform introduction
-5. **Contact Section** - Get in touch
+- Booking: normalized entities (patients, providers, slots, appointments, payments) with SSR-friendly flows.
+- Telemedicine: WebRTC/RTC provider integration, secure tokens, waiting rooms, session lifecycle.
+- Chat: WebSocket/RTC abstraction, persistence, read receipts, offline cache.
+- Dashboards: role-based surfaces for patient/doctor/admin.
 
-## Future Development
+## Testing & Quality
 
--  Doctor & Patient Modules
--  Booking System
--  Video Consultations
--  Real-time Chat
--  Dashboards
+- Prefer Playwright/Cypress for critical flows (locale switch, booking steps, chat send/receive).
+- Lint/format before commit; keep TypeScript strict.
 
-## Technologies
-
-- Next.js 16
-- TypeScript
-- Sass/SCSS
-- next-intl
-
- 2025 Anees Health. All rights reserved.
+© 2025 Anees Health. All rights reserved.

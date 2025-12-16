@@ -4,8 +4,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Slider from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
-import doctorsDataEn from "../../patients/doctorgrid/doctors.en.json";
-import doctorsDataAr from "../../patients/doctorgrid/doctors.ar.json";
+import doctorsDataEn from "../../doctors/doctorgrid/doctors.en.json";
+import doctorsDataAr from "../../doctors/doctorgrid/doctors.ar.json";
 
 const SectionDoctor: React.FC = () => {
   const t = useTranslations();
