@@ -1,5 +1,5 @@
-﻿// Import component-specific styles
-@import './components';
+﻿// Load component-specific styles (Sass @use)
+@use './components';
 
 // RTL support
 [dir='rtl'] {

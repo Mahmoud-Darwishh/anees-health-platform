@@ -1,5 +1,5 @@
 
-@import '../utils/variables';
+@use '../utils/variables' as variables;
 // Custom override for nav-list active state (for custom header component)
 .nav-list > li.active > a,
 .nav-list > li.active > a:visited {
