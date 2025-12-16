@@ -25,24 +25,24 @@ const Home3Footer = () => {
                       {t('footer.about_text')}
                     </p>
                     <div className="social-icon">
-                      <ul>
+                      <ul className="list-unstyled d-flex gap-3 mb-0">
                         <li>
-                          <Link href="https://www.facebook.com/aneeshealthcare/">
+                          <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex">
                             <i className="fa-brands fa-facebook" />
                           </Link>
                         </li>
                         <li>
-                          <Link href="https://www.tiktok.com/@aneeshealth">
+                          <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex">
                             <i className="fa-brands fa-tiktok" />
                           </Link>
                         </li>
                         <li>
-                          <Link href="https://www.instagram.com/aneeshealth/">
+                          <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex">
                             <i className="fa-brands fa-instagram" />
                           </Link>
                         </li>
                         <li>
-                          <Link href="https://www.linkedin.com/company/aneeshealth">
+                          <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex">
                             <i className="fa-brands fa-linkedin" />
                           </Link>
                         </li>
@@ -105,24 +105,22 @@ const Home3Footer = () => {
                 <div className="footer-widget footer-contact">
                   <h2 className="footer-title">{t('footer.contact')}</h2>
                   <div className="footer-contact-info">
-                    <div className="footer-address">
-                      {" "}
-                      <span>
+                    <div className="footer-address d-flex align-items-start gap-2 mb-3">
+                      <span className="me-3">
                         <i className="fas fa-map-marker-alt" />
                       </span>
-                      <p>
-                        5th Settlement, New Cairo
+                      <p className="mb-3">
+                        {t('footer.address')}
                         <br />
-                        Cairo, Egypt
+                        {t('footer.city')}
                       </p>
                     </div>
-                    <p>
-                      <i className="fa-solid fa-mobile-screen-button" />
+                    <p className="mb-2">
+                      <i className="fa-solid fa-mobile-screen-button me-3 mb-3" />
                       +201055164595
                     </p>
                     <p className="mb-0">
-                      {" "}
-                      <i className="fas fa-envelope" />
+                      <i className="fas fa-envelope me-3 mb-3" />
                       info@aneeshealth.com
                     </p>
                   </div>
@@ -134,27 +132,27 @@ const Home3Footer = () => {
         </div>
         {/* /Footer Top */}
         {/* Footer Bottom */}
-        <div className="footer-bottom">
+        <div className="footer-bottom py-4">
           <div className="container-fluid">
             {/* Copyright */}
             <div className="copyright">
               <div className="row">
                 <div className="col-md-6 col-lg-6">
                   <div className="copyright-text">
-                    <p className="mb-0">
+                    <p className="mb-0 text-white">
                       {t('footer.copyright')}
                     </p>
                   </div>
                 </div>
-                <div className="col-md-6 col-lg-6">
+                <div className="col-md-6 col-lg-6 text-end">
                   {/* Copyright Menu */}
                   <div className="copyright-menu">
-                    <ul className="policy-menu">
+                    <ul className="policy-menu no-separator list-unstyled d-flex gap-3 justify-content-end mb-0">
                       <li>
-                        <Link href={`/${locale}/terms`}>{t('footer.terms')}</Link>
+                        <Link href={`/${locale}/terms`} className="text-white text-decoration-none">{t('footer.terms')}</Link>
                       </li>
                       <li>
-                        <Link href={`/${locale}/privacy-policy`}>{t('footer.privacy')}</Link>
+                        <Link href={`/${locale}/privacy-policy`} className="text-white text-decoration-none">{t('footer.privacy')}</Link>
                       </li>
                     </ul>
                   </div>

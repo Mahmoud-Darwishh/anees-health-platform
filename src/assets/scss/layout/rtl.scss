@@ -190,52 +190,8 @@
     }
   }
 
-  // Icons positioning
-  .btn i,
-  .nav-link i {
-    margin-right: 0 !important;
-    margin-left: 0.5rem !important;
-  }
-
-  .language-globe-icon {
-    margin-right: 0 !important;
-    margin-left: 0.5rem !important;
-  }
-
-  // Button icons
-  .btn-primary-gradient,
-  .btn-dark {
-    i {
-      margin-right: 0 !important;
-      margin-left: 0.5rem !important;
-    }
-  }
-
-  // Flex containers
-  .d-flex {
-    &.gap-2,
-    &.gap-3 {
-      flex-direction: row-reverse;
-    }
-  }
-
-  .d-inline-flex {
-    flex-direction: row-reverse;
-    
-    &.align-items-center {
-      > i {
-        order: 2;
-      }
-    }
-  }
-
-  // Rounded pills buttons
-  .rounded-pill {
-    i {
-      margin-right: 0 !important;
-      margin-left: 0.5rem !important;
-    }
-  }
+  // Let Bootstrap's built-in RTL utilities handle spacing and flex direction
+  // Using me-2, ms-2, etc. automatically converts to appropriate RTL margins
 
   // Flag dropdown
   .flag-dropdown {
@@ -340,12 +296,7 @@
       }
     }
 
-    .social-icon {
-      ul {
-        justify-content: flex-end;
-      }
-    }
-  }
+    /* Social icons: Bootstrap utilities handle RTL layout natively */
 
   // ============================================
   // UTILITIES

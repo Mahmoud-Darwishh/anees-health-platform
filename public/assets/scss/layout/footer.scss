@@ -186,6 +186,17 @@
 					}
 				}
 			}
+
+			/* Remove separators when using utility class or footer-three skin */
+			.policy-menu.no-separator li,
+			.footer-three .policy-menu li {
+				margin-right: 0;
+				padding-right: 0;
+			}
+			.policy-menu.no-separator li::after,
+			.footer-three .policy-menu li::after {
+				content: none !important;
+			}
 		}		
 	} 
 	&.inner-footer {

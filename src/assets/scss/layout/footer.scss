@@ -86,23 +86,10 @@
 					}
 				}
 				.social-icon ul {
-					list-style: none;
-					@extend %inline-flex;
-					@include mixins.margin-padding(0,0);
-					li {
-						margin-right: 15px;
-						&:last-child {
-							margin-right: 0;
-						}
-						a {	
-							color: colors.$white;
-							@extend %inline-flex;
-							font-size: typography.$font__size__20;
-							@include mixins.transition(all 0.4s ease 0s);
-							&:hover {
-								color: colors.$primarycolor;
-							}
-						}
+					/* Bootstrap utilities handle layout: list-unstyled, d-flex, gap-3 */
+					/* Link hover color on interaction */
+					li a:hover {
+						color: colors.$primarycolor;
 					}
 				}
 			}
@@ -134,13 +121,12 @@
 		}
 	}
 	.footer-bottom {
+		/* Bootstrap utilities handle: border-top, py-4 */
 		.copyright {
-			border-top: 1px solid colors.$steel__blue;
-			@include mixins.margin-padding(null, 30px 0);
+			/* Layout and spacing handled by Bootstrap */
 			.copyright-text {
 				p {
-					font-size: variables.$font-size-14;
-					color: colors.$white;
+					/* Text color handled by Bootstrap text-white */
 					a {
 						color: variables.$gray-900;
 						font-weight: variables.$font-weight-medium;
@@ -156,38 +142,45 @@
 				}	
 			}
 			.policy-menu {
-			    font-size: variables.$font-size-14;
-			    text-align: variables.$right;
-			    @include mixins.margin-padding(0,0);
-			    @include mixins.respond-below(md) {
-			    	margin-top: 10px;
-	    			text-align: variables.$left;
-			    }
-			    li {
-				    display: variables.$inline__block;
-				    margin-right: 15px;
-				    &:last-child {
-						margin-right: 0;
-					}
-					a {
-					    color: colors.$white;
+			    /* Bootstrap utilities handle layout: list-unstyled, d-flex, gap-3, justify-content-end */
+			    /* Text color and link styling handled by Bootstrap text-white and text-decoration-none */
+			    a {
 					    &:hover, &:focus {
 					    	color: variables.$primary;
 					    }
 					}
+			}
+
+			/* Remove legacy separators for footer-three policy links (handled by gap utility) */
+			&.footer-three {
+				.policy-menu li {
+					margin-right: 0;
+					padding-right: 0;
 					&::after {
-						color: colors.$white;
-					    content: "|";
-					    font-weight: typography.$light;
-					    @include mixins.position(variables.$relative, null, null, null, 10px);
-					}
-					&:last-child::after {
-					    content: "";
+						content: none;
 					}
 				}
 			}
+
+			/* Explicit opt-out when "no-separator" utility class is present */
+			.policy-menu.no-separator li {
+				margin-right: 0;
+				padding-right: 0;
+			}
+			.policy-menu.no-separator li::after {
+				content: none !important;
+			}
 		}		
 	} 
+
+/* Force remove separators for footer-three policy menu (catch-all) */
+.footer.footer-three .policy-menu li {
+	margin-right: 0;
+	padding-right: 0;
+}
+.footer.footer-three .policy-menu li::after {
+	content: none !important;
+}
 	&.inner-footer {
 		position: relative;
 		z-index: 1;

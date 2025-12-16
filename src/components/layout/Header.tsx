@@ -182,29 +182,29 @@ const Header: React.FC = () => {
                       <i className="fas fa-times" />
                     </Link>
                   </div>
-                  <ul className="main-nav">
-                    <li>
-                      <Link href={`/${locale}`}>
+                  <ul className="main-nav d-flex">
+                    <li className="nav-item me-3">
+                      <Link href={`/${locale}`} className="nav-link">
                         {t('nav.home')}
                       </Link>
                     </li>
-                    <li>
-                      <Link href={`/${locale}#about`}>
+                    <li className="nav-item me-3">
+                      <Link href={`/${locale}#about`} className="nav-link">
                         {t('nav.about')}
                       </Link>
                     </li>
-                    <li>
-                      <Link href={`/${locale}#services`}>
+                    <li className="nav-item me-3">
+                      <Link href={`/${locale}#services`} className="nav-link">
                         {t('nav.services')}
                       </Link>
                     </li>
-                    <li>
-                      <Link href={`/${locale}/doctors`}>
+                    <li className="nav-item me-3">
+                      <Link href={`/${locale}/doctors`} className="nav-link">
                         {t('nav.doctors')}
                       </Link>
                     </li>
-                    <li>
-                      <Link href={`/${locale}#contact`}>
+                    <li className="nav-item me-3">
+                      <Link href={`/${locale}#contact`} className="nav-link">
                         {t('nav.contact')}
                       </Link>
                     </li>
@@ -242,23 +242,23 @@ const Header: React.FC = () => {
                     </div>
                   </li>
 
-                  <li className="d-flex gap-2 align-items-center ms-3">
+                  <li className="nav-item me-2">
                     <Link 
                       href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}
-                      className="d-inline-flex align-items-center gap-2"
+                      className="nav-link"
                     >
-                      <i className="feather-globe language-globe-icon" />
-                      {locale === 'en' ? 'العربية' : 'English'}
+                      <i className="feather-globe me-2" />
+                      <span>{locale === 'en' ? 'العربية' : 'English'}</span>
                     </Link>
                   </li>
 
-                  <li className="ms-3">
+                  <li className="nav-item">
                     <Link
                       href={`/${locale}/login`}
-                      className="btn btn-md btn-primary-gradient d-inline-flex align-items-center rounded-pill"
+                      className="btn btn-md btn-primary-gradient d-flex align-items-center rounded-pill"
                     >
-                      <i className="isax isax-lock-1 me-1" />
-                      {t('header.login')}
+                      <i className="isax isax-lock-1 me-2" />
+                      <span>{t('header.login')}</span>
                     </Link>
                   </li>
                   {/* <li>
