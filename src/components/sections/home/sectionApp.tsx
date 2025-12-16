@@ -17,7 +17,7 @@ const SectionApp: React.FC = () => {
                             <div className="row">
                                 <div className="col-lg-6 col-md-12 d-flex">
                                     <div className="app-content d-flex flex-column justify-content-center">
-                                        <div className="app-header aos" data-aos="fade-up">
+                                        <div className="app-header aos" data-reveal>
                                             <h3 className="display-6 text-white">
                                                 Download Anees Health App today!
                                             </h3>
@@ -26,7 +26,7 @@ const SectionApp: React.FC = () => {
                                                 you can typically visit the app store on your device.
                                             </p>
                                         </div>
-                                        <div className="google-imgs aos" data-aos="fade-up">
+                                        <div className="google-imgs aos" data-reveal>
                                             <Link href="#">
                                                 <img src="assets/img/icons/app-store-01.svg" alt="img" />
                                             </Link>
@@ -36,7 +36,7 @@ const SectionApp: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-lg-6 col-md-12 aos" data-aos="fade-up">
+                                <div className="col-lg-6 col-md-12 aos" data-reveal>
                                     <div className="mobile-img">
                                         <img
                                             src="assets/img/mobile-img.png"
@@ -79,18 +79,18 @@ const SectionApp: React.FC = () => {
             <div className="row align-items-end">
               <div className="col-lg-6 col-md-12">
                 <div className="app-content">
-                  <div className="app-header aos" data-aos="fade-up">
+                  <div className="app-header aos" data-reveal>
                     <h5>{t('home.app.working')}</h5>
                     <h2>{t('home.app.title')}</h2>
                   </div>
-                  <div className="app-scan aos" data-aos="fade-up">
+                  <div className="app-scan aos" data-reveal>
                     <p>{t('home.app.scan_text')}</p>
                     <img
                       src="assets/img/scan-img.png"
                       alt="scan-image"
                     />
                   </div>
-                  <div className="google-imgs aos" data-aos="fade-up">
+                  <div className="google-imgs aos" data-reveal>
                     <Link href="#">
                       <img
                         src="assets/img/icons/google-play-icon.svg"
@@ -106,7 +106,7 @@ const SectionApp: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-lg-6 col-md-12 aos" data-aos="fade-up">
+              <div className="col-lg-6 col-md-12 aos" data-reveal>
                 <div className="mobile-img">
                   <img
                     src="assets/img/mobile-img.png"

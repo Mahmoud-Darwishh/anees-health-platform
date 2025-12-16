@@ -50,7 +50,7 @@ const SectionTestimonial: React.FC = () => {
             {/* Testimonial Section */}
             <section className="testimonial-section-one">
                 <div className="container">
-                    <div className="section-header sec-header-one text-center aos" data-aos="fade-up">
+                    <div className="section-header sec-header-one text-center aos" data-reveal>
                         <span className="badge badge-primary">{t('home.testimonials.title')}</span>
                         <h2>{t('home.testimonials.subtitle')}</h2>
                     </div>
@@ -59,7 +59,7 @@ const SectionTestimonial: React.FC = () => {
                     {/* Counter */}
                     <div className="testimonial-counter">
                         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 row-gap-4">
-                            <div className="counter-item text-center aos" data-aos="fade-up">
+                            <div className="counter-item text-center aos" data-reveal>
                                 <h6 className="display-6 main-count">
                                     <CountUp
                                         end={100}
@@ -68,7 +68,7 @@ const SectionTestimonial: React.FC = () => {
                                     />+</h6>
                                 <p>{t('home.testimonials.doctors_available')}</p>
                             </div>
-                            <div className="counter-item text-center aos" data-aos="fade-up" >
+                            <div className="counter-item text-center aos" data-reveal >
                                 <h6 className="display-6 main-count">
                                     <CountUp
                                         end={10}
@@ -77,7 +77,7 @@ const SectionTestimonial: React.FC = () => {
                                     />+</h6>
                                 <p>{t('home.testimonials.specialities')}</p>
                             </div>
-                            <div className="counter-item text-center aos" data-aos="fade-up">
+                            <div className="counter-item text-center aos" data-reveal>
                                 <h6 className="display-6 main-count">
                                     <CountUp
                                         end={30}
@@ -86,7 +86,7 @@ const SectionTestimonial: React.FC = () => {
                                     />+</h6>
                                 <p>{t('home.testimonials.bookings_done')}</p>
                             </div>
-                            <div className="counter-item text-center aos" data-aos="fade-up">
+                            <div className="counter-item text-center aos" data-reveal>
                                 <h6 className="display-6 main-count">
                                     <CountUp
                                         end={20}
@@ -95,7 +95,7 @@ const SectionTestimonial: React.FC = () => {
                                     />+</h6>
                                 <p>{t('home.testimonials.hospitals_clinics')}</p>
                             </div>
-                            <div className="counter-item text-center  aos" data-aos="fade-up">
+                            <div className="counter-item text-center  aos" data-reveal>
                                 <h6 className="display-6 main-count">
                                     <CountUp
                                         end={35}
@@ -111,7 +111,7 @@ const SectionTestimonial: React.FC = () => {
             </section>
             {/* /Testimonial Section */}
 
-            <section className="company-section bg-deer aos" data-aos="fade-up">
+            <section className="company-section bg-deer aos" data-reveal>
                 <div className="container">
                     <div className="section-header sec-header-one text-center">
                         <h6 className="text-light">

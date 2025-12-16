@@ -2,18 +2,23 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 const SectionService: React.FC = () => {
     const t = useTranslations();
+    const locale = useLocale();
+    const isRTL = locale === 'ar';
 
     useEffect(() => {
         const scrollers = document.querySelectorAll(".horizontal-slide");
 
         scrollers.forEach((scroller) => {
             const scrollerInner = scroller.querySelector(".slide-list");
-            if (scrollerInner) {
-                const scrollerContent = Array.from(scrollerInner.children);
+            if (!scrollerInner) return;
+
+            const scrollerContent = Array.from(scrollerInner.children);
+            // Duplicate items twice to guarantee seamless infinite scroll in all locales.
+            for (let i = 0; i < 2; i += 1) {
                 scrollerContent.forEach((item) => {
                     const duplicatedItem = item.cloneNode(true) as Element;
                     duplicatedItem.setAttribute("aria-hidden", "true");
@@ -27,11 +32,12 @@ const SectionService: React.FC = () => {
     return (
         <>
             {/* Services Section */}
-            <section className="services-section aos" data-aos="fade-up">
+            <section className="services-section aos" data-reveal>
                 <div
                     className="horizontal-slide d-flex"
-                    data-direction="right"
-                    data-speed="slow"
+                    data-direction={isRTL ? "left" : "right"}
+                    data-speed="medium"
+                    /*data-speed={isRTL ? "medium" : "medium"}*/
                 >
                     <div className="slide-list d-flex gap-4">
                         <div className="services-slide">

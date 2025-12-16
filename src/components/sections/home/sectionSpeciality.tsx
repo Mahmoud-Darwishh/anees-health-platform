@@ -118,12 +118,12 @@ const SectionSpeciality: React.FC = () => {
                 <div className="container">
                     <div
                         className="section-header sec-header-one text-center aos"
-                        data-aos="fade-up"
+                        data-reveal
                     >
                         <span className="badge badge-primary">{t('home.specialities.title')}</span>
                         <h2>{t('home.specialities.subtitle')}</h2>
                     </div>
-                    <div className="spciality-slider slick-margins slick-arrow-center aos" data-aos="fade-up">
+                    <div className="spciality-slider slick-margins slick-arrow-center aos" data-reveal>
                         <Slider ref={setSlider} {...SpecialitySlider}>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">

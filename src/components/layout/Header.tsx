@@ -1,60 +1,285 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
-export default function Header() {
-  const t = useTranslations('nav');
-  const locale = useLocale();
+const Header: React.FC = () => {
+  const t = useTranslations();
   const router = useRouter();
+  const locale = useLocale();
   const pathname = usePathname();
+  const [searchField, setSearchField] = useState(false);
+  const [homeSearchQuery, setHomeSearchQuery] = useState('');
+  const toggleSearch = () => {
+    setSearchField(!searchField);
+  };
+  const [headerClass, setHeaderClass] = useState(
+    "header header-custom header-fixed inner-header relative"
+  );
+  const directionPath = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (homeSearchQuery.trim()) {
+      router.push(`/${locale}/doctors?search=${encodeURIComponent(homeSearchQuery)}`);
+      setHomeSearchQuery('');
+      setSearchField(false);
+    }
+  };
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const scrollThreshold = 100;
 
-  const switchLanguage = () => {
-    const newLocale = locale === 'en' ? 'ar' : 'en';
-    const path = pathname.replace(`/${locale}`, `/${newLocale}`);
-    router.push(path);
+      if (scrollPosition > scrollThreshold) {
+        setHeaderClass(
+          "header header-custom header-fixed inner-header relative fixed pharmacy-header"
+        );
+      } else {
+        setHeaderClass(
+          "header header-custom header-fixed inner-header relative"
+        );
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+  const onHandleMobileMenu = () => {
+    const root = document.getElementsByTagName("html")[0];
+    root.classList.add("menu-opened");
+  };
+  const onHandleCloseMenu = () => {
+    const root = document.getElementsByTagName("html")[0];
+    root.classList.remove("menu-opened");
   };
 
   return (
-    <header className="header">
-      <div className="container">
-        <div className="header-content">
-          <div className="logo">
-            <Link href={`/${locale}`}>
-              <h1>Anees Health</h1>
-            </Link>
+    <div>
+      <>
+      {/*
+        <div className="header-topbar">
+          <div className="container">
+            <div className="topbar-info">
+              <div className="d-flex align-items-center gap-3 header-info">
+                <p>
+                  <i className="isax isax-message-text5 me-1" />
+                  info@example.com
+                </p>
+                <p>
+                  <i className="isax isax-call5 me-1" />
+                  +1 66589 14556
+                </p>
+              </div>
+              <ul>
+                <li className="header-theme">
+                  <DarkModeToggle />
+                </li>
+                <li className="d-inline-flex align-items-center drop-header">
+                          <img
+                            src="assets/img/flags/france-flag.svg"
+                            className="me-2"
+                            alt="flag"
+                          />
+                          FRA
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="dropdown dropdown-amt">
+                    <Link
+                      href="#"
+                      className="dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      USD
+                    </Link>
+                    <ul className="dropdown-menu p-2 mt-2">
+                      <li>
+                        <Link className="dropdown-item rounded" href="#">
+                          USD
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item rounded" href="#">
+                          YEN
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item rounded" href="#">
+                          EURO
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <li className="social-header">
+                  <div className="social-icon">
+                    <Link href="#">
+                      <i className="fa-brands fa-facebook" />
+                    </Link>
+                    <Link href="#">
+                      <i className="fa-brands fa-x-twitter" />
+                    </Link>
+                    <Link href="#">
+                      <i className="fa-brands fa-instagram" />
+                    </Link>
+                    <Link href="#">
+                      <i className="fa-brands fa-linkedin" />
+                    </Link>
+                    <Link href="#">
+                      <i className="fa-brands fa-pinterest" />
+                    </Link>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
-          
-          <nav className="nav">
-            <ul className="nav-list">
-              <li className={(pathname === `/${locale}` || pathname === `/${locale}/`) ? 'active' : ''}>
-                <Link href={`/${locale}`}>{t('home')}</Link>
-              </li>
-              <li className={pathname === `/${locale}/about` ? 'active' : ''}>
-                <Link href={`/${locale}/about`}>{t('about')}</Link>
-              </li>
-              <li className={pathname === `/${locale}/services` ? 'active' : ''}>
-                <Link href={`/${locale}/services`}>{t('services')}</Link>
-              </li>
-              <li className={pathname === `/${locale}/doctors` ? 'active' : ''}>
-                <Link href={`/${locale}/doctors`}>{t('doctors')}</Link>
-              </li>
-              <li className={pathname === `/${locale}/contact` ? 'active' : ''}>
-                <Link href={`/${locale}/contact`}>{t('contact')}</Link>
-              </li>
-            </ul>
-          </nav>
+        </div>   */}
 
-          <button 
-            onClick={switchLanguage}
-            className="language-switcher"
-            aria-label="Switch Language"
-          >
-            {locale === 'en' ? 'العربية' : 'English'}
-          </button>
-        </div>
-      </div>
-    </header>
+
+        <header className={headerClass}>
+          <div className="container">
+            <nav className="navbar navbar-expand-lg header-nav">
+              <div className="navbar-header">
+                <Link id="mobile_btn" href="#" onClick={onHandleMobileMenu}>
+                  <span className="bar-icon">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                </Link>
+                <Link
+                  href={`/${locale}`}
+                  className="navbar-brand logo"
+                >
+                  <img
+                    src="/assets/img/anees-logo.png"
+                    className="img-fluid"
+                    alt="Logo"
+                  />
+                </Link>
+              </div>
+              <div className="header-menu">
+                <div className="main-menu-wrapper">
+                  <div className="menu-header">
+                    <Link href={`/${locale}`} className="menu-logo">
+                      <img
+                        src="/assets/img/anees-logo.png"
+                        className="img-fluid"
+                        alt="Logo"
+                      />
+                    </Link>
+                    <Link
+                      id="menu_close"
+                      className="menu-close"
+                      href="#"
+                      onClick={onHandleCloseMenu}
+                    >
+                      <i className="fas fa-times" />
+                    </Link>
+                  </div>
+                  <ul className="main-nav">
+                    <li>
+                      <Link href={`/${locale}`}>
+                        {t('nav.home')}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}#about`}>
+                        {t('nav.about')}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}#services`}>
+                        {t('nav.services')}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/doctors`}>
+                        {t('nav.doctors')}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}#contact`}>
+                        {t('nav.contact')}
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+                <ul className="nav header-navbar-rht">
+                  <li className="searchbar">
+                    <Link href="#" onClick={toggleSearch}>
+                      <i className="feather-search" />
+                    </Link>
+                    <div
+                      className={
+                        searchField
+                          ? "togglesearch d-block"
+                          : "togglesearch d-none"
+                      }
+                    >
+                      <form onSubmit={directionPath}>
+                        <div className="input-group">
+                          <input 
+                            type="text" 
+                            className="form-control"
+                            placeholder={t('header.search_placeholder')}
+                            value={homeSearchQuery}
+                            onChange={(e) => setHomeSearchQuery(e.target.value)}
+                          />
+                          <button
+                            type="submit"
+                            className="btn"
+                          >
+                            {t('common.search')}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </li>
+
+                  <li className="d-flex gap-2 align-items-center ms-3">
+                    <Link 
+                      href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}
+                      className="d-inline-flex align-items-center gap-2"
+                    >
+                      <i className="feather-globe language-globe-icon" />
+                      {locale === 'en' ? 'العربية' : 'English'}
+                    </Link>
+                  </li>
+
+                  <li className="ms-3">
+                    <Link
+                      href={`/${locale}/login`}
+                      className="btn btn-md btn-primary-gradient d-inline-flex align-items-center rounded-pill"
+                    >
+                      <i className="isax isax-lock-1 me-1" />
+                      {t('header.login')}
+                    </Link>
+                  </li>
+                  {/* <li>
+                    <Link
+                      href={`/${locale}/register`}
+                      className="btn btn-md btn-dark d-inline-flex align-items-center rounded-pill"
+                    >
+                      <i className="isax isax-user-tick me-1" />
+                      {t('header.register')}
+                    </Link>
+                  </li> */}
+                </ul>
+              </div>
+            </nav>
+          </div>
+        </header>
+      </>
+    </div>
   );
-}
+};
+
+export default Header;
+
+

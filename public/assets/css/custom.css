@@ -58695,10 +58695,13 @@ ul li {
   --_animation-direction: reverse;
 }
 .horizontal-slide[data-direction=left] {
-  --_animation-direction: forwards;
+  --_animation-direction: normal;
 }
 .horizontal-slide[data-speed=fast] {
-  --_animation-duration: 30s;
+  --_animation-duration: 22s;
+}
+.horizontal-slide[data-speed=medium] {
+  --_animation-duration: 45s;
 }
 .horizontal-slide[data-speed=slow] {
   --_animation-duration: 120s;
@@ -58706,7 +58709,11 @@ ul li {
 .horizontal-slide .slide-list {
   width: max-content;
   flex-wrap: nowrap;
-  animation: scroll var(--_animation-duration, 60s) var(--_animation-direction, forwards) linear infinite;
+  animation-name: scroll;
+  animation-duration: var(--_animation-duration, 45s);
+  animation-direction: var(--_animation-direction, normal);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 .horizontal-slide .slide-list:hover {
   animation-play-state: paused;

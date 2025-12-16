@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react'
-import Header from './header'
+import React, { useRef } from 'react'
+import { usePathname } from 'next/navigation'
+import { useLocale } from 'next-intl'
+import Header from '@/components/layout/Header'
 import HomeBanner from './homeBanner'
-import 'aos/dist/aos.css';
-import Footer from './footer';
+import Footer from '@/components/layout/Footer'
+import { useReveal } from '@/hooks/useReveal';
 
 import SectionSpeciality from './sectionSpeciality';
 import SectionDoctor from './sectionDoctor';
@@ -14,33 +16,28 @@ import SectionLogos from './sectionLogos';
 import SectionFaq from './sectionFaq';
 import SectionApp from './sectionApp';
 import SectionArtical from './sectionArtical';
+import { Reveal } from '@/components/common/Reveal';
 
 
 const GeneralHomeOne: React.FC = () => {
-  useEffect(() => {
-    let mounted = true;
-    import('aos').then(({ default: AOS }) => {
-      if (mounted) {
-        AOS.init({ duration: 1000 });
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const pathname = usePathname();
+  const locale = useLocale();
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useReveal(wrapperRef, [pathname, locale]);
 
   return (
-    <div className='main-wrapper'>
+    <div ref={wrapperRef} className='main-wrapper' key={locale}>
       <Header />
       <HomeBanner />
-      <SectionSpeciality />
-      <SectionDoctor />
-      <SectionService />
-      <SectionBook />
-      <SectionLogos />
-      <SectionFaq />
-      <SectionApp />
-      <SectionArtical />
+      <Reveal><SectionSpeciality /></Reveal>
+      <Reveal><SectionDoctor /></Reveal>
+      <Reveal><SectionService /></Reveal>
+      <Reveal><SectionBook /></Reveal>
+      <Reveal><SectionLogos /></Reveal>
+      <Reveal><SectionFaq /></Reveal>
+      <Reveal><SectionApp /></Reveal>
+      <Reveal><SectionArtical /></Reveal>
       <Footer />
     </div>
   )

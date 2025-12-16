@@ -108,11 +108,11 @@ const SectionDoctor: React.FC = () => {
   return (
     <section className="doctor-section">
       <div className="container">
-        <div className="section-header sec-header-one text-center aos" data-aos="fade-up">
+        <div className="section-header sec-header-one text-center aos" data-reveal>
           <span className="badge badge-primary">{t("home.doctors.title")}</span>
           <h2>{t("home.doctors.subtitle")}</h2>
         </div>
-        <div className="doctors-slider slick-margins slick-arrow-center aos" data-aos="fade-up">
+        <div className="doctors-slider slick-margins slick-arrow-center aos" data-reveal>
           <Slider ref={setSlider} key={locale} {...Doctoroptions}>
             {featuredDoctors.map((doc) => (
               <div className="card" key={doc.id}>

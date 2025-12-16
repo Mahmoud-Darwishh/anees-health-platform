@@ -14,14 +14,14 @@ const SectionArtical: React.FC = () => {
                     <div className="container">
                         <div
                             className="section-header sec-header-one text-center aos"
-                            data-aos="fade-up"
+                            data-reveal
                         >
                             <span className="badge badge-primary">{t('home.articles.badge')}</span>
                             <h2>{t('home.articles.title')}</h2>
                         </div>
                         <div className="row g-4">
                             <div className="col-lg-6">
-                                <div className="article-item aos" data-aos="fade-up">
+                                <div className="article-item aos" data-reveal>
                                     <div className="article-img">
                                         <Link href="/blog/blog-details">
                                             <img
@@ -48,7 +48,7 @@ const SectionArtical: React.FC = () => {
                                 </div>
                             </div>
                             <div className="col-lg-6">
-                                <div className="article-item aos" data-aos="fade-up">
+                                <div className="article-item aos" data-reveal>
                                     <div className="article-img">
                                         <Link href="/blog/blog-details">
                                             <img
@@ -76,7 +76,7 @@ const SectionArtical: React.FC = () => {
                             </div>
                             {/*
                             <div className="col-lg-6">
-                                <div className="article-item aos" data-aos="fade-up">
+                                <div className="article-item aos" data-reveal>
                                     <div className="article-img">
                                         <Link href="/blog/blog-details">
                                             <img
@@ -101,7 +101,7 @@ const SectionArtical: React.FC = () => {
                                 </div>
                             </div>
                             <div className="col-lg-6">
-                                <div className="article-item aos" data-aos="fade-up">
+                                <div className="article-item aos" data-reveal>
                                     <div className="article-img">
                                         <Link href="/blog/blog-details">
                                             <img
@@ -131,7 +131,7 @@ const SectionArtical: React.FC = () => {
                                 </div>
                             </div> */}
                         </div> 
-                        <div className="text-center load-item aos" data-aos="fade-up">
+                        <div className="text-center load-item aos" data-reveal>
                             <Link href="blog/blog-grid" className="btn btn-dark">
                                 {t('home.articles.view_all')}
                                 <i className="isax isax-arrow-right-3 ms-2" />
@@ -145,14 +145,14 @@ const SectionArtical: React.FC = () => {
                     <div className="container">
                         <div className="contact-info">
                             <div className="d-lg-flex align-items-center justify-content-between w-100 gap-4">
-                                <div className="mb-4 mb-lg-0 aos" data-aos="fade-up">
+                                <div className="mb-4 mb-lg-0 aos" data-reveal>
                                     <h6 className="display-6 text-white">
                                         Working for Your Better Health.
                                     </h6>
                                 </div>
                                 <div
                                     className="d-sm-flex align-items-center justify-content-lg-end gap-4 aos"
-                                    data-aos="fade-up"
+                                    data-reveal
                                 >
                                     <div className="con-info d-flex align-items-center mb-3 mb-sm-0">
                                         <span className="con-icon">

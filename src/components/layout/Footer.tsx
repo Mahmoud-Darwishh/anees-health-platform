@@ -1,12 +1,11 @@
-import { useTranslations, useLocale } from 'next-intl';
-import Link from 'next/link';
-import Image from 'next/image';
+'use client';
 
-export default function Footer() {
-  const t = useTranslations('footer');
-  const tHeader = useTranslations('header');
+import Link from "next/link";
+import { useLocale, useTranslations } from 'next-intl';
+
+const Home3Footer = () => {
+  const t = useTranslations();
   const locale = useLocale();
-
   return (
     <div>
       {/* Footer */}
@@ -19,39 +18,33 @@ export default function Footer() {
                 {/* Footer Widget */}
                 <div className="footer-widget footer-about">
                   <div className="footer-logo">
-                    <Image 
-                      src="/assets/img/footer-logo.png" 
-                      alt="logo"
-                      width={150}
-                      height={50}
-                      priority
-                    />
+                    <img src="/assets/img/footer-logo.png" alt="logo" />
                   </div>
                   <div className="footer-about-content">
                     <p>
-                      {t('about_text')}
+                      {t('footer.about_text')}
                     </p>
                     <div className="social-icon">
                       <ul>
                         <li>
-                          <a href="https://www.facebook.com/aneeshealthcare/" target="_blank" rel="noopener noreferrer">
+                          <Link href="https://www.facebook.com/aneeshealthcare/">
                             <i className="fa-brands fa-facebook" />
-                          </a>
+                          </Link>
                         </li>
                         <li>
-                          <a href="https://www.tiktok.com/@aneeshealth" target="_blank" rel="noopener noreferrer">
+                          <Link href="https://www.tiktok.com/@aneeshealth">
                             <i className="fa-brands fa-tiktok" />
-                          </a>
+                          </Link>
                         </li>
                         <li>
-                          <a href="https://www.instagram.com/aneeshealth/" target="_blank" rel="noopener noreferrer">
+                          <Link href="https://www.instagram.com/aneeshealth/">
                             <i className="fa-brands fa-instagram" />
-                          </a>
+                          </Link>
                         </li>
                         <li>
-                          <a href="https://www.linkedin.com/company/aneeshealth" target="_blank" rel="noopener noreferrer">
+                          <Link href="https://www.linkedin.com/company/aneeshealth">
                             <i className="fa-brands fa-linkedin" />
-                          </a>
+                          </Link>
                         </li>
                       </ul>
                     </div>
@@ -62,22 +55,22 @@ export default function Footer() {
               <div className="col-lg-3 col-md-6">
                 {/* Footer Widget */}
                 <div className="footer-widget footer-menu">
-                  <h2 className="footer-title">{t('for_patients')}</h2>
+                  <h2 className="footer-title">{t('footer.for_patients')}</h2>
                   <ul>
                     <li>
-                      <span>{t('search_doctors')}</span>
+                      <Link href={`/${locale}/search-doctor`}>{t('footer.search_doctors')}</Link>
                     </li>
                     <li>
-                      <span>{tHeader('login')}</span>
+                      <Link href={`/${locale}/login`}>{t('header.login')}</Link>
                     </li>
                     <li>
-                      <span>{tHeader('register')}</span>
+                      <Link href={`/${locale}/register`}>{t('header.register')}</Link>
                     </li>
                     <li>
-                      <span>{t('booking')}</span>
+                      <Link href={`/${locale}/booking`}>{t('footer.booking')}</Link>
                     </li>
                     <li>
-                      <span>{t('patient_dashboard')}</span>
+                      <Link href={`/${locale}/patient/dashboard`}>{t('footer.patient_dashboard')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -86,22 +79,22 @@ export default function Footer() {
               <div className="col-lg-3 col-md-6">
                 {/* Footer Widget */}
                 <div className="footer-widget footer-menu">
-                  <h2 className="footer-title">{t('for_doctors')}</h2>
+                  <h2 className="footer-title">{t('footer.for_doctors')}</h2>
                   <ul>
                     <li>
-                      <span>{t('appointments')}</span>
+                      <Link href={`/${locale}/doctor/appointments`}>{t('footer.appointments')}</Link>
                     </li>
                     <li>
-                      <span>{t('chat')}</span>
+                      <Link href={`/${locale}/chat`}>{t('footer.chat')}</Link>
                     </li>
                     <li>
-                      <span>{tHeader('login')}</span>
+                      <Link href={`/${locale}/login`}>{t('header.login')}</Link>
                     </li>
                     <li>
-                      <span>{tHeader('register')}</span>
+                      <Link href={`/${locale}/doctor/register`}>{t('header.register')}</Link>
                     </li>
                     <li>
-                      <span>{t('doctor_dashboard')}</span>
+                      <Link href={`/${locale}/doctor/dashboard`}>{t('footer.doctor_dashboard')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -110,9 +103,10 @@ export default function Footer() {
               <div className="col-lg-3 col-md-6">
                 {/* Footer Widget */}
                 <div className="footer-widget footer-contact">
-                  <h2 className="footer-title">{t('contact')}</h2>
+                  <h2 className="footer-title">{t('footer.contact')}</h2>
                   <div className="footer-contact-info">
                     <div className="footer-address">
+                      {" "}
                       <span>
                         <i className="fas fa-map-marker-alt" />
                       </span>
@@ -127,6 +121,7 @@ export default function Footer() {
                       +201055164595
                     </p>
                     <p className="mb-0">
+                      {" "}
                       <i className="fas fa-envelope" />
                       info@aneeshealth.com
                     </p>
@@ -147,7 +142,7 @@ export default function Footer() {
                 <div className="col-md-6 col-lg-6">
                   <div className="copyright-text">
                     <p className="mb-0">
-                      {t('copyright')}
+                      {t('footer.copyright')}
                     </p>
                   </div>
                 </div>
@@ -156,10 +151,10 @@ export default function Footer() {
                   <div className="copyright-menu">
                     <ul className="policy-menu">
                       <li>
-                        <span>{t('terms')}</span>
+                        <Link href={`/${locale}/terms`}>{t('footer.terms')}</Link>
                       </li>
                       <li>
-                        <span>{t('privacy')}</span>
+                        <Link href={`/${locale}/privacy-policy`}>{t('footer.privacy')}</Link>
                       </li>
                     </ul>
                   </div>
@@ -175,4 +170,8 @@ export default function Footer() {
       {/* /Footer */}
     </div>
   );
-}
+};
+
+export default Home3Footer;
+
+

@@ -16,21 +16,21 @@ const SectionBook: React.FC = () => {
                         <div className="col-lg-6">
                             <div className="bookus-img">
                                 <div className="row g-3">
-                                    <div className="col-md-12 aos" data-aos="fade-up">
+                                    <div className="col-md-12 aos" data-reveal>
                                         <img
                                             src="assets/img/book-01.png"
                                             alt="img"
                                             className="img-fluid"
                                         />
                                     </div>
-                                    <div className="col-sm-6 aos" data-aos="fade-up">
+                                    <div className="col-sm-6 aos" data-reveal>
                                         <img
                                             src="assets/img/book-02.png"
                                             alt="img"
                                             className="img-fluid"
                                         />
                                     </div>
-                                    <div className="col-sm-6 aos" data-aos="fade-up">
+                                    <div className="col-sm-6 aos" data-reveal>
                                         <img
                                             src="assets/img/book-03.png"
                                             alt="img"
@@ -43,7 +43,7 @@ const SectionBook: React.FC = () => {
                         <div className="col-lg-6">
                             <div
                                 className="section-header sec-header-one mb-2 aos"
-                                data-aos="fade-up"
+                                data-reveal
                             >
                                 <span className="badge badge-primary">{t('home.booking.title')}</span>
                                 <h2 className="text-white mb-3">
@@ -56,7 +56,7 @@ const SectionBook: React.FC = () => {
                             <p className="text-light mb-4">
                                 {t('home.booking.description')}
                             </p>
-                            <div className="faq-info aos" data-aos="fade-up">
+                            <div className="faq-info aos" data-reveal>
                                 <div className="accordion" id="faq-details">
                                     {/* FAQ Item */}
                                     <div className="accordion-item">

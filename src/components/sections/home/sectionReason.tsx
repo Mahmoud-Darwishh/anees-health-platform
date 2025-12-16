@@ -12,14 +12,14 @@ const SectionReason: React.FC = () => {
                 <div className="container">
                     <div
                         className="section-header sec-header-one text-center aos"
-                        data-aos="fade-up"
+                        data-reveal
                     >
                         <span className="badge badge-primary">{t('home.reasons.badge')}</span>
                         <h2>{t('home.reasons.title')}</h2>
                     </div>
                     <div className="row row-gap-4 justify-content-center">
                         <div className="col-lg-4 col-md-6">
-                            <div className="reason-item aos" data-aos="fade-up">
+                            <div className="reason-item aos" data-reveal>
                                 <h6 className="mb-2">
                                     <i className="isax isax-tag-user5 text-orange me-2" />
                                     {t('home.reasons.followup')}
@@ -30,7 +30,7 @@ const SectionReason: React.FC = () => {
                             </div>
                         </div>
                         <div className="col-lg-4 col-md-6">
-                            <div className="reason-item aos" data-aos="fade-up">
+                            <div className="reason-item aos" data-reveal>
                                 <h6 className="mb-2">
                                     <i className="isax isax-voice-cricle text-purple me-2" />
                                     {t('home.reasons.patient_centered')}
@@ -41,7 +41,7 @@ const SectionReason: React.FC = () => {
                             </div>
                         </div>
                         <div className="col-lg-4 col-md-6">
-                            <div className="reason-item aos" data-aos="fade-up">
+                            <div className="reason-item aos" data-reveal>
                                 <h6 className="mb-2">
                                     <i className="isax isax-wallet-add-15 text-cyan me-2" />
                                     {t('home.reasons.convenient')}
