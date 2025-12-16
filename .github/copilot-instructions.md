@@ -55,6 +55,11 @@ Your goal is to **produce clean, scalable, secure, and accessible code** suitabl
   * Shared design tokens (colors, spacing, typography, motion)
 * Avoid `!important`
 * Prefer scoped, predictable class names
+* Prefrer **Sass @use** over `@import` for styles organization
+* prefer Bootstrap utility classes for layout and spacing where possible
+* Ensure RTL styles are handled correctly via layout and utility classes
+* Do not create custom RTL styles unless absolutely necessary
+* When creating lists of items (e.g., menus, social icons), ensure proper spacing and alignment for both LTR and RTL using utility classes or shared styles
 
 ---
 
