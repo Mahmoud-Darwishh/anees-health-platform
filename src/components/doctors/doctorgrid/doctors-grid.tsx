@@ -91,6 +91,14 @@ const DoctorGrid = () => {
     setCurrentPage(1);
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    // Scroll to top immediately and smoothly using requestAnimationFrame
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  };
+
   // Filter doctors
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doctor) => {
@@ -332,7 +340,7 @@ const DoctorGrid = () => {
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={handlePageChange}
                   tg={tg}
                 />
               )}

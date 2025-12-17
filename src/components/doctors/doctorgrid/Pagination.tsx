@@ -8,6 +8,12 @@ interface PaginationProps {
 }
 
 export const Pagination = ({ currentPage, totalPages, onPageChange, tg }: PaginationProps) => {
+  const handlePageClick = (e: React.MouseEvent<HTMLButtonElement>, page: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onPageChange(page);
+  };
+
   return (
     <div className="col-md-12">
       <nav className="pagination dashboard-pagination mt-4 mb-4" aria-label="Pagination">
@@ -17,7 +23,8 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, tg }: Pagina
             <button
               className="page-link prev"
               disabled={currentPage === 1}
-              onClick={() => onPageChange(currentPage - 1)}
+              onClick={(e) => handlePageClick(e, currentPage - 1)}
+              type="button"
             >
               {tg('pagination.prev')}
             </button>
@@ -28,7 +35,8 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, tg }: Pagina
             <li key={page}>
               <button
                 className={`page-link ${currentPage === page ? 'active' : ''}`}
-                onClick={() => onPageChange(page)}
+                onClick={(e) => handlePageClick(e, page)}
+                type="button"
               >
                 {page}
               </button>
@@ -40,7 +48,8 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, tg }: Pagina
             <button
               className="page-link next"
               disabled={currentPage === totalPages}
-              onClick={() => onPageChange(currentPage + 1)}
+              onClick={(e) => handlePageClick(e, currentPage + 1)}
+              type="button"
             >
               {tg('pagination.next')}
             </button>

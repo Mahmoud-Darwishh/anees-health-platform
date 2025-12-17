@@ -1336,7 +1336,7 @@
     "testimonials": []
   },
   {
-    "id": 19,
+    "id": 27,
     "image": "assets/img/doctor-grid/4.png",
     "rating": 4.8,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
@@ -1579,7 +1579,7 @@
     "testimonials": []
   },
   {
-    "id": 22,
+    "id": 29,
     "image": "assets/img/doctor-grid/27.png",
     "rating": 4.9,
     "speciality": "جراحة العظام",

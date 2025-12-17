@@ -132,7 +132,7 @@ const Home3Footer = () => {
         </div>
         {/* /Footer Top */}
         {/* Footer Bottom */}
-        <div className="footer-bottom py-4">
+        <div className="footer-bottom py-3">
           <div className="container-fluid">
             {/* Copyright */}
             <div className="copyright">
