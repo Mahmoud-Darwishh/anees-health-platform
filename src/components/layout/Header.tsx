@@ -208,6 +208,15 @@ const Header: React.FC = () => {
                         {t('nav.contact')}
                       </Link>
                     </li>
+                    <li className="nav-item me-3 d-lg-none mobile-lang-switcher">
+                      <Link
+                        href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}
+                        className="nav-link d-flex align-items-center"
+                      >
+                        <i className="feather-globe me-2" />
+                        <span>{locale === 'en' ? 'العربية' : 'English'}</span>
+                      </Link>
+                    </li>
                   </ul>
                 </div>
                 <ul className="nav header-navbar-rht">
