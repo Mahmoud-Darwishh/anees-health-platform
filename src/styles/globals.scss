@@ -1,5 +1,7 @@
 ﻿// Load component-specific styles (Sass @use)
 @use './components';
+// Doctor grid legacy styling (service chips, cards, filters)
+@use '../assets/scss/pages/doctor-grid';
 
 // RTL support
 [dir='rtl'] {

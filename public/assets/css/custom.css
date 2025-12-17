@@ -5579,7 +5579,8 @@ a.bg-danger:focus, a.bg-danger:hover, button.bg-danger:focus, button.bg-danger:h
 }
 
 .breadcrumb-bar {
-  background-color: #F9FBFF;
+  background: url(/assets/img/bg/breadcrumb-bg-03.png) no-repeat center center;
+  background-size: cover;
   padding: 108px 0 40px;
   position: relative;
   z-index: 1;

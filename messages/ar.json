@@ -92,6 +92,80 @@
       "orthopedic_surgeon": "جراح عظام",
       "fees_start": "تبدأ الرسوم من"
     },
+    "doctorGrid": {
+      "title": "اعثر على الطبيب المناسب",
+      "subtitle": "ابحث حسب التخصص أو اللغة أو نوع الاستشارة",
+      "breadcrumb": {
+        "home": "الرئيسية",
+        "doctor": "الأطباء",
+        "ourDoctors": "أطباؤنا"
+      },
+      "search": {
+        "namePlaceholder": "ابحث عن طبيب أو تخصص",
+        "locationPlaceholder": "الموقع (اختياري)",
+        "cta": "بحث"
+      },
+      "filters": {
+        "title": "التصفيات",
+        "clear": "إعادة التصفية",
+        "speciality": "التخصص",
+        "channel": "نوع الاستشارة",
+        "gender": "الجنس",
+        "male": "ذكر",
+        "female": "أنثى",
+        "language": "اللغة",
+        "price": "رسوم الاستشارة",
+        "rating": "التقييم",
+        "experience": "الخبرة",
+        "view_more": "عرض المزيد",
+        "view_less": "عرض أقل",
+        "years_plus": "{count}+ سنة",
+        "range": "النطاق",
+        "stars_up": "{count}+ نجوم",
+        "priceAny": "أي رسوم",
+        "priceLow": "حتى 1000 جنيه",
+        "priceMid": "1000 - 2000 جنيه",
+        "priceHigh": "2000 جنيه فأكثر",
+        "ratingAny": "أي تقييم",
+        "ratingFour": "4.0+",
+        "ratingFourFive": "4.5+",
+        "ratingFive": "5.0"
+      },
+      "channels": {
+        "home": "زيارة منزلية",
+        "video": "مكالمة فيديو",
+        "chat": "محادثة"
+      },
+      "sort": {
+        "label": "ترتيب",
+        "relevance": "الأكثر صلة",
+        "priceAsc": "السعر: من الأقل للأعلى",
+        "priceDesc": "السعر: من الأعلى للأقل",
+        "ratingDesc": "التقييم: الأعلى أولاً",
+        "experienceDesc": "الخبرة: الأعلى أولاً"
+      },
+      "results": {
+        "count": "{count} طبيب",
+        "showing": "عرض <c>{current}</c> من {total}+ نتيجة",
+        "noResults": "لم يتم العثور على أطباء يطابقون معاييرك"
+      },
+      "card": {
+        "available": "متاح",
+        "duration": "استشارة عن بُعد",
+        "from": "تبدأ من {price}",
+        "book": "احجز الآن",
+        "clinic_visit": "زيارة عيادة",
+        "verified": "موثق",
+        "starting_from": "تبدأ من",
+        "to": "حتى",
+        "yrs_exp": "سنة خبرة"
+      },
+      "pagination": {
+        "prev": "السابق",
+        "next": "التالي",
+        "page": "صفحة {current} من {total}"
+      }
+    },
     "booking": {
       "title": "لماذا تحجز معنا",
       "subtitle": "نحن ملتزمون بفهم احتياجاتك الفريدة وتقديم الرعاية.",

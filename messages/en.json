@@ -92,6 +92,80 @@
       "orthopedic_surgeon": "Orthopedic Surgeon",
       "fees_start": "Fees Start from"
     },
+    "doctorGrid": {
+      "title": "Find the right doctor",
+      "subtitle": "Search by speciality, language, or consultation type",
+      "breadcrumb": {
+        "home": "Home",
+        "doctor": "Doctors",
+        "ourDoctors": "Our Doctors"
+      },
+      "search": {
+        "namePlaceholder": "Search doctor or speciality",
+        "locationPlaceholder": "Location (optional)",
+        "cta": "Search"
+      },
+      "filters": {
+        "title": "Filters",
+        "clear": "Clear all",
+        "speciality": "Speciality",
+        "channel": "Consultation",
+        "gender": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "language": "Language",
+        "price": "Consultation fee",
+        "rating": "Rating",
+        "experience": "Experience",
+        "view_more": "View more",
+        "view_less": "View less",
+        "years_plus": "{count}+ years",
+        "range": "Range",
+        "stars_up": "{count}+ stars",
+        "priceAny": "Any fee",
+        "priceLow": "Up to EGP 1,000",
+        "priceMid": "EGP 1,000 - 2,000",
+        "priceHigh": "EGP 2,000+",
+        "ratingAny": "Any rating",
+        "ratingFour": "4.0+",
+        "ratingFourFive": "4.5+",
+        "ratingFive": "5.0"
+      },
+      "channels": {
+        "home": "Home Visit",
+        "video": "Video Call",
+        "chat": "Chat"
+      },
+      "sort": {
+        "label": "Sort",
+        "relevance": "Relevance",
+        "priceAsc": "Price: Low to High",
+        "priceDesc": "Price: High to Low",
+        "ratingDesc": "Rating: High to Low",
+        "experienceDesc": "Experience: High to Low"
+      },
+      "results": {
+        "count": "{count} doctors",
+        "showing": "Showing <c>{current}</c> of {total}+ Results",
+        "noResults": "No doctors found matching your criteria"
+      },
+      "card": {
+        "available": "Available",
+        "duration": "Tele-Medicine",
+        "from": "From {price}",
+        "book": "Book now",
+        "clinic_visit": "Clinic Visit",
+        "verified": "Verified",
+        "starting_from": "Starting from",
+        "to": "to",
+        "yrs_exp": "yrs exp"
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {current} of {total}"
+      }
+    },
     "booking": {
       "title": "Why Book With Us",
       "subtitle": "We are committed to understanding your unique needs and delivering care.",

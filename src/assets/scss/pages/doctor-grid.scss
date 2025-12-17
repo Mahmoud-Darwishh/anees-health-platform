@@ -46,8 +46,91 @@
   span {
     color: variables.$gray-900;
     display: inline-block;
-    margin-right: 10px;
   }
+}
+
+/* Refined sorting control – minimal, token-based, RTL-friendly */
+.sort-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: variables.$warning-200; /* soft beige */
+  border: 2px solid variables.$primary; /* thicker primary border by default */
+  border-radius: 8px; /* less curvy */
+  color: variables.$gray-900;
+  padding: 8px 16px;
+  font-size: variables.$font-size-14;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+
+  &:hover,
+  &:focus {
+    border-color: variables.$primary-hover;
+    background-color: variables.$warning-300;
+    color: variables.$gray-900;
+    box-shadow: 0 4px 12px rgba(170, 134, 66, 0.18);
+  }
+
+  &.show {
+    border-color: variables.$primary;
+  }
+
+  /* Ensure internal text spacing is consistent across LTR/RTL */
+  .me-2 {
+    margin-inline-end: 0.5rem !important;
+  }
+
+  /* Caret color and spacing */
+  &.dropdown-toggle::after {
+    border-top-color: variables.$gray-700;
+    border-right-color: transparent;
+    border-left-color: transparent;
+    margin-inline-start: 6px;
+  }
+}
+.view-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid variables.$primary;
+  background: variables.$white;
+  color: variables.$primary;
+  box-shadow: 0 8px 18px rgba(170, 134, 66, 0.28);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover,
+  &:focus {
+    background: variables.$primary;
+    color: variables.$white;
+    border-color: variables.$primary-hover;
+    box-shadow: 0 10px 22px rgba(170, 134, 66, 0.35);
+  }
+
+  i { font-size: 16px; }
+}
+
+/* Dropdown menu visual parity with legacy while using tokens */
+.dropdown-menu {
+  border: 1px solid variables.$gray-transparent;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.dropdown-menu .dropdown-item {
+  font-size: variables.$font-size-14;
+  color: variables.$gray-900;
+}
+.dropdown-menu .dropdown-item:hover {
+  background-color: variables.$light-200;
+  color: variables.$gray-900;
+}
+
+/* Brand text utility for primary color */
+.text-primary-brand {
+  color: variables.$primary !important;
 }
 .text-orange {
   color: variables.$orange;
@@ -353,7 +436,7 @@
   .verified-badge-overlay {
     position: absolute;
     top: 12px;
-    left: 12px;
+    right: 12px;
     z-index: 10;
 
     .badge {
@@ -425,17 +508,17 @@
     .service-chips-container {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
 
       .service-chip {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        padding: 6px 10px;
-        background: variables.$light-200;
-        border-radius: 16px;
-        font-size: 11px;
-        font-weight: 500;
+        padding: 4px 8px;
+        background: variables.$primary-100;
+        border-radius: 14px;
+        font-size: 9px;
+        font-weight: 600;
         color: variables.$gray-700;
         transition: all 0.2s ease;
         cursor: default;
@@ -446,16 +529,13 @@
         }
 
         .chip-label {
-          display: none;
-
-          @include mixins.respond-above(lg) {
-            display: inline;
-          }
+          display: inline;
+          white-space: nowrap;
         }
 
         &:hover {
-          background: variables.$primary-100;
-          color: variables.$primary;
+          background: variables.$primary-200;
+          color: variables.$gray-900;
         }
       }
     }
