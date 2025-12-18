@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 const SectionLogos: React.FC = () => {
@@ -39,13 +38,17 @@ const SectionLogos: React.FC = () => {
                                         minHeight: '120px'
                                     }}
                                 >
-                                    <Image 
+                                    <img 
                                         src={logo.image}
                                         alt={logo.alt || 'partner-logo'}
-                                        width={220}
-                                        height={110}
-                                        sizes="(max-width: 768px) 120px, 180px"
-                                        style={{ height: 'auto', maxHeight: '80px', width: 'auto', objectFit: 'contain' }}
+                                        loading="lazy"
+                                        style={{ 
+                                            height: 'auto', 
+                                            maxHeight: '80px', 
+                                            width: 'auto', 
+                                            maxWidth: '100%',
+                                            objectFit: 'contain' 
+                                        }}
                                     />
                                 </div>
                             </div>

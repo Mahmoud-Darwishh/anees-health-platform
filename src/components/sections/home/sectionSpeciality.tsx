@@ -72,26 +72,18 @@ const SectionSpeciality: React.FC = () => {
         cssEase: 'ease-in-out',
         focusOnSelect: false,
         lazyLoad: 'ondemand' as const,
+        swipe: true,
+        swipeToSlide: true,
+        touchThreshold: 10,
+        touchMove: true,
         responsive: [
             {
-                breakpoint: 640,
+                breakpoint: 1440,
                 settings: {
-                    slidesToShow: 3,
+                    slidesToShow: 8,
                     rtl: isRTL,
-                },
-            },
-            {
-                breakpoint: 768,
-                settings: {
-                    slidesToShow: 4,
-                    rtl: isRTL,
-                },
-            },
-            {
-                breakpoint: 992,
-                settings: {
-                    slidesToShow: 5,
-                    rtl: isRTL,
+                    swipe: true,
+                    touchMove: true,
                 },
             },
             {
@@ -99,13 +91,36 @@ const SectionSpeciality: React.FC = () => {
                 settings: {
                     slidesToShow: 6,
                     rtl: isRTL,
+                    swipe: true,
+                    touchMove: true,
                 },
             },
             {
-                breakpoint: 1440,
+                breakpoint: 992,
                 settings: {
-                    slidesToShow: 8,
+                    slidesToShow: 5,
                     rtl: isRTL,
+                    swipe: true,
+                    touchMove: true,
+                },
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 4,
+                    rtl: isRTL,
+                    swipe: true,
+                    touchMove: true,
+                },
+            },
+            {
+                breakpoint: 640,
+                settings: {
+                    slidesToShow: 3,
+                    rtl: isRTL,
+                    arrows: false,
+                    swipe: true,
+                    touchMove: true,
                 },
             },
         ],

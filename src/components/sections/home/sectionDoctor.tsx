@@ -73,12 +73,27 @@ const SectionDoctor: React.FC = () => {
     speed: 500,
     cssEase: "ease-in-out",
     focusOnSelect: false,
+    swipe: true,
+    swipeToSlide: true,
+    touchThreshold: 10,
+    touchMove: true,
     responsive: [
+      {
+        breakpoint: 1200,
+        settings: {
+          slidesToShow: 4,
+          rtl: isRTL,
+          swipe: true,
+          touchMove: true,
+        },
+      },
       {
         breakpoint: 992,
         settings: {
           slidesToShow: 3,
           rtl: isRTL,
+          swipe: true,
+          touchMove: true,
         },
       },
       {
@@ -86,6 +101,8 @@ const SectionDoctor: React.FC = () => {
         settings: {
           slidesToShow: 2,
           rtl: isRTL,
+          swipe: true,
+          touchMove: true,
         },
       },
       {
@@ -93,13 +110,9 @@ const SectionDoctor: React.FC = () => {
         settings: {
           slidesToShow: 2,
           rtl: isRTL,
-        },
-      },
-      {
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 4,
-          rtl: isRTL,
+          arrows: false,
+          swipe: true,
+          touchMove: true,
         },
       },
     ],
