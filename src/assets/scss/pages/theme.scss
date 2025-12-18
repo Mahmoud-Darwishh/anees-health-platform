@@ -623,7 +623,10 @@
         background: variables.$darkmode-light;
     }
     .header-one .main-menu-wrapper .main-nav li a {
-        color: variables.$darkmode-text;
+        color: #374151;
+    }
+    .header-one .main-menu-wrapper .main-nav li.active a {
+        color: #aa8642 !important;
     }
     .banner-section::after {
         background: url(/src/assets/img/bg/ban-bg.png), variables.$darkmode-light;

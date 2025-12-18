@@ -1,13 +1,17 @@
 
 @use '../utils/variables' as variables;
-// Custom override for nav-list active state (for custom header component)
-.nav-list > li.active > a,
-.nav-list > li.active > a:visited {
-  color: $primary !important;
-}
 @use "../base/colors";
 @use "../base/typography";
 @use "../utils/mixins";
+
+// Custom override for nav-list active state (for custom header component)
+.nav-list > li.active > a,
+.nav-list > li.active > a:visited {
+
+}
+
+
+
 
 .header {
 	.header-nav {
@@ -242,6 +246,7 @@
 						@include mixins.margin-padding(null, 15px 20px !important);
 					}
 
+				&>a {
 					&>i {
 						@include mixins.respond-above(lg) {
 							font-size: typography.$font__size__12;
@@ -538,15 +543,37 @@
 			@include mixins.respond-below(sm) {
 				display: none;
 			}
+			
+			gap: 20px;
+			
+			@include mixins.respond-below(xl) {
+				gap: 16px;
+			}
 
 			li {
-				padding-right: 20px;
+				padding-right: 0;
 				@extend %inline-flex;
 				@extend %align-items-center;
 				@extend %justify-content-center;
 
 				&:last-child {
 					padding-right: 0px;
+				}
+				
+				.nav-link {
+					color: #374151;
+					font-weight: 500;
+					font-size: variables.$font-size-14;
+					transition: all 0.3s ease;
+					white-space: nowrap;
+					
+					&:hover {
+						color: #aa8642;
+					}
+					
+					i {
+						font-size: typography.$font__size__18;
+					}
 				}
 
 				.dropdown-menu {
@@ -1852,29 +1879,27 @@
 			flex-wrap: nowrap;
 			height: auto;
 			min-height: 80px;
-			@include mixins.margin-padding(null, 0 15px);
+			@include mixins.margin-padding(null, 0);
 
 			.navbar-header {
 				width: variables.$full__width;
 				display: flex;
 				align-items: center;
-				justify-content: flex-end;
+				justify-content: space-between;
 				position: relative;
+				padding: 0;
+				margin: 0;
 
 				#mobile_btn {
-					@include mixins.position(variables.$absolute, 50%, null, null, 0);
-					@include mixins.transform(translateY(-50%));
 					margin: 0;
-					left: 0;
-					right: auto;
+					padding: 0;
+					position: relative;
 				}
-			}
-
-			.navbar-brand.logo {
-				margin-left: variables.$auto;
-				margin-right: 0;
-				display: block;
-				text-align: variables.$right;
+				
+				.navbar-brand.logo {
+					margin: 0;
+					padding: 0;
+				}
 			}
 		}
 	}

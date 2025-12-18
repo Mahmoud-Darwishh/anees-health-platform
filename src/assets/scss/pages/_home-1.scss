@@ -73,41 +73,153 @@
             @include mixins.rounded(70px);
             padding: 8px;
             min-width: auto;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            
             @include mixins.respond-below(md) {
                 @include mixins.rounded(10px);
+                padding: 10px;
             }
-            .search-input { 
+            
+            &:hover {
+                box-shadow: 0 6px 20px rgba(170, 134, 66, 0.15);
+            }
+            
+            form {
+                gap: 8px !important;
+                
+                @include mixins.respond-below(md) {
+                    gap: 10px !important;
+                }
+            }
+            
+            .search-input {
+                position: relative;
+                margin: 0;
+                
                 &.search-calendar-line {
-                    width: 21%;
-                    input {
-                        padding-right: 10px;
-                    }
+                    min-width: 200px;
+                    
                     @include mixins.respond-below(xl) {
-                        width: 17%;
+                        min-width: 180px;
                     }
                     @include mixins.respond-below(md) {
                         width: 100%;
+                        min-width: auto;
                     }
-                }
-                i {
-                    color: variables.$gray-900;
-                }
-                & > i {
-                    &.bficon {
-                        left: 8px;
+                    
+                    input {
+                        padding-inline-start: 42px;
+                        padding-inline-end: 16px;
+                    }
+                    
+                    .search-icon {
+                        position: absolute;
+                        inset-inline-start: 14px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        z-index: 10;
+                        pointer-events: none;
+                        font-size: 18px;
+                        transition: color 0.2s ease;
                     }
                 }
                 
+                &.search-map-line,
                 &.search-line {
-                    .form-control {
-                        padding-left: 33px;
+                    min-width: 180px;
+                    
+                    @include mixins.respond-below(xl) {
+                        min-width: 160px;
+                    }
+                    @include mixins.respond-below(md) {
+                        width: 100%;
+                        min-width: auto;
                     }
                 }
+                
+                i:not(.search-icon) {
+                    color: variables.$gray-900;
+                }
+                
+                .form-control, .form-select {
+                    border: 1px solid variables.$gray-200;
+                    @include mixins.rounded(50px);
+                    padding: 12px 20px;
+                    height: 48px;
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    background-color: variables.$white;
+                    
+                    @include mixins.respond-below(md) {
+                        @include mixins.rounded(8px);
+                        height: 46px;
+                        padding: 10px 16px;
+                    }
+                    
+                    &:hover {
+                        border-color: #aa8642;
+                        background-color: variables.$white;
+                    }
+                    
+                    &:focus {
+                        border-color: #aa8642;
+                        background-color: variables.$white;
+                        box-shadow: 0 0 0 3px rgba(170, 134, 66, 0.1);
+                        outline: none;
+                    }
+                    
+                    &::placeholder {
+                        color: variables.$gray-500;
+                        opacity: 1;
+                    }
+                }
+                
+                .form-select {
+                    appearance: none;
+                    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+                    background-repeat: no-repeat;
+                    background-position: right 16px center;
+                    background-size: 14px;
+                    padding-inline-end: 40px;
+                    cursor: pointer;
+                }
             }
+            
             .form-search-btn {
                 padding-top: 0;
+                margin: 0;
+                
                 .btn {
                     margin: 0;
+                    height: 48px;
+                    padding: 12px 24px;
+                    @include mixins.rounded(50px);
+                    font-weight: 600;
+                    font-size: 14px;
+                    white-space: nowrap;
+                    transition: all 0.3s ease;
+                    background: linear-gradient(135deg, #aa8642 0%, #06AED4 100%);
+                    border: none;
+                    
+                    @include mixins.respond-below(md) {
+                        width: 100%;
+                        @include mixins.rounded(8px);
+                        height: 46px;
+                    }
+                    
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 8px 16px rgba(170, 134, 66, 0.25);
+                    }
+                    
+                    &:active {
+                        transform: translateY(0);
+                    }
+                    
+                    i {
+                        font-size: 16px;
+                    }
                 }
             }
         }
@@ -343,6 +455,29 @@
     }
     
 }
+
+// Fix for React Slick arrows positioning
+.speciality-section {
+    .slick-slider {
+        position: relative;
+        overflow: visible;
+        
+        .slick-list {
+            overflow: visible;
+        }
+        
+        .slick-track {
+            display: flex !important;
+        }
+        
+        .slick-arrow {
+            position: static !important;
+            transform: none !important;
+            display: inline-block;
+        }
+    }
+}
+
 .owl-nav.nav-bottom {
     text-align: center;
     margin-top: 40px;

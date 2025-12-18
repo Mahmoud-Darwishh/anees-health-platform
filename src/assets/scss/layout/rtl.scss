@@ -48,7 +48,7 @@
 
     // Main Navigation
     .main-nav {
-      // No directional overrides needed - gap handles spacing automatically
+      // Gap handles spacing automatically for RTL
       
       li {
         // Links styling  
@@ -272,6 +272,38 @@
   }
 
   .form-label { text-align: right; }
+  
+  // ============================================
+  // SEARCH BAR - Home Banner
+  // ============================================
+  
+  .search-box-one {
+    .search-input {
+      &.search-calendar-line {
+        .search-icon {
+          inset-inline-start: auto;
+          inset-inline-end: 14px;
+        }
+        
+        input {
+          padding-inline-start: 16px;
+          padding-inline-end: 42px;
+        }
+      }
+      
+      .form-select {
+        background-position: left 16px center;
+        padding-inline-start: 40px;
+        padding-inline-end: 20px;
+      }
+    }
+    
+    form {
+      .gap-2 {
+        gap: 8px !important;
+      }
+    }
+  }
 
   // ============================================
   // APP SECTION - Automatic RTL (using logical properties in home.scss)

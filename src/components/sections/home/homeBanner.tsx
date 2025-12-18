@@ -35,64 +35,68 @@ const HomeBanner: React.FC = () => {
                         <div className="col-lg-7">
                             <div className="banner-content">
                                 
-                                <h1 className="display-5">
+                                <h1 className="display-5 mb-4">
                                     <span style={{ color: '#aa8642' }}>{t('home.banner.title_highlight')}</span><span>{t('home.banner.title_rest')}</span>
                                 </h1>
                                 <div className="search-box-one">
-                                    <form onSubmit={handleSearch}>
-                                        <div className="search-input search-calendar-line">
-                                            <i className="isax isax-user-search" style={{zIndex:99}}/>
-                                            <div className=" mb-0">
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    placeholder={t('home.banner.search_doctor')}
-                                                    value={doctorQuery}
-                                                    onChange={(e) => setDoctorQuery(e.target.value)}
-                                                />
-                                            </div>
+                                    <form onSubmit={handleSearch} className="d-flex flex-wrap gap-2 align-items-center">
+                                        {/* Doctor Search Input */}
+                                        <div className="search-input search-calendar-line flex-grow-1">
+                                            <i className="isax isax-user-search search-icon" aria-hidden="true" />
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder={t('home.banner.search_doctor')}
+                                                value={doctorQuery}
+                                                onChange={(e) => setDoctorQuery(e.target.value)}
+                                                aria-label={t('home.banner.search_doctor')}
+                                            />
                                         </div>
-                                        <div className="search-input search-map-line">
-                                            <div className=" mb-0">
-                                                <select
-                                                    className="form-control"
-                                                    value={specialty}
-                                                    onChange={(e) => setSpecialty(e.target.value)}
-                                                >
-                                                    <option value="">{t('home.banner.specialty')}</option>
-                                                    <option value="cardiology">{t('home.specialities.cardiology')}</option>
-                                                    <option value="orthopedics">{t('home.specialities.orthopedics')}</option>
-                                                    <option value="gastroenterology">{t('home.specialities.gastroenterology')}</option>
-                                                    <option value="geriatrics">{t('home.specialities.geriatrics')}</option>
-                                                    <option value="psychiatry">{t('home.specialities.psychiatry')}</option>
-                                                    <option value="endocrinology">{t('home.specialities.endocrinology')}</option>
-                                                    <option value="pulmonology">{t('home.specialities.pulmonology')}</option>
-                                                    <option value="nephrology">{t('home.specialities.nephrology')}</option>
-                                                    <option value="neurology">{t('home.specialities.neurology')}</option>
-                                                </select>
-                                            </div>
+                                        
+                                        {/* Specialty Dropdown */}
+                                        <div className="search-input search-map-line flex-grow-1">
+                                            <select
+                                                className="form-control form-select"
+                                                value={specialty}
+                                                onChange={(e) => setSpecialty(e.target.value)}
+                                                aria-label={t('home.banner.specialty')}
+                                            >
+                                                <option value="">{t('home.banner.specialty')}</option>
+                                                <option value="cardiology">{t('home.specialities.cardiology')}</option>
+                                                <option value="orthopedics">{t('home.specialities.orthopedics')}</option>
+                                                <option value="gastroenterology">{t('home.specialities.gastroenterology')}</option>
+                                                <option value="geriatrics">{t('home.specialities.geriatrics')}</option>
+                                                <option value="psychiatry">{t('home.specialities.psychiatry')}</option>
+                                                <option value="endocrinology">{t('home.specialities.endocrinology')}</option>
+                                                <option value="pulmonology">{t('home.specialities.pulmonology')}</option>
+                                                <option value="nephrology">{t('home.specialities.nephrology')}</option>
+                                                <option value="neurology">{t('home.specialities.neurology')}</option>
+                                            </select>
                                         </div>
-                                        <div className="search-input search-line">
-                                            <div className=" mb-0">
-                                                <select
-                                                    className="form-control"
-                                                    value={serviceType}
-                                                    onChange={(e) => setServiceType(e.target.value)}
-                                                >
-                                                    <option value="">{t('home.banner.service_type')}</option>
-                                                    <option value="telemedicine">{t('home.list.telemedicine')}</option>
-                                                    <option value="doctor_visit">{t('home.list.doctor_visit')}</option>
-                                                    <option value="nursing">{t('home.list.nursing')}</option>
-                                                    <option value="physiotherapy">{t('home.list.physiotherapy')}</option>
-                                                    <option value="lab_testing">{t('home.list.lab_testing')}</option>
-                                                    <option value="home_radiology">{t('home.list.home_radiology')}</option>
-                                                </select>
-                                            </div>
+                                        
+                                        {/* Service Type Dropdown */}
+                                        <div className="search-input search-line flex-grow-1">
+                                            <select
+                                                className="form-control form-select"
+                                                value={serviceType}
+                                                onChange={(e) => setServiceType(e.target.value)}
+                                                aria-label={t('home.banner.service_type')}
+                                            >
+                                                <option value="">{t('home.banner.service_type')}</option>
+                                                <option value="telemedicine">{t('home.list.telemedicine')}</option>
+                                                <option value="doctor_visit">{t('home.list.doctor_visit')}</option>
+                                                <option value="nursing">{t('home.list.nursing')}</option>
+                                                <option value="physiotherapy">{t('home.list.physiotherapy')}</option>
+                                                <option value="lab_testing">{t('home.list.lab_testing')}</option>
+                                                <option value="home_radiology">{t('home.list.home_radiology')}</option>
+                                            </select>
                                         </div>
+                                        
+                                        {/* Search Button */}
                                         <div className="form-search-btn">
-                                            <button className="btn btn-primary" type="submit">
-                                                <i className="isax isax-search-normal5 me-2" />
-                                                {t('common.search')}
+                                            <button className="btn btn-primary d-flex align-items-center gap-2" type="submit">
+                                                <i className="isax isax-search-normal5" aria-hidden="true" />
+                                                <span>{t('common.search')}</span>
                                             </button>
                                         </div>
                                     </form>

@@ -19,6 +19,31 @@ const Header: React.FC = () => {
   const [headerClass, setHeaderClass] = useState(
     "header header-custom header-fixed inner-header relative"
   );
+  
+  // Helper function to check if a link is active
+  const isActiveLink = (href: string) => {
+    // Exact match for home page
+    if (href === `/${locale}`) {
+      return pathname === `/${locale}` || pathname === `/${locale}/`;
+    }
+    
+    // For hash links, only highlight when on home page AND hash matches current URL hash
+    if (href.includes('#')) {
+      const baseHref = href.split('#')[0];
+      const hashPart = href.split('#')[1];
+      const isOnBasePage = pathname === baseHref || pathname === `${baseHref}/`;
+      
+      // Don't mark hash links as active - they're anchor links, not separate pages
+      return false;
+    }
+    
+    // For regular routes like /doctors
+    if (href.startsWith(`/${locale}/`)) {
+      return pathname.startsWith(href);
+    }
+    
+    return false;
+  };
   const directionPath = (e: React.FormEvent) => {
     e.preventDefault();
     if (homeSearchQuery.trim()) {
@@ -183,27 +208,27 @@ const Header: React.FC = () => {
                     </Link>
                   </div>
                   <ul className="main-nav d-flex">
-                    <li className="nav-item me-3">
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}`) ? 'active' : ''}`}>
                       <Link href={`/${locale}`} className="nav-link">
                         {t('nav.home')}
                       </Link>
                     </li>
-                    <li className="nav-item me-3">
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}#about`) ? 'active' : ''}`}>
                       <Link href={`/${locale}#about`} className="nav-link">
                         {t('nav.about')}
                       </Link>
                     </li>
-                    <li className="nav-item me-3">
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}#services`) ? 'active' : ''}`}>
                       <Link href={`/${locale}#services`} className="nav-link">
                         {t('nav.services')}
                       </Link>
                     </li>
-                    <li className="nav-item me-3">
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}/doctors`) ? 'active' : ''}`}>
                       <Link href={`/${locale}/doctors`} className="nav-link">
                         {t('nav.doctors')}
                       </Link>
                     </li>
-                    <li className="nav-item me-3">
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}#contact`) ? 'active' : ''}`}>
                       <Link href={`/${locale}#contact`} className="nav-link">
                         {t('nav.contact')}
                       </Link>
