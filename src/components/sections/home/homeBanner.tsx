@@ -45,17 +45,22 @@ const HomeBanner: React.FC = () => {
                                             <i className="isax isax-user-search search-icon" aria-hidden="true" />
                                             <input
                                                 type="text"
+                                                id="doctor-search"
+                                                name="doctor-search"
                                                 className="form-control"
                                                 placeholder={t('home.banner.search_doctor')}
                                                 value={doctorQuery}
                                                 onChange={(e) => setDoctorQuery(e.target.value)}
                                                 aria-label={t('home.banner.search_doctor')}
+                                                autoComplete="off"
                                             />
                                         </div>
                                         
                                         {/* Specialty Dropdown */}
                                         <div className="search-input search-map-line flex-grow-1">
                                             <select
+                                                id="specialty-select"
+                                                name="specialty"
                                                 className="form-control form-select"
                                                 value={specialty}
                                                 onChange={(e) => setSpecialty(e.target.value)}
@@ -77,6 +82,8 @@ const HomeBanner: React.FC = () => {
                                         {/* Service Type Dropdown */}
                                         <div className="search-input search-line flex-grow-1">
                                             <select
+                                                id="service-type-select"
+                                                name="service-type"
                                                 className="form-control form-select"
                                                 value={serviceType}
                                                 onChange={(e) => setServiceType(e.target.value)}

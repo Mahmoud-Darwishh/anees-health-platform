@@ -46,7 +46,7 @@ export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
           {/* Main info */}
           <div className="doctor-info-content p-3">
             <h3 className="doctor-name mb-2">
-              <Link href={`/${locale}/doctors/${doctor.id}`}>{doctor.doctorName}</Link>
+              <Link href="#">{doctor.doctorName}</Link>
             </h3>
             <p className="professional-title text-muted fs-13 mb-2">
               {doctor.professionalTitle || doctor.speciality}
@@ -100,7 +100,7 @@ export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
 
             {/* Book button */}
             <Link
-              href={`/${locale}/booking?doctor=${doctor.id}`}
+              href="#"
               className="btn btn-sm btn-primary w-100 rounded-pill"
             >
               <i className="isax isax-calendar-1 me-2"></i>

@@ -1,17 +1,18 @@
+@charset "UTF-8";
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
 /* Force gold color for active nav item in custom header */
 .nav-list > li.active > a,
 .nav-list > li.active > a:visited {
   color: #aa8642 !important;
 }
-@charset "UTF-8";
+
 /****** UTILS ******/
 /*** default values ***/
 /***** custom values *****/
 /***** Grid Values *****/
 /** Extends **/
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 .upload-wrap, .login-page .login-right, .listing-day, .doctor-action, .doc-times, .css-equal-content, .css-equal-heights {
   display: flex;
   display: -webkit-flex;

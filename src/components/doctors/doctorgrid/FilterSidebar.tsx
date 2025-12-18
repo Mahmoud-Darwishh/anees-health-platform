@@ -64,11 +64,14 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           <div className="position-relative input-icon">
             <input
               type="text"
+              id="doctor-filter-search"
+              name="doctor-name-search"
               className="form-control"
               value={filters.searchText}
               onChange={(e) => onFilterChange({ searchText: e.target.value })}
               placeholder={tg('search.namePlaceholder')}
               aria-label={tg('search.namePlaceholder')}
+              autoComplete="off"
             />
             <span>
               <i className="isax isax-search-normal-1" />

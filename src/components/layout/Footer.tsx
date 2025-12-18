@@ -58,19 +58,19 @@ const Home3Footer = () => {
                   <h2 className="footer-title">{t('footer.for_patients')}</h2>
                   <ul>
                     <li>
-                      <Link href={`/${locale}/search-doctor`}>{t('footer.search_doctors')}</Link>
+                      <Link href={`/${locale}/doctors`}>{t('footer.search_doctors')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/login`}>{t('header.login')}</Link>
+                      <Link href="#">{t('header.login')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/register`}>{t('header.register')}</Link>
+                      <Link href="#">{t('header.register')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/booking`}>{t('footer.booking')}</Link>
+                      <Link href="#">{t('footer.booking')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/patient/dashboard`}>{t('footer.patient_dashboard')}</Link>
+                      <Link href="#">{t('footer.patient_dashboard')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -82,19 +82,19 @@ const Home3Footer = () => {
                   <h2 className="footer-title">{t('footer.for_doctors')}</h2>
                   <ul>
                     <li>
-                      <Link href={`/${locale}/doctor/appointments`}>{t('footer.appointments')}</Link>
+                      <Link href="#">{t('footer.appointments')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/chat`}>{t('footer.chat')}</Link>
+                      <Link href="#">{t('footer.chat')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/login`}>{t('header.login')}</Link>
+                      <Link href="#">{t('header.login')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/doctor/register`}>{t('header.register')}</Link>
+                      <Link href="#">{t('header.register')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/doctor/dashboard`}>{t('footer.doctor_dashboard')}</Link>
+                      <Link href="#">{t('footer.doctor_dashboard')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -149,10 +149,10 @@ const Home3Footer = () => {
                   <div className="copyright-menu">
                     <ul className="policy-menu no-separator list-unstyled d-flex gap-3 justify-content-end mb-0">
                       <li>
-                        <Link href={`/${locale}/terms`} className="text-white text-decoration-none">{t('footer.terms')}</Link>
+                        <Link href="#" className="text-white text-decoration-none">{t('footer.terms')}</Link>
                       </li>
                       <li>
-                        <Link href={`/${locale}/privacy-policy`} className="text-white text-decoration-none">{t('footer.privacy')}</Link>
+                        <Link href="#" className="text-white text-decoration-none">{t('footer.privacy')}</Link>
                       </li>
                     </ul>
                   </div>

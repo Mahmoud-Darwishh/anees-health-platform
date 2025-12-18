@@ -155,7 +155,7 @@ const SectionDoctor: React.FC = () => {
                   <div className="p-3 pt-0">
                     <div className="doctor-info-detail mb-3 pb-3">
                       <h3 className="mb-1">
-                        <Link href={`/${locale}/doctors/${doc.id}`}>{doc.doctorName}</Link>
+                        <Link href="#">{doc.doctorName}</Link>
                       </h3>
                       <div className="d-flex align-items-center">
                         <p className="d-flex align-items-center mb-0 fs-14">
@@ -172,7 +172,7 @@ const SectionDoctor: React.FC = () => {
                         <h3 className="text-orange">{doc.consultationFee}</h3>
                       </div>
                       <Link
-                        href={`/${locale}/booking?doctor=${doc.id}`}
+                        href="#"
                         className="btn btn-md btn-dark d-inline-flex align-items-center rounded-pill text-truncate"
                       >
                         {t("home.doctors.book_now")}

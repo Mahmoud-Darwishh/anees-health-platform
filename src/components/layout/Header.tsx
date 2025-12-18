@@ -259,11 +259,14 @@ const Header: React.FC = () => {
                       <form onSubmit={directionPath}>
                         <div className="input-group">
                           <input 
-                            type="text" 
+                            type="text"
+                            id="header-search"
+                            name="search"
                             className="form-control"
                             placeholder={t('header.search_placeholder')}
                             value={homeSearchQuery}
                             onChange={(e) => setHomeSearchQuery(e.target.value)}
+                            autoComplete="off"
                           />
                           <button
                             type="submit"
@@ -288,7 +291,7 @@ const Header: React.FC = () => {
 
                   <li className="nav-item">
                     <Link
-                      href={`/${locale}/login`}
+                      href="#"
                       className="btn btn-md btn-primary-gradient d-flex align-items-center rounded-pill"
                     >
                       <i className="isax isax-lock-1 me-2" />
