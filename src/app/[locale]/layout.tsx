@@ -5,7 +5,6 @@ import Script from 'next/script';
 import { locales } from '@/i18n/request';
 import '@/styles/globals.scss';
 import '@/styles/legacy.scss';
-import '@/assets/css/rtl.css';
 
 export default async function LocaleLayout({
   children,
