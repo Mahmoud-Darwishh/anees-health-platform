@@ -1,0 +1,259 @@
+import Header from "../../header";
+import Footer from "../../footer";
+import { Link } from "react-router-dom";
+import ImageWithBasePath from "../../../../components/imageWithBasePath";
+import { all_routes } from "../../../../routes/all_routes";
+
+const Policy = (props: any) => {
+  return (
+    <>
+      <Header {...props} />
+      <>
+        <>
+          {/* Breadcrumb */}
+          <div className="breadcrumb-bar">
+            <div className="container">
+              <div className="row align-items-center inner-banner">
+                <div className="col-md-12 col-12 text-center">
+                  <nav aria-label="breadcrumb" className="page-breadcrumb">
+                    <ol className="breadcrumb">
+                      <li className="breadcrumb-item">
+                        <Link to={all_routes.generalHomeOne}>
+                          <i className="isax isax-home-15" />
+                        </Link>
+                      </li>
+                      <li className="breadcrumb-item active">Privacy Policy</li>
+                    </ol>
+                    <h2 className="breadcrumb-title">Privacy Policy</h2>
+                  </nav>
+                </div>
+              </div>
+            </div>
+            <div className="breadcrumb-bg">
+              <ImageWithBasePath
+                src="assets/img/bg/breadcrumb-bg-01.png"
+                alt="img"
+                className="breadcrumb-bg-01"
+              />
+              <ImageWithBasePath
+                src="assets/img/bg/breadcrumb-bg-02.png"
+                alt="img"
+                className="breadcrumb-bg-02"
+              />
+              <ImageWithBasePath
+                src="assets/img/bg/breadcrumb-icon.png"
+                alt="img"
+                className="breadcrumb-bg-03"
+              />
+              <ImageWithBasePath
+                src="assets/img/bg/breadcrumb-icon.png"
+                alt="img"
+                className="breadcrumb-bg-04"
+              />
+            </div>
+          </div>
+          {/* /Breadcrumb */}
+        </>
+
+        {/* Privacy Policy */}
+        <section className="terms-section">
+          <div className="container">
+            <div className="row">
+              <div className="col-md-12">
+                <div className="terms-content pb-0">
+                  <div className="terms-text">
+                    <h6>Introduction</h6>
+                    <p>
+                      At Anees Healthcare Platform, we are committed to protecting your privacy and safeguarding your personal 
+                      health information. This Privacy Policy explains how we collect, use, disclose, and protect your information 
+                      in compliance with Egyptian Data Protection Laws, the Egyptian Constitution (Article 57), and international 
+                      healthcare privacy standards including GDPR principles.
+                    </p>
+                    <p>
+                      As a home healthcare and telemedicine service provider operating in Egypt, we adhere to regulations set forth 
+                      by the Egyptian Ministry of Health and Population (MoHP), the Supreme Council of Universities' medical ethics 
+                      guidelines, and Law No. 151 of 2019 concerning cybersecurity and personal data protection.
+                    </p>
+                    <p className="text-muted small">
+                      <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>1. Information We Collect</h6>
+                    <h6 className="h6 mt-3">1.1 Personal Information</h6>
+                    <ul>
+                      <li>Full name, national ID number (as required by Egyptian MoHP regulations)</li>
+                      <li>Date of birth, gender, contact details (phone, email, address)</li>
+                      <li>Emergency contact information</li>
+                      <li>Payment and billing information</li>
+                    </ul>
+
+                    <h6 className="h6 mt-3">1.2 Medical Information</h6>
+                    <ul>
+                      <li>Medical history, current medications, and allergies</li>
+                      <li>Lab results, diagnostic reports, and imaging records</li>
+                      <li>Treatment plans and physician notes</li>
+                      <li>Home healthcare visit records and vital signs monitoring data</li>
+                      <li>Telemedicine consultation recordings (with explicit consent as per Egyptian law)</li>
+                    </ul>
+
+                    <h6 className="h6 mt-3">1.3 Technical Information</h6>
+                    <ul>
+                      <li>Device information, IP addresses, and browser types</li>
+                      <li>Location data for home healthcare service delivery</li>
+                      <li>Platform usage data and appointment history</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>2. How We Use Your Information</h6>
+                    <p>We use your information for the following purposes, all in compliance with Egyptian healthcare regulations:</p>
+                    <ul>
+                      <li><strong>Healthcare Service Delivery:</strong> Scheduling appointments, coordinating home visits, facilitating telemedicine consultations</li>
+                      <li><strong>Medical Records Management:</strong> Maintaining electronic health records (EHR) as required by MoHP digitalization initiatives</li>
+                      <li><strong>Treatment Coordination:</strong> Sharing information with licensed healthcare providers for continuity of care</li>
+                      <li><strong>Quality Assurance:</strong> Monitoring service quality and healthcare provider performance</li>
+                      <li><strong>Legal Compliance:</strong> Meeting Egyptian Ministry of Health reporting requirements and legal obligations</li>
+                      <li><strong>Emergency Response:</strong> Providing critical information to emergency medical services when necessary</li>
+                      <li><strong>Research & Analytics:</strong> Anonymized data analysis for healthcare improvement (only with explicit consent)</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>3. Data Security & Protection</h6>
+                    <p>We implement comprehensive security measures in accordance with Egyptian cybersecurity laws and international healthcare data standards:</p>
+                    <ul>
+                      <li><strong>Encryption:</strong> End-to-end encryption for all medical data transmission (AES-256 standard)</li>
+                      <li><strong>Access Controls:</strong> Role-based access with multi-factor authentication for healthcare providers</li>
+                      <li><strong>Secure Storage:</strong> Healthcare data stored on Egyptian-based or EU-compliant servers with regular security audits</li>
+                      <li><strong>Staff Training:</strong> All personnel undergo mandatory data protection and medical confidentiality training</li>
+                      <li><strong>Incident Response:</strong> Established protocols for data breach notification as per Egyptian law (within 72 hours)</li>
+                      <li><strong>Audit Trails:</strong> Complete logs of all access to medical records for accountability</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>4. Data Sharing & Disclosure</h6>
+                    <p>We share your information only in specific, legally-compliant circumstances:</p>
+                    <ul>
+                      <li><strong>Healthcare Providers:</strong> Licensed physicians, nurses, and medical professionals on our platform for treatment purposes</li>
+                      <li><strong>Healthcare Facilities:</strong> Hospitals, laboratories, and pharmacies for coordinated care (with consent)</li>
+                      <li><strong>Legal Authorities:</strong> Egyptian Ministry of Health, law enforcement, or courts when legally required</li>
+                      <li><strong>Emergency Services:</strong> Emergency medical responders when patient safety is at risk</li>
+                      <li><strong>Service Providers:</strong> Vetted third-party vendors (payment processors, cloud storage) under strict confidentiality agreements</li>
+                      <li><strong>Insurance Companies:</strong> Only with explicit written consent for claims processing</li>
+                    </ul>
+                    <p className="mt-2"><strong>We NEVER sell your medical information to third parties.</strong></p>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>5. Your Rights Under Egyptian Law</h6>
+                    <p>In accordance with Egyptian Constitution Article 57 and Data Protection Law No. 151/2019, you have the following rights:</p>
+                    <ul>
+                      <li><strong>Right to Access:</strong> Request copies of your medical records at any time</li>
+                      <li><strong>Right to Correction:</strong> Request corrections to inaccurate health information</li>
+                      <li><strong>Right to Deletion:</strong> Request deletion of data (subject to legal retention requirements for medical records - typically 20 years in Egypt)</li>
+                      <li><strong>Right to Data Portability:</strong> Receive your health data in a transferable electronic format</li>
+                      <li><strong>Right to Object:</strong> Object to processing of your data for research or marketing purposes</li>
+                      <li><strong>Right to Withdraw Consent:</strong> Withdraw consent for telemedicine recording or data analysis (prospectively)</li>
+                      <li><strong>Right to File Complaints:</strong> Lodge complaints with the Egyptian Data Protection Authority</li>
+                    </ul>
+                    <p className="mt-2">To exercise any of these rights, contact us at <strong>privacy@aneeshealthcare.eg</strong></p>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>6. Data Retention</h6>
+                    <p>We retain your information in accordance with Egyptian medical record-keeping regulations:</p>
+                    <ul>
+                      <li><strong>Medical Records:</strong> Minimum 20 years from last treatment (as per MoHP guidelines)</li>
+                      <li><strong>Billing Records:</strong> 10 years for tax and accounting compliance</li>
+                      <li><strong>Telemedicine Recordings:</strong> 5 years (if consent was provided)</li>
+                      <li><strong>Marketing Data:</strong> Until consent is withdrawn or account closure</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>7. Children's Privacy</h6>
+                    <p>
+                      For patients under 18 years of age, we require parental or legal guardian consent for all medical services 
+                      and data processing, in accordance with Egyptian civil law. Parents have the right to access, correct, and 
+                      request deletion of their children's health information.
+                    </p>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>8. Telemedicine-Specific Provisions</h6>
+                    <p>For telemedicine consultations conducted via our platform:</p>
+                    <ul>
+                      <li>Video/audio consultations may be recorded ONLY with explicit patient consent</li>
+                      <li>All recordings are encrypted and stored securely with access limited to treating physicians</li>
+                      <li>Patients can request deletion of consultation recordings after treatment completion</li>
+                      <li>Telemedicine services comply with Egyptian MoHP telemedicine guidelines issued in 2020</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>9. International Data Transfers</h6>
+                    <p>
+                      If we transfer data outside Egypt (e.g., for cloud storage or specialized medical consultations), we ensure:
+                    </p>
+                    <ul>
+                      <li>Transfers only to countries with adequate data protection laws (EU, EEA, approved jurisdictions)</li>
+                      <li>Standard Contractual Clauses (SCCs) or equivalent safeguards</li>
+                      <li>Explicit patient consent for international medical second opinions</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>10. Changes to This Privacy Policy</h6>
+                    <p>
+                      We may update this Privacy Policy to reflect changes in Egyptian laws, regulations, or our practices. 
+                      Material changes will be communicated via email and prominently displayed on our platform 30 days before 
+                      taking effect. Continued use of our services after changes constitutes acceptance.
+                    </p>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>11. Contact Information</h6>
+                    <p>For privacy-related questions, concerns, or to exercise your rights:</p>
+                    <ul className="list-unstyled">
+                      <li><strong>Email:</strong> privacy@aneeshealthcare.eg</li>
+                      <li><strong>Phone:</strong> +20 (2) 1234-5678</li>
+                      <li><strong>Address:</strong> Anees Healthcare Platform, [Address], Cairo, Egypt</li>
+                      <li><strong>Data Protection Officer:</strong> dpo@aneeshealthcare.eg</li>
+                    </ul>
+                  </div>
+
+                  <div className="terms-text">
+                    <h6>12. Regulatory Compliance</h6>
+                    <p>This Privacy Policy complies with:</p>
+                    <ul>
+                      <li>Egyptian Constitution (2014) - Article 57 (Privacy Rights)</li>
+                      <li>Egyptian Data Protection Law No. 151 of 2019</li>
+                      <li>Egyptian Ministry of Health and Population Regulations</li>
+                      <li>Egyptian Medical Syndicate Ethical Guidelines</li>
+                      <li>Egyptian Cybersecurity Law No. 175 of 2018</li>
+                      <li>GDPR Principles (where applicable for EU citizens)</li>
+                    </ul>
+                  </div>
+
+                  <div className="alert alert-info mt-4" role="alert">
+                    <i className="fas fa-info-circle me-2"></i>
+                    <strong>Important:</strong> This privacy policy is provided in both English and Arabic. 
+                    In case of any discrepancy, the Arabic version shall prevail in accordance with Egyptian law.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* /Privacy Policy */}
+      </>
+
+      <Footer />
+    </>
+  );
+};
+
+export default Policy;

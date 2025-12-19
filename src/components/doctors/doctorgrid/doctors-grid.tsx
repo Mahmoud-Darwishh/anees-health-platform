@@ -64,11 +64,14 @@ const DoctorGrid = () => {
 
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const doctorsPerPage = 12;
 
   const handleFilterChange = (updates: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
     setCurrentPage(1);
+    // Close mobile filter panel when filter changes
+    setShowMobileFilters(false);
   };
 
   const handleClearAll = () => {
@@ -85,6 +88,8 @@ const DoctorGrid = () => {
     });
     setCurrentPage(1);
     setSortOrder('none');
+    // Close mobile filter panel when clearing all
+    setShowMobileFilters(false);
   };
 
   const handleSearch = () => {
@@ -227,8 +232,8 @@ const DoctorGrid = () => {
       <div className="content mt-5">
         <div className="container">
           <div className="row">
-            {/* Sidebar Filters */}
-            <div className="col-xl-3">
+            {/* Sidebar Filters - Desktop */}
+            <div className="col-xl-3 d-none d-xl-block">
               <FilterSidebar
                 filters={filters}
                 onFilterChange={handleFilterChange}
@@ -242,8 +247,46 @@ const DoctorGrid = () => {
               />
             </div>
 
+            {/* Mobile Filters Offcanvas */}
+            <div
+              className="offcanvas offcanvas-start"
+              tabIndex={-1}
+              id="mobileFiltersOffcanvas"
+              aria-labelledby="mobileFiltersLabel"
+              style={{
+                visibility: showMobileFilters ? 'visible' : 'hidden',
+                transform: showMobileFilters ? 'translateX(0)' : 'translateX(-100%)',
+                transition: 'transform 0.3s ease-in-out, visibility 0.3s ease-in-out',
+              }}
+            >
+              <div className="offcanvas-header">
+                <h5 className="offcanvas-title" id="mobileFiltersLabel">
+                  {tg('filters.title')}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowMobileFilters(false)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="offcanvas-body p-0">
+                <FilterSidebar
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onClearAll={handleClearAll}
+                  specialities={specialities}
+                  channels={channels}
+                  languages={languages}
+                  minPrice={minPrice}
+                  maxPrice={maxPrice}
+                  tg={tg}
+                />
+              </div>
+            </div>
+
             {/* Results Section */}
-            <div className="col-xl-9">
+            <div className="col-xl-9 col-12">
               <div className="row align-items-center mb-4">
                 <div className="col-md-6 col-12">
                   <div className="mb-3 mb-md-0">
@@ -258,6 +301,17 @@ const DoctorGrid = () => {
                 </div>
                 <div className="col-md-6 col-12">
                   <div className="d-flex align-items-center justify-content-md-end justify-content-start gap-2">
+                    {/* Mobile Filter Button */}
+                    <button
+                      className="btn btn-outline-primary d-xl-none"
+                      type="button"
+                      onClick={() => setShowMobileFilters(true)}
+                      aria-label="Open filters"
+                    >
+                      <i className="fas fa-sliders-h me-2"></i>
+                      {tg('filters.title')}
+                    </button>
+
                     <div className="dropdown">
                       <button
                         className="btn sort-control dropdown-toggle d-flex align-items-center gap-2"

@@ -1,0 +1,344 @@
+import { Link } from "react-router-dom";
+import Header from "../../header";
+import Footer from "../../footer";
+import ImageWithBasePath from "../../../../components/imageWithBasePath";
+import { all_routes } from "../../../../routes/all_routes";
+
+const Terms = (props: any) => {
+  return (
+    <>
+      <Header {...props} />
+      <>
+        {/* Breadcrumb */}
+        <div className="breadcrumb-bar">
+          <div className="container">
+            <div className="row align-items-center inner-banner">
+              <div className="col-md-12 col-12 text-center">
+                <nav aria-label="breadcrumb" className="page-breadcrumb">
+                  <ol className="breadcrumb">
+                    <li className="breadcrumb-item">
+                      <Link to={all_routes.generalHomeOne}>
+                        <i className="isax isax-home-15" />
+                      </Link>
+                    </li>
+                    <li className="breadcrumb-item active">Terms &amp; Conditions</li>
+                  </ol>
+                  <h2 className="breadcrumb-title">Terms &amp; Conditions</h2>
+                </nav>
+              </div>
+            </div>
+          </div>
+          <div className="breadcrumb-bg">
+            
+            <ImageWithBasePath
+              src="assets/img/bg/breadcrumb-icon.png"
+              alt="img"
+              className="breadcrumb-bg-03"
+            />
+            <ImageWithBasePath
+              src="assets/img/bg/breadcrumb-icon.png"
+              alt="img"
+              className="breadcrumb-bg-04"
+            />
+          </div>
+        </div>
+        {/* /Breadcrumb */}
+        {/* Terms */}
+        <div className="terms-section">
+          <div className="container">
+            <div className="row">
+              <div className="col-md-12">
+                <div className="terms-text">
+                  <h6>Introduction</h6>
+                  <p>
+                    Welcome to <strong>Anees Healthcare Platform</strong>, your trusted partner for professional home healthcare 
+                    and telemedicine services in Egypt. By accessing or using our platform, you agree to be bound by these Terms 
+                    and Conditions. Please read them carefully before using our services.
+                  </p>
+                  <p>
+                    These Terms govern your use of our platform and services, including home nursing care, physician home visits, 
+                    physiotherapy, laboratory services, telemedicine consultations, and medical equipment rental. Our services 
+                    comply with Egyptian Ministry of Health and Population (MoHP) regulations, Law No. 198 of 2020 on Healthcare 
+                    Services, and the Egyptian Medical Syndicate ethical guidelines.
+                  </p>
+                  <p className="text-muted small">
+                    <strong>Effective Date:</strong> {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>1. Definitions</h6>
+                  <ul>
+                    <li><strong>"Platform"</strong> refers to the Anees Healthcare website, mobile applications, and all related services</li>
+                    <li><strong>"Services"</strong> include home healthcare visits, telemedicine consultations, medical equipment rental, and related offerings</li>
+                    <li><strong>"Healthcare Providers"</strong> are licensed physicians, nurses, physiotherapists, and medical professionals on our platform</li>
+                    <li><strong>"Patient" or "User"</strong> refers to individuals using our platform to access healthcare services</li>
+                    <li><strong>"Home Healthcare"</strong> encompasses medical services delivered at the patient's residence</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>2. Eligibility & Account Registration</h6>
+                  <ul>
+                    <li><strong>Age Requirement:</strong> You must be at least 18 years old to create an account. For minors, a parent or legal guardian must create and manage the account</li>
+                    <li><strong>Identity Verification:</strong> You must provide accurate personal information, including national ID or passport number, as required by Egyptian healthcare regulations</li>
+                    <li><strong>Account Security:</strong> You are responsible for maintaining the confidentiality of your login credentials</li>
+                    <li><strong>Prohibited Use:</strong> You may not use another person's account or provide false information</li>
+                    <li><strong>Account Termination:</strong> We reserve the right to suspend or terminate accounts that violate these Terms</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>3. Services Provided</h6>
+                  <h6 className="h6 mt-3">3.1 Home Healthcare Services</h6>
+                  <p>We facilitate the following home-based medical services:</p>
+                  <ul>
+                    <li>Home nursing care (wound care, medication administration, catheter management)</li>
+                    <li>Physician home visits for medical consultations and examinations</li>
+                    <li>Physiotherapy and rehabilitation services</li>
+                    <li>Home laboratory services (blood tests, sample collection)</li>
+                    <li>Medical equipment rental (oxygen concentrators, hospital beds, wheelchairs)</li>
+                    <li>Elderly care and chronic disease management</li>
+                    <li>Post-operative care and recovery support</li>
+                  </ul>
+
+                  <h6 className="h6 mt-3">3.2 Telemedicine Services</h6>
+                  <p>Subject to MoHP telemedicine guidelines (2020):</p>
+                  <ul>
+                    <li>Video consultations with licensed physicians</li>
+                    <li>Remote diagnosis for non-emergency conditions</li>
+                    <li>Prescription renewals and medication management</li>
+                    <li>Medical advice and second opinions</li>
+                    <li>Mental health counseling (by licensed psychiatrists/psychologists)</li>
+                  </ul>
+                  <p className="text-danger"><strong>Note:</strong> Telemedicine is NOT suitable for medical emergencies. Call 123 (Egyptian Emergency Services) for urgent care.</p>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>4. Booking & Appointments</h6>
+                  <ul>
+                    <li><strong>Appointment Scheduling:</strong> Appointments are subject to healthcare provider availability and confirmed in real-time</li>
+                    <li><strong>Appointment Times:</strong> Home visits are scheduled within agreed time windows (2-4 hours). Late arrivals beyond 30 minutes qualify for service credits</li>
+                    <li><strong>Patient Responsibilities:</strong> Ensure accurate address details, availability at scheduled time, and safe access for healthcare providers</li>
+                    <li><strong>Cancellation Policy:</strong> 
+                      <ul className="mt-2">
+                        <li>Free cancellation up to 6 hours before scheduled appointment</li>
+                        <li>50% cancellation fee for cancellations 2-6 hours before appointment</li>
+                        <li>Full charge for cancellations less than 2 hours before appointment or no-shows</li>
+                      </ul>
+                    </li>
+                    <li><strong>Rescheduling:</strong> Appointments can be rescheduled once without penalty (subject to availability)</li>
+                    <li><strong>Emergency Bookings:</strong> Same-day urgent visits may incur additional fees (20-30% surcharge)</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>5. Payment & Fees</h6>
+                  <ul>
+                    <li><strong>Accepted Payment Methods:</strong> Credit/debit cards (Visa, Mastercard), mobile wallets (Vodafone Cash, Fawry), cash on delivery, and insurance (select providers)</li>
+                    <li><strong>Pricing:</strong> All fees are displayed in Egyptian Pounds (EGP) before booking confirmation. Prices include VAT (14%) as per Egyptian tax law</li>
+                    <li><strong>Service Fees:</strong> Platform service fee (10-15%) is included in displayed prices</li>
+                    <li><strong>Additional Charges:</strong> May apply for:
+                      <ul className="mt-2">
+                        <li>After-hours services (10pm-7am): 25% surcharge</li>
+                        <li>Weekend/holiday services: 15% surcharge</li>
+                        <li>Remote areas outside Cairo/Giza/Alexandria: Transportation fees</li>
+                        <li>Medical supplies and medications (billed separately at cost + 10%)</li>
+                      </ul>
+                    </li>
+                    <li><strong>Insurance Claims:</strong> We assist with insurance documentation, but patients are responsible for pre-authorization and claim submissions</li>
+                    <li><strong>Refund Policy:</strong> Full refunds for canceled services by providers. No refunds for completed services unless severe quality issues are verified</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>6. Healthcare Provider Qualifications</h6>
+                  <p>All healthcare providers on our platform are:</p>
+                  <ul>
+                    <li>Licensed by the Egyptian Medical Syndicate, Nursing Syndicate, or relevant professional bodies</li>
+                    <li>Verified through background checks and credential verification</li>
+                    <li>Insured for professional liability (minimum EGP 1,000,000 coverage)</li>
+                    <li>Required to maintain continuing medical education (CME) credits</li>
+                    <li>Subject to patient reviews and quality monitoring</li>
+                  </ul>
+                  <p className="mt-2"><strong>Provider Independence:</strong> Healthcare providers are independent contractors, not employees of Anees Healthcare Platform.</p>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>7. Medical Disclaimer & Limitations</h6>
+                  <ul>
+                    <li><strong>Platform Role:</strong> Anees is a technology platform connecting patients with healthcare providers. We do NOT provide medical advice or treatment directly</li>
+                    <li><strong>No Guarantees:</strong> We do not guarantee specific medical outcomes or diagnoses. Healthcare providers are solely responsible for their clinical decisions</li>
+                    <li><strong>Emergency Situations:</strong> Our services are NOT for medical emergencies. For life-threatening conditions, call 123 or visit the nearest emergency room</li>
+                    <li><strong>Telemedicine Limitations:</strong> Some conditions require in-person examination. Healthcare providers may refuse telemedicine consultations when physical examination is necessary</li>
+                    <li><strong>Prescription Validity:</strong> E-prescriptions issued via telemedicine are valid for 30 days and comply with Egyptian Pharmacists Syndicate regulations</li>
+                    <li><strong>Laboratory Results:</strong> Lab results are for informational purposes and should be interpreted by qualified physicians</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>8. Liability & Indemnification</h6>
+                  <ul>
+                    <li><strong>Provider Liability:</strong> Healthcare providers are solely responsible for medical malpractice, negligence, or errors in treatment</li>
+                    <li><strong>Platform Liability:</strong> Anees is liable only for technical platform failures preventing service delivery (limited to service fee refund)</li>
+                    <li><strong>Maximum Liability:</strong> Our total liability is limited to the amount paid for the specific service in question</li>
+                    <li><strong>Patient Indemnification:</strong> Patients agree to indemnify Anees against claims arising from:
+                      <ul className="mt-2">
+                        <li>Providing false or misleading health information</li>
+                        <li>Non-compliance with medical advice</li>
+                        <li>Misuse of platform or services</li>
+                        <li>Damage to healthcare provider equipment or property</li>
+                      </ul>
+                    </li>
+                    <li><strong>Force Majeure:</strong> We are not liable for service interruptions due to natural disasters, government restrictions, or events beyond our control</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>9. Patient Rights & Responsibilities</h6>
+                  <h6 className="h6 mt-3">9.1 Patient Rights</h6>
+                  <ul>
+                    <li>Receive safe, competent, and respectful healthcare services</li>
+                    <li>Access your medical records within 72 hours of request</li>
+                    <li>Receive treatment without discrimination based on gender, religion, nationality, or disability</li>
+                    <li>Informed consent before any medical procedure</li>
+                    <li>Privacy and confidentiality of medical information</li>
+                    <li>File complaints about service quality or provider conduct</li>
+                    <li>Second medical opinions from different providers</li>
+                  </ul>
+
+                  <h6 className="h6 mt-3">9.2 Patient Responsibilities</h6>
+                  <ul>
+                    <li>Provide accurate medical history and current medications</li>
+                    <li>Inform providers of allergies and adverse reactions</li>
+                    <li>Follow prescribed treatment plans and medical advice</li>
+                    <li>Respect healthcare providers and maintain appropriate conduct</li>
+                    <li>Ensure payment for services rendered</li>
+                    <li>Maintain a safe environment for home healthcare visits</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>10. Intellectual Property</h6>
+                  <ul>
+                    <li>All platform content, logos, trademarks, and software are owned by Anees Healthcare or licensed to us</li>
+                    <li>You may not reproduce, distribute, or create derivative works without written permission</li>
+                    <li>Patient reviews and feedback become our property upon submission</li>
+                    <li>Medical records remain the property of patients, with platform having limited access for service delivery</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>11. Data Privacy & Security</h6>
+                  <p>
+                    Your privacy is governed by our <Link to="/pages/privacy-policy" className="text-primary">Privacy Policy</Link>, 
+                    which complies with Egyptian Data Protection Law No. 151/2019 and healthcare privacy regulations. Key points:
+                  </p>
+                  <ul>
+                    <li>Medical data is encrypted and stored securely</li>
+                    <li>Information is shared only with treating healthcare providers and authorized parties</li>
+                    <li>You have rights to access, correct, and request deletion of your data (subject to legal retention requirements)</li>
+                    <li>We never sell your medical information to third parties</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>12. Complaints & Dispute Resolution</h6>
+                  <ul>
+                    <li><strong>Filing Complaints:</strong> Submit complaints via email to complaints@aneeshealthcare.eg or through the platform within 14 days of service</li>
+                    <li><strong>Resolution Process:</strong> We investigate complaints within 7 business days and provide written responses</li>
+                    <li><strong>Medical Disputes:</strong> Disputes regarding medical care may be escalated to the Egyptian Medical Syndicate Ethics Committee</li>
+                    <li><strong>Arbitration:</strong> Unresolved disputes shall be settled through arbitration in Cairo, Egypt, under Egyptian Arbitration Law No. 27/1994</li>
+                    <li><strong>Governing Law:</strong> These Terms are governed by the laws of the Arab Republic of Egypt</li>
+                    <li><strong>Jurisdiction:</strong> Egyptian courts in Cairo have exclusive jurisdiction for legal disputes</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>13. Prohibited Conduct</h6>
+                  <p>You may NOT:</p>
+                  <ul>
+                    <li>Use the platform for illegal purposes or fraudulent activities</li>
+                    <li>Harass, threaten, or abuse healthcare providers or platform staff</li>
+                    <li>Share account credentials or impersonate others</li>
+                    <li>Submit false reviews or ratings</li>
+                    <li>Attempt to hack, disrupt, or compromise platform security</li>
+                    <li>Use services to obtain controlled substances without legitimate medical need</li>
+                    <li>Resell or commercially exploit platform services</li>
+                  </ul>
+                  <p className="mt-2 text-danger"><strong>Violation of these terms may result in account suspension, service termination, and legal action.</strong></p>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>14. Modifications to Terms</h6>
+                  <p>
+                    We reserve the right to modify these Terms at any time to reflect legal changes, service updates, or operational 
+                    improvements. Material changes will be communicated via email and platform notifications 30 days before taking effect. 
+                    Continued use of services after changes constitutes acceptance.
+                  </p>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>15. Service Availability</h6>
+                  <ul>
+                    <li><strong>Geographic Coverage:</strong> Currently serving Cairo, Giza, Alexandria, and select cities (expanding coverage continuously)</li>
+                    <li><strong>Operating Hours:</strong> Platform available 24/7; home services available 7am-10pm (emergency services available 24/7 in select areas)</li>
+                    <li><strong>Service Interruptions:</strong> We strive for 99.9% uptime but cannot guarantee uninterrupted service</li>
+                    <li><strong>Platform Updates:</strong> Periodic maintenance may temporarily affect availability (scheduled during off-peak hours)</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text terms-list">
+                  <h6>16. Contact Information</h6>
+                  <p>For questions, support, or concerns regarding these Terms:</p>
+                  <ul className="list-unstyled">
+                    <li><strong>Customer Support:</strong> support@aneeshealth.com | +20 (2) 1055164595</li>
+                    <li><strong>Medical Queries:</strong> medical@aneeshealthcare.eg</li>
+                    <li><strong>Legal Department:</strong> legal@aneeshealthcare.eg</li>
+                    <li><strong>Complaints:</strong> complaints@aneeshealthcare.eg</li>
+                    <li><strong>Address:</strong> Anees Healthcare Platform, [Office Address], Cairo, Egypt</li>
+                    <li><strong>Business Hours:</strong> Sunday-Thursday, 9am-5pm (GMT+2)</li>
+                  </ul>
+                </div>
+
+                <div className="terms-text">
+                  <h6>17. Regulatory Compliance</h6>
+                  <p>These Terms comply with:</p>
+                  <ul>
+                    <li>Egyptian Healthcare Services Law No. 198 of 2020</li>
+                    <li>Egyptian Medical Syndicate Regulations (Law No. 415/1954)</li>
+                    <li>Egyptian Nursing Syndicate Law No. 6/1997</li>
+                    <li>Ministry of Health and Population Telemedicine Guidelines (2020)</li>
+                    <li>Egyptian Data Protection Law No. 151/2019</li>
+                    <li>Egyptian Consumer Protection Law No. 181/2018</li>
+                    <li>Egyptian E-Commerce Law No. 15/2004</li>
+                  </ul>
+                </div>
+
+                <div className="alert alert-warning mt-4" role="alert">
+                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  <strong>Important Notice:</strong> By clicking "I Agree" or using our services, you acknowledge that you have read, 
+                  understood, and agree to be bound by these Terms & Conditions. These Terms are available in both English and Arabic. 
+                  In case of discrepancy, the Arabic version shall prevail under Egyptian law.
+                </div>
+
+                <div className="text-center mt-4">
+                  <p className="text-muted small">
+                    <strong>Document Version:</strong> 1.0 | <strong>Last Updated:</strong> {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* /Terms */}
+      </>
+
+
+
+      <Footer />
+    </>
+  );
+};
+
+export default Terms;
