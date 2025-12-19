@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -24,10 +24,10 @@ const DoctorGrid = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   useReveal(wrapperRef, [locale]);
 
-  const doctors: Doctor[] =
-    locale === 'ar'
-      ? (doctorsDataAr as Doctor[])
-      : (doctorsDataEn as Doctor[]);
+  const doctors: Doctor[] = useMemo(
+    () => (locale === 'ar' ? (doctorsDataAr as Doctor[]) : (doctorsDataEn as Doctor[])),
+    [locale]
+  );
 
   // Calculate min and max prices from doctors with fallback values
   const prices = doctors
@@ -67,14 +67,25 @@ const DoctorGrid = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const doctorsPerPage = 12;
 
-  const handleFilterChange = (updates: Partial<FilterState>) => {
+  const deferredSearchText = useDeferredValue(filters.searchText);
+  const deferredLocationText = useDeferredValue(filters.locationText);
+
+  const normalizedSearch = useMemo(
+    () => deferredSearchText.trim().toLowerCase(),
+    [deferredSearchText]
+  );
+  const normalizedLocation = useMemo(
+    () => deferredLocationText.trim().toLowerCase(),
+    [deferredLocationText]
+  );
+
+  const handleFilterChange = useCallback((updates: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
     setCurrentPage(1);
-    // Close mobile filter panel when filter changes
     setShowMobileFilters(false);
-  };
+  }, []);
 
-  const handleClearAll = () => {
+  const handleClearAll = useCallback(() => {
     setFilters({
       selectedSpecialities: [],
       selectedChannels: [],
@@ -88,44 +99,36 @@ const DoctorGrid = () => {
     });
     setCurrentPage(1);
     setSortOrder('none');
-    // Close mobile filter panel when clearing all
     setShowMobileFilters(false);
-  };
+  }, [maxPrice, minPrice]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = useCallback((newPage: number) => {
     setCurrentPage(newPage);
-    // Scroll to top immediately and smoothly using requestAnimationFrame
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-  };
+  }, []);
 
   // Filter doctors
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doctor) => {
       // Search text filter
       if (
-        filters.searchText &&
-        !doctor.doctorName
-          .toLowerCase()
-          .includes(filters.searchText.toLowerCase()) &&
-        !doctor.speciality
-          .toLowerCase()
-          .includes(filters.searchText.toLowerCase())
+        normalizedSearch &&
+        !doctor.doctorName.toLowerCase().includes(normalizedSearch) &&
+        !doctor.speciality.toLowerCase().includes(normalizedSearch)
       ) {
         return false;
       }
 
       // Location filter
       if (
-        filters.locationText &&
-        !doctor.location
-          .toLowerCase()
-          .includes(filters.locationText.toLowerCase())
+        normalizedLocation &&
+        !doctor.location.toLowerCase().includes(normalizedLocation)
       ) {
         return false;
       }
@@ -186,7 +189,7 @@ const DoctorGrid = () => {
 
       return true;
     });
-  }, [doctors, filters]);
+  }, [doctors, filters, normalizedLocation, normalizedSearch]);
 
   // Sort doctors
   const filteredAndSorted = useMemo(() => {

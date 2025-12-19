@@ -1,8 +1,8 @@
 [
   {
     "id": 1,
-    "image": "assets/img/doctor-grid/10.png",
-    "rating": 5.0,
+    "image": "assets/img/doctor-grid-optimized/10.webp",
+    "rating": 5,
     "speciality": "الطب النفسي العصبي",
     "specialityColorClass": "active-bar-info",
     "specialityTextClass": "text-info",
@@ -98,7 +98,7 @@
   },
   {
     "id": 3,
-    "image": "assets/img/doctor-grid/3.png",
+    "image": "assets/img/doctor-grid-optimized/3.webp",
     "rating": 4.7,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-teal",
@@ -188,7 +188,7 @@
   },
   {
     "id": 4,
-    "image": "assets/img/doctor-grid/14.png",
+    "image": "assets/img/doctor-grid-optimized/14.webp",
     "rating": 4.9,
     "speciality": "طب المسنين",
     "specialityColorClass": "active-bar-info",
@@ -268,7 +268,7 @@
   },
   {
     "id": 5,
-    "image": "assets/img/doctor-grid/13.png",
+    "image": "assets/img/doctor-grid-optimized/13.webp",
     "rating": 4.5,
     "speciality": "طب المسنين",
     "specialityColorClass": "active-bar-teal",
@@ -349,7 +349,7 @@
   },
   {
     "id": 19,
-    "image": "assets/img/doctor-grid/2.png",
+    "image": "assets/img/doctor-grid-optimized/2.webp",
     "rating": 4.8,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
     "specialityColorClass": "active-bar-success",
@@ -439,7 +439,7 @@
   },
   {
     "id": 22,
-    "image": "assets/img/doctor-grid/12.png",
+    "image": "assets/img/doctor-grid-optimized/12.webp",
     "rating": 4.9,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-warning",
@@ -519,7 +519,7 @@
   },
   {
     "id": 2,
-    "image": "assets/img/doctor-grid/11.png",
+    "image": "assets/img/doctor-grid-optimized/11.webp",
     "rating": 4.8,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-info",
@@ -600,7 +600,7 @@
   },
   {
     "id": 6,
-    "image": "assets/img/doctor-grid/30.png",
+    "image": "assets/img/doctor-grid-optimized/30.webp",
     "rating": 4.9,
     "speciality": "طب الأطفال وحديثي الولادة",
     "specialityColorClass": "active-bar-info",
@@ -690,7 +690,7 @@
   },
   {
     "id": 23,
-    "image": "assets/img/doctor-grid/15.png",
+    "image": "assets/img/doctor-grid-optimized/15.webp",
     "rating": 4.9,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-warning",
@@ -770,7 +770,7 @@
   },
   {
     "id": 24,
-    "image": "assets/img/doctor-grid/16.png",
+    "image": "assets/img/doctor-grid-optimized/16.webp",
     "rating": 4.9,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-warning",
@@ -852,7 +852,7 @@
   },
   {
     "id": 25,
-    "image": "assets/img/doctor-grid/17.png",
+    "image": "assets/img/doctor-grid-optimized/17.webp",
     "rating": 4.9,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-warning",
@@ -932,7 +932,7 @@
   },
   {
     "id": 7,
-    "image": "assets/img/doctor-grid/21.png",
+    "image": "assets/img/doctor-grid-optimized/21.webp",
     "rating": 4.6,
     "speciality": "الجلدية والتجميل والليزر",
     "specialityColorClass": "active-bar-pink",
@@ -1022,8 +1022,8 @@
   },
   {
     "id": 28,
-    "image": "assets/img/doctor-grid/28.png",
-    "rating": 5.0,
+    "image": "assets/img/doctor-grid-optimized/28.webp",
+    "rating": 5,
     "speciality": "أمراض الكلى",
     "specialityColorClass": "active-bar-blue",
     "specialityTextClass": "text-blue",
@@ -1038,9 +1038,18 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "أنثى",
-    "channels": ["زيارة منزلية", "فيديو", "محادثة"],
-    "languages": ["العربية", "الإنجليزية"],
-    "clinics": ["عيادة أنيس الصحية"],
+    "channels": [
+      "زيارة منزلية",
+      "فيديو",
+      "محادثة"
+    ],
+    "languages": [
+      "العربية",
+      "الإنجليزية"
+    ],
+    "clinics": [
+      "عيادة أنيس الصحية"
+    ],
     "experienceYears": 4,
     "bio": "أخصائية أمراض الكلى المكرسة مع خبرة سريرية قوية في إدارة أمراض الكلى والعناية بالغسيل الكلوي والفشل الكلوي الحاد والحالات الكلوية المزمنة. معروفة بنهجها المتمركز حول المريض والممارسة المبنية على الأدلة والالتزام بتحسين صحة الكلى.",
     "certifications": [
@@ -1068,7 +1077,12 @@
     "successRate": "92%",
     "avgWaitTime": "16 دقيقة",
     "totalPatients": "900+",
-    "areaCoverage": ["6 أكتوبر", "الزايد", "الدقي", "المهندسين"],
+    "areaCoverage": [
+      "6 أكتوبر",
+      "الزايد",
+      "الدقي",
+      "المهندسين"
+    ],
     "clinicDetails": [
       {
         "name": "عيادة أنيس الصحية",
@@ -1095,7 +1109,7 @@
   },
   {
     "id": 16,
-    "image": "assets/img/doctor-grid/22.png",
+    "image": "assets/img/doctor-grid-optimized/22.webp",
     "rating": 4.7,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
     "specialityColorClass": "active-bar-pink",
@@ -1175,7 +1189,7 @@
   },
   {
     "id": 17,
-    "image": "assets/img/doctor-grid/23.png",
+    "image": "assets/img/doctor-grid-optimized/23.webp",
     "rating": 4.4,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
     "specialityColorClass": "active-bar-danger",
@@ -1256,7 +1270,7 @@
   },
   {
     "id": 18,
-    "image": "assets/img/doctor-grid/24.png",
+    "image": "assets/img/doctor-grid-optimized/24.webp",
     "rating": 4.8,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
     "specialityColorClass": "active-bar-info",
@@ -1337,7 +1351,7 @@
   },
   {
     "id": 27,
-    "image": "assets/img/doctor-grid/4.png",
+    "image": "assets/img/doctor-grid-optimized/4.webp",
     "rating": 4.8,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
     "specialityColorClass": "active-bar-success",
@@ -1417,7 +1431,7 @@
   },
   {
     "id": 20,
-    "image": "assets/img/doctor-grid/25.png",
+    "image": "assets/img/doctor-grid-optimized/25.webp",
     "rating": 4.9,
     "speciality": "جراحة الأوعية الدموية",
     "specialityColorClass": "active-bar-warning",
@@ -1499,7 +1513,7 @@
   },
   {
     "id": 21,
-    "image": "assets/img/doctor-grid/26.png",
+    "image": "assets/img/doctor-grid-optimized/26.webp",
     "rating": 4.9,
     "speciality": "العلاج الطبيعي وإعادة التأهيل",
     "specialityColorClass": "active-bar-warning",
@@ -1580,7 +1594,7 @@
   },
   {
     "id": 29,
-    "image": "assets/img/doctor-grid/27.png",
+    "image": "assets/img/doctor-grid-optimized/27.webp",
     "rating": 4.9,
     "speciality": "جراحة العظام",
     "specialityColorClass": "active-bar-warning",
@@ -1661,7 +1675,7 @@
   },
   {
     "id": 26,
-    "image": "assets/img/doctor-grid/19.png",
+    "image": "assets/img/doctor-grid-optimized/19.webp",
     "rating": 4.9,
     "speciality": "طب المسنين",
     "specialityColorClass": "active-bar-warning",

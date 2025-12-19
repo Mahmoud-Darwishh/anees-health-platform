@@ -1,8 +1,8 @@
 [
   {
     "id": 1,
-    "image": "assets/img/doctor-grid/10.png",
-    "rating": 5.0,
+    "image": "assets/img/doctor-grid-optimized/10.webp",
+    "rating": 5,
     "speciality": "Neuropsychiatry",
     "specialityColorClass": "active-bar-info",
     "specialityTextClass": "text-info",
@@ -17,16 +17,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 8,
     "bio": "Experienced Neuropsychiatry Consultant with 8+ years of specialized experience in treating neurological and psychiatric disorders. Dedicated to providing compassionate, evidence-based care to patients with mental health challenges and neurological conditions.",
-    "certifications": ["Board Certified in Psychiatry", "Neuropsychiatry Specialist", "International Medical License"],
+    "certifications": [
+      "Board Certified in Psychiatry",
+      "Neuropsychiatry Specialist",
+      "International Medical License"
+    ],
     "education": [
-      {"degree": "MD in Psychiatry", "university": "Cairo University", "year": "2012"},
-      {"degree": "Fellowship in Neuropsychiatry", "university": "Ain Shams University", "year": "2015"},
-      {"degree": "Board Certification", "university": "Egyptian Medical Syndicate", "year": "2016"}
+      {
+        "degree": "MD in Psychiatry",
+        "university": "Cairo University",
+        "year": "2012"
+      },
+      {
+        "degree": "Fellowship in Neuropsychiatry",
+        "university": "Ain Shams University",
+        "year": "2015"
+      },
+      {
+        "degree": "Board Certification",
+        "university": "Egyptian Medical Syndicate",
+        "year": "2016"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 500",
@@ -36,7 +61,13 @@
     "successRate": "96%",
     "avgWaitTime": "15 min",
     "totalPatients": "1,800+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Heliopolis", "Maadi", "Downtown Cairo"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Heliopolis",
+      "Maadi",
+      "Downtown Cairo"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -48,14 +79,26 @@
       }
     ],
     "testimonials": [
-      {"name": "Ahmed Hassan", "rating": 5, "text": "Dr. Farwiez is an excellent doctor. Very professional and caring. Helped me through a difficult time."},
-      {"name": "Fatima Ali", "rating": 5, "text": "Highly recommended! The doctor took time to explain everything clearly."},
-      {"name": "Omar Mahmoud", "rating": 4.5, "text": "Great experience. Very knowledgeable and patient-focused."}
+      {
+        "name": "Ahmed Hassan",
+        "rating": 5,
+        "text": "Dr. Farwiez is an excellent doctor. Very professional and caring. Helped me through a difficult time."
+      },
+      {
+        "name": "Fatima Ali",
+        "rating": 5,
+        "text": "Highly recommended! The doctor took time to explain everything clearly."
+      },
+      {
+        "name": "Omar Mahmoud",
+        "rating": 4.5,
+        "text": "Great experience. Very knowledgeable and patient-focused."
+      }
     ]
   },
   {
     "id": 3,
-    "image": "assets/img/doctor-grid/3.png",
+    "image": "assets/img/doctor-grid-optimized/3.webp",
     "rating": 4.7,
     "speciality": "Orthopedic Surgery",
     "specialityColorClass": "active-bar-teal",
@@ -71,16 +114,42 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic","Zoher Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic",
+      "Zoher Clinic"
+    ],
     "experienceYears": 6,
     "bio": "Skilled Orthopedic Surgeon specializing in joint replacement, sports injuries, and trauma care. Committed to using the latest surgical techniques and rehabilitation protocols to help patients regain mobility and quality of life.",
-    "certifications": ["Board Certified Orthopedic Surgeon", "Joint Replacement Specialist", "Sports Medicine Certificate"],
+    "certifications": [
+      "Board Certified Orthopedic Surgeon",
+      "Joint Replacement Specialist",
+      "Sports Medicine Certificate"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2013"},
-      {"degree": "Master's in Orthopedic Surgery", "university": "Ain Shams University", "year": "2017"},
-      {"degree": "Fellowship in Joint Replacement", "university": "Cairo University Hospitals", "year": "2019"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2013"
+      },
+      {
+        "degree": "Master's in Orthopedic Surgery",
+        "university": "Ain Shams University",
+        "year": "2017"
+      },
+      {
+        "degree": "Fellowship in Joint Replacement",
+        "university": "Cairo University Hospitals",
+        "year": "2019"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1500",
@@ -90,7 +159,13 @@
     "successRate": "94%",
     "avgWaitTime": "20 min",
     "totalPatients": "1,200+",
-    "areaCoverage": ["Heliopolis", "Nasr City", "Maadi", "New Cairo", "Fifth Settlement"],
+    "areaCoverage": [
+      "Heliopolis",
+      "Nasr City",
+      "Maadi",
+      "New Cairo",
+      "Fifth Settlement"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -113,7 +188,7 @@
   },
   {
     "id": 4,
-    "image": "assets/img/doctor-grid/14.png",
+    "image": "assets/img/doctor-grid-optimized/14.webp",
     "rating": 4.9,
     "speciality": "Geriatric Medicine",
     "specialityColorClass": "active-bar-info",
@@ -129,16 +204,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 12,
     "bio": "Compassionate Geriatric Medicine Specialist with over 12 years of experience in elderly care. Expertise in managing chronic conditions, dementia care, and promoting healthy aging through comprehensive geriatric assessments.",
-    "certifications": ["Board Certified in Geriatric Medicine", "Palliative Care Specialist", "Elderly Care Expert"],
+    "certifications": [
+      "Board Certified in Geriatric Medicine",
+      "Palliative Care Specialist",
+      "Elderly Care Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Cairo University", "year": "2007"},
-      {"degree": "Master's in Geriatric Medicine", "university": "Ain Shams University", "year": "2012"},
-      {"degree": "Diploma in Palliative Care", "university": "Royal College of Physicians", "year": "2015"}
+      {
+        "degree": "MBBS",
+        "university": "Cairo University",
+        "year": "2007"
+      },
+      {
+        "degree": "Master's in Geriatric Medicine",
+        "university": "Ain Shams University",
+        "year": "2012"
+      },
+      {
+        "degree": "Diploma in Palliative Care",
+        "university": "Royal College of Physicians",
+        "year": "2015"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1200",
@@ -148,7 +247,13 @@
     "successRate": "97%",
     "avgWaitTime": "12 min",
     "totalPatients": "2,400+",
-    "areaCoverage": ["Nasr City", "Maadi", "Heliopolis", "New Cairo", "Zamalek"],
+    "areaCoverage": [
+      "Nasr City",
+      "Maadi",
+      "Heliopolis",
+      "New Cairo",
+      "Zamalek"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -163,7 +268,7 @@
   },
   {
     "id": 5,
-    "image": "assets/img/doctor-grid/13.png",
+    "image": "assets/img/doctor-grid-optimized/13.webp",
     "rating": 4.5,
     "speciality": "Geriatric Medicine",
     "specialityColorClass": "active-bar-teal",
@@ -179,16 +284,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Female",
-    "channels": ["Home","chat","video"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat",
+      "video"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 4,
     "bio": "Dedicated Geriatric Medicine Consultant focused on improving the quality of life for elderly patients. Specializes in fall prevention, medication management, and cognitive health assessment for seniors.",
-    "certifications": ["Geriatric Medicine Board Certification", "Cognitive Health Specialist", "Elderly Nutrition Expert"],
+    "certifications": [
+      "Geriatric Medicine Board Certification",
+      "Cognitive Health Specialist",
+      "Elderly Nutrition Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2016"},
-      {"degree": "Postgraduate Diploma in Geriatrics", "university": "Cairo University", "year": "2019"},
-      {"degree": "Fellowship in Elderly Care", "university": "Kasr El Aini Hospital", "year": "2021"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2016"
+      },
+      {
+        "degree": "Postgraduate Diploma in Geriatrics",
+        "university": "Cairo University",
+        "year": "2019"
+      },
+      {
+        "degree": "Fellowship in Elderly Care",
+        "university": "Kasr El Aini Hospital",
+        "year": "2021"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1500",
@@ -198,7 +328,13 @@
     "successRate": "93%",
     "avgWaitTime": "18 min",
     "totalPatients": "850+",
-    "areaCoverage": ["New Cairo", "Fifth Settlement", "Nasr City", "Heliopolis", "Rehab City"],
+    "areaCoverage": [
+      "New Cairo",
+      "Fifth Settlement",
+      "Nasr City",
+      "Heliopolis",
+      "Rehab City"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -213,7 +349,7 @@
   },
   {
     "id": 19,
-    "image": "assets/img/doctor-grid/2.png",
+    "image": "assets/img/doctor-grid-optimized/2.webp",
     "rating": 4.8,
     "speciality": "Physical Therapy & Rehabilitation",
     "specialityColorClass": "active-bar-success",
@@ -229,16 +365,42 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic","Dar Tabib Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic",
+      "Dar Tabib Clinic"
+    ],
     "experienceYears": 3,
     "bio": "Dedicated Physical Therapist with expertise in post-surgical rehabilitation, sports injury recovery, and chronic pain management. Uses evidence-based techniques to help patients restore function and improve mobility.",
-    "certifications": ["Licensed Physical Therapist", "Sports Rehabilitation Specialist", "Manual Therapy Certified"],
+    "certifications": [
+      "Licensed Physical Therapist",
+      "Sports Rehabilitation Specialist",
+      "Manual Therapy Certified"
+    ],
     "education": [
-      {"degree": "Bachelor of Physical Therapy", "university": "Cairo University", "year": "2017"},
-      {"degree": "Postgraduate Diploma in Sports Rehabilitation", "university": "Ain Shams University", "year": "2020"},
-      {"degree": "Manual Therapy Certification", "university": "International Academy", "year": "2021"}
+      {
+        "degree": "Bachelor of Physical Therapy",
+        "university": "Cairo University",
+        "year": "2017"
+      },
+      {
+        "degree": "Postgraduate Diploma in Sports Rehabilitation",
+        "university": "Ain Shams University",
+        "year": "2020"
+      },
+      {
+        "degree": "Manual Therapy Certification",
+        "university": "International Academy",
+        "year": "2021"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 800",
@@ -248,7 +410,13 @@
     "successRate": "95%",
     "avgWaitTime": "10 min",
     "totalPatients": "700+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Fifth Settlement", "Heliopolis", "Maadi"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Fifth Settlement",
+      "Heliopolis",
+      "Maadi"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -271,7 +439,7 @@
   },
   {
     "id": 22,
-    "image": "assets/img/doctor-grid/12.png",
+    "image": "assets/img/doctor-grid-optimized/12.webp",
     "rating": 4.9,
     "speciality": "Orthopedic Surgery",
     "specialityColorClass": "active-bar-warning",
@@ -287,16 +455,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 9,
     "bio": "Expert Orthopedic Surgeon with 9 years of experience in complex bone and joint surgeries. Specializes in arthroscopic procedures, fracture management, and sports medicine with a focus on minimally invasive techniques.",
-    "certifications": ["Board Certified Orthopedic Surgeon", "Arthroscopy Specialist", "Trauma Surgery Expert"],
+    "certifications": [
+      "Board Certified Orthopedic Surgeon",
+      "Arthroscopy Specialist",
+      "Trauma Surgery Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Cairo University", "year": "2010"},
-      {"degree": "Master's in Orthopedic Surgery", "university": "Alexandria University", "year": "2014"},
-      {"degree": "Fellowship in Arthroscopic Surgery", "university": "European Society of Sports Traumatology", "year": "2016"}
+      {
+        "degree": "MBBS",
+        "university": "Cairo University",
+        "year": "2010"
+      },
+      {
+        "degree": "Master's in Orthopedic Surgery",
+        "university": "Alexandria University",
+        "year": "2014"
+      },
+      {
+        "degree": "Fellowship in Arthroscopic Surgery",
+        "university": "European Society of Sports Traumatology",
+        "year": "2016"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1800",
@@ -306,7 +498,13 @@
     "successRate": "96%",
     "avgWaitTime": "18 min",
     "totalPatients": "1,600+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Maadi", "Heliopolis", "Zamalek"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Maadi",
+      "Heliopolis",
+      "Zamalek"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -321,7 +519,7 @@
   },
   {
     "id": 2,
-    "image": "assets/img/doctor-grid/11.png",
+    "image": "assets/img/doctor-grid-optimized/11.webp",
     "rating": 4.8,
     "speciality": "Internal Medicine (Gastroenterology)",
     "specialityColorClass": "active-bar-info",
@@ -337,16 +535,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 7,
     "bio": "Experienced Internal Medicine and Gastroenterology Specialist with expertise in diagnosing and treating digestive disorders. Dedicated to providing comprehensive care for liver diseases, inflammatory bowel disease, and gastrointestinal conditions.",
-    "certifications": ["Board Certified in Internal Medicine", "Gastroenterology Specialist", "Hepatology Expert"],
+    "certifications": [
+      "Board Certified in Internal Medicine",
+      "Gastroenterology Specialist",
+      "Hepatology Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Ain Shams University", "year": "2012"},
-      {"degree": "Master's in Internal Medicine", "university": "Cairo University", "year": "2016"},
-      {"degree": "Fellowship in Gastroenterology", "university": "Kasr El Aini Hospital", "year": "2018"}
+      {
+        "degree": "MBBS",
+        "university": "Ain Shams University",
+        "year": "2012"
+      },
+      {
+        "degree": "Master's in Internal Medicine",
+        "university": "Cairo University",
+        "year": "2016"
+      },
+      {
+        "degree": "Fellowship in Gastroenterology",
+        "university": "Kasr El Aini Hospital",
+        "year": "2018"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1500",
@@ -356,7 +579,13 @@
     "successRate": "95%",
     "avgWaitTime": "16 min",
     "totalPatients": "1,400+",
-    "areaCoverage": ["Nasr City", "Heliopolis", "New Cairo", "Maadi", "Downtown Cairo"],
+    "areaCoverage": [
+      "Nasr City",
+      "Heliopolis",
+      "New Cairo",
+      "Maadi",
+      "Downtown Cairo"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -371,7 +600,7 @@
   },
   {
     "id": 6,
-    "image": "assets/img/doctor-grid/30.png",
+    "image": "assets/img/doctor-grid-optimized/30.webp",
     "rating": 4.9,
     "speciality": "Cardiology",
     "specialityColorClass": "active-bar-info",
@@ -387,16 +616,42 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Female",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic","Zoher Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic",
+      "Zoher Clinic"
+    ],
     "experienceYears": 11,
     "bio": "Highly experienced Cardiology Consultant specializing in preventive cardiology, heart failure management, and cardiovascular disease. Committed to delivering patient-centered care with advanced diagnostic and treatment approaches.",
-    "certifications": ["Board Certified Cardiologist", "Interventional Cardiology Specialist", "Echocardiography Expert"],
+    "certifications": [
+      "Board Certified Cardiologist",
+      "Interventional Cardiology Specialist",
+      "Echocardiography Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Cairo University", "year": "2008"},
-      {"degree": "Master's in Cardiology", "university": "Ain Shams University", "year": "2012"},
-      {"degree": "Fellowship in Interventional Cardiology", "university": "National Heart Institute", "year": "2014"}
+      {
+        "degree": "MBBS",
+        "university": "Cairo University",
+        "year": "2008"
+      },
+      {
+        "degree": "Master's in Cardiology",
+        "university": "Ain Shams University",
+        "year": "2012"
+      },
+      {
+        "degree": "Fellowship in Interventional Cardiology",
+        "university": "National Heart Institute",
+        "year": "2014"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 2000",
@@ -406,7 +661,13 @@
     "successRate": "98%",
     "avgWaitTime": "14 min",
     "totalPatients": "2,200+",
-    "areaCoverage": ["Heliopolis", "Nasr City", "Maadi", "New Cairo", "Zamalek"],
+    "areaCoverage": [
+      "Heliopolis",
+      "Nasr City",
+      "Maadi",
+      "New Cairo",
+      "Zamalek"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -429,7 +690,7 @@
   },
   {
     "id": 23,
-    "image": "assets/img/doctor-grid/15.png",
+    "image": "assets/img/doctor-grid-optimized/15.webp",
     "rating": 4.9,
     "speciality": "Orthopedic Surgery",
     "specialityColorClass": "active-bar-warning",
@@ -445,16 +706,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 5,
     "bio": "Dedicated Orthopedic Surgeon with focus on pediatric orthopedics and spinal surgery. Provides comprehensive treatment for bone deformities, scoliosis, and musculoskeletal injuries with a patient-first approach.",
-    "certifications": ["Board Certified Orthopedic Surgeon", "Pediatric Orthopedics Specialist", "Spinal Surgery Certified"],
+    "certifications": [
+      "Board Certified Orthopedic Surgeon",
+      "Pediatric Orthopedics Specialist",
+      "Spinal Surgery Certified"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2014"},
-      {"degree": "Master's in Orthopedic Surgery", "university": "Cairo University", "year": "2018"},
-      {"degree": "Fellowship in Pediatric Orthopedics", "university": "Children's Hospital Cairo", "year": "2020"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2014"
+      },
+      {
+        "degree": "Master's in Orthopedic Surgery",
+        "university": "Cairo University",
+        "year": "2018"
+      },
+      {
+        "degree": "Fellowship in Pediatric Orthopedics",
+        "university": "Children's Hospital Cairo",
+        "year": "2020"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1400",
@@ -464,7 +749,13 @@
     "successRate": "93%",
     "avgWaitTime": "20 min",
     "totalPatients": "950+",
-    "areaCoverage": ["New Cairo", "Fifth Settlement", "Nasr City", "Heliopolis", "Rehab City"],
+    "areaCoverage": [
+      "New Cairo",
+      "Fifth Settlement",
+      "Nasr City",
+      "Heliopolis",
+      "Rehab City"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -479,7 +770,7 @@
   },
   {
     "id": 24,
-    "image": "assets/img/doctor-grid/16.png",
+    "image": "assets/img/doctor-grid-optimized/16.webp",
     "rating": 4.9,
     "speciality": "Geriatric Medicine",
     "specialityColorClass": "active-bar-warning",
@@ -495,16 +786,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 14,
     "bio": "Senior Geriatric Medicine Specialist with 14 years of experience providing holistic care to elderly patients. Expertise in managing multiple chronic conditions, cognitive disorders, and end-of-life care with dignity and compassion.",
-    "certifications": ["Board Certified in Geriatric Medicine", "Advanced Dementia Care Specialist", "Palliative Medicine Expert"],
+    "certifications": [
+      "Board Certified in Geriatric Medicine",
+      "Advanced Dementia Care Specialist",
+      "Palliative Medicine Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Cairo University", "year": "2005"},
-      {"degree": "Master's in Geriatric Medicine", "university": "Ain Shams University", "year": "2010"},
-      {"degree": "Fellowship in Palliative Care", "university": "European Academy of Geriatrics", "year": "2013"}
+      {
+        "degree": "MBBS",
+        "university": "Cairo University",
+        "year": "2005"
+      },
+      {
+        "degree": "Master's in Geriatric Medicine",
+        "university": "Ain Shams University",
+        "year": "2010"
+      },
+      {
+        "degree": "Fellowship in Palliative Care",
+        "university": "European Academy of Geriatrics",
+        "year": "2013"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1600",
@@ -514,7 +830,14 @@
     "successRate": "98%",
     "avgWaitTime": "15 min",
     "totalPatients": "3,000+",
-    "areaCoverage": ["Nasr City", "Heliopolis", "Maadi", "New Cairo", "Zamalek", "Downtown Cairo"],
+    "areaCoverage": [
+      "Nasr City",
+      "Heliopolis",
+      "Maadi",
+      "New Cairo",
+      "Zamalek",
+      "Downtown Cairo"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -529,7 +852,7 @@
   },
   {
     "id": 25,
-    "image": "assets/img/doctor-grid/17.png",
+    "image": "assets/img/doctor-grid-optimized/17.webp",
     "rating": 4.9,
     "speciality": "Geriatric Medicine",
     "specialityColorClass": "active-bar-warning",
@@ -545,16 +868,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 10,
     "bio": "Experienced Geriatric Medicine Consultant specializing in preventive geriatrics and functional assessment of elderly patients. Focuses on maintaining independence and improving quality of life through comprehensive care plans.",
-    "certifications": ["Board Certified in Geriatric Medicine", "Functional Assessment Specialist", "Nutritional Medicine Expert"],
+    "certifications": [
+      "Board Certified in Geriatric Medicine",
+      "Functional Assessment Specialist",
+      "Nutritional Medicine Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2009"},
-      {"degree": "Master's in Geriatric Medicine", "university": "Cairo University", "year": "2013"},
-      {"degree": "Diploma in Nutritional Medicine", "university": "American Academy of Anti-Aging", "year": "2016"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2009"
+      },
+      {
+        "degree": "Master's in Geriatric Medicine",
+        "university": "Cairo University",
+        "year": "2013"
+      },
+      {
+        "degree": "Diploma in Nutritional Medicine",
+        "university": "American Academy of Anti-Aging",
+        "year": "2016"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1300",
@@ -564,7 +911,13 @@
     "successRate": "95%",
     "avgWaitTime": "17 min",
     "totalPatients": "1,900+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Heliopolis", "Maadi", "Fifth Settlement"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Heliopolis",
+      "Maadi",
+      "Fifth Settlement"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -579,7 +932,7 @@
   },
   {
     "id": 7,
-    "image": "assets/img/doctor-grid/21.png",
+    "image": "assets/img/doctor-grid-optimized/21.webp",
     "rating": 4.6,
     "speciality": "Obstetrics & Gynecology",
     "specialityColorClass": "active-bar-pink",
@@ -595,16 +948,42 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Female",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic","Zoher Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic",
+      "Zoher Clinic"
+    ],
     "experienceYears": 7,
     "bio": "Compassionate OB/GYN Specialist dedicated to women's health across all life stages. Expertise in prenatal care, high-risk pregnancies, minimally invasive gynecological surgery, and reproductive health with a caring, patient-centered approach.",
-    "certifications": ["Board Certified OB/GYN", "High-Risk Pregnancy Specialist", "Laparoscopic Surgery Expert"],
+    "certifications": [
+      "Board Certified OB/GYN",
+      "High-Risk Pregnancy Specialist",
+      "Laparoscopic Surgery Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Cairo University", "year": "2012"},
-      {"degree": "Master's in Obstetrics & Gynecology", "university": "Ain Shams University", "year": "2016"},
-      {"degree": "Fellowship in Maternal-Fetal Medicine", "university": "National Maternity Hospital", "year": "2018"}
+      {
+        "degree": "MBBS",
+        "university": "Cairo University",
+        "year": "2012"
+      },
+      {
+        "degree": "Master's in Obstetrics & Gynecology",
+        "university": "Ain Shams University",
+        "year": "2016"
+      },
+      {
+        "degree": "Fellowship in Maternal-Fetal Medicine",
+        "university": "National Maternity Hospital",
+        "year": "2018"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1700",
@@ -614,7 +993,13 @@
     "successRate": "94%",
     "avgWaitTime": "19 min",
     "totalPatients": "1,500+",
-    "areaCoverage": ["Heliopolis", "Nasr City", "New Cairo", "Maadi", "Fifth Settlement"],
+    "areaCoverage": [
+      "Heliopolis",
+      "Nasr City",
+      "New Cairo",
+      "Maadi",
+      "Fifth Settlement"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -635,11 +1020,10 @@
     ],
     "testimonials": []
   },
-
   {
     "id": 28,
-    "image": "assets/img/doctor-grid/28.png",
-    "rating": 5.0,
+    "image": "assets/img/doctor-grid-optimized/28.webp",
+    "rating": 5,
     "speciality": "Nephrology",
     "specialityColorClass": "active-bar-blue",
     "specialityTextClass": "text-blue",
@@ -654,9 +1038,18 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Female",
-    "channels": ["home", "video", "chat"],
-    "languages": ["Arabic", "English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 4,
     "bio": "Dedicated Nephrology Specialist with strong clinical experience in kidney disease management, dialysis care, acute kidney injury, and chronic renal conditions. Known for a patient-centered approach, evidence-based practice, and a commitment to advancing renal health.",
     "certifications": [
@@ -684,7 +1077,12 @@
     "successRate": "92%",
     "avgWaitTime": "16 min",
     "totalPatients": "900+",
-    "areaCoverage": ["6 OCtober", "Zayed", "Dokki", "Mohandessin"],
+    "areaCoverage": [
+      "6 OCtober",
+      "Zayed",
+      "Dokki",
+      "Mohandessin"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -709,10 +1107,9 @@
     ],
     "testimonials": []
   },
-
   {
     "id": 16,
-    "image": "assets/img/doctor-grid/22.png",
+    "image": "assets/img/doctor-grid-optimized/22.webp",
     "rating": 4.7,
     "speciality": "Obstetrics & Gynecology",
     "specialityColorClass": "active-bar-pink",
@@ -728,16 +1125,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 6,
     "bio": "Experienced OB/GYN Consultant specializing in gynecological oncology and advanced laparoscopic procedures. Committed to providing evidence-based care with focus on early detection and minimally invasive treatment options.",
-    "certifications": ["Board Certified OB/GYN", "Gynecological Oncology Specialist", "Advanced Laparoscopy Certified"],
+    "certifications": [
+      "Board Certified OB/GYN",
+      "Gynecological Oncology Specialist",
+      "Advanced Laparoscopy Certified"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2013"},
-      {"degree": "Master's in Obstetrics & Gynecology", "university": "Cairo University", "year": "2017"},
-      {"degree": "Fellowship in Gynecological Oncology", "university": "National Cancer Institute", "year": "2019"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2013"
+      },
+      {
+        "degree": "Master's in Obstetrics & Gynecology",
+        "university": "Cairo University",
+        "year": "2017"
+      },
+      {
+        "degree": "Fellowship in Gynecological Oncology",
+        "university": "National Cancer Institute",
+        "year": "2019"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1900",
@@ -747,7 +1168,13 @@
     "successRate": "95%",
     "avgWaitTime": "18 min",
     "totalPatients": "1,300+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Heliopolis", "Maadi", "Fifth Settlement"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Heliopolis",
+      "Maadi",
+      "Fifth Settlement"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -762,7 +1189,7 @@
   },
   {
     "id": 17,
-    "image": "assets/img/doctor-grid/23.png",
+    "image": "assets/img/doctor-grid-optimized/23.webp",
     "rating": 4.4,
     "speciality": "General Surgery",
     "specialityColorClass": "active-bar-danger",
@@ -778,16 +1205,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 9,
     "bio": "Skilled General Surgeon with extensive experience in abdominal surgery, laparoscopic procedures, and emergency surgical care. Dedicated to providing safe, effective surgical solutions with focus on rapid recovery and minimal complications.",
-    "certifications": ["Board Certified General Surgeon", "Advanced Laparoscopic Surgery", "Trauma Surgery Specialist"],
+    "certifications": [
+      "Board Certified General Surgeon",
+      "Advanced Laparoscopic Surgery",
+      "Trauma Surgery Specialist"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Ain Shams University", "year": "2010"},
-      {"degree": "Master's in General Surgery", "university": "Cairo University", "year": "2014"},
-      {"degree": "Fellowship in Advanced Laparoscopy", "university": "International Surgical Institute", "year": "2016"}
+      {
+        "degree": "MBBS",
+        "university": "Ain Shams University",
+        "year": "2010"
+      },
+      {
+        "degree": "Master's in General Surgery",
+        "university": "Cairo University",
+        "year": "2014"
+      },
+      {
+        "degree": "Fellowship in Advanced Laparoscopy",
+        "university": "International Surgical Institute",
+        "year": "2016"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 2200",
@@ -797,7 +1249,13 @@
     "successRate": "92%",
     "avgWaitTime": "22 min",
     "totalPatients": "1,700+",
-    "areaCoverage": ["Nasr City", "Heliopolis", "New Cairo", "Maadi", "Downtown Cairo"],
+    "areaCoverage": [
+      "Nasr City",
+      "Heliopolis",
+      "New Cairo",
+      "Maadi",
+      "Downtown Cairo"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -812,7 +1270,7 @@
   },
   {
     "id": 18,
-    "image": "assets/img/doctor-grid/24.png",
+    "image": "assets/img/doctor-grid-optimized/24.webp",
     "rating": 4.8,
     "speciality": "Cardiology",
     "specialityColorClass": "active-bar-info",
@@ -828,16 +1286,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 13,
     "bio": "Renowned Cardiology Consultant with 13 years of expertise in coronary artery disease, heart rhythm disorders, and cardiac rehabilitation. Utilizes cutting-edge technology for accurate diagnosis and personalized treatment plans.",
-    "certifications": ["Board Certified Cardiologist", "Interventional Cardiology Expert", "Cardiac Imaging Specialist"],
+    "certifications": [
+      "Board Certified Cardiologist",
+      "Interventional Cardiology Expert",
+      "Cardiac Imaging Specialist"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Cairo University", "year": "2006"},
-      {"degree": "Master's in Cardiology", "university": "Ain Shams University", "year": "2010"},
-      {"degree": "Fellowship in Interventional Cardiology", "university": "Cleveland Clinic Foundation", "year": "2012"}
+      {
+        "degree": "MBBS",
+        "university": "Cairo University",
+        "year": "2006"
+      },
+      {
+        "degree": "Master's in Cardiology",
+        "university": "Ain Shams University",
+        "year": "2010"
+      },
+      {
+        "degree": "Fellowship in Interventional Cardiology",
+        "university": "Cleveland Clinic Foundation",
+        "year": "2012"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 2500",
@@ -847,7 +1330,13 @@
     "successRate": "97%",
     "avgWaitTime": "16 min",
     "totalPatients": "2,800+",
-    "areaCoverage": ["Dokki", "Zamalek", "Mohandessin", "Agouza", "Giza"],
+    "areaCoverage": [
+      "Dokki",
+      "Zamalek",
+      "Mohandessin",
+      "Agouza",
+      "Giza"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -862,7 +1351,7 @@
   },
   {
     "id": 27,
-    "image": "assets/img/doctor-grid/4.png",
+    "image": "assets/img/doctor-grid-optimized/4.webp",
     "rating": 4.8,
     "speciality": "Physical Therapy & Rehabilitation",
     "specialityColorClass": "active-bar-success",
@@ -878,16 +1367,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 4,
     "bio": "Passionate Physical Therapist specializing in neurological rehabilitation, stroke recovery, and mobility restoration. Employs innovative therapeutic techniques to help patients regain independence and improve their functional abilities.",
-    "certifications": ["Licensed Physical Therapist", "Neuro Rehabilitation Specialist", "Stroke Recovery Expert"],
+    "certifications": [
+      "Licensed Physical Therapist",
+      "Neuro Rehabilitation Specialist",
+      "Stroke Recovery Expert"
+    ],
     "education": [
-      {"degree": "Bachelor of Physical Therapy", "university": "Cairo University", "year": "2016"},
-      {"degree": "Master's in Neurological Rehabilitation", "university": "Ain Shams University", "year": "2019"},
-      {"degree": "Certification in Stroke Rehabilitation", "university": "International Neuro Therapy Association", "year": "2020"}
+      {
+        "degree": "Bachelor of Physical Therapy",
+        "university": "Cairo University",
+        "year": "2016"
+      },
+      {
+        "degree": "Master's in Neurological Rehabilitation",
+        "university": "Ain Shams University",
+        "year": "2019"
+      },
+      {
+        "degree": "Certification in Stroke Rehabilitation",
+        "university": "International Neuro Therapy Association",
+        "year": "2020"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 900",
@@ -897,7 +1410,13 @@
     "successRate": "94%",
     "avgWaitTime": "12 min",
     "totalPatients": "800+",
-    "areaCoverage": ["Nasr City", "Heliopolis", "New Cairo", "Fifth Settlement", "Rehab City"],
+    "areaCoverage": [
+      "Nasr City",
+      "Heliopolis",
+      "New Cairo",
+      "Fifth Settlement",
+      "Rehab City"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -912,7 +1431,7 @@
   },
   {
     "id": 20,
-    "image": "assets/img/doctor-grid/25.png",
+    "image": "assets/img/doctor-grid-optimized/25.webp",
     "rating": 4.9,
     "speciality": "Vascular Surgery",
     "specialityColorClass": "active-bar-warning",
@@ -928,16 +1447,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 15,
     "bio": "Highly experienced Vascular Surgeon with 15 years specializing in treating arterial and venous diseases. Expert in endovascular procedures, varicose vein treatment, and diabetic foot care with emphasis on limb preservation.",
-    "certifications": ["Board Certified Vascular Surgeon", "Endovascular Surgery Specialist", "Diabetic Foot Care Expert"],
+    "certifications": [
+      "Board Certified Vascular Surgeon",
+      "Endovascular Surgery Specialist",
+      "Diabetic Foot Care Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2004"},
-      {"degree": "Master's in Vascular Surgery", "university": "Cairo University", "year": "2008"},
-      {"degree": "Fellowship in Endovascular Surgery", "university": "European Society for Vascular Surgery", "year": "2010"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2004"
+      },
+      {
+        "degree": "Master's in Vascular Surgery",
+        "university": "Cairo University",
+        "year": "2008"
+      },
+      {
+        "degree": "Fellowship in Endovascular Surgery",
+        "university": "European Society for Vascular Surgery",
+        "year": "2010"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 2800",
@@ -947,7 +1491,14 @@
     "successRate": "98%",
     "avgWaitTime": "20 min",
     "totalPatients": "3,200+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Heliopolis", "Maadi", "Zamalek", "Downtown Cairo"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Heliopolis",
+      "Maadi",
+      "Zamalek",
+      "Downtown Cairo"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -962,7 +1513,7 @@
   },
   {
     "id": 21,
-    "image": "assets/img/doctor-grid/26.png",
+    "image": "assets/img/doctor-grid-optimized/26.webp",
     "rating": 4.9,
     "speciality": "Physical Therapy & Rehabilitation",
     "specialityColorClass": "active-bar-warning",
@@ -978,16 +1529,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Female",
-    "channels": ["Home","chat","video"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat",
+      "video"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 2,
     "bio": "Enthusiastic Physical Therapist specializing in pediatric rehabilitation and women's health physiotherapy. Dedicated to helping children with developmental delays and women recover from pregnancy and postpartum conditions.",
-    "certifications": ["Licensed Physical Therapist", "Pediatric Rehabilitation Specialist", "Women's Health Physiotherapy"],
+    "certifications": [
+      "Licensed Physical Therapist",
+      "Pediatric Rehabilitation Specialist",
+      "Women's Health Physiotherapy"
+    ],
     "education": [
-      {"degree": "Bachelor of Physical Therapy", "university": "Cairo University", "year": "2018"},
-      {"degree": "Postgraduate Diploma in Pediatric Physiotherapy", "university": "Ain Shams University", "year": "2021"},
-      {"degree": "Women's Health Physiotherapy Certification", "university": "International Pelvic Health Institute", "year": "2022"}
+      {
+        "degree": "Bachelor of Physical Therapy",
+        "university": "Cairo University",
+        "year": "2018"
+      },
+      {
+        "degree": "Postgraduate Diploma in Pediatric Physiotherapy",
+        "university": "Ain Shams University",
+        "year": "2021"
+      },
+      {
+        "degree": "Women's Health Physiotherapy Certification",
+        "university": "International Pelvic Health Institute",
+        "year": "2022"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 400",
@@ -997,7 +1573,13 @@
     "successRate": "92%",
     "avgWaitTime": "10 min",
     "totalPatients": "500+",
-    "areaCoverage": ["New Cairo", "Fifth Settlement", "Nasr City", "Rehab City", "Heliopolis"],
+    "areaCoverage": [
+      "New Cairo",
+      "Fifth Settlement",
+      "Nasr City",
+      "Rehab City",
+      "Heliopolis"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -1012,7 +1594,7 @@
   },
   {
     "id": 29,
-    "image": "assets/img/doctor-grid/27.png",
+    "image": "assets/img/doctor-grid-optimized/27.webp",
     "rating": 4.9,
     "speciality": "Orthopedic Surgery",
     "specialityColorClass": "active-bar-warning",
@@ -1028,16 +1610,41 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
-    "channels": ["Home","video","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 8,
     "bio": "Experienced Orthopedic Surgeon with expertise in shoulder and knee surgery, ligament reconstruction, and sports-related injuries. Focuses on helping athletes and active individuals return to peak performance.",
-    "certifications": ["Board Certified Orthopedic Surgeon", "Sports Medicine Specialist", "Knee Arthroscopy Expert"],
+    "certifications": [
+      "Board Certified Orthopedic Surgeon",
+      "Sports Medicine Specialist",
+      "Knee Arthroscopy Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Ain Shams University", "year": "2011"},
-      {"degree": "Master's in Orthopedic Surgery", "university": "Cairo University", "year": "2015"},
-      {"degree": "Fellowship in Sports Medicine", "university": "International Sports Medicine Institute", "year": "2017"}
+      {
+        "degree": "MBBS",
+        "university": "Ain Shams University",
+        "year": "2011"
+      },
+      {
+        "degree": "Master's in Orthopedic Surgery",
+        "university": "Cairo University",
+        "year": "2015"
+      },
+      {
+        "degree": "Fellowship in Sports Medicine",
+        "university": "International Sports Medicine Institute",
+        "year": "2017"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1100",
@@ -1047,7 +1654,13 @@
     "successRate": "95%",
     "avgWaitTime": "17 min",
     "totalPatients": "1,400+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Fifth Settlement", "Heliopolis", "Maadi"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Fifth Settlement",
+      "Heliopolis",
+      "Maadi"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",
@@ -1062,7 +1675,7 @@
   },
   {
     "id": 26,
-    "image": "assets/img/doctor-grid/19.png",
+    "image": "assets/img/doctor-grid-optimized/19.webp",
     "rating": 4.9,
     "speciality": "Geriatric Medicine",
     "specialityColorClass": "active-bar-warning",
@@ -1078,16 +1691,40 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Female",
-    "channels": ["Home","chat"],
-    "languages": ["Arabic","English"],
-    "clinics": ["Anees Health Clinic"],
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
     "experienceYears": 7,
     "bio": "Dedicated Geriatric Medicine Specialist with 7 years of experience focusing on memory disorders, osteoporosis, and mobility issues in elderly patients. Committed to enhancing quality of life through personalized care and family involvement.",
-    "certifications": ["Board Certified in Geriatric Medicine", "Memory Disorders Specialist", "Osteoporosis Management Expert"],
+    "certifications": [
+      "Board Certified in Geriatric Medicine",
+      "Memory Disorders Specialist",
+      "Osteoporosis Management Expert"
+    ],
     "education": [
-      {"degree": "MBBS", "university": "Alexandria University", "year": "2012"},
-      {"degree": "Master's in Geriatric Medicine", "university": "Cairo University", "year": "2016"},
-      {"degree": "Fellowship in Memory Disorders", "university": "Alzheimer's Research Center", "year": "2018"}
+      {
+        "degree": "MBBS",
+        "university": "Alexandria University",
+        "year": "2012"
+      },
+      {
+        "degree": "Master's in Geriatric Medicine",
+        "university": "Cairo University",
+        "year": "2016"
+      },
+      {
+        "degree": "Fellowship in Memory Disorders",
+        "university": "Alzheimer's Research Center",
+        "year": "2018"
+      }
     ],
     "pricing": {
       "telemedicine": "EGP 1000",
@@ -1097,7 +1734,13 @@
     "successRate": "96%",
     "avgWaitTime": "14 min",
     "totalPatients": "1,600+",
-    "areaCoverage": ["Nasr City", "New Cairo", "Heliopolis", "Fifth Settlement", "Maadi"],
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Heliopolis",
+      "Fifth Settlement",
+      "Maadi"
+    ],
     "clinicDetails": [
       {
         "name": "Anees Health Clinic",

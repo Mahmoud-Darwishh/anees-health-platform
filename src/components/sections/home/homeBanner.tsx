@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
 
 const HomeBanner: React.FC = () => {
@@ -112,11 +113,16 @@ const HomeBanner: React.FC = () => {
                         </div>
                         <div className="col-lg-5">
                             <div className="banner-img">
-                                <img
-                                    src="assets/img/banner/012.png"
-                                    className="img-fluid"
-                                    alt="patient-image"
-                                />
+                                    <Image
+                                        src="/assets/img/optimized/banner-012.webp"
+                                        alt="patient-image"
+                                        width={600}
+                                        height={600}
+                                        className="img-fluid"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                        priority
+                                        quality={85}
+                                    />
                                 {/*
                                 <div className="banner-appointment">
                                     <h6>1K</h6>

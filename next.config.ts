@@ -4,11 +4,55 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // Image optimization for WebP and AVIF formats
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  // Enable compression
+  compress: true,
+  // Optimize on-demand entries
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
+  },
   sassOptions: {
     silenceDeprecations: ['legacy-js-api'],
   },
   async headers() {
     return [
+      // Cache images aggressively (1 year)
+      {
+        source: '/assets/img/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Cache CSS with medium TTL (1 week)
+      {
+        source: '/assets/css/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800',
+          },
+        ],
+      },
+      // Cache fonts with long TTL (1 year)
+      {
+        source: '/assets/fonts/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // CSP and security headers
       {
         source: '/:path*',
         headers: [

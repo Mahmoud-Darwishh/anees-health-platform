@@ -1,12 +1,19 @@
 'use client';
 
-import React from 'react'
+import React, { useId } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 
 const SectionBook: React.FC = () => {
     const t = useTranslations();
     const locale = useLocale();
+    const accordionBaseId = useId();
+    const faqParentId = `${accordionBaseId}-faq`;
+    const headingOneId = `${accordionBaseId}-heading-vision`;
+    const collapseOneId = `${accordionBaseId}-collapse-vision`;
+    const headingTwoId = `${accordionBaseId}-heading-mission`;
+    const collapseTwoId = `${accordionBaseId}-collapse-mission`;
     return (
         <>
             {/* Bookus Section */}
@@ -17,24 +24,39 @@ const SectionBook: React.FC = () => {
                             <div className="bookus-img">
                                 <div className="row g-3">
                                     <div className="col-md-12 aos" data-reveal>
-                                        <img
-                                            src="assets/img/book-01.png"
+                                            <Image
+                                                src="/assets/img/optimized/book-01.webp"
                                             alt="img"
+                                                width={600}
+                                                height={400}
                                             className="img-fluid"
+                                                sizes="(max-width: 768px) 100vw, 50vw"
+                                                loading="lazy"
+                                                quality={85}
                                         />
                                     </div>
                                     <div className="col-sm-6 aos" data-reveal>
-                                        <img
-                                            src="assets/img/book-02.png"
+                                            <Image
+                                                src="/assets/img/optimized/book-02.webp"
                                             alt="img"
+                                                width={400}
+                                                height={400}
                                             className="img-fluid"
+                                                sizes="(max-width: 768px) 50vw, 25vw"
+                                                loading="lazy"
+                                                quality={85}
                                         />
                                     </div>
                                     <div className="col-sm-6 aos" data-reveal>
-                                        <img
-                                            src="assets/img/book-03.png"
+                                            <Image
+                                                src="/assets/img/optimized/book-03.webp"
                                             alt="img"
+                                                width={400}
+                                                height={400}
                                             className="img-fluid"
+                                                sizes="(max-width: 768px) 50vw, 25vw"
+                                                loading="lazy"
+                                                quality={85}
                                         />
                                     </div>
                                 </div>
@@ -57,26 +79,26 @@ const SectionBook: React.FC = () => {
                                 {t('home.booking.description')}
                             </p>
                             <div className="faq-info aos" data-reveal>
-                                <div className="accordion" id="faq-details">
+                                <div className="accordion" id={faqParentId}>
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingOne">
+                                        <h2 className="accordion-header" id={headingOneId}>
                                             <Link
                                                 href="#"
                                                 className="accordion-button"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseOne"
+                                                data-bs-target={`#${collapseOneId}`}
                                                 aria-expanded="true"
-                                                aria-controls="collapseOne"
+                                                aria-controls={collapseOneId}
                                             >
                                                 01 . {t('home.booking.vision')}
                                             </Link>
                                         </h2>
                                         <div
-                                            id="collapseOne"
+                                            id={collapseOneId}
                                             className="accordion-collapse collapse show"
-                                            aria-labelledby="headingOne"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingOneId}
+                                            data-bs-parent={`#${faqParentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">
@@ -90,22 +112,22 @@ const SectionBook: React.FC = () => {
                                     {/* /FAQ Item */}
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingTwo">
+                                        <h2 className="accordion-header" id={headingTwoId}>
                                             <Link
                                                 href="#"
                                                 className="accordion-button collapsed"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseTwo"
-                                                aria-controls="collapseTwo"
+                                                data-bs-target={`#${collapseTwoId}`}
+                                                aria-controls={collapseTwoId}
                                             >
                                                 02 . {t('home.booking.mission')}
                                             </Link>
                                         </h2>
                                         <div
-                                            id="collapseTwo"
+                                            id={collapseTwoId}
                                             className="accordion-collapse collapse"
-                                            aria-labelledby="headingTwo"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingTwoId}
+                                            data-bs-parent={`#${faqParentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">

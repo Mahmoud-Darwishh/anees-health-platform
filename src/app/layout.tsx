@@ -40,19 +40,19 @@ export default function RootLayout({
     <>
       {children}
       
-      {/* Chatbot Script */}
-      <Script id="chatbot-config" strategy="afterInteractive">
+      {/* Chatbot Script - Lazy load */}
+      <Script id="chatbot-config" strategy="lazyOnload">
         {`window.chtlConfig = { chatbotId: "9941775766" };`}
       </Script>
       <Script
         src="https://chatling.ai/js/embed.js"
         data-id="9941775766"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         async
       />
 
-      {/* Microsoft Clarity */}
-      <Script id="clarity-script" strategy="afterInteractive">
+      {/* Microsoft Clarity - Lazy load */}
+      <Script id="clarity-script" strategy="lazyOnload">
         {`
           (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -62,8 +62,8 @@ export default function RootLayout({
         `}
       </Script>
 
-      {/* Meta Pixel */}
-      <Script id="facebook-pixel" strategy="afterInteractive">
+      {/* Meta Pixel - Lazy load */}
+      <Script id="facebook-pixel" strategy="lazyOnload">
         {`
           !function(f,b,e,v,n,t,s)
           {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

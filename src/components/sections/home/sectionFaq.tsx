@@ -1,10 +1,14 @@
 'use client';
 
-import React from 'react'
+import React, { useId } from 'react'
 import { useTranslations } from 'next-intl';
 
 const SectionFaq: React.FC = () => {
     const t = useTranslations();
+    const uid = useId();
+    const parentId = `${uid}-faq`;
+    const headingIds = [1, 2, 3, 4, 5].map((n) => `${uid}-heading-${n}`);
+    const collapseIds = [1, 2, 3, 4, 5].map((n) => `${uid}-collapse-${n}`);
     return (
         <div>
             <section className="faq-section-one">
@@ -19,26 +23,26 @@ const SectionFaq: React.FC = () => {
                     <div className="row">
                         <div className="col-md-10 mx-auto">
                             <div className="faq-info aos" data-reveal>
-                                <div className="accordion" id="faq-details">
+                                <div className="accordion" id={parentId}>
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingOne">
+                                        <h2 className="accordion-header" id={headingIds[0]}>
                                             <button
                                                 type="button"
                                                 className="accordion-button"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseOne"
+                                                data-bs-target={`#${collapseIds[0]}`}
                                                 aria-expanded="true"
-                                                aria-controls="collapseOne"
+                                                aria-controls={collapseIds[0]}
                                             >
                                                 {t('home.faqs.q1')}
                                             </button>
                                         </h2>
                                         <div
-                                            id="collapseOne"
+                                            id={collapseIds[0]}
                                             className="accordion-collapse collapse show"
-                                            aria-labelledby="headingOne"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingIds[0]}
+                                            data-bs-parent={`#${parentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">
@@ -52,23 +56,23 @@ const SectionFaq: React.FC = () => {
                                     {/* /FAQ Item */}
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingTwo">
+                                        <h2 className="accordion-header" id={headingIds[1]}>
                                             <button
                                                 type="button"
                                                 className="accordion-button collapsed"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseTwo"
+                                                data-bs-target={`#${collapseIds[1]}`}
                                                 aria-expanded="false"
-                                                aria-controls="collapseTwo"
+                                                aria-controls={collapseIds[1]}
                                             >
                                                 {t('home.faqs.q2')}
                                             </button>
                                         </h2>
                                         <div
-                                            id="collapseTwo"
+                                            id={collapseIds[1]}
                                             className="accordion-collapse collapse"
-                                            aria-labelledby="headingTwo"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingIds[1]}
+                                            data-bs-parent={`#${parentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">
@@ -82,23 +86,23 @@ const SectionFaq: React.FC = () => {
                                     {/* /FAQ Item */}
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingThree">
+                                        <h2 className="accordion-header" id={headingIds[2]}>
                                             <button
                                                 type="button"
                                                 className="accordion-button collapsed"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseThree"
+                                                data-bs-target={`#${collapseIds[2]}`}
                                                 aria-expanded="false"
-                                                aria-controls="collapseThree"
+                                                aria-controls={collapseIds[2]}
                                             >
                                                 {t('home.faqs.q3')}
                                             </button>
                                         </h2>
                                         <div
-                                            id="collapseThree"
+                                            id={collapseIds[2]}
                                             className="accordion-collapse collapse"
-                                            aria-labelledby="headingThree"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingIds[2]}
+                                            data-bs-parent={`#${parentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">
@@ -112,23 +116,23 @@ const SectionFaq: React.FC = () => {
                                     {/* /FAQ Item */}
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingFour">
+                                        <h2 className="accordion-header" id={headingIds[3]}>
                                             <button
                                                 type="button"
                                                 className="accordion-button collapsed"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseFour"
+                                                data-bs-target={`#${collapseIds[3]}`}
                                                 aria-expanded="false"
-                                                aria-controls="collapseFour"
+                                                aria-controls={collapseIds[3]}
                                             >
                                                 {t('home.faqs.q4')}
                                             </button>
                                         </h2>
                                         <div
-                                            id="collapseFour"
+                                            id={collapseIds[3]}
                                             className="accordion-collapse collapse"
-                                            aria-labelledby="headingFour"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingIds[3]}
+                                            data-bs-parent={`#${parentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">
@@ -142,23 +146,23 @@ const SectionFaq: React.FC = () => {
                                     {/* /FAQ Item */}
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
-                                        <h2 className="accordion-header" id="headingFive">
+                                        <h2 className="accordion-header" id={headingIds[4]}>
                                             <button
                                                 type="button"
                                                 className="accordion-button collapsed"
                                                 data-bs-toggle="collapse"
-                                                data-bs-target="#collapseFive"
+                                                data-bs-target={`#${collapseIds[4]}`}
                                                 aria-expanded="false"
-                                                aria-controls="collapseFive"
+                                                aria-controls={collapseIds[4]}
                                             >
                                                 {t('home.faqs.q5')}
                                             </button>
                                         </h2>
                                         <div
-                                            id="collapseFive"
+                                            id={collapseIds[4]}
                                             className="accordion-collapse collapse"
-                                            aria-labelledby="headingFive"
-                                            data-bs-parent="#faq-details"
+                                            aria-labelledby={headingIds[4]}
+                                            data-bs-parent={`#${parentId}`}
                                         >
                                             <div className="accordion-body">
                                                 <div className="accordion-content">

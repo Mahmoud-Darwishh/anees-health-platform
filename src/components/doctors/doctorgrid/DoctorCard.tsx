@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { memo } from 'react';
 import type { Doctor } from './types';
 
 type MessageValues = Record<string, string | number>;
@@ -10,7 +11,11 @@ interface DoctorCardProps {
   tg: (key: string, values?: MessageValues) => string;
 }
 
-export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
+export const DoctorCard = memo(function DoctorCard({
+  doctor,
+  locale,
+  tg,
+}: DoctorCardProps) {
   return (
     <div className="col-xxl-4 col-md-6 mb-4">
       <div className="card doctor-card-enhanced">
@@ -23,6 +28,9 @@ export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
               width={500}
               height={500}
               className="doctor-card-image"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="lazy"
+              quality={85}
             />
           </Link>
               <div className="verified-badge-overlay position-absolute top-0 end-0 m-2">
@@ -143,4 +151,6 @@ export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
       </div>
     </div>
   );
-};
+});
+
+DoctorCard.displayName = 'DoctorCard';

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 
 const SectionApp: React.FC = () => {
@@ -38,10 +39,15 @@ const SectionApp: React.FC = () => {
                                 </div>
                                 <div className="col-lg-6 col-md-12 aos" data-reveal>
                                     <div className="mobile-img">
-                                        <img
-                                            src="assets/img/mobile-img.png"
+                                      <Image
+                                        src="/assets/img/optimized/mobile-img.webp"
+                                        alt="img"
+                                        width={400}
+                                        height={800}
                                             className="img-fluid"
-                                            alt="img"
+                                        sizes="(max-width: 768px) 100vw, 50vw"
+                                        loading="lazy"
+                                        quality={85}
                                         />
                                     </div>
                                 </div>
@@ -108,10 +114,15 @@ const SectionApp: React.FC = () => {
               </div>
               <div className="col-lg-6 col-md-12 aos" data-reveal>
                 <div className="mobile-img">
-                  <img
-                    src="assets/img/mobile-img.png"
+                    <Image
+                      src="/assets/img/optimized/mobile-img.webp"
+                      alt="img"
+                      width={400}
+                      height={800}
                     className="img-fluid"
-                    alt="img"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      loading="lazy"
+                      quality={85}
                   />
                 </div>
               </div>
