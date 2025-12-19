@@ -1626,7 +1626,7 @@ button:focus {
 }
 
 .btn {
-  border-radius: 44px;
+  border-color: #aa864294;
   padding: 0.5rem 0.85rem;
   font-size: 14px;
   transition: all 0.5s;
@@ -3416,7 +3416,7 @@ textarea.form-control {
   width: 0.9rem;
   height: 0.9rem;
   background-color: #FFF;
-  border: 1px solid #E6E8EE;
+  border: 1px solid #aa864275;
 }
 .form-check-input:checked {
   background-color: #aa8642;
@@ -5627,14 +5627,19 @@ a.bg-danger:focus, a.bg-danger:hover, button.bg-danger:focus, button.bg-danger:h
   color: transparent;
 }
 .breadcrumb-bar .page-breadcrumb .breadcrumb-item + .breadcrumb-item {
-  padding-left: 10px;
+  padding-left: 0;
 }
 .breadcrumb-bar .page-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
-  color: #465D7C;
-  font-size: 14px;
+  color: #163155;
+  font-size: 11px;
   content: "\f054";
   font-family: "Fontawesome";
-  padding-right: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  position: relative;
+  top: 8px;
+  display: inline-block;
+  line-height: 1;
 }
 .breadcrumb-bar .breadcrumb-bg .breadcrumb-bg-01 {
   position: absolute;
@@ -27137,12 +27142,17 @@ a.mute-video.stop {
   padding-left: 10px;
 }
 .breadcrumb-bar-one .breadcrumb-item + .breadcrumb-item::before {
-  content: "/";
-  font-family: "feather";
-  float: left;
-  padding-right: 10px;
-  color: #9CA3AF;
-  font-size: 14px;
+  content: "\f054";
+  font-family: "Fontawesome";
+  float: none;
+  padding-right: 12px;
+  padding-left: 12px;
+  color: #163155;
+  font-size: 10px;
+  position: relative;
+  top: 8px;
+  display: inline-block;
+  line-height: 1;
   font-weight: 600;
 }
 
@@ -46490,13 +46500,17 @@ ul.benifits-col li i {
   align-items: baseline;
 }
 .breadcrumb-bar-two .breadcrumb-item + .breadcrumb-item::before {
-  content: "/";
-  font-family: "feather";
-  float: left;
-  padding-right: 10px;
-  color: #9CA3AF;
-  font-size: 14px;
-  font-weight: 600;
+  content: "\f054";
+  font-family: "Fontawesome";
+  float: none;
+  padding-right: 12px;
+  padding-left: 12px;
+  color: #163155;
+  font-size: 10px;
+  position: relative;
+  top: 8px;
+  display: inline-block;
+  line-height: 1;
 }
 
 .about-section {

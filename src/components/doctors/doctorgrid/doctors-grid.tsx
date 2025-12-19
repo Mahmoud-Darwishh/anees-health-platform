@@ -316,10 +316,6 @@ const DoctorGrid = () => {
                         </li>
                       </ul>
                     </div>
-
-                    <a href="#" className="btn view-toggle" aria-label="Toggle view">
-                      <i className="isax isax-grid-7" />
-                    </a>
                   </div>
                 </div>
               </div>

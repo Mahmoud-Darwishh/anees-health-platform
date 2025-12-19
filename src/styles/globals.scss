@@ -7,6 +7,28 @@
 [dir='rtl'] {
   direction: rtl;
   text-align: right;
+  
+  // Breadcrumb RTL fix
+  .breadcrumb-bar {
+    .page-breadcrumb {
+      ol {
+        display: flex;
+        flex-direction: row-reverse;
+      }
+      
+      .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0;
+        padding-right: 0;
+        
+        &::before {
+          padding-left: 12px;
+          padding-right: 12px;
+          display: inline-block;
+          transform: scaleX(-1);
+        }
+      }
+    }
+  }
 }
 
 [dir='ltr'] {

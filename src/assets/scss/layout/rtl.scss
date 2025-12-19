@@ -193,6 +193,31 @@
   // Let Bootstrap's built-in RTL utilities handle spacing and flex direction
   // Using me-2, ms-2, etc. automatically converts to appropriate RTL margins
 
+  // ============================================
+  // BREADCRUMB
+  // ============================================
+  
+  .breadcrumb-bar {
+    .page-breadcrumb {
+      ol {
+        display: flex;
+        flex-direction: row-reverse;
+      }
+      
+      .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0;
+        padding-right: 10px;
+        
+        &::before {
+          padding-right: 0;
+          padding-left: 10px;
+          display: inline-block;
+          transform: scaleX(-1);
+        }
+      }
+    }
+  }
+
   // Flag dropdown
   .flag-dropdown {
     .dropdown-toggle {

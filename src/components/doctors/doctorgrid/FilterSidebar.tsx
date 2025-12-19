@@ -129,7 +129,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                       {spec}
                     </label>
                   </div>
-                  <span className="filter-badge"></span>
+                  
                 </div>
               ))}
 
@@ -157,7 +157,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                         {spec}
                       </label>
                     </div>
-                    <span className="filter-badge"></span>
+                    
                   </div>
                 ))}
 
@@ -219,7 +219,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     {tg('filters.male')}
                   </label>
                 </div>
-                <span className="filter-badge"></span>
+                
               </div>
               <div className="d-flex align-items-center justify-content-between">
                 <div className="form-check">
@@ -237,7 +237,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     {tg('filters.female')}
                   </label>
                 </div>
-                <span className="filter-badge"></span>
+                
               </div>
             </div>
           </div>

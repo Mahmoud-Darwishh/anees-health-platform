@@ -60,21 +60,52 @@ export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
             {doctor.channels && doctor.channels.length > 0 && (
               <div className="services-offered mb-3">
                 <div className="service-chips-container">
-                    {doctor.channels.map((channel) => {
+                    {doctor.channels.map((channelRaw, idx) => {
+                      const channel = String(channelRaw).trim();
+                      const normalized = channel.toLowerCase();
+
                       const channelMap: Record<string, { icon: string; label: string }> = {
                         video: { icon: 'fa-video', label: tg('channels.video') },
                         chat: { icon: 'fa-message', label: tg('channels.chat') },
-                        Home: { icon: 'fa-home', label: tg('channels.home') },
+                        home: { icon: 'fa-home', label: tg('channels.home') },
                         clinic: { icon: 'fa-hospital', label: tg('card.clinic_visit') },
                       };
-                      const service = channelMap[channel] || { icon: 'fa-hospital', label: channel };
-                    return (
-                      <span key={channel} className="service-chip" title={service.label} aria-label={service.label}>
-                        <i className={`fa-solid ${service.icon}`} aria-hidden="true"></i>
-                        <span className="chip-label">{service.label}</span>
-                      </span>
-                    );
-                  })}
+
+                      // Handle Arabic/localized strings by pattern matching
+                      const arabicMatchers: Array<{ pattern: RegExp; key: keyof typeof channelMap }> = [
+                        { pattern: /فيديو|مرئي|فديو/i, key: 'video' },
+                        { pattern: /دردشة|محادثة|شات/i, key: 'chat' },
+                        { pattern: /منزل|منزلي|زيارة منزلية/i, key: 'home' },
+                        { pattern: /عيادة|مركز|كشف/i, key: 'clinic' },
+                      ];
+
+                      let resolvedKey: keyof typeof channelMap | undefined = channelMap[normalized] ? (normalized as keyof typeof channelMap) : undefined;
+
+                      if (!resolvedKey) {
+                        for (const matcher of arabicMatchers) {
+                          if (matcher.pattern.test(normalized)) {
+                            resolvedKey = matcher.key;
+                            break;
+                          }
+                        }
+                      }
+
+                      const service = resolvedKey
+                        ? channelMap[resolvedKey]
+                        : { icon: 'fa-hospital', label: channel };
+
+                      return (
+                        <span
+                          key={`${channel}-${idx}`}
+                          className="service-chip"
+                          title={service.label}
+                          aria-label={service.label}
+                        >
+                          <i className={`fa-solid ${service.icon}`} aria-hidden="true"></i>
+                          <span className="chip-label">{service.label}</span>
+                        </span>
+                      );
+                    })}
                 </div>
               </div>
             )}
@@ -84,11 +115,12 @@ export const DoctorCard = ({ doctor, locale, tg }: DoctorCardProps) => {
               <p className="text-muted fs-13 mb-1">{tg('card.starting_from')}</p>
               <div className="price-display">
                 <h4 className="text-orange mb-0">{doctor.consultationFee}</h4>
+                {/*
                 {doctor.maxConsultationFee && (
                   <p className="text-muted fs-12 mb-0">
                     {tg('card.to')} {doctor.maxConsultationFee}
                   </p>
-                )}
+                )}  */}
               </div>
             </div>
 

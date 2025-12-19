@@ -18,7 +18,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "من زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -115,7 +115,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -205,7 +205,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [
@@ -285,7 +285,7 @@
     "bookingLink": "/booking",
     "gender": "أنثى",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة",
       "فيديو"
     ],
@@ -366,7 +366,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -456,7 +456,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [
@@ -536,7 +536,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -617,7 +617,7 @@
     "bookingLink": "/booking",
     "gender": "أنثى",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -707,7 +707,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [
@@ -787,7 +787,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -869,7 +869,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [
@@ -949,7 +949,7 @@
     "bookingLink": "/booking",
     "gender": "أنثى",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -1038,7 +1038,7 @@
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "أنثى",
-    "channels": ["منزلي", "فيديو", "محادثة"],
+    "channels": ["زيارة منزلية", "فيديو", "محادثة"],
     "languages": ["العربية", "الإنجليزية"],
     "clinics": ["عيادة أنيس الصحية"],
     "experienceYears": 4,
@@ -1112,7 +1112,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [
@@ -1192,7 +1192,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -1273,7 +1273,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -1354,7 +1354,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [
@@ -1434,7 +1434,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -1516,7 +1516,7 @@
     "bookingLink": "/booking",
     "gender": "أنثى",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة",
       "فيديو"
     ],
@@ -1597,7 +1597,7 @@
     "bookingLink": "/booking",
     "gender": "ذكر",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "فيديو",
       "محادثة"
     ],
@@ -1678,7 +1678,7 @@
     "bookingLink": "/booking",
     "gender": "أنثى",
     "channels": [
-      "منزلي",
+      "زيارة منزلية",
       "محادثة"
     ],
     "languages": [

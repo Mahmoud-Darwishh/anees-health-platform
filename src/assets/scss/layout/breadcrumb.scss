@@ -43,13 +43,16 @@
 		    }
 		}
 		.breadcrumb-item + .breadcrumb-item {
-			padding-left: 10px;
+			padding-left: 0 !important;
 			&::before {
-				color: variables.$text-color;
-				font-size: variables.$font-size-14;
-				content: "\f054";
-				font-family: variables.$font-awesome;
-				padding-right: 10px;
+				color: variables.$secondary !important;
+				font-size: 5px !important;
+				content: "\f054" !important;
+				font-family: variables.$font-awesome !important;
+				padding-left: 12px !important;
+				padding-right: 12px !important;
+				line-height: 1 !important;
+				display: inline-block !important;
 			}
 		}
 	}
