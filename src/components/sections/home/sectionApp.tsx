@@ -45,7 +45,6 @@ const SectionApp: React.FC = () => {
                                         width={400}
                                         height={800}
                                             className="img-fluid"
-                                        sizes="(max-width: 768px) 100vw, 50vw"
                                         loading="lazy"
                                         quality={85}
                                         />
@@ -120,7 +119,6 @@ const SectionApp: React.FC = () => {
                       width={400}
                       height={800}
                     className="img-fluid"
-                      sizes="(max-width: 768px) 100vw, 50vw"
                       loading="lazy"
                       quality={85}
                   />

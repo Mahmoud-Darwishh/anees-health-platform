@@ -30,7 +30,6 @@ const SectionBook: React.FC = () => {
                                                 width={600}
                                                 height={400}
                                             className="img-fluid"
-                                                sizes="(max-width: 768px) 100vw, 50vw"
                                                 loading="lazy"
                                                 quality={85}
                                         />
@@ -42,7 +41,6 @@ const SectionBook: React.FC = () => {
                                                 width={400}
                                                 height={400}
                                             className="img-fluid"
-                                                sizes="(max-width: 768px) 50vw, 25vw"
                                                 loading="lazy"
                                                 quality={85}
                                         />
@@ -54,7 +52,6 @@ const SectionBook: React.FC = () => {
                                                 width={400}
                                                 height={400}
                                             className="img-fluid"
-                                                sizes="(max-width: 768px) 50vw, 25vw"
                                                 loading="lazy"
                                                 quality={85}
                                         />

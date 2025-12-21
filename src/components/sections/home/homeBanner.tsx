@@ -119,7 +119,6 @@ const HomeBanner: React.FC = () => {
                                         width={600}
                                         height={600}
                                         className="img-fluid"
-                                        sizes="(max-width: 768px) 100vw, 50vw"
                                         priority
                                         quality={85}
                                     />
