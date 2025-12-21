@@ -720,5 +720,10 @@
     "form_message": "Message",
     "form_submit": "Send Message",
     "map_title": "Service Area Map"
+  },
+  "whatsapp": {
+    "label": "Chat with us on WhatsApp",
+    "message_en": "Hello Anees Health!\n\nI am interested and have some enquiries about your healthcare services. Could you please help me with more information?\n\n🩺 ❤️",
+    "message_ar": "مرحبا بك في أنيس هيلث!\n\nأنا مهتم جداً وعندي بعض الاستفسارات عن خدماتك الصحية. هل يمكنك مساعدتي بمزيد من المعلومات؟\n\n🩺 ❤️"
   }
 }

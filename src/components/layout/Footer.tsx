@@ -27,22 +27,22 @@ const Home3Footer = () => {
                     <div className="social-icon">
                       <ul className="list-unstyled d-flex gap-3 mb-0">
                         <li>
-                          <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex">
+                          <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <i className="fa-brands fa-facebook" />
                           </Link>
                         </li>
                         <li>
-                          <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex">
+                          <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <i className="fa-brands fa-tiktok" />
                           </Link>
                         </li>
                         <li>
-                          <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex">
+                          <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <i className="fa-brands fa-instagram" />
                           </Link>
                         </li>
                         <li>
-                          <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex">
+                          <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <i className="fa-brands fa-linkedin" />
                           </Link>
                         </li>

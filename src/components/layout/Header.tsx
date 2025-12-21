@@ -229,12 +229,6 @@ const Header: React.FC = () => {
                         {t('nav.doctors')}
                       </Link>
                     </li>
-                    
-                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}/contact-us`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}/contact-us`} className="nav-link">
-                        {t('nav.contact_us')}
-                      </Link>
-                    </li>
                     <li className="nav-item me-3 d-lg-none mobile-lang-switcher">
                       <Link
                         href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}

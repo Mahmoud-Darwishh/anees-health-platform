@@ -87,3 +87,47 @@ a {
   opacity: 1;
   transform: none;
 }
+
+/* WhatsApp Floating Button */
+.whatsapp-floating-btn {
+  position: fixed;
+  bottom: 85px;
+  right: 20px;
+  width: 55px;
+  height: 55px;
+  background: linear-gradient(135deg, #25d366 0%, #20ba5a 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+  z-index: 999;
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* RTL adjustment for WhatsApp button */
+/*
+[dir='rtl'] {
+  .whatsapp-floating-btn {
+    right: auto;
+    left: 24px;
+  }
+}*/

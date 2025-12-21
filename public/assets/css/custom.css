@@ -14273,7 +14273,7 @@ header.inner-header .header-nav .header-navbar-rht li.noti-nav > a i {
   height: 48px;
   padding: 0 35px 0 15px;
   border: 0;
-  color: #012047;
+  /*color: #012047;*/
   background-color: transparent;
   cursor: pointer;
   font-size: 15px;
@@ -14288,7 +14288,7 @@ header.inner-header .header-nav .header-navbar-rht li.noti-nav > a i {
 }
 .search-input select:hover,
 .search-input select:focus {
-  color: #FFB800;
+  color: #aa8642;
   outline: none;
 }
 .search-input select:focus {

@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { locales } from '@/i18n/request';
+import WhatsAppButton from '@/components/common/WhatsAppButton';
 import '@/styles/globals.scss';
 import '@/styles/legacy.scss';
 
@@ -64,6 +65,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           {children}
+          <WhatsAppButton />
         </NextIntlClientProvider>
         
         {/* Bootstrap JS */}
