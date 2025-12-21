@@ -213,9 +213,10 @@ const Header: React.FC = () => {
                         {t('nav.home')}
                       </Link>
                     </li>
-                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}#about`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}#about`} className="nav-link">
-                        {t('nav.about')}
+                    
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}/about-us`) ? 'active' : ''}`}>
+                      <Link href={`/${locale}/about-us`} className="nav-link">
+                        {t('nav.about_us')}
                       </Link>
                     </li>
                     <li className={`nav-item me-3 ${isActiveLink(`/${locale}#services`) ? 'active' : ''}`}>
@@ -228,9 +229,10 @@ const Header: React.FC = () => {
                         {t('nav.doctors')}
                       </Link>
                     </li>
-                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}#contact`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}#contact`} className="nav-link">
-                        {t('nav.contact')}
+                    
+                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}/contact-us`) ? 'active' : ''}`}>
+                      <Link href={`/${locale}/contact-us`} className="nav-link">
+                        {t('nav.contact_us')}
                       </Link>
                     </li>
                     <li className="nav-item me-3 d-lg-none mobile-lang-switcher">

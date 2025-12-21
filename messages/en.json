@@ -678,4 +678,47 @@
     "important_label": "Important:",
     "important_text": "This privacy policy is provided in both English and Arabic. In case of any discrepancy, the Arabic version shall prevail in accordance with Egyptian law."
   }
+  ,
+  "aboutPage": {
+    "title": "About Us",
+    "meta_description": "Anees Health brings trusted home healthcare and telemedicine to your doorstep in Egypt.",
+    "about_company_label": "About Our Company",
+    "headline": "We Always Ensure the Best Medical Care for Your Health",
+    "paragraph_1": "Anees Health is a modern home-health platform designed to bring essential medical services directly to your doorstep—safely, conveniently, and with trusted quality. We connect patients with licensed doctors, skilled nurses, physiotherapists, and diagnostic specialists, eliminating the stress of hospital visits and long waiting times.",
+    "paragraph_2": "With a growing network of certified providers and secure telemedicine tools, Anees ensures that every patient receives reliable, professional, and timely care. From doctor home visits and lab tests at home to chronic care programs and virtual consultations, we’re redefining how healthcare can be delivered—through convenience, compassion, and trust.",
+    "years_experience": "Over 25+ Years Experience",
+    "why_title": "Why Choose Us",
+    "why_item_1_title": "Experienced & Certified Professionals",
+    "why_item_1_text": "Anees partners only with qualified, licensed doctors, nurses, and physiotherapists to ensure every visit or consultation is safe and trustworthy.",
+    "why_item_2_title": "Available 24/7",
+    "why_item_2_text": "Whether early morning or late night, Anees is ready to support you with timely care whenever you need it.",
+    "why_item_3_title": "Quality Assurance",
+    "why_item_3_text": "Every service is monitored and continuously improved, following strict clinical guidelines and patient feedback.",
+    "why_item_4_title": "Compassionate Nursing",
+    "why_item_4_text": "Our nursing team provides consistent, attentive support for daily care, monitoring, and long-term recovery.",
+    "cta_title": "Be on Your Way to Feeling Better with Anees",
+    "cta_text": "Have questions or need assistance? Reach out to Anees Health—support, guidance, and care when you need it.",
+    "cta_button": "Contact Us"
+  }
+  ,
+  "contactPage": {
+    "title": "Contact Us",
+    "meta_description": "Get in touch with Anees Health for support, questions, or service inquiries.",
+    "get_in_touch_label": "Get in touch",
+    "have_question_title": "Have Any Question?",
+    "address_label": "Address",
+    "address_text": "5th Settlement, New Cairo, Cairo",
+    "phone_label": "Phone Number",
+    "phone_text": "+20 10 5516 4595",
+    "email_label": "Email Address",
+    "email_text": "info@aneeshealth.com",
+    "form_aria": "Contact form",
+    "form_name": "Name",
+    "form_email": "Email",
+    "form_phone": "Phone Number",
+    "form_services": "Services",
+    "form_message": "Message",
+    "form_submit": "Send Message",
+    "map_title": "Service Area Map"
+  }
 }
