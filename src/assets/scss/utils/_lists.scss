@@ -1,0 +1,56 @@
+// Reusable list spacing utility for LTR & RTL
+
+// Base spacing for lists
+.list-spaced ul,
+.list-spaced ol {
+  list-style-position: outside;
+  margin: 0;
+}
+
+// Ordered lists: keep native markers
+.list-spaced ol {
+  list-style-type: decimal;
+  padding-inline-start: 1.5rem;
+}
+
+// Unordered lists: render bullets via pseudo for stable spacing
+.list-spaced ul {
+  list-style: none;
+  padding-inline-start: 1rem; // slight indentation for UL
+}
+
+.list-spaced ul li {
+  position: relative;
+}
+
+.list-spaced ul li::before {
+  content: "\f111"; // Font Awesome small circle
+  font-family: "Fontawesome";
+  display: inline-block;
+  margin-inline-end: 0.5rem;
+  color: #aa8642; // gold bullet as before
+  font-size: 10px;
+}
+
+.list-spaced ol {
+  list-style-type: decimal;
+}
+
+.list-spaced li {
+  margin-block: 0.5rem;
+}
+
+[dir='rtl'] .list-spaced ul,
+[dir='rtl'] .list-spaced ol {
+  padding-inline-start: 0;
+  padding-inline-end: 1.5rem;
+  text-align: right;
+}
+
+[dir='rtl'] .list-spaced ul {
+  padding-inline-end: 1rem; // match UL indentation in RTL
+}
+[dir='rtl'] .list-spaced ul li::before {
+  margin-inline-end: 0.5rem; // gap between bullet and text in RTL
+  margin-inline-start: 0;
+}

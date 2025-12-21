@@ -2,6 +2,10 @@
 @use './components';
 // Doctor grid legacy styling (service chips, cards, filters)
 @use '../assets/scss/pages/doctor-grid';
+// Legal pages styling (privacy policy, terms)
+@use '../assets/scss/pages/privacy-policy';
+// Shared list utilities
+@use '../assets/scss/utils/lists';
 
 // RTL support
 [dir='rtl'] {

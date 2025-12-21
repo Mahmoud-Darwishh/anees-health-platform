@@ -149,10 +149,10 @@ const Home3Footer = () => {
                   <div className="copyright-menu">
                     <ul className="policy-menu no-separator list-unstyled d-flex gap-3 justify-content-end mb-0">
                       <li>
-                        <Link href="#" className="text-white text-decoration-none">{t('footer.terms')}</Link>
+                        <Link href={`/${locale}/terms-and-conditions`} className="text-white text-decoration-none">{t('footer.terms')}</Link>
                       </li>
                       <li>
-                        <Link href="#" className="text-white text-decoration-none">{t('footer.privacy')}</Link>
+                        <Link href={`/${locale}/privacy-policy`} className="text-white text-decoration-none">{t('footer.privacy')}</Link>
                       </li>
                     </ul>
                   </div>
