@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
 const SectionArtical: React.FC = () => {
     const t = useTranslations();
@@ -23,13 +23,18 @@ const SectionArtical: React.FC = () => {
                             <div className="col-lg-6">
                                 <div className="article-item aos" data-reveal>
                                     <div className="article-img">
-                                        <Link href="/blog/blog-details">
+                                        <a
+                                            href="https://www.facebook.com/share/p/1AC323K9G8/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label="Open related article on Facebook"
+                                        >
                                             <img
                                                 src="assets/img/blog/article-01.png"
                                                 className="img-fluid"
                                                 alt="img"
                                             />
-                                        </Link>
+                                        </a>
                                         <div className="date-icon">
                                             <span>15</span>May
                                         </div>
@@ -37,9 +42,14 @@ const SectionArtical: React.FC = () => {
                                     <div className="article-info">
                                         <span className="badge badge-cyan mb-2">{t('home.articles.ophthalmology')}</span>
                                         <h6 className="mb-2">
-                                            <Link href="/blog/blog-details">
+                                            <a
+                                                href="https://www.facebook.com/share/p/1AC323K9G8/"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label="Open related article on Facebook"
+                                            >
                                                 {t('home.articles.article1_title')}
-                                            </Link>
+                                            </a>
                                         </h6>
                                         <p>
                                             {t('home.articles.article1_desc')}
@@ -50,13 +60,18 @@ const SectionArtical: React.FC = () => {
                             <div className="col-lg-6">
                                 <div className="article-item aos" data-reveal>
                                     <div className="article-img">
-                                        <Link href="/blog/blog-details">
+                                        <a
+                                            href="https://www.facebook.com/share/p/1AC323K9G8/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label="Open related article on Facebook"
+                                        >
                                             <img
                                                 src="assets/img/blog/article-02.png"
                                                 className="img-fluid"
                                                 alt="img"
                                             />
-                                        </Link>
+                                        </a>
                                         <div className="date-icon">
                                             <span>18</span>May
                                         </div>
@@ -64,9 +79,14 @@ const SectionArtical: React.FC = () => {
                                     <div className="article-info">
                                         <span className="badge badge-cyan mb-2">{t('home.articles.cardiology')}</span>
                                         <h6 className="mb-2">
-                                            <Link href="/blog/blog-details">
+                                            <a
+                                                href="https://www.facebook.com/share/p/1AC323K9G8/"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                aria-label="Open related article on Facebook"
+                                            >
                                                 {t('home.articles.article2_title')}
-                                            </Link>
+                                            </a>
                                         </h6>
                                         <p>
                                             {t('home.articles.article2_desc')}
@@ -132,10 +152,16 @@ const SectionArtical: React.FC = () => {
                             </div> */}
                         </div> 
                         <div className="text-center load-item aos" data-reveal>
-                            <Link href="blog/blog-grid" className="btn btn-dark">
-                                {t('home.articles.view_all')}
+                            <a
+                                href="https://www.facebook.com/share/p/1AC323K9G8/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-dark"
+                                aria-label={t('home.articles.continue_facebook_aria')}
+                            >
+                                {t('home.articles.continue_facebook')}
                                 <i className="isax isax-arrow-right-3 ms-2" />
-                            </Link>
+                            </a>
                         </div>
                     </div>
                 </section>
