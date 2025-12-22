@@ -1675,7 +1675,7 @@
   },
   {
     "id": 26,
-    "image": "assets/img/doctor-grid-optimized/19.webp",
+    "image": "assets/img/doctor-grid-optimized/18.webp",
     "rating": 4.9,
     "speciality": "Geriatric Medicine",
     "specialityColorClass": "active-bar-warning",
@@ -1752,5 +1752,99 @@
       }
     ],
     "testimonials": []
+  },
+  {
+    "id": 30,
+    "image": "assets/img/doctor-grid-optimized/20.webp",
+    "rating": 4.9,
+    "speciality": "Physiotherapy",
+    "specialityColorClass": "active-bar-warning",
+    "specialityTextClass": "text-warning",
+    "availabilityStatus": "Available",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "Dr. Ahmed Sayed Badr",
+    "location": "Cairo, Egypt",
+    "duration": "Tele-Medicine",
+    "consultationFee": "EGP 600",
+    "maxConsultationFee": "EGP 1500",
+    "professionalTitle": "Physiotherapy Specialist",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "Male",
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
+    "experienceYears": 2,
+    "bio": "Experienced Physiotherapy Specialist with 2+ years of dedicated experience in orthopedic rehabilitation and sports medicine. Specializing in treating orthopedic conditions and sports-related injuries with evidence-based therapeutic interventions and personalized rehabilitation programs.",
+    "certifications": [
+      "Board Certified in Physiotherapy",
+      "Sports Medicine Specialist",
+      "Orthopedic Rehabilitation Expert",
+      "International Physiotherapy License"
+    ],
+    "education": [
+      {
+        "degree": "Bachelor's in Physiotherapy",
+        "university": "Heliopolis University",
+        "year": "2024"
+      },
+      {
+        "degree": "Certification in Sports Medicine",
+        "university": "Egyptian Physical Therapy Association",
+        "year": "2014"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "EGP 600",
+      "homeVisit": "EGP 1200",
+      "clinicVisit": "EGP 600"
+    },
+    "successRate": "94%",
+    "avgWaitTime": "12 min",
+    "totalPatients": "2,100+",
+    "areaCoverage": [
+      "Fifth Settlement",
+      "New Cairo",
+      "Obour",
+      "Heliopolis",
+      "Sheraton",
+      "Nasr City"
+    ],
+    "clinicDetails": [
+      {
+        "name": "Anees Health Clinic",
+        "location": "Nasr City, Cairo",
+        "address": "15 Mostafa El-Nahas Street, 8th District, Nasr City",
+        "hours": "8:00 AM - 8:00 PM",
+        "slots": "8 slots available",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.345!3d30.045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMjAnNDIuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "Karim El-Sayed",
+        "rating": 5,
+        "text": "Dr. Ahmed is exceptional! His physiotherapy sessions have greatly improved my mobility after my sports injury. Highly recommended."
+      },
+      {
+        "name": "Hana Mostafa",
+        "rating": 5,
+        "text": "Very professional and knowledgeable. Made recovery from my orthopedic surgery much easier with personalized care."
+      },
+      {
+        "name": "Tariq Ahmed",
+        "rating": 4.8,
+        "text": "Excellent therapist with a deep understanding of sports rehabilitation. Helped me return to my athletic activities."
+      }
+    ]
   }
 ]

@@ -1675,7 +1675,7 @@
   },
   {
     "id": 26,
-    "image": "assets/img/doctor-grid-optimized/19.webp",
+    "image": "assets/img/doctor-grid-optimized/18.webp",
     "rating": 4.9,
     "speciality": "طب المسنين",
     "specialityColorClass": "active-bar-warning",
@@ -1752,5 +1752,99 @@
       }
     ],
     "testimonials": []
+  },
+  {
+    "id": 30,
+    "image": "assets/img/doctor-grid-optimized/20.webp",
+    "rating": 4.9,
+    "speciality": "العلاج الطبيعي",
+    "specialityColorClass": "active-bar-warning",
+    "specialityTextClass": "text-warning",
+    "availabilityStatus": "متاح",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "د. أحمد السيد بدر",
+    "location": "القاهرة، مصر",
+    "duration": "عن بُعد",
+    "consultationFee": "٦٠٠ جنيه",
+    "maxConsultationFee": "١٥٠٠ جنيه",
+    "professionalTitle": "أخصائي العلاج الطبيعي",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "ذكر",
+    "channels": [
+      "من زيارة منزلية",
+      "فيديو",
+      "محادثة"
+    ],
+    "languages": [
+      "العربية",
+      "الإنجليزية"
+    ],
+    "clinics": [
+      "عيادة أنيس الصحية"
+    ],
+    "experienceYears": 2,
+    "bio": "أخصائي علاج طبيعي متمرس بخبرة تزيد عن 2 سنوات في إعادة التأهيل العظمي والطب الرياضي. متخصص في علاج الحالات العظمية والإصابات الرياضية باستخدام برامج تأهيلية شاملة وعلاجات موثوقة بالأدلة العلمية.",
+    "certifications": [
+      "معتمد في العلاج الطبيعي",
+      "أخصائي الطب الرياضي",
+      "خبير إعادة التأهيل العظمي",
+      "رخصة عالمية في العلاج الطبيعي"
+    ],
+    "education": [
+      {
+        "degree": "بكالوريوس في العلاج الطبيعي",
+        "university": "جامعة هليوبوليس",
+        "year": "2024"
+      },
+      {
+        "degree": "شهادة في الطب الرياضي",
+        "university": "الجمعية المصرية للعلاج الطبيعي",
+        "year": "2017"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "٦٠٠ جنيه",
+      "homeVisit": "١٢٠٠ جنيه",
+      "clinicVisit": "٦٠٠ جنيه"
+    },
+    "successRate": "94%",
+    "avgWaitTime": "12 دقيقة",
+    "totalPatients": "2,100+",
+    "areaCoverage": [
+      "التجمع الخامس",
+      "القاهرة الجديدة",
+      "العبور",
+      "مصر الجديدة",
+      "الشيراتون",
+      "مدينة نصر"
+    ],
+    "clinicDetails": [
+      {
+        "name": "عيادة أنيس الصحية",
+        "location": "مدينة نصر، القاهرة",
+        "address": "شارع مصطفى النحاس رقم 15، الحي الثامن، مدينة نصر",
+        "hours": "8:00 صباحاً - 8:00 مساءً",
+        "slots": "8 مواعيد متاحة",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.345!3d30.045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMjAnNDIuMCJF!5e0!3m2!1sar!2seg!4v1234567890"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "كريم السيد",
+        "rating": 5,
+        "text": "د. أحمد متميز جداً! جلسات العلاج الطبيعي حسّنت حركتي كثيراً بعد الإصابة الرياضية. أنصح به بشدة."
+      },
+      {
+        "name": "هناء مصطفى",
+        "rating": 5,
+        "text": "احترافي جداً وملم بكل شيء. ساعدني في التعافي من جراحة العظام بطريقة رائعة."
+      },
+      {
+        "name": "طارق أحمد",
+        "rating": 4.8,
+        "text": "معالج متميز مع فهم عميق لإعادة التأهيل الرياضي. ساعدني على العودة لممارسة الرياضة."
+      }
+    ]
   }
 ]
