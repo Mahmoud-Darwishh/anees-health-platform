@@ -142,45 +142,53 @@
 				}	
 			}
 			.policy-menu {
-			    /* Bootstrap utilities handle layout: list-unstyled, d-flex, gap-3, justify-content-end */
+			    /* Bootstrap utilities handle layout: list-unstyled, d-flex, gap-2, justify-content-end */
 			    /* Text color and link styling handled by Bootstrap text-white and text-decoration-none */
 			    a {
 					    &:hover, &:focus {
 					    	color: variables.$primary;
+					    	transition: color 0.3s ease;
 					    }
 					}
+					
+					/* Better mobile spacing */
+					@include mixins.respond-below(md) {
+						justify-content: center !important;
+						
+						li {
+							font-size: variables.$font-size-14;
+						}
+					}
 			}
-
-			/* Remove legacy separators for footer-three policy links (handled by gap utility) */
-			&.footer-three {
-				.policy-menu li {
-					margin-right: 0;
-					padding-right: 0;
-					&::after {
-						content: none;
+			
+			/* New simple policy links styling without list semantics */
+			.policy-links {
+				font-size: variables.$font-size-16;
+				
+				@include mixins.respond-below(md) {
+					font-size: variables.$font-size-14;
+				}
+				
+				a {
+					&:hover, &:focus {
+						color: variables.$primary !important;
+						transition: color 0.3s ease;
 					}
 				}
 			}
 
-			/* Explicit opt-out when "no-separator" utility class is present */
-			.policy-menu.no-separator li {
+			/* Remove all separators - we use manual pipe character */
+			.policy-menu li {
 				margin-right: 0;
 				padding-right: 0;
-			}
-			.policy-menu.no-separator li::after {
-				content: none !important;
+				
+				&::after {
+					content: none !important;
+					display: none !important;
+				}
 			}
 		}		
-	} 
-
-/* Force remove separators for footer-three policy menu (catch-all) */
-.footer.footer-three .policy-menu li {
-	margin-right: 0;
-	padding-right: 0;
-}
-.footer.footer-three .policy-menu li::after {
-	content: none !important;
-}
+	}
 	&.inner-footer {
 		position: relative;
 		z-index: 1;
@@ -312,33 +320,15 @@
 				}
 			    li {
 				    display: inline-block;
-				    margin: 0 8px 5px 0;
-					padding-right: 14px;
+				    margin: 0;
+					padding: 0;
 					position: relative;
-				    &:last-child {
-						margin-right: 0;
-						padding-right: 0;
-					}
+					
 					a {
 					    color: variables.$gray-600;
 					    &:hover, &:focus {
 					    	color: variables.$primary;
 					    }
-					}
-					&::after {
-						background: variables.$primary;
-					    width: 6px;
-						height: 6px;
-					    position: absolute;
-						right: 0;
-						left: auto;
-						@include mixins.rounded(50%);
-						top: 50%;
-						@include mixins.transform(translateY(-50%));
-						content: "";
-					}
-					&:last-child::after {
-					    content: none;
 					}
 				}
 			}

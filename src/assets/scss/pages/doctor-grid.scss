@@ -230,13 +230,6 @@
   border-radius: 10px 10px 0 0;
 }
 
-@include mixins.respond-below(md) {
-  .card-img-hover img.doctor-card-image {
-    width: auto !important;
-    height: auto !important;
-  }
-}
-
 /* Override global rule that hides footers on `.map-page` so this page shows the homepage footer */
 .map-page .footer {
   display: block !important;

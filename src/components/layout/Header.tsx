@@ -80,6 +80,10 @@ const Header: React.FC = () => {
     const root = document.getElementsByTagName("html")[0];
     root.classList.remove("menu-opened");
   };
+  const onHandleLinkClick = () => {
+    // Close menu when any navigation link is clicked
+    onHandleCloseMenu();
+  };
 
   return (
     <div>
@@ -191,7 +195,7 @@ const Header: React.FC = () => {
               <div className="header-menu">
                 <div className="main-menu-wrapper">
                   <div className="menu-header">
-                    <Link href={`/${locale}`} className="menu-logo">
+                    <Link href={`/${locale}`} className="menu-logo" onClick={onHandleLinkClick}>
                       <img
                         src="/assets/img/anees-logo.png"
                         className="img-fluid"
@@ -209,23 +213,23 @@ const Header: React.FC = () => {
                   </div>
                   <ul className="main-nav d-flex">
                     <li className={`nav-item me-3 ${isActiveLink(`/${locale}`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}`} className="nav-link">
+                      <Link href={`/${locale}`} className="nav-link" onClick={onHandleLinkClick}>
                         {t('nav.home')}
                       </Link>
                     </li>
                     
                     <li className={`nav-item me-3 ${isActiveLink(`/${locale}/about-us`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}/about-us`} className="nav-link">
+                      <Link href={`/${locale}/about-us`} className="nav-link" onClick={onHandleLinkClick}>
                         {t('nav.about_us')}
                       </Link>
                     </li>
                     <li className={`nav-item me-3 ${isActiveLink(`/${locale}#services`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}#services`} className="nav-link">
+                      <Link href={`/${locale}#services`} className="nav-link" onClick={onHandleLinkClick}>
                         {t('nav.services')}
                       </Link>
                     </li>
                     <li className={`nav-item me-3 ${isActiveLink(`/${locale}/doctors`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}/doctors`} className="nav-link">
+                      <Link href={`/${locale}/doctors`} className="nav-link" onClick={onHandleLinkClick}>
                         {t('nav.doctors')}
                       </Link>
                     </li>
@@ -233,6 +237,7 @@ const Header: React.FC = () => {
                       <Link
                         href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}
                         className="nav-link d-flex align-items-center"
+                        onClick={onHandleLinkClick}
                       >
                         <i className="feather-globe me-2" />
                         <span>{locale === 'en' ? 'العربية' : 'English'}</span>

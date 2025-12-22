@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from 'next-intl';
 const Home3Footer = () => {
   const t = useTranslations();
   const locale = useLocale();
+  const isRTL = locale === 'ar';
+  
   return (
     <div>
       {/* Footer */}
@@ -136,25 +138,26 @@ const Home3Footer = () => {
           <div className="container-fluid">
             {/* Copyright */}
             <div className="copyright">
-              <div className="row">
-                <div className="col-md-6 col-lg-6">
-                  <div className="copyright-text">
+              <div className="row align-items-center">
+                <div className="col-md-6 col-12 mb-3 mb-md-0">
+                  <div className={`copyright-text text-center ${isRTL ? 'text-md-end' : 'text-md-start'}`}>
                     <p className="mb-0 text-white">
                       {t('footer.copyright')}
                     </p>
                   </div>
                 </div>
-                <div className="col-md-6 col-lg-6 text-end">
+                <div className="col-md-6 col-12">
                   {/* Copyright Menu */}
-                  <div className="copyright-menu">
-                    <ul className="policy-menu no-separator list-unstyled d-flex gap-3 justify-content-end mb-0">
-                      <li>
-                        <Link href={`/${locale}/terms-and-conditions`} className="text-white text-decoration-none">{t('footer.terms')}</Link>
-                      </li>
-                      <li>
-                        <Link href={`/${locale}/privacy-policy`} className="text-white text-decoration-none">{t('footer.privacy')}</Link>
-                      </li>
-                    </ul>
+                  <div className={`copyright-menu text-center ${isRTL ? 'text-md-start' : 'text-md-end'}`}>
+                    <p className="policy-links d-inline-flex align-items-center flex-wrap mb-0 text-white">
+                      <Link href={`/${locale}/terms-and-conditions`} className="text-white text-decoration-none">
+                        {t('footer.terms')}
+                      </Link>
+                      <span className="text-white-50 mx-2" aria-hidden="true">|</span>
+                      <Link href={`/${locale}/privacy-policy`} className="text-white text-decoration-none">
+                        {t('footer.privacy')}
+                      </Link>
+                    </p>
                   </div>
                   {/* /Copyright Menu */}
                 </div>
