@@ -107,6 +107,7 @@ const Home3Footer = () => {
                 <div className="footer-widget footer-contact">
                   <h2 className="footer-title">{t('footer.contact')}</h2>
                   <div className="footer-contact-info">
+                    {/*
                     <div className="footer-address d-flex align-items-start gap-2 mb-3">
                       <span className="me-3">
                         <i className="fas fa-map-marker-alt" />
@@ -116,7 +117,7 @@ const Home3Footer = () => {
                         <br />
                         {t('footer.city')}
                       </p>
-                    </div>
+                    </div> */}
                     <div className="d-flex align-items-start gap-3 mb-2">
                       <i className="fa-solid fa-mobile-screen-button mt-1" aria-hidden="true" />
                       <div className="d-flex flex-column">
