@@ -117,10 +117,13 @@ const Home3Footer = () => {
                         {t('footer.city')}
                       </p>
                     </div>
-                    <p className="mb-2">
-                      <i className="fa-solid fa-mobile-screen-button me-3 mb-3" />
-                      +201055164595
-                    </p>
+                    <div className="d-flex align-items-start gap-3 mb-2">
+                      <i className="fa-solid fa-mobile-screen-button mt-1" aria-hidden="true" />
+                      <div className="d-flex flex-column">
+                        <span className="mb-1">+201096185922</span>
+                        <span className="mb-0">+201270558620</span>
+                      </div>
+                    </div> 
                     <p className="mb-0">
                       <i className="fas fa-envelope me-3 mb-3" />
                       info@aneeshealth.com
