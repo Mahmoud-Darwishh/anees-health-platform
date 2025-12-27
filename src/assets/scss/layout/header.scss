@@ -2472,16 +2472,15 @@ html.menu-opened body {
 	}
 }
 }
-.menu-opened .main-menu-wrapper .main-nav > li.has-submenu > .submenu {
-	@media (max-width: 991.98px) {
+// Mobile submenu - show when submenu-open class is applied
+@media (max-width: 991.98px) {
+	.menu-opened .main-menu-wrapper .main-nav > li.has-submenu > .submenu {
 		display: none;
 		visibility: hidden;
 		opacity: 0;
 	}
-}
 
-.menu-opened .main-menu-wrapper .main-nav > li.has-submenu.submenu-open > .submenu {
-	@media (max-width: 991.98px) {
+	.menu-opened .main-menu-wrapper .main-nav > li.has-submenu.submenu-open > .submenu {
 		display: block;
 		visibility: visible;
 		opacity: 1;

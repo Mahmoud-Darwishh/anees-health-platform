@@ -87,9 +87,9 @@ const Header: React.FC = () => {
     onHandleCloseMenu();
   };
 
-  // Toggle submenu on mobile (click) while preserving hover on desktop
+  // Toggle submenu on mobile (click/touch) while preserving hover on desktop
   const handleSubmenuToggle = (
-    e: React.MouseEvent | React.KeyboardEvent,
+    e: React.MouseEvent | React.KeyboardEvent | React.TouchEvent,
     key: string
   ) => {
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 992;
