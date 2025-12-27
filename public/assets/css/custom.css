@@ -1668,8 +1668,8 @@ button:focus {
   color: #FFF;
 }
 .btn.btn-secondary:hover, .btn.btn-secondary:focus, .btn.btn-secondary.focus, .btn.btn-secondary:active, .btn.btn-secondary.active {
-  background-color: rgb(109.2, 36.12, 178.08);
-  border: 1px solid rgb(109.2, 36.12, 178.08);
+  background-color: rgb(1.8617283951, 109.8419753086, 224.3382716049);
+  border: 1px solid rgb(1.8617283951, 109.8419753086, 224.3382716049);
   color: #FFF;
 }
 .btn.btn-success {
