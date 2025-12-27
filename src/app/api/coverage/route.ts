@@ -110,7 +110,11 @@ export async function GET(request: NextRequest) {
       );
 
       // Log the coverage check (async, non-blocking)
-      const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+      const ipHeader =
+        request.headers.get('x-forwarded-for') ||
+        request.headers.get('x-real-ip') ||
+        undefined;
+      const ip = ipHeader ? ipHeader.split(',')[0].trim() : 'unknown';
       const userAgent = request.headers.get('user-agent') || undefined;
       
       logCoverageCheck({
