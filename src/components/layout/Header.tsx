@@ -223,10 +223,22 @@ const Header: React.FC = () => {
                         {t('nav.about_us')}
                       </Link>
                     </li>
-                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}#services`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}#services`} className="nav-link" onClick={onHandleLinkClick}>
-                        {t('nav.services')}
+                    <li className={`nav-item has-submenu me-3 ${isActiveLink(`/${locale}#services`) || isActiveLink(`/${locale}/coverage`) ? 'active' : ''}`}>
+                      <Link href={`/${locale}#services`} className="nav-link">
+                        {t('nav.services')} <i className="fas fa-chevron-down ms-1"></i>
                       </Link>
+                      <ul className="submenu">
+                        <li>
+                          <Link href={`/${locale}#services`} onClick={onHandleLinkClick}>
+                            {t('nav.all_services')}
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
+                            {t('nav.coverage')}
+                          </Link>
+                        </li>
+                      </ul>
                     </li>
                     <li className={`nav-item me-3 ${isActiveLink(`/${locale}/doctors`) ? 'active' : ''}`}>
                       <Link href={`/${locale}/doctors`} className="nav-link" onClick={onHandleLinkClick}>
