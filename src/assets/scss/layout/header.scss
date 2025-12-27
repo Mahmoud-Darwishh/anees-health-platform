@@ -18,49 +18,11 @@
 		background-color: colors.$white;
 		border: 0;
 		position: variables.$relative;
-		height: 85px;
-		margin-bottom: 0;
-		display: -webkit-box;
-		display: -ms-flexbox;
-		display: flex;
-		@extend %flex-align-center;
-		@extend %justify-content-between;
-		@extend %flex-wrap;
-		@include mixins.margin-padding(null, 0);
-
-		@include mixins.respond-below(lg) {
-			flex-wrap: nowrap;
-			justify-content: space-between;
-			height: auto;
-		}
-
-		@include mixins.respond-below(xl) {
-			@include mixins.margin-padding(null, 0);
-		}
-
+									content: "\f078";
 		@include mixins.respond-below(sm) {
 			@include mixins.margin-padding(null, 0 15px);
 		}
-
-		.navbar-header {
-			@include mixins.respond-below(lg) {
-				width: variables.$full__width;
-				display: flex;
-				align-items: center;
-				justify-content: flex-end;
-				position: relative;
-			}
-
-			.bar-icon {
-				display: variables.$inline__block;
-				width: 31px;
-				@include mixins.respond-below(lg) {
-					@include mixins.position(variables.$absolute, 50%, null, null, 0);
-					@include mixins.transform(translateY(-50%));
-				}
-
-				span {
-					background-color: colors.$dark-inkblue;
+													content: "\f078";
 					display: block;
 					float: variables.$left;
 					height: 3px;
@@ -1294,6 +1256,37 @@
 	}
 }
 
+// Mobile submenu support: allow tap-to-open when we add .submenu-open
+@media (max-width: 991.98px) {
+	.header .main-menu-wrapper .main-nav > li.has-submenu {
+		position: static;
+	}
+
+	.header .main-menu-wrapper .main-nav > li.has-submenu > .submenu {
+		display: none;
+		visibility: hidden;
+		opacity: 0;
+		position: static;
+		margin: 0;
+		transform: none;
+		box-shadow: none;
+		height: auto;
+		max-height: none;
+	}
+
+	.header .main-menu-wrapper .main-nav > li.has-submenu.submenu-open > .submenu,
+	.header .main-menu-wrapper .main-nav .has-submenu .submenu.submenu-open {
+		display: block !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+		position: static;
+		transform: none;
+		margin: 0;
+		height: auto;
+		max-height: none;
+	}
+}
+
 .header-one {
 	.header-nav {
 		.main-nav {
@@ -2449,23 +2442,6 @@ html.menu-opened body {
 										color: colors.$slate-blue;
 									}
 								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-.header-one {
-	.main-menu-wrapper {
-		.main-nav {
-			& > li {
-				.submenu {
-					& > li {
-						&.has-submenu {
-							& > a {
-								&::after {
 									content: "\f078";
 								}
 							}
@@ -2495,6 +2471,27 @@ html.menu-opened body {
 		}
 	}
 }
+}
+.menu-opened .main-menu-wrapper .main-nav > li.has-submenu > .submenu {
+	@media (max-width: 991.98px) {
+		display: none;
+		visibility: hidden;
+		opacity: 0;
+	}
+}
+
+.menu-opened .main-menu-wrapper .main-nav > li.has-submenu.submenu-open > .submenu {
+	@media (max-width: 991.98px) {
+		display: block;
+		visibility: visible;
+		opacity: 1;
+		position: static;
+		transform: none;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		box-shadow: none;
+	}
 }
 .header.home-head-one.header-fixed {
 	background: variables.$light-300;

@@ -1424,3 +1424,28 @@ body {
     opacity: 1;
   }
 }
+
+/* Mobile submenu reveal for header navigation */
+@media (max-width: 991.98px) {
+  .header .header-nav .main-nav > li.has-submenu.submenu-open > .submenu,
+  .header .header-nav .main-nav > li .submenu.submenu-open {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static;
+    transform: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-height: none;
+    height: auto;
+    box-shadow: none;
+    background-color: #23527b;
+  }
+
+  .header .header-nav .main-nav > li.has-submenu > .submenu {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+  }
+}

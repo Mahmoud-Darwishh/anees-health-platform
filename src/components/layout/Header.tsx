@@ -13,6 +13,7 @@ const Header: React.FC = () => {
   const pathname = usePathname();
   const [searchField, setSearchField] = useState(false);
   const [homeSearchQuery, setHomeSearchQuery] = useState('');
+  const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
   const toggleSearch = () => {
     setSearchField(!searchField);
   };
@@ -79,10 +80,26 @@ const Header: React.FC = () => {
   const onHandleCloseMenu = () => {
     const root = document.getElementsByTagName("html")[0];
     root.classList.remove("menu-opened");
+    setOpenSubmenus({});
   };
   const onHandleLinkClick = () => {
     // Close menu when any navigation link is clicked
     onHandleCloseMenu();
+  };
+
+  // Toggle submenu on mobile (click) while preserving hover on desktop
+  const handleSubmenuToggle = (
+    e: React.MouseEvent | React.KeyboardEvent,
+    key: string
+  ) => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 992;
+    if (!isMobile) return; // let hover handle desktop/tablet
+
+    e.preventDefault();
+    setOpenSubmenus((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   return (
@@ -223,11 +240,29 @@ const Header: React.FC = () => {
                         {t('nav.about_us')}
                       </Link>
                     </li>
-                    <li className={`nav-item has-submenu me-3 ${isActiveLink(`/${locale}#services`) || isActiveLink(`/${locale}/coverage`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}#services`} className="nav-link">
+                    <li
+                      className={`nav-item has-submenu me-3 ${
+                        isActiveLink(`/${locale}#services`) || isActiveLink(`/${locale}/coverage`) ? 'active' : ''
+                      } ${openSubmenus.services ? 'active submenu-open' : ''}`}
+                    >
+                      <Link
+                        href={`/${locale}#services`}
+                        className="nav-link"
+                        onClick={(e) => handleSubmenuToggle(e, 'services')}
+                        role="button"
+                        aria-haspopup="true"
+                        aria-expanded={openSubmenus.services ? 'true' : 'false'}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            handleSubmenuToggle(e, 'services');
+                          }
+                        }}
+                      >
                         {t('nav.services')} <i className="fas fa-chevron-down ms-1"></i>
                       </Link>
-                      <ul className="submenu">
+                      <ul
+                        className={`submenu ${openSubmenus.services ? 'submenu-open' : ''}`}
+                      >
                         <li>
                           <Link href={`/${locale}#services`} onClick={onHandleLinkClick}>
                             {t('nav.all_services')}
