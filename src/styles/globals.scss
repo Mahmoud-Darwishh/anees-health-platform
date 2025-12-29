@@ -2,6 +2,8 @@
 @use './components';
 // Doctor grid legacy styling (service chips, cards, filters)
 @use '../assets/scss/pages/doctor-grid';
+// Doctor profile page styling
+@use '../assets/scss/pages/doctor-profile';
 // Legal pages styling (privacy policy, terms)
 @use '../assets/scss/pages/privacy-policy';
 // Shared list utilities

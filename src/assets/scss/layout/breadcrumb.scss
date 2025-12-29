@@ -25,13 +25,15 @@
 	.page-breadcrumb {
 		ol {
 		    background-color: transparent;
-		    font-size: variables.$font-size-16;
+		    font-size: variables.$font-size-15;
 			margin-bottom: 5px;
 			justify-content: center;
 		    li {
 				color: variables.$text-color;
 		    	&.active {
-		    		color:variables.$title-color;
+		    		color: variables.$text-color;
+		    		opacity: 0.7;
+		    		font-weight: 600;
 		    	}
 		    	a {
 		    		background: variables.$primary_gradient;

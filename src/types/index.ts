@@ -19,6 +19,7 @@ export interface Feature {
 }
 
 // Future types for telemedicine features
+// Note: Comprehensive Doctor types are now in src/lib/models/doctor.types.ts
 
 export interface Doctor {
   id: string;

@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
+import { generateDoctorSlug } from '@/lib/utils/slug';
+import doctorsDataEn from './doctors.en.json';
 import type { Doctor } from './types';
 
 type MessageValues = Record<string, string | number>;
@@ -11,17 +13,26 @@ interface DoctorCardProps {
   tg: (key: string, values?: MessageValues) => string;
 }
 
+// Canonical slugs derived from English names to stay stable across locales
+const canonicalSlugById = new Map<number, string>(
+  (doctorsDataEn as Doctor[]).map((doc) => [doc.id, generateDoctorSlug(doc.doctorName)])
+);
+
 export const DoctorCard = memo(function DoctorCard({
   doctor,
   locale,
   tg,
 }: DoctorCardProps) {
+  // Generate stable slug from canonical (English) mapping to keep URLs identical across locales
+  const doctorSlug = canonicalSlugById.get(doctor.id) || generateDoctorSlug(doctor.doctorName);
+  const profileHref = `/${locale}/doctors/${doctorSlug}`;
+
   return (
     <div className="col-xxl-4 col-md-6 mb-4">
       <div className="card doctor-card-enhanced">
         {/* Image with verified badge overlay */}
         <div className="card-img card-img-hover doctor-image-wrapper position-relative">
-          <Link href={`/${locale}/doctors/${doctor.id}`}>
+          <Link href={profileHref}>
             <Image
               src={`/${doctor.image}`}
               alt={doctor.doctorName}
@@ -53,7 +64,7 @@ export const DoctorCard = memo(function DoctorCard({
           {/* Main info */}
           <div className="doctor-info-content p-3">
             <h3 className="doctor-name mb-2">
-              <Link href="#">{doctor.doctorName}</Link>
+              <Link href={profileHref}>{doctor.doctorName}</Link>
             </h3>
             <p className="professional-title text-muted fs-13 mb-2">
               {doctor.professionalTitle || doctor.speciality}
@@ -139,7 +150,7 @@ export const DoctorCard = memo(function DoctorCard({
 
             {/* Book button */}
             <Link
-              href="#"
+              href={profileHref}
               className="btn btn-sm btn-primary w-100 rounded-pill"
             >
               <i className="isax isax-calendar-1 me-2"></i>
