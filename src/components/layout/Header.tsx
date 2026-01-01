@@ -337,7 +337,19 @@ const Header: React.FC = () => {
                     </Link>
                   </li>
 
-                  <li className="nav-item">
+                  <li className="nav-item me-2">
+                    <Link
+                      href={`/${locale}/booking`}
+                      className="btn btn-md btn-primary-gradient d-flex align-items-center rounded-pill"
+                      onClick={onHandleLinkClick}
+                    >
+                      <i className="isax isax-calendar-1 me-2" />
+                      <span>{t('header.bookNow')}</span>
+                    </Link>
+                  </li>
+
+                  {/* Login Button - Disabled for now, to be reused in future */}
+                  {/* <li className="nav-item">
                     <Link
                       href="#"
                       className="btn btn-md btn-primary-gradient d-flex align-items-center rounded-pill"
@@ -345,7 +357,9 @@ const Header: React.FC = () => {
                       <i className="isax isax-lock-1 me-2" />
                       <span>{t('header.login')}</span>
                     </Link>
-                  </li>
+                  </li> */}
+
+                  {/* Register Button - Disabled for now */}
                   {/* <li>
                     <Link
                       href={`/${locale}/register`}

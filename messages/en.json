@@ -42,6 +42,7 @@
     "subtitle": "Trusted Home Healthcare Anytime, Anywhere",
     "login": "Login",
     "register": "Register",
+    "bookNow": "Book Now",
     "search_placeholder": "Search doctors, clinics, hospitals, diseases...",
     "home": "Home",
     "doctors": "Doctors",
@@ -65,6 +66,7 @@
       "service_type": "Select Service Type",
       "specialty": "Select Specialty",
       "search_doctor": "Search for Doctor",
+      "book_instantly": "Skip the search—book a consultation directly",
       "stats": {
         "doctors": "Doctors",
         "patients": "Patients",
@@ -778,5 +780,151 @@
     "contact_cta_title": "We're Here to Help",
     "contact_cta_text": "Have questions about our coverage? Want to request service in your area?",
     "contact_button": "Contact Us"
+  },
+  "booking": {
+    "title": "Book Your Service",
+    "meta_description": "Book home healthcare services with Anees Health. Choose your preferred service type, date, and time.",
+    "breadcrumb": {
+      "home": "Home",
+      "booking": "Book Service"
+    },
+    "form": {
+      "personalInfo": "Your Information",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "phoneNumber": "Phone Number",
+      "phoneNumberPlaceholder": "e.g., +20 10 5516 4595",
+      "visitType": "Select Visit Type",
+      "homeVisit": "Home Visit",
+      "telemedicine": "Telemedicine",
+      "telemedicinePrice": "250 EGP",
+      "homeVisitDescription": "A clinician comes to your location for hands-on care.",
+      "telemedicineDescription": "Secure video consult from anywhere—no travel needed.",
+      "serviceType": "Select Service Type",
+      "doctorVisit": "Doctor Visit",
+      "physiotherapy": {
+        "label": "Physiotherapy",
+        "postoperative": "Postoperative Recovery",
+        "fracture": "Fracture / Orthopedic Rehab",
+        "neuro": "Neuro & Strokes",
+        "other": "Other"
+      },
+      "nursing": {
+        "label": "Nursing Care",
+        "nurse": "Registered Nurse",
+        "nursingAssistant": "Nursing Assistant",
+        "hours": {
+          "8hrs": "8 Hours",
+          "12hrs": "12 Hours",
+          "24hrs": "24 Hours (Full Day)"
+        },
+        "duration": {
+          "1week": "1 Week",
+          "2weeks": "2 Weeks",
+          "1month": "1 Month"
+        }
+      },
+      "specialty": {
+        "label": "Medical Specialty",
+        "generalMedicine": "General Medicine",
+        "pediatrics": "Pediatrics",
+        "orthopedics": "Orthopedics",
+        "cardiology": "Cardiology",
+        "dermatology": "Dermatology"
+      },
+      "specialtySelect": "Select a specialty",
+      "preferredDate": "Preferred Date",
+      "timePreference": "Preferred Time",
+      "morning": "Morning",
+      "evening": "Evening",
+      "doesntMatter": "Doesn't Matter",
+      "sessions": "Number of Sessions",
+      "sessions1": "1 Session",
+      "sessions12": "12 Sessions",
+      "caseType": "Type of Case",
+      "caseTypeSelect": "Select case type",
+      "details": "Details",
+      "nursingType": "Nursing Professional",
+      "nursingTypeSelect": "Select professional type",
+      "hoursPerDay": "Hours Per Day",
+      "hoursPerDaySelect": "Select hours",
+      "duration": "Duration",
+      "durationSelect": "Select duration"
+    },
+    "summary": {
+      "title": "Booking Summary",
+      "yourDetails": "Your Details",
+      "serviceDetails": "Service Details",
+      "pricing": "Pricing",
+      "totalPrice": "Total Price",
+      "currency": "EGP",
+      "empty": "Complete the form to see your booking summary",
+      "selectService": "Select a service to see pricing"
+    },
+    "actions": {
+      "payNow": "Pay Now",
+      "chatWithTeam": "Chat with Care Team",
+      "processing": "Processing...",
+      "confirm": "Confirm Booking",
+      "proceedToPayment": "Proceed to Payment",
+      "expandSummary": "Expand Summary",
+      "collapseSummary": "Collapse Summary"
+    },
+    "validation": {
+      "fullNameRequired": "Please enter your full name",
+      "phoneNumberRequired": "Please enter your phone number",
+      "invalidPhoneNumber": "Please enter a valid Egyptian phone number (e.g., +20 10 XXXX XXXX)",
+      "visitTypeRequired": "Please select a visit type",
+      "serviceTypeRequired": "Please select a service type",
+      "specialtyRequired": "Please select a specialty",
+      "preferredDateRequired": "Please select a preferred date",
+      "timePreferenceRequired": "Please select a time preference",
+      "sessionCountRequired": "Please select number of sessions",
+      "caseTypeRequired": "Please select a case type",
+      "nursingTypeRequired": "Please select nursing professional type",
+      "nursingHoursRequired": "Please select hours per day",
+      "nursingDurationRequired": "Please select duration",
+      "allFieldsRequired": "Please fill in all required fields"
+    },
+    "success": {
+      "title": "Thank You!",
+      "message": "Your booking has been confirmed. You will receive a confirmation shortly."
+    },
+    "whatsappMessage": "Hello Anees Health!\n\nI would like to book a service with the following details:\n\n📋 Name: {fullName}\n📱 Phone: {phoneNumber}\n🏥 Service: {service}\n💰 Price: {price} EGP\n\nPlease confirm my booking and provide next steps.\n\nThank you!",
+    "expandSummary": "Expand Summary",
+    "collapseSummary": "Collapse Summary",
+    "newBooking": "Book Another Service",
+    "help_title": "Booking Support",
+    "how_it_works": "How It Works",
+    "step1": "Select your preferred service type and provide your information",
+    "step2": "Review the pricing and booking details in the summary",
+    "step3": "Complete payment and receive booking confirmation",
+    "need_help": "Need Help?",
+    "contact_support": "If you have any questions or need assistance with your booking, please contact our care team.",
+    "contact_button": "Contact Us"
+  },
+  "payment": {
+    "initializing": "Initializing Payment",
+    "pleaseWait": "Please wait while we set up your secure payment...",
+    "processing": "Processing...",
+    "error": "Payment Error",
+    "backToBooking": "Back to Booking",
+    "completePayment": "Complete Your Payment",
+    "securePayment": "Secure payment powered by Kashier",
+    "orderSummary": "Order Summary",
+    "orderId": "Order ID",
+    "amount": "Amount",
+    "payNow": "Pay Now",
+    "cancel": "Cancel",
+    "clickBelow": "Click the button above to open the secure payment window and complete your transaction.",
+    "paymentSuccess": "Payment Successful!",
+    "paymentFailed": "Payment Failed",
+    "paymentSuccessMessage": "Your payment has been processed successfully. We'll send you a confirmation email shortly.",
+    "paymentFailedMessage": "We couldn't process your payment. Please try again or use a different payment method.",
+    "transactionId": "Transaction ID",
+    "paymentMethod": "Payment Method",
+    "returnHome": "Return to Home",
+    "tryAgain": "Try Again",
+    "confirmationEmail": "A confirmation email with your booking details has been sent to your email address."
   }
 }

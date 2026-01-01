@@ -1,0 +1,347 @@
+/**
+ * Booking Page Styles
+ */
+
+.bookingPageContainer {
+  width: 100%;
+}
+
+/* ============================================================================
+   HERO SECTION
+   ============================================================================ */
+
+.heroSection {
+  background: linear-gradient(135deg, #aa8642 0%, #d4b16a 100%);
+  color: white;
+  padding: 1.75rem 1rem;
+  text-align: center;
+
+  @media (min-width: 640px) {
+    padding: 2.5rem 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    padding: 3.5rem 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 5rem 4rem;
+  }
+}
+
+.heroContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.heroTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+
+  @media (min-width: 640px) {
+    font-size: 2.25rem;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 2.75rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 3.5rem;
+  }
+}
+
+.heroSubtitle {
+  font-size: 0.95rem;
+  opacity: 0.95;
+  line-height: 1.5;
+  margin: 0;
+
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+}
+
+/* ============================================================================
+   BREADCRUMB
+   ============================================================================ */
+
+.breadcrumb {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  @media (min-width: 768px) {
+    padding: 0.75rem 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 0.75rem 4rem;
+  }
+
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+
+    &:not(:last-child)::after {
+      content: '/';
+      margin-left: 0.5rem;
+      color: #9ca3af;
+    }
+
+    a {
+      color: #0066cc;
+      text-decoration: none;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: #0052a3;
+        text-decoration: underline;
+      }
+    }
+
+    &[aria-current='page'] {
+      color: #6b7280;
+      font-weight: 600;
+    }
+  }
+}
+
+/* ============================================================================
+   MAIN CONTENT
+   ============================================================================ */
+
+.mainContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1rem 1rem;
+
+  @media (min-width: 640px) {
+    padding: 1.25rem 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    padding: 1.5rem 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 2rem 4rem;
+  }
+}
+
+/* Success Message */
+.successMessage {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+  }
+}
+
+.newBookingButton {
+  padding: 0.875rem 2rem;
+  background: white;
+  color: #10b981;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus {
+    outline: 2px solid white;
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================================
+   INFO SECTION
+   ============================================================================ */
+
+.infoSection {
+  background: #f9fafb;
+  padding: 4rem 2rem;
+  border-top: 1px solid #e5e7eb;
+
+  @media (min-width: 768px) {
+    padding: 5rem 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 6rem 4rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #1f2937;
+  }
+}
+
+.infoContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.helpGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
+  }
+}
+
+.helpCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  ol {
+    padding-left: 1.5rem;
+    color: #4b5563;
+    line-height: 1.8;
+
+    li {
+      margin-bottom: 0.75rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.contactLink {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #aa8642 0%, #d4b16a 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(170, 134, 66, 0.3);
+  }
+
+  &:focus {
+    outline: 2px solid #aa8642;
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 767px) {
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
+  .heroSection {
+    padding: 2.5rem 1rem;
+  }
+
+  .breadcrumb {
+    padding: 1rem;
+  }
+
+  .mainContent {
+    padding: 1.5rem;
+  }
+
+  .infoSection {
+    padding: 2rem 1rem;
+
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .helpCard {
+    padding: 1.5rem;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .helpCard {
+    transition: none;
+  }
+
+  .contactLink {
+    transition: none;
+  }
+
+  .newBookingButton {
+    transition: none;
+  }
+}

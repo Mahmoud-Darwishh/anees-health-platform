@@ -1,0 +1,401 @@
+/**
+ * Booking Form Styles
+ * Responsive, accessible form with RTL/LTR support
+ */
+
+.bookingContainer {
+  width: 100%;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, rgba(170, 134, 66, 0.05) 0%, rgba(212, 177, 106, 0.05) 100%);
+  min-height: 100vh;
+
+  @media (min-width: 768px) {
+    padding: 3rem 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 4rem;
+  }
+}
+
+.bookingWrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 380px;
+    gap: 3rem;
+  }
+}
+
+/* ============================================================================
+   FORM STYLES
+   ============================================================================ */
+
+.bookingForm {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    padding: 3rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 3rem;
+  }
+}
+
+.formContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.formSection {
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  &:not(:last-of-type) {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+}
+
+.expandingSection {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.5rem;
+    background: linear-gradient(180deg, #aa8642 0%, #d4b16a 100%);
+    border-radius: 2px;
+  }
+}
+
+.subFieldset {
+  border: none;
+  padding: 0;
+  margin: 1.5rem 0 0 0;
+}
+
+.subLegend {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* ============================================================================
+   FORM GROUPS
+   ============================================================================ */
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.required {
+  color: #dc2626;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.input,
+.select {
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: white;
+  color: #1f2937;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #aa8642;
+    box-shadow: 0 0 0 3px rgba(170, 134, 66, 0.1);
+  }
+
+  &:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+
+  &.inputError {
+    border-color: #dc2626;
+    background-color: rgba(220, 38, 38, 0.05);
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+  }
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231f2937' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 0.75rem) center;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+
+  [dir='rtl'] & {
+    background-position: calc(0% + 0.75rem) center;
+    padding-right: 1rem;
+    padding-left: 2.5rem;
+  }
+}
+
+.errorText {
+  font-size: 0.875rem;
+  color: #dc2626;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &::before {
+    content: '⚠';
+    display: inline-block;
+  }
+}
+
+/* ============================================================================
+   RADIO BUTTONS & CHECKBOXES
+   ============================================================================ */
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radioOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  input[type='radio'] {
+    margin-top: 0.25rem;
+    cursor: pointer;
+    accent-color: #aa8642;
+    flex-shrink: 0;
+
+    &:focus {
+      outline: 2px solid #aa8642;
+      outline-offset: 2px;
+    }
+  }
+
+  label {
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    font-weight: 500;
+    color: #1f2937;
+  }
+
+  &:has(input:checked) {
+    border-color: #aa8642;
+    background-color: rgba(170, 134, 66, 0.05);
+  }
+
+  &:hover {
+    border-color: #d4b16a;
+    background-color: rgba(212, 177, 106, 0.03);
+  }
+}
+
+.priceTag {
+  display: inline-block;
+  background: linear-gradient(135deg, #aa8642 0%, #d4b16a 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: auto;
+
+  [dir='rtl'] & {
+    margin-left: 0;
+    margin-right: auto;
+  }
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+.submitButton {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #aa8642 0%, #d4b16a 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(170, 134, 66, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus {
+    outline: 2px solid #aa8642;
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================================
+   SUMMARY SECTION
+   ============================================================================ */
+
+.summarySection {
+  position: sticky;
+  top: 20px;
+
+  @media (max-width: 1023px) {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 767px) {
+  .bookingForm {
+    padding: 1.5rem;
+  }
+
+  .formSection {
+    &:not(:last-of-type) {
+      padding-bottom: 1.5rem;
+    }
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .radioOption {
+    padding: 0.75rem;
+  }
+
+  .submitButton {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .input,
+  .select {
+    border-width: 2px;
+  }
+
+  .radioOption {
+    border-width: 3px;
+  }
+
+  .submitButton {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .expandingSection {
+    animation: none;
+  }
+
+  .radioOption,
+  .input,
+  .select,
+  .submitButton {
+    transition: none;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid #aa8642;
+  outline-offset: 2px;
+}
