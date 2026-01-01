@@ -5,6 +5,7 @@
  */
 
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Doctor } from '@/lib/models/doctor.types';
 
 interface DoctorProfileContentProps {
@@ -122,10 +123,10 @@ export default function DoctorProfileContent({
 
                   {/* CTA Buttons */}
                   <div className="cta-buttons">
-                    <button className="btn btn-primary btn-lg">
+                    <Link href={`/${locale}/booking`} className="btn btn-primary btn-lg">
                       <i className="isax isax-calendar-1"></i>
                       {labels.bookNow}
-                    </button>
+                    </Link>
                     <button className="btn btn-outline-primary btn-lg">
                       <i className="isax isax-message"></i>
                       {isArabic ? 'تواصل' : 'Contact'}

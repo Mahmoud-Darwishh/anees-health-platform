@@ -145,6 +145,30 @@
 				}
 			}
 
+			.mobile-book-now-btn {
+				@include mixins.respond-below(lg) {
+					padding: 0.875rem 1.5rem !important;
+					font-size: 1rem;
+					font-weight: 600;
+					box-shadow: 0 4px 12px rgba(170, 134, 66, 0.3);
+					transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+					transform: translateZ(0);
+
+					&:hover {
+						transform: translateY(-2px);
+						box-shadow: 0 8px 20px rgba(170, 134, 66, 0.4);
+					}
+
+					&:active {
+						transform: translateY(0);
+					}
+
+					i {
+						font-size: 1.25rem;
+					}
+				}
+			}
+
 			&>.has-submenu {
 				&>.submenu {
 					&>.has-submenu {

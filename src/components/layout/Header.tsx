@@ -290,6 +290,16 @@ const Header: React.FC = () => {
                         <span>{locale === 'en' ? 'العربية' : 'English'}</span>
                       </Link>
                     </li>
+                    <li className="nav-item d-lg-none mt-3">
+                      <Link
+                        href={`/${locale}/booking`}
+                        className="btn btn-sm btn-primary-gradient d-flex align-items-center justify-content-center rounded-pill mobile-book-now-btn"
+                        onClick={onHandleLinkClick}
+                      >
+                        <i className="isax isax-calendar-1 me-2" />
+                        <span>{t('header.bookNow')}</span>
+                      </Link>
+                    </li>
                   </ul>
                 </div>
                 <ul className="nav header-navbar-rht">
