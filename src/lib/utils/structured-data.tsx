@@ -13,6 +13,7 @@
  */
 
 import { config } from '../config';
+import type { Doctor } from '../models/doctor.types';
 
 export interface StructuredDataProps {
   locale?: string;
@@ -207,21 +208,7 @@ export function generateDoctorSchema(
  * Optimized for SEO and GEO
  */
 export function generatePhysicianSchema(
-  doctor: {
-    doctorName: string;
-    professionalTitle: string;
-    bio: string;
-    image: string;
-    gender?: string;
-    languages?: string[];
-    speciality: string;
-    channels?: string[];
-    certifications?: string[];
-    education?: Array<{ institution: string; degree: string; field: string }>;
-    rating?: number;
-    areaCoverage?: string[];
-    pricing?: { consultationFee?: string; followUpFee?: string };
-  },
+  doctor: Doctor,
   locale: string = 'en',
   canonicalUrl: string
 ) {
@@ -229,6 +216,12 @@ export function generatePhysicianSchema(
   const imageUrl = doctor.image.startsWith('http')
     ? doctor.image
     : `${baseUrl}/${doctor.image}`;
+
+  const priceRange = doctor.pricing?.homeVisit || doctor.pricing?.telemedicine
+    ? [doctor.pricing.homeVisit, doctor.pricing.telemedicine, doctor.pricing.clinicVisit]
+        .filter(Boolean)
+        .join(' / ')
+    : undefined;
 
   return {
     '@context': 'https://schema.org',
@@ -240,7 +233,7 @@ export function generatePhysicianSchema(
     image: imageUrl,
     url: canonicalUrl,
     jobTitle: doctor.professionalTitle,
-    gender: doctor.gender?.toLowerCase() === 'male' ? 'Male' : 'Female',
+    gender: doctor.gender?.toLowerCase() === 'female' ? 'Female' : 'Male',
     knowsLanguage: doctor.languages?.map((lang: string) => ({
       '@type': 'Language',
       name: lang,
@@ -271,8 +264,8 @@ export function generatePhysicianSchema(
     })),
     alumniOf: doctor.education?.map((edu) => ({
       '@type': 'EducationalOrganization',
-      name: edu.institution,
-      description: `${edu.degree} in ${edu.field}`,
+      name: edu.university,
+      description: `${edu.degree}${edu.year ? ` (${edu.year})` : ''}`,
     })),
     aggregateRating: doctor.rating
       ? {
@@ -286,9 +279,7 @@ export function generatePhysicianSchema(
       '@type': 'City',
       name: area,
     })),
-    priceRange: doctor.pricing?.consultationFee
-      ? `${doctor.pricing.consultationFee} - ${doctor.pricing.followUpFee || doctor.pricing.consultationFee}`
-      : undefined,
+    priceRange,
   };
 }
 
