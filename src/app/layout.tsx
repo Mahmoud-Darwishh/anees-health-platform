@@ -3,12 +3,26 @@ import { locales } from '@/i18n/request';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Anees Health',
+  metadataBase: new URL('https://aneeshealth.com'),
+  title: {
+    default: 'Anees Health | Home Healthcare & Telemedicine Egypt',
+    template: '%s | Anees Health',
+  },
   description: 'Anees Health is Egypt\'s leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Cairo, Giza, and Alexandria.',
-  keywords: 'Anees Health, home healthcare Egypt, doctor home visit, home nurse Egypt, telemedicine Egypt, physiotherapy at home, elderly care Cairo, chronic disease management, palliative home care, post operative care, lab tests at home, remote patient monitoring, medical equipment rental',
+  keywords: 'Anees Health, home healthcare Egypt, doctor home visit, home nurse Egypt, telemedicine Egypt, physiotherapy at home, elderly care Cairo, chronic disease management, palliative home care, post operative care, lab tests at home, remote patient monitoring, medical equipment rental, رعاية صحية منزلية مصر، طبيب منزلي، تمريض منزلي',
+  authors: [{ name: 'Anees Health' }],
+  creator: 'Anees Health',
+  publisher: 'Anees Health',
+  formatDetection: {
+    telephone: true,
+    email: true,
+    address: true,
+  },
   icons: {
     icon: '/assets/img/fav.png',
+    apple: '/logos/anees-health-logo.png',
   },
+  manifest: '/manifest.json',
   openGraph: {
     title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
     description: 'Trusted home healthcare and telemedicine across Egypt: doctor home visits, skilled nursing, physiotherapy, lab at home, chronic disease management, and 24/7 medical support for seniors and families.',
@@ -16,14 +30,57 @@ export const metadata: Metadata = {
     url: 'https://aneeshealth.com/',
     type: 'website',
     locale: 'en_US',
+    alternateLocale: ['ar_EG'],
+    images: [
+      {
+        url: '/assets/img/banner/anees-health-og.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Anees Health - Home Healthcare Services',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
     description: 'Home healthcare and telemedicine in Egypt: doctor home visits, nursing, physiotherapy, lab at home, chronic care, and 24/7 support for seniors and families.',
+    creator: '@aneeshealth',
+    site: '@aneeshealth',
+    images: ['/assets/img/banner/anees-health-og.jpg'],
   },
   alternates: {
     canonical: 'https://aneeshealth.com/',
+    languages: {
+      'en-US': 'https://aneeshealth.com/en',
+      'ar-EG': 'https://aneeshealth.com/ar',
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    // Add your verification codes when available
+    // google: 'your-google-verification-code',
+    // yandex: 'your-yandex-verification-code',
+    // bing: 'your-bing-verification-code',
+  },
+  category: 'Healthcare',
+  other: {
+    // Additional metadata for AI crawlers
+    'google-site-verification': process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+    'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || '',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'apple-mobile-web-app-title': 'Anees Health',
   },
 };
 
@@ -41,6 +98,11 @@ export default function RootLayout({
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#0066cc" />
+        <meta name="geo.region" content="EG" />
+        <meta name="geo.placename" content="Cairo, Egypt" />
+        <meta name="geo.position" content="30.0444;31.2357" />
+        <meta name="ICBM" content="30.0444, 31.2357" />
 
         {/* Preconnect to critical third-party origins */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

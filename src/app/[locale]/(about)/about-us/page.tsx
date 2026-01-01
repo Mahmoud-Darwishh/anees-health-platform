@@ -1,16 +1,12 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+import { generateAboutMetadata } from '@/lib/utils/metadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
-  return {
-    title: t('aboutPage.title'),
-    description: t('aboutPage.meta_description', { default: t('aboutPage.title') }),
-  };
+  return generateAboutMetadata(locale);
 }
 
 export default function AboutUsPage() {

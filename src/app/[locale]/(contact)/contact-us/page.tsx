@@ -1,16 +1,13 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+import { generateContactMetadata } from '@/lib/utils/metadata';
+import { generateContactPageSchema, renderJsonLd } from '@/lib/utils/structured-data';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
-  return {
-    title: t('contactPage.title'),
-    description: t('contactPage.meta_description', { default: t('contactPage.title') }),
-  };
+  return generateContactMetadata(locale);
 }
 
 export default function ContactUsPage() {
@@ -23,8 +20,16 @@ export default function ContactUsPage() {
     { label: t('title'), active: true },
   ];
 
+  // Generate ContactPage schema
+  const contactPageSchema = generateContactPageSchema(locale);
+
   return (
     <>
+      {/* Structured Data - ContactPage Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(contactPageSchema) }}
+      />
       <Header />
 
       <Breadcrumb items={breadcrumbItems} title={t('title')} />

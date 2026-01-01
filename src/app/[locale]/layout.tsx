@@ -4,6 +4,11 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { locales } from '@/i18n/request';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
+import {
+  generateOrganizationSchema,
+  generateLocalBusinessSchema,
+  generateWebsiteSchema,
+} from '@/lib/utils/structured-data';
 import '@/styles/globals.scss';
 import '@/styles/legacy.scss';
 
@@ -23,9 +28,28 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const direction = $locale === 'ar' ? 'rtl' : 'ltr';
 
+  // Generate structured data for this locale
+  const organizationSchema = generateOrganizationSchema($locale);
+  const localBusinessSchema = generateLocalBusinessSchema();
+  const websiteSchema = generateWebsiteSchema($locale);
+
   return (
     <NextIntlClientProvider messages={messages} locale={$locale} timeZone="Africa/Cairo">
       <div dir={direction} lang={$locale}>
+        {/* Structured Data for SEO & GEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+
         {children}
         <WhatsAppButton />
       </div>

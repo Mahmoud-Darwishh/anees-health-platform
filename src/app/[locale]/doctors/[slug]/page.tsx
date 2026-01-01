@@ -9,7 +9,12 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getDoctorBySlug, getAllDoctorSlugs, extractCity } from '@/lib/api/doctors';
-import { generatePhysicianSchema, renderJsonLd } from '@/lib/utils/structured-data';
+import {
+  generatePhysicianSchema,
+  generateBreadcrumbSchema,
+  renderJsonLd,
+} from '@/lib/utils/structured-data';
+import { generateDoctorProfileMetadata } from '@/lib/utils/metadata';
 import { config } from '@/lib/config';
 import DoctorProfileContent from '@/components/doctors/profile/DoctorProfileContent';
 import Header from '@/components/layout/Header';
@@ -51,70 +56,11 @@ export async function generateMetadata({
       robots: {
         index: false,
         follow: true,
-        googleBot: {
-          index: false,
-          follow: true,
-          'max-video-preview': -1,
-          'max-image-preview': 'large',
-          'max-snippet': -1,
-        },
       },
     };
   }
 
-  const baseUrl = config.api.baseUrl;
-  const canonicalUrl = `${baseUrl}/${locale}/doctors/${slug}`;
-  const city = extractCity(doctor.location);
-
-  const title = locale === 'ar'
-    ? `${doctor.doctorName} - ${doctor.speciality} في ${city}`
-    : `${doctor.doctorName} - ${doctor.speciality} in ${city}`;
-
-  const description = locale === 'ar'
-    ? `احجز موعد مع ${doctor.doctorName}، ${doctor.professionalTitle}. ${doctor.experienceYears}+ سنوات خبرة. متاح عبر ${doctor.channels.join('، ')}.`
-    : `Book an appointment with ${doctor.doctorName}, ${doctor.professionalTitle}. ${doctor.experienceYears}+ years experience. Available via ${doctor.channels.join(', ')}.`;
-
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: canonicalUrl,
-      languages: {
-        'en': `${baseUrl}/en/doctors/${slug}`,
-        'ar': `${baseUrl}/ar/doctors/${slug}`,
-        'x-default': `${baseUrl}/en/doctors/${slug}`,
-      },
-    },
-    openGraph: {
-      title,
-      description,
-      url: canonicalUrl,
-      siteName: locale === 'ar' ? 'أنيس' : 'Anees',
-      locale: locale === 'ar' ? 'ar_EG' : 'en_EG',
-      type: 'profile',
-      images: [
-        {
-          url: doctor.image.startsWith('http')
-            ? doctor.image
-            : `${baseUrl}/${doctor.image}`,
-          width: 800,
-          height: 600,
-          alt: doctor.doctorName,
-        },
-      ],
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-  };
+  return generateDoctorProfileMetadata(doctor, locale, slug);
 }
 
 export default async function DoctorProfilePage({
@@ -129,10 +75,9 @@ export default async function DoctorProfilePage({
 
   const baseUrl = config.api.baseUrl;
   const canonicalUrl = `${baseUrl}/${locale}/doctors/${slug}`;
-  const physicianSchema = generatePhysicianSchema(doctor, locale as 'en' | 'ar', canonicalUrl);
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
-  // Breadcrumb items
+  // Breadcrumb items for navigation
   const breadcrumbItems = [
     {
       label: locale === 'ar' ? 'الرئيسية' : 'Home',
@@ -148,12 +93,30 @@ export default async function DoctorProfilePage({
     },
   ];
 
+  // Structured data schemas
+  const physicianSchema = generatePhysicianSchema(doctor, locale as 'en' | 'ar', canonicalUrl);
+  
+  const breadcrumbSchema = generateBreadcrumbSchema(
+    [
+      { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
+      { name: locale === 'ar' ? 'الأطباء' : 'Doctors', url: `${baseUrl}/${locale}/doctors` },
+      { name: doctor.doctorName, url: canonicalUrl },
+    ]
+  );
+
   return (
     <>
+      {/* Structured Data - Physician Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(physicianSchema) }}
       />
+      {/* Structured Data - Breadcrumb Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+      />
+      
       <Header />
       <Breadcrumb items={breadcrumbItems} title={doctor.doctorName} />
       <article dir={dir} className="doctor-profile-page">

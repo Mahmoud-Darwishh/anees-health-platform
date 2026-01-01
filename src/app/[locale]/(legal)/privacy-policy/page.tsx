@@ -1,17 +1,12 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import { generatePrivacyMetadata } from '@/lib/utils/metadata';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale });
-  
-  return {
-    title: t('privacy.title'),
-    description: t('privacy.intro_description'),
-  };
+  return generatePrivacyMetadata(locale);
 }
 
 export default function PrivacyPolicyPage() {
