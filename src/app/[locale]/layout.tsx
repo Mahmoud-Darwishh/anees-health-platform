@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { locales } from '@/i18n/request';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import {
   generateOrganizationSchema,
   generateLocalBusinessSchema,
@@ -52,6 +53,7 @@ export default async function LocaleLayout({
 
         {children}
         <WhatsAppButton />
+        <MobileBottomNav />
       </div>
       {/* Bootstrap JS */}
       <Script

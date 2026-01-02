@@ -926,5 +926,10 @@
     "returnHome": "Return to Home",
     "tryAgain": "Try Again",
     "confirmationEmail": "A confirmation email with your booking details has been sent to your email address."
+  },
+  "mobileNav": {
+    "navLabel": "Mobile Navigation",
+    "ourDoctors": "Our Doctors",
+    "bookNow": "Book Now"
   }
 }

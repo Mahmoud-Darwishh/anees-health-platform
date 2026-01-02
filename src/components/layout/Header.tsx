@@ -275,11 +275,6 @@ const Header: React.FC = () => {
                         </li>
                       </ul>
                     </li>
-                    <li className={`nav-item me-3 ${isActiveLink(`/${locale}/doctors`) ? 'active' : ''}`}>
-                      <Link href={`/${locale}/doctors`} className="nav-link" onClick={onHandleLinkClick}>
-                        {t('nav.doctors')}
-                      </Link>
-                    </li>
                     <li className="nav-item me-3 d-lg-none mobile-lang-switcher">
                       <Link
                         href={`/${locale === 'en' ? 'ar' : 'en'}${pathname.replace(`/${locale}`, '')}`}
@@ -288,16 +283,6 @@ const Header: React.FC = () => {
                       >
                         <i className="feather-globe me-2" />
                         <span>{locale === 'en' ? 'العربية' : 'English'}</span>
-                      </Link>
-                    </li>
-                    <li className="nav-item d-lg-none mt-3">
-                      <Link
-                        href={`/${locale}/booking`}
-                        className="btn btn-sm btn-primary-gradient d-flex align-items-center justify-content-center rounded-pill mobile-book-now-btn"
-                        onClick={onHandleLinkClick}
-                      >
-                        <i className="isax isax-calendar-1 me-2" />
-                        <span>{t('header.bookNow')}</span>
                       </Link>
                     </li>
                   </ul>
