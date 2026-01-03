@@ -18,6 +18,7 @@ import styles from '@/assets/scss/components/booking-form.module.scss';
 
 const INITIAL_FORM_STATE: BookingFormState = {
   fullName: '',
+  countryCode: '20', // Egypt by default
   phoneNumber: '',
   visitType: 'homeVisit',
   serviceType: null,
@@ -45,9 +46,31 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Clean phone number - remove country code and leading 0
+  const cleanPhoneNumber = (value: string, countryCode: string): string => {
+    let digits = value.replace(/\D/g, ''); // Remove all non-digits
+    
+    // Remove country code if it's at the start
+    if (digits.startsWith(countryCode)) {
+      digits = digits.slice(countryCode.length);
+    }
+    
+    // Remove leading 0 if present
+    if (digits.startsWith('0')) {
+      digits = digits.slice(1);
+    }
+    
+    return digits;
+  };
+
   // Update form field
   const handleFieldChange = useCallback(
     (field: keyof BookingFormState, value: any) => {
+      // Clean phone number - remove leading 0 or country code
+      if (field === 'phoneNumber') {
+        value = cleanPhoneNumber(value, formState.countryCode);
+      }
+
       setFormState((prev) => {
         const updated = { ...prev, [field]: value };
 
@@ -210,30 +233,49 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
                       *
                     </span>
                   </label>
-                  <input
-                    id="phoneNumber"
-                    type="tel"
-                    className={`${styles.input} ${
-                      errors.phoneNumber ? styles.inputError : ''
-                    }`}
-                    placeholder={t('booking.form.phoneNumberPlaceholder')}
-                    value={formState.phoneNumber}
-                    onChange={(e) =>
-                      handleFieldChange('phoneNumber', e.target.value)
-                    }
-                    disabled={isSubmitting}
-                    aria-invalid={!!errors.phoneNumber}
-                    aria-describedby={
-                      errors.phoneNumber ? 'phoneNumber-error' : undefined
-                    }
-                  />
-                  {errors.phoneNumber && (
+                  <div className={styles.phoneInputWrapper}>
+                    <select
+                      className={`${styles.countryCodeSelect} ${
+                        errors.countryCode ? styles.inputError : ''
+                      }`}
+                      value={formState.countryCode}
+                      onChange={(e) =>
+                        handleFieldChange('countryCode', e.target.value)
+                      }
+                      disabled={isSubmitting}
+                      aria-label="Country code"
+                    >
+                      <option value="20">🇪🇬 +20</option>
+                      <option value="966">🇸🇦 +966</option>
+                      <option value="971">🇦🇪 +971</option>
+                      <option value="965">🇰🇼 +965</option>
+                      <option value="974">🇶🇦 +974</option>
+                    </select>
+                    <input
+                      id="phoneNumber"
+                      type="tel"
+                      className={`${styles.phoneNumberInput} ${
+                        errors.phoneNumber ? styles.inputError : ''
+                      }`}
+                      placeholder={t('booking.form.phoneNumberPlaceholder')}
+                      value={formState.phoneNumber}
+                      onChange={(e) =>
+                        handleFieldChange('phoneNumber', e.target.value)
+                      }
+                      disabled={isSubmitting}
+                      aria-invalid={!!errors.phoneNumber}
+                      aria-describedby={
+                        errors.phoneNumber ? 'phoneNumber-error' : undefined
+                      }
+                    />
+                  </div>
+                  {(errors.countryCode || errors.phoneNumber) && (
                     <span
                       id="phoneNumber-error"
                       className={styles.errorText}
                       role="alert"
                     >
-                      {errors.phoneNumber}
+                      {errors.phoneNumber || errors.countryCode}
                     </span>
                   )}
                 </div>

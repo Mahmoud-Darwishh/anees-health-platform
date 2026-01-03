@@ -16,7 +16,7 @@ export function generateBookingMessage(
 أود حجز خدمة بالتفاصيل التالية:
 
 📋 الاسم: ${formState.fullName}
-📱 الهاتف: ${formState.phoneNumber}
+📱 الهاتف: +${formState.countryCode} ${formState.phoneNumber}
 🏥 نوع الزيارة: ${getVisitTypeString(formState.visitType, isArabic)}
 ${formState.serviceType ? `💼 الخدمة: ${getServiceTypeString(formState.serviceType, isArabic)}` : ''}
 ${formState.specialty ? `🩺 التخصص: ${getSpecialtyString(formState.specialty)}` : ''}
@@ -40,7 +40,7 @@ ${formState.nursingDuration ? `📆 المدة: ${getNursingDurationString(formS
 I would like to book a service with the following details:
 
 📋 Name: ${formState.fullName}
-📱 Phone: ${formState.phoneNumber}
+📱 Phone: +${formState.countryCode} ${formState.phoneNumber}
 🏥 Visit Type: ${getVisitTypeString(formState.visitType, isArabic)}
 ${formState.serviceType ? `💼 Service: ${getServiceTypeString(formState.serviceType, isArabic)}` : ''}
 ${formState.specialty ? `🩺 Specialty: ${getSpecialtyString(formState.specialty)}` : ''}

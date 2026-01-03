@@ -204,6 +204,38 @@
    PRICING BOX
    ============================================================================ */
 
+.pricingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.pricingLabel {
+  font-size: 0.95rem;
+  font-weight: $font-weight-medium;
+  color: #6b7280;
+}
+
+.pricingValue {
+  font-size: 1.1rem;
+  font-weight: $font-weight-semibold;
+  color: $dark;
+}
+
+.currency {
+  margin-left: 0.25rem;
+
+  [dir='rtl'] & {
+    margin-left: 0;
+    margin-right: 0.25rem;
+  }
+}
+
 .priceBox {
   background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($Crayola-Gold, 0.05) 100%);
   padding: 1.5rem;
@@ -212,6 +244,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 1rem;
 
   [dir='rtl'] & {
     border-left: none;
@@ -238,6 +271,12 @@
   font-size: 0.85rem;
   font-weight: $font-weight-semibold;
   color: #6b7280;
+  margin-left: 0.25rem;
+
+  [dir='rtl'] & {
+    margin-left: 0;
+    margin-right: 0.25rem;
+  }
 }
 
 /* ============================================================================

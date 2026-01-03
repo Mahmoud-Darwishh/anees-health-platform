@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import BookingForm from '@/components/booking/booking-form';
 import PaymentGateway from '@/components/booking/payment-gateway';
-import { BookingFormState, calculateBookingPrice } from '@/lib/models/booking.types';
+import { BookingFormState, calculateBookingPrice, calculateTotalWithFee } from '@/lib/models/booking.types';
 import styles from './page.module.scss';
 
 interface PageContentProps {
@@ -25,8 +25,9 @@ export default function BookingPage({ locale }: PageContentProps) {
   const handlePayNow = useCallback((state: BookingFormState) => {
     setFormState(state);
     // Calculate price based on booking
-    const price = calculateBookingPrice(state);
-    setTotalPrice(price);
+    const basePrice = calculateBookingPrice(state);
+    const priceWithFee = calculateTotalWithFee(basePrice);
+    setTotalPrice(basePrice);
     
     // Generate order ID
     const newOrderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
@@ -37,7 +38,8 @@ export default function BookingPage({ locale }: PageContentProps) {
       sessionStorage.setItem('pendingBooking', JSON.stringify({
         ...state,
         orderId: newOrderId,
-        totalPrice: price,
+        basePrice: basePrice,
+        totalPrice: priceWithFee,
         createdAt: new Date().toISOString()
       }));
     }
@@ -93,7 +95,7 @@ export default function BookingPage({ locale }: PageContentProps) {
             {showPayment && (
               <PaymentGateway
                 orderId={orderId}
-                amount={String(totalPrice)}
+                amount={String(calculateTotalWithFee(totalPrice))}
                 currency="EGP"
                 customerId={formState?.phoneNumber}
                 locale={locale}

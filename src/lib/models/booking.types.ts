@@ -26,7 +26,8 @@ export type NursingDuration = '1week' | '2weeks' | '1month';
 export interface BookingFormState {
   // Personal Info
   fullName: string;
-  phoneNumber: string;
+  countryCode: string; // e.g., '20' for Egypt
+  phoneNumber: string; // 10 digits for Egypt
 
   // Visit Selection
   visitType: VisitType | null;
@@ -64,6 +65,7 @@ export interface BookingSummary extends BookingFormState {
 
 export interface CreateBookingIntentRequest {
   fullName: string;
+  countryCode: string;
   phoneNumber: string;
   visitType: VisitType;
   serviceType?: ServiceType;
@@ -95,11 +97,29 @@ export interface BookingValidationError {
 // ============================================================================
 
 export const SPECIALTIES = [
+  // Priority specialties at top
+  { value: 'geriatrics', label: 'specialty.geriatrics' },
+  { value: 'orthopedics', label: 'specialty.orthopedics' },
+  { value: 'neurology', label: 'specialty.neurology' },
+  { value: 'cardiology', label: 'specialty.cardiology' },
+  
+  // Most common specialties
   { value: 'generalMedicine', label: 'specialty.generalMedicine' },
   { value: 'pediatrics', label: 'specialty.pediatrics' },
-  { value: 'orthopedics', label: 'specialty.orthopedics' },
-  { value: 'cardiology', label: 'specialty.cardiology' },
   { value: 'dermatology', label: 'specialty.dermatology' },
+  { value: 'gynecology', label: 'specialty.gynecology' },
+  { value: 'ophthalmology', label: 'specialty.ophthalmology' },
+  { value: 'otolaryngology', label: 'specialty.otolaryngology' },
+  { value: 'psychiatry', label: 'specialty.psychiatry' },
+  { value: 'urology', label: 'specialty.urology' },
+  { value: 'gastroenterology', label: 'specialty.gastroenterology' },
+  { value: 'pulmonology', label: 'specialty.pulmonology' },
+  { value: 'rheumatology', label: 'specialty.rheumatology' },
+  { value: 'endocrinology', label: 'specialty.endocrinology' },
+  { value: 'nephrology', label: 'specialty.nephrology' },
+  { value: 'oncology', label: 'specialty.oncology' },
+  { value: 'hematology', label: 'specialty.hematology' },
+  { value: 'immunology', label: 'specialty.immunology' },
 ] as const;
 
 export const PHYSIOTHERAPY_CASE_TYPES = [
@@ -129,6 +149,21 @@ export const NURSING_DURATIONS = [
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
+
+/**
+ * Calculate processing fee (2.75% rounded up)
+ */
+export function calculateProcessingFee(basePrice: number): number {
+  const fee = basePrice * 0.0275;
+  return Math.ceil(fee); // Round up
+}
+
+/**
+ * Calculate total price including processing fee
+ */
+export function calculateTotalWithFee(basePrice: number): number {
+  return basePrice + calculateProcessingFee(basePrice);
+}
 
 /**
  * Calculate total booking price based on selections
@@ -199,6 +234,13 @@ export function validateBookingForm(
     errors.push({ field: 'fullName', message: 'booking.validation.fullNameRequired' });
   }
 
+  if (!state.countryCode?.trim()) {
+    errors.push({
+      field: 'countryCode',
+      message: 'booking.validation.countryCodeRequired',
+    });
+  }
+
   if (!state.phoneNumber?.trim()) {
     errors.push({
       field: 'phoneNumber',
@@ -206,11 +248,8 @@ export function validateBookingForm(
     });
   }
 
-  // Simple phone validation (Egyptian format)
-  if (
-    state.phoneNumber &&
-    !/^(\+20|0)[0-9]{10}$/.test(state.phoneNumber.replace(/\s/g, ''))
-  ) {
+  // Simple phone validation (10 digits for Egyptian phone)
+  if (state.phoneNumber && !/^[0-9]{10}$/.test(state.phoneNumber.replace(/\s/g, ''))) {
     errors.push({
       field: 'phoneNumber',
       message: 'booking.validation.invalidPhoneNumber',

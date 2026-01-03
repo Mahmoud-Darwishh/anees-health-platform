@@ -9,6 +9,8 @@ import {
   NURSING_TYPES,
   NURSING_HOURS,
   NURSING_DURATIONS,
+  calculateProcessingFee,
+  calculateTotalWithFee,
 } from '@/lib/models/booking.types';
 import { generateBookingMessage } from '@/lib/utils/booking-utils';
 import styles from '@/assets/scss/components/booking-summary.module.scss';
@@ -115,7 +117,8 @@ export default function BookingSummary({
 
   const handleWhatsAppClick = () => {
     const message = generateBookingMessage(formState, totalPrice, locale);
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const whatsappNumber = '201055164595'; // Anees Health WhatsApp number
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
@@ -170,7 +173,7 @@ export default function BookingSummary({
                 {formState.phoneNumber && (
                   <li className={styles.detailsItem}>
                     <span className={styles.detailsLabel}>{t('form.phoneNumber')}</span>
-                    <span className={styles.detailsValue}>{formState.phoneNumber}</span>
+                    <span className={styles.detailsValue}>+{formState.countryCode} {formState.phoneNumber}</span>
                   </li>
                 )}
               </ul>
@@ -262,10 +265,30 @@ export default function BookingSummary({
             {/* Pricing */}
             <div className={styles.summarySection}>
               <h3 className={styles.sectionTitle}>{t('summary.pricing')}</h3>
+              
+              {/* Service Price */}
+              <div className={styles.pricingRow}>
+                <span className={styles.pricingLabel}>Service Price</span>
+                <span className={styles.pricingValue}>
+                  {totalPrice}
+                  <span className={styles.currency}>{t('summary.currency')}</span>
+                </span>
+              </div>
+
+              {/* Processing Fee */}
+              <div className={styles.pricingRow}>
+                <span className={styles.pricingLabel}>Processing Fee</span>
+                <span className={styles.pricingValue}>
+                  {calculateProcessingFee(totalPrice)}
+                  <span className={styles.currency}>{t('summary.currency')}</span>
+                </span>
+              </div>
+
+              {/* Total Price */}
               <div className={styles.priceBox}>
                 <span className={styles.priceLabel}>{t('summary.totalPrice')}</span>
                 <span className={styles.priceValue}>
-                  {totalPrice}
+                  {calculateTotalWithFee(totalPrice)}
                   <span className={styles.currency}>{t('summary.currency')}</span>
                 </span>
               </div>
