@@ -13,11 +13,11 @@ export async function POST(request: NextRequest) {
     const body: CreateBookingIntentRequest = await request.json();
 
     // Validate required fields
-    if (!body.fullName || !body.phoneNumber || !body.visitType) {
+    if (!body.fullName || !body.countryCode || !body.phoneNumber || !body.visitType) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Missing required fields: fullName, phoneNumber, visitType',
+          message: 'Missing required fields: fullName, countryCode, phoneNumber, visitType',
         },
         { status: 400 }
       );
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
     // Construct form state from request
     const formState = {
       fullName: body.fullName,
+      countryCode: body.countryCode,
       phoneNumber: body.phoneNumber,
       visitType: body.visitType,
       serviceType: body.serviceType || null,

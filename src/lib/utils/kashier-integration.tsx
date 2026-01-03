@@ -60,6 +60,7 @@ export function useBookingPayment({
       // Step 1: Create booking intent on server
       const bookingPayload: CreateBookingIntentRequest = {
         fullName: formState.fullName,
+        countryCode: formState.countryCode,
         phoneNumber: formState.phoneNumber,
         visitType: formState.visitType!,
         serviceType: formState.serviceType || undefined,
