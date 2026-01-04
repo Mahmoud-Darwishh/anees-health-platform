@@ -463,6 +463,40 @@
   }
 }
 
+// Compact layout for visit types - 3 cards side by side
+.visitTypeCompact {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+
+  @media (min-width: map.get($breakpoints, md)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .radioOption {
+    padding: 0.75rem;
+
+    .optionContent {
+      div {
+        gap: 0.25rem;
+      }
+    }
+
+  
+  }
+}
+
+// Package grid layout - 3 cards side by side
+.packageGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+
+  @media (min-width: map.get($breakpoints, md)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .radioOption {
   display: flex;
   align-items: flex-start;

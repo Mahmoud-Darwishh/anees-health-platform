@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   BookingFormState,
   calculateBookingPrice,
@@ -12,6 +12,7 @@ import {
   NURSING_TYPES,
   NURSING_HOURS,
   NURSING_DURATIONS,
+  PackageType,
 } from '@/lib/models/booking.types';
 import BookingSummary from './booking-summary';
 import styles from '@/assets/scss/components/booking-form.module.scss';
@@ -21,6 +22,7 @@ const INITIAL_FORM_STATE: BookingFormState = {
   countryCode: '20', // Egypt by default
   phoneNumber: '',
   visitType: 'homeVisit',
+  packageType: null,
   serviceType: null,
   specialty: null,
   preferredDate: '',
@@ -35,9 +37,10 @@ const INITIAL_FORM_STATE: BookingFormState = {
 interface BookingFormProps {
   onSubmit?: (formData: BookingFormState) => void;
   onPayNow?: (formData: BookingFormState) => void;
+  preSelectedPackage?: PackageType | null;
 }
 
-export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
+export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: BookingFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -45,6 +48,17 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
   const [formState, setFormState] = useState<BookingFormState>(INITIAL_FORM_STATE);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle pre-selected package from URL
+  useEffect(() => {
+    if (preSelectedPackage) {
+      setFormState(prev => ({
+        ...prev,
+        visitType: 'package',
+        packageType: preSelectedPackage,
+      }));
+    }
+  }, [preSelectedPackage]);
 
   // Clean phone number - remove country code and leading 0
   const cleanPhoneNumber = (value: string, countryCode: string): string => {
@@ -76,6 +90,7 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
 
         // Reset dependent fields when parent selection changes
         if (field === 'visitType') {
+          updated.packageType = null;
           updated.serviceType = null;
           updated.specialty = null;
           updated.preferredDate = '';
@@ -133,7 +148,7 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
                 {t('booking.form.visitType')}
               </legend>
 
-              <div className={`${styles.radioGroup} ${styles.visitTypeCards}`}>
+              <div className={`${styles.radioGroup} ${styles.visitTypeCompact}`}>
                 <div className={styles.radioOption}>
                   <input
                     id="homeVisit"
@@ -170,6 +185,27 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
                     <div>
                       <span className={styles.optionTitle}>{t('booking.form.telemedicine')}</span>
                       <span className={styles.optionSubtitle}>{t('booking.form.telemedicineDescription')}</span>
+                    </div>
+                  </label>
+                </div>
+
+                <div className={styles.radioOption}>
+                  <input
+                    id="package"
+                    type="radio"
+                    name="visitType"
+                    value="package"
+                    checked={formState.visitType === 'package'}
+                    onChange={() =>
+                      handleFieldChange('visitType', 'package')
+                    }
+                    disabled={isSubmitting}
+                    aria-label={locale === 'ar' ? 'باقات الرعاية' : 'Care Packages'}
+                  />
+                  <label htmlFor="package" className={styles.optionContent}>
+                    <div>
+                      <span className={styles.optionTitle}>{locale === 'ar' ? 'باقات' : 'Packages'}</span>
+                      <span className={styles.optionSubtitle}>{locale === 'ar' ? 'برامج رعاية شاملة' : 'Care programs'}</span>
                     </div>
                   </label>
                 </div>
@@ -282,6 +318,96 @@ export default function BookingForm({ onSubmit, onPayNow }: BookingFormProps) {
               </div>
 
               </fieldset>
+
+              {/* Package Selection - Only show if visitType is 'package' */}
+              {formState.visitType === 'package' && (
+                <fieldset className={styles.formSection}>
+                  <legend className={styles.sectionTitle}>
+                    {locale === 'ar' ? 'اختر الباقة' : 'Select Package'}
+                  </legend>
+
+                  <div className={`${styles.radioGroup} ${styles.packageGrid}`}>
+                    <div className={styles.radioOption}>
+                      <input
+                        id="haraka"
+                        type="radio"
+                        name="packageType"
+                        value="haraka"
+                        checked={formState.packageType === 'haraka'}
+                        onChange={() => handleFieldChange('packageType', 'haraka')}
+                        disabled={isSubmitting}
+                        aria-label="Harakā - حَرَكَة"
+                      />
+                      <label htmlFor="haraka" className={styles.optionContent}>
+                        <div>
+                          <span className={styles.optionTitle}>Harakā - حَرَكَة</span>
+                          <span className={styles.optionSubtitle}>
+                            {locale === 'ar' 
+                              ? 'خشونة المفاصل والروماتويد - 5,000 جنيه' 
+                              : 'Joint & Arthritis Care - 5,000 EGP'}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div className={styles.radioOption}>
+                      <input
+                        id="wai"
+                        type="radio"
+                        name="packageType"
+                        value="wai"
+                        checked={formState.packageType === 'wai'}
+                        onChange={() => handleFieldChange('packageType', 'wai')}
+                        disabled={isSubmitting}
+                        aria-label="Wa'i - وَعْي"
+                      />
+                      <label htmlFor="wai" className={styles.optionContent}>
+                        <div>
+                          <span className={styles.optionTitle}>Wa'i - وَعْي</span>
+                          <span className={styles.optionSubtitle}>
+                            {locale === 'ar' 
+                              ? 'الزهايمر والخرف - 8,000 جنيه' 
+                              : 'Cognitive & Dementia Care - 8,000 EGP'}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div className={styles.radioOption}>
+                      <input
+                        id="amal"
+                        type="radio"
+                        name="packageType"
+                        value="amal"
+                        checked={formState.packageType === 'amal'}
+                        onChange={() => handleFieldChange('packageType', 'amal')}
+                        disabled={isSubmitting}
+                        aria-label="Amal - أَمَل"
+                      />
+                      <label htmlFor="amal" className={styles.optionContent}>
+                        <div>
+                          <span className={styles.optionTitle}>Amal - أَمَل</span>
+                          <span className={styles.optionSubtitle}>
+                            {locale === 'ar' 
+                              ? 'التعافي من الجلطات - 6,000 جنيه' 
+                              : 'Stroke Recovery - 6,000 EGP'}
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {errors.packageType && (
+                    <span
+                      id="packageType-error"
+                      className={styles.errorText}
+                      role="alert"
+                    >
+                      {errors.packageType}
+                    </span>
+                  )}
+                </fieldset>
+              )}
 
               {/* Section 3: Service Type (Home Visit Only) */}
               {formState.visitType === 'homeVisit' && (

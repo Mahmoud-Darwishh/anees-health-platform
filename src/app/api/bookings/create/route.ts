@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       countryCode: body.countryCode,
       phoneNumber: body.phoneNumber,
       visitType: body.visitType,
+      packageType: body.packageType || null,
       serviceType: body.serviceType || null,
       specialty: body.specialty || null,
       preferredDate: body.preferredDate || '',

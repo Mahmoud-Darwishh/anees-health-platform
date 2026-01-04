@@ -217,6 +217,62 @@
       "article2_title": "Understanding and Preventing Hypertension: A Detailed Guide",
       "article2_desc": "Discover signs & Symptoms of High Blood Pressue and How to Avoid...."
     },
+    "packages": {
+      "badge": "Health Packages",
+      "title": "Comprehensive Care Packages for Your Needs",
+      "subtitle": "Choose the perfect health package designed to support your specific health journey",
+      "book_now": "Booking Now",
+      "contact_note": "Have questions or need a custom package? We're here to help.",
+      "contact_us": "Contact Us",
+      "contact_us_aria": "Contact us to learn more about our health packages",
+      "haraka": {
+        "nameEn": "Harakā",
+        "nameAr": "حَرَكَة",
+        "duration": "3-6 Months Program",
+        "focus": "Focus on Osteoarthritis, Rheumatoid Arthritis & Chronic Pain",
+        "features": [
+          "4 Monthly Orthopedic Consultations",
+          "12 Physical Therapy & Pain Management Sessions",
+          "Comprehensive Lab Tests & Imaging",
+          "Joint Mobility & Strength Training Program",
+          "Anti-inflammatory Injections & Medication Management",
+          "Nutrition Consultation for Joint Health",
+          "Home Safety Assessment & 24/7 Support"
+        ]
+      },
+      "wai": {
+        "nameEn": "Wa'i",
+        "nameAr": "وَعْي",
+        "duration": "6-12 Months Program",
+        "focus": "Focus on Alzheimer's, Dementia & Cognitive Decline",
+        "features": [
+          "6-12 Monthly Neurology Home Visits",
+          "Cognitive Screening & Memory Training (24 Sessions)",
+          "Brain Health Optimization Program",
+          "Personalized Nutrition Plan for Brain Health",
+          "Caregiver Education & Support Program",
+          "Home Safety & Dementia-Friendly Environment Setup",
+          "Regular Cognitive Monitoring & Progress Reports",
+          "24/7 Crisis Support & Emergency Response"
+        ]
+      },
+      "amal": {
+        "nameEn": "Amal",
+        "nameAr": "أَمَل",
+        "duration": "3-6 Months Program",
+        "focus": "Focus on Stroke Recovery & Prevention",
+        "features": [
+          "4-6 Monthly Neurology & Cardiology Home Visits",
+          "18 Intensive Physical & Speech Therapy Sessions",
+          "Occupational Therapy & Daily Living Skills Training",
+          "Cardiovascular Health & Anticoagulation Management",
+          "Blood Pressure, Cholesterol & Glucose Monitoring",
+          "Home Safety Modifications & Fall Prevention",
+          "Caregiver Training & Family Support Counseling",
+          "Lifestyle & Exercise Prescription with 24/7 Support"
+        ]
+      }
+    },
     "faqs": {
       "badge": "FAQ'S",
       "title": "Your Questions are Answered",
@@ -799,8 +855,8 @@
       "homeVisit": "Home Visit",
       "telemedicine": "Telemedicine",
       "telemedicinePrice": "250 EGP",
-      "homeVisitDescription": "A clinician comes to your location for hands-on care.",
-      "telemedicineDescription": "Secure video consult from anywhere—no travel needed.",
+      "homeVisitDescription": "Clinician visits your home",
+      "telemedicineDescription": "Video consult anywhere",
       "serviceType": "Select Service Type",
       "doctorVisit": "Doctor Visit",
       "physiotherapy": {
@@ -892,6 +948,7 @@
       "phoneNumberRequired": "Please enter your phone number",
       "invalidPhoneNumber": "Please enter a valid phone number (10 digits)",
       "visitTypeRequired": "Please select a visit type",
+      "packageTypeRequired": "Please select a package",
       "serviceTypeRequired": "Please select a service type",
       "specialtyRequired": "Please select a specialty",
       "preferredDateRequired": "Please select a preferred date",

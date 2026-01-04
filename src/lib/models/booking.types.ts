@@ -9,8 +9,9 @@ import { BOOKING_PRICING } from '@/lib/config/booking-pricing';
 // BOOKING TYPES
 // ============================================================================
 
-export type VisitType = 'homeVisit' | 'telemedicine';
+export type VisitType = 'homeVisit' | 'telemedicine' | 'package';
 export type ServiceType = 'doctorVisit' | 'physiotherapy' | 'nursing';
+export type PackageType = 'haraka' | 'wai' | 'amal';
 export type Specialty = 'generalMedicine' | 'pediatrics' | 'orthopedics' | 'cardiology' | 'dermatology';
 export type TimePreference = 'morning' | 'evening' | 'doesntMatter';
 export type PhysiotherapySessions = '1' | '12';
@@ -31,6 +32,9 @@ export interface BookingFormState {
 
   // Visit Selection
   visitType: VisitType | null;
+
+  // Package Selection (for package visitType)
+  packageType: PackageType | null;
 
   // Service Type (Home Visit only)
   serviceType: ServiceType | null;
@@ -68,6 +72,7 @@ export interface CreateBookingIntentRequest {
   countryCode: string;
   phoneNumber: string;
   visitType: VisitType;
+  packageType?: PackageType;
   serviceType?: ServiceType;
   specialty?: Specialty;
   preferredDate?: string;
@@ -171,6 +176,19 @@ export function calculateTotalWithFee(basePrice: number): number {
 export function calculateBookingPrice(state: BookingFormState): number {
   if (!state.visitType) return 0;
 
+  // Package pricing
+  if (state.visitType === 'package') {
+    if (!state.packageType) return 0;
+    
+    const packagePrices = {
+      haraka: 5000, // Joint & Arthritis Care - 3-6 months
+      wai: 8000,    // Cognitive & Dementia Care - 6-12 months
+      amal: 6000,   // Stroke Recovery - 3-6 months
+    };
+    
+    return packagePrices[state.packageType] || 0;
+  }
+
   if (state.visitType === 'telemedicine') {
     return BOOKING_PRICING.telemedicine;
   }
@@ -261,6 +279,18 @@ export function validateBookingForm(
       field: 'visitType',
       message: 'booking.validation.visitTypeRequired',
     });
+  }
+
+  // Package validation
+  if (state.visitType === 'package') {
+    if (!state.packageType) {
+      errors.push({
+        field: 'packageType',
+        message: 'booking.validation.packageTypeRequired',
+      });
+    }
+    // For packages, we only need personal info, no other validations needed
+    return errors;
   }
 
   if (state.visitType === 'homeVisit') {

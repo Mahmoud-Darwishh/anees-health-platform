@@ -8,6 +8,8 @@
 @use '../assets/scss/pages/privacy-policy';
 // Shared list utilities
 @use '../assets/scss/utils/lists';
+// Packages section styling
+@use '../assets/scss/packages';
 
 // RTL support
 [dir='rtl'] {

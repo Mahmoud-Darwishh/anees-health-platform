@@ -2,12 +2,13 @@
 
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import BookingForm from '@/components/booking/booking-form';
 import PaymentGateway from '@/components/booking/payment-gateway';
-import { BookingFormState, calculateBookingPrice, calculateTotalWithFee } from '@/lib/models/booking.types';
+import { BookingFormState, calculateBookingPrice, calculateTotalWithFee, PackageType } from '@/lib/models/booking.types';
 import styles from './page.module.scss';
 
 interface PageContentProps {
@@ -16,6 +17,9 @@ interface PageContentProps {
 
 export default function BookingPage({ locale }: PageContentProps) {
   const t = useTranslations('booking');
+  const searchParams = useSearchParams();
+  const preSelectedPackage = searchParams.get('package') as PackageType | null;
+  
   const [formState, setFormState] = useState<BookingFormState | null>(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [showPayment, setShowPayment] = useState(false);
@@ -89,7 +93,7 @@ export default function BookingPage({ locale }: PageContentProps) {
           </div>
         ) : (
           <>
-            <BookingForm onPayNow={handlePayNow} />
+            <BookingForm onPayNow={handlePayNow} preSelectedPackage={preSelectedPackage} />
             
             {/* Payment Modal - Overlay the booking form */}
             {showPayment && (

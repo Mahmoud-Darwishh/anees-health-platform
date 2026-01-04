@@ -15,7 +15,7 @@ import SectionBook from './sectionBook';
 import SectionLogos from './sectionLogos';
 import SectionFaq from './sectionFaq';
 import SectionApp from './sectionApp';
-import SectionArtical from './sectionArtical';
+import SectionPackages from './sectionPackages';
 import { Reveal } from '@/components/common/Reveal';
 
 
@@ -34,10 +34,10 @@ const GeneralHomeOne: React.FC = () => {
       <Reveal><SectionDoctor /></Reveal>
       <Reveal><SectionService /></Reveal>
       <Reveal><SectionBook /></Reveal>
+      <Reveal><SectionPackages /></Reveal>
       <Reveal><SectionLogos /></Reveal>
       <Reveal><SectionFaq /></Reveal>
       <Reveal><SectionApp /></Reveal>
-      <Reveal><SectionArtical /></Reveal>
       <Footer />
     </div>
   )
