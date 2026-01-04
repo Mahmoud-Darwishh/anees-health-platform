@@ -1,8 +1,15 @@
 import { useLocale, useTranslations } from 'next-intl';
+import Script from 'next/script';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { generatePrivacyMetadata } from '@/lib/utils/metadata';
+import {
+  generateBreadcrumbSchema,
+  generateArticleSchema,
+  renderJsonLd,
+} from '@/lib/utils/structured-data';
+import { config } from '@/lib/config';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -13,14 +20,45 @@ export default function PrivacyPolicyPage() {
   const t = useTranslations('privacy');
   const common = useTranslations('common');
   const locale = useLocale();
+  const baseUrl = config.api.baseUrl;
 
   const breadcrumbItems = [
     { label: common('home'), href: `/${locale}` },
     { label: t('title'), active: true },
   ];
 
+  // Structured data
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
+    { name: t('title'), url: `${baseUrl}/${locale}/privacy-policy` },
+  ]);
+
+  const articleSchema = generateArticleSchema(
+    {
+      title: t('title'),
+      description: locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy',
+      datePublished: '2024-01-01',
+      dateModified: new Date().toISOString(),
+      author: 'Anees Health',
+    },
+    locale,
+    `${baseUrl}/${locale}/privacy-policy`
+  );
+
   return (
     <>
+      {/* Structured Data */}
+      <Script
+        id="privacy-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+      />
+      <Script
+        id="privacy-article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(articleSchema) }}
+      />
+
       <Header />
 
       <Breadcrumb items={breadcrumbItems} title={t('title')} />

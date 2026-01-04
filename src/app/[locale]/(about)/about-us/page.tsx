@@ -1,8 +1,16 @@
 import { useLocale, useTranslations } from 'next-intl';
+import Script from 'next/script';
+import { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { generateAboutMetadata } from '@/lib/utils/metadata';
+import {
+  generateBreadcrumbSchema,
+  generateArticleSchema,
+  renderJsonLd,
+} from '@/lib/utils/structured-data';
+import { config } from '@/lib/config';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -13,14 +21,44 @@ export default function AboutUsPage() {
   const t = useTranslations('aboutPage');
   const common = useTranslations('common');
   const locale = useLocale();
+  const baseUrl = config.api.baseUrl;
 
   const breadcrumbItems = [
     { label: common('home'), href: `/${locale}` },
     { label: t('title'), active: true },
   ];
 
+  // Structured data
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
+    { name: t('title'), url: `${baseUrl}/${locale}/about-us` },
+  ]);
+
+  const articleSchema = generateArticleSchema(
+    {
+      title: t('title'),
+      description: t('headline'),
+      datePublished: '2024-01-01',
+      author: 'Anees Health',
+    },
+    locale,
+    `${baseUrl}/${locale}/about-us`
+  );
+
   return (
     <>
+      {/* Structured Data */}
+      <Script
+        id="about-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+      />
+      <Script
+        id="about-article-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(articleSchema) }}
+      />
+
       <Header />
 
       <Breadcrumb items={breadcrumbItems} title={t('title')} />
