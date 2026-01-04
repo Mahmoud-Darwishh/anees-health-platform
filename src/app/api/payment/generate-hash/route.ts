@@ -40,15 +40,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Trim API key to remove any whitespace
+    const trimmedApiKey = apiKey.trim();
+
     // Generate hash path as per Kashier documentation
-    // Format: /?payment=mid.orderId.amount.currency[.customerReference]
-    const path = `/?payment=${merchantId}.${orderId}.${amount}.${currency}${
+    // Format: mid.orderId.amount.currency[.customerReference]
+    const path = `${merchantId}.${orderId}.${amount}.${currency}${
       customerId ? '.' + customerId : ''
     }`;
 
     console.log('Hash generation details:', {
       path,
-      apiKeyLength: apiKey.length,
+      apiKeyLength: trimmedApiKey.length,
       merchantId,
       orderId,
       amount,
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
 
     // Generate HMAC SHA256 hash using API Key (as per Kashier documentation)
     const hash = crypto
-      .createHmac('sha256', apiKey)
+      .createHmac('sha256', trimmedApiKey)
       .update(path)
       .digest('hex');
 

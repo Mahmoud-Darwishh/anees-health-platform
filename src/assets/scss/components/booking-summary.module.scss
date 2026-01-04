@@ -141,7 +141,7 @@
 .sectionTitle {
   font-size: 0.8rem;
   font-weight: $font-weight-semibold;
-  color: $primary;
+  color: $dark;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.75rem;
@@ -154,7 +154,7 @@
     display: inline-block;
     width: 3px;
     height: 1rem;
-    background: linear-gradient(180deg, $primary 0%, $Crayola-Gold 100%);
+    background: $dark;
     border-radius: 1.5px;
   }
 }
@@ -179,7 +179,7 @@
 
 .detailsLabel {
   font-weight: $font-weight-medium;
-  color: $primary;
+  color: $dark;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -390,35 +390,35 @@
 
 @media (prefers-color-scheme: dark) {
   .summaryContainer {
-    background: $dark;
+    background: $white; // Force white background regardless of dark mode
   }
 
   .sectionTitle {
-    color: #f3f4f6;
+    color: $dark; // Keep dark color consistent
   }
 
   .detailsLabel {
-    color: #9ca3af;
+    color: $dark; // Keep dark color consistent
   }
 
   .detailsValue {
-    color: #f3f4f6;
+    color: $dark; // Keep original dark text color
   }
 
   .priceBox {
-    background: linear-gradient(135deg, rgba($primary, 0.2) 0%, rgba($Crayola-Gold, 0.1) 100%);
-    color: #f3f4f6;
+    background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($Crayola-Gold, 0.05) 100%);
+    color: $dark; // Keep original color
   }
 
   .priceLabel {
-    color: #d1d5db;
+    color: #374151; // Keep original color
   }
 
   .detailsList {
-    border-color: #374151;
+    border-color: #e5e7eb; // Keep original border color
   }
 
   .summarySection {
-    border-bottom-color: #374151;
+    border-bottom-color: #e5e7eb; // Keep original border color
   }
 }
