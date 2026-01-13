@@ -10,6 +10,8 @@
 @use '../assets/scss/utils/lists';
 // Packages section styling
 @use '../assets/scss/packages';
+// Banner section styling
+@use '../assets/scss/sections/banner';
 
 // RTL support
 [dir='rtl'] {
@@ -135,3 +137,55 @@ a {
     left: 24px;
   }
 }*/
+
+/* Hero Section Enhancements */
+.trust-badge {
+  .star-icon {
+    line-height: 1;
+  }
+}
+
+.credentials-row {
+  .credential-item {
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+/* Geriatrics Easter Egg Animation */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+.geriatrics-easter-egg {
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #667eea;
+  }
+}
