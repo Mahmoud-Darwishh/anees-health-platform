@@ -1833,12 +1833,9 @@
         display: none;
     }
     img {
-        @include mixins.respond-below(custom1440) {
-            max-width: 450px;
-        }
-        @include mixins.respond-below(xl) {
-            max-width: 370px;
-        }
+        width: 100% !important;
+        height: auto !important;
+        max-width: none;
     }
 }
 .faq-section {

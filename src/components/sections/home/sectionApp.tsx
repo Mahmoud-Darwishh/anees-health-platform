@@ -42,7 +42,7 @@ const SectionApp: React.FC = () => {
                                       <Image
                                         src="/assets/img/optimized/mobile-img.webp"
                                         alt="img"
-                                        width={400}
+                                        width={800}
                                         height={800}
                                             className="img-fluid"
                                         loading="lazy"
@@ -116,7 +116,7 @@ const SectionApp: React.FC = () => {
                     <Image
                       src="/assets/img/optimized/mobile-img.webp"
                       alt="img"
-                      width={400}
+                      width={800}
                       height={800}
                     className="img-fluid"
                       loading="lazy"

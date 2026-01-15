@@ -271,13 +271,13 @@ const Header: React.FC = () => {
                         className={`submenu ${openSubmenus.services ? 'submenu-open' : ''}`}
                       >
                         <li>
-                          <Link href={`/${locale}#services`} onClick={onHandleLinkClick}>
-                            {t('nav.all_services')}
+                          <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
+                            {t('nav.coverage')}
                           </Link>
                         </li>
                         <li>
-                          <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
-                            {t('nav.coverage')}
+                          <Link href={`/${locale}/booking`} onClick={onHandleLinkClick}>
+                            Book Now
                           </Link>
                         </li>
                       </ul>
