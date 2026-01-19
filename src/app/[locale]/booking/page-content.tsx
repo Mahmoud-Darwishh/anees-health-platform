@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -96,8 +96,9 @@ export default function BookingPage({ locale }: PageContentProps) {
             <BookingForm onPayNow={handlePayNow} preSelectedPackage={preSelectedPackage} />
             
             {/* Payment Modal - Overlay the booking form */}
-            {showPayment && (
+            {showPayment && orderId && (
               <PaymentGateway
+                key={orderId}
                 orderId={orderId}
                 amount={String(calculateTotalWithFee(totalPrice))}
                 currency="EGP"

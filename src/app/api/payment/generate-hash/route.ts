@@ -23,25 +23,27 @@ export async function POST(request: NextRequest) {
 
     // Get credentials from environment
     const merchantId = process.env.KASHIER_MERCHANT_ID;
-    const apiKey = process.env.KASHIER_API_KEY;
-    const mode = process.env.KASHIER_MODE || 'test';
+    // Kashier docs require the secret key for hashing; fall back to API key only if not provided.
+    const secretKey = process.env.KASHIER_SECRET_KEY || process.env.KASHIER_API_KEY;
+    const mode = process.env.KASHIER_MODE === 'live' ? 'live' : 'test'; // Default to test
 
     console.log('Environment check:', {
       merchantId: merchantId ? 'SET' : 'MISSING',
-      apiKey: apiKey ? 'SET' : 'MISSING',
-      mode
+      secretKey: secretKey ? 'SET' : 'MISSING',
+      mode,
+      modeEnv: process.env.KASHIER_MODE || 'not set (defaulting to test)'
     });
 
-    if (!merchantId || !apiKey) {
+    if (!merchantId || !secretKey) {
       console.error('Kashier credentials not configured');
       return NextResponse.json(
-        { error: 'Payment gateway not configured. Please add KASHIER_MERCHANT_ID and KASHIER_API_KEY to environment variables.' },
+        { error: 'Payment gateway not configured. Please add KASHIER_MERCHANT_ID and KASHIER_SECRET_KEY (or KASHIER_API_KEY) to environment variables.' },
         { status: 500 }
       );
     }
 
-    // Trim API key to remove any whitespace
-    const trimmedApiKey = apiKey.trim();
+    // Trim secret key to remove any whitespace
+    const trimmedSecretKey = secretKey.trim();
 
     // Generate hash path as per Kashier documentation
     // Format: mid.orderId.amount.currency[.customerReference]
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Hash generation details:', {
       path,
-      apiKeyLength: trimmedApiKey.length,
+      secretKeyLength: trimmedSecretKey.length,
       merchantId,
       orderId,
       amount,
@@ -59,9 +61,9 @@ export async function POST(request: NextRequest) {
       customerId
     });
 
-    // Generate HMAC SHA256 hash using API Key (as per Kashier documentation)
+    // Generate HMAC SHA256 hash using Secret Key (as per Kashier documentation)
     const hash = crypto
-      .createHmac('sha256', trimmedApiKey)
+      .createHmac('sha256', trimmedSecretKey)
       .update(path)
       .digest('hex');
 

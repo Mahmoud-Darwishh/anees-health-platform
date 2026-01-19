@@ -99,12 +99,20 @@ export default function PaymentGateway({
 
       console.log('✅ Hash generated successfully');
 
-      // Build redirect URL (for payment completion)
-      const redirectUrl = `${window.location.origin}/${locale}/payment/redirect`;
-      const webhookUrl = `${window.location.origin}/api/payment/webhook`;
+      // Build redirect URL (prefer env for production/live compliance)
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const redirectUrl = process.env.KASHIER_REDIRECT || `${siteUrl}/${locale}/payment/redirect`;
+      const webhookUrl = process.env.KASHIER_WEBHOOK || `${siteUrl}/api/payment/webhook`;
+
+      // IMPORTANT: Use test mode URL if mode is 'test'
+      const baseUrl = mode === 'test' 
+        ? 'https://test-payments.kashier.io/' 
+        : 'https://payments.kashier.io/';
+      
+      console.log('🔧 Payment mode:', mode, '| Base URL:', baseUrl);
 
       // Build Kashier Hosted Payment Page URL (for iframe src)
-      const kashierUrl = new URL('https://payments.kashier.io/');
+      const kashierUrl = new URL(baseUrl);
       kashierUrl.searchParams.append('merchantId', merchantId);
       kashierUrl.searchParams.append('orderId', orderId);
       kashierUrl.searchParams.append('amount', String(amount));
