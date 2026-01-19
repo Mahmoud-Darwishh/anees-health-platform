@@ -139,6 +139,10 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/custom.css" />
         <link rel="stylesheet" href="/assets/css/customstyleclient.css" />
 
+        {/* Chatbot Script */}
+        <script dangerouslySetInnerHTML={{ __html: `window.chtlConfig = { chatbotId: "9941775766" }` }} />
+        <script async data-id="9941775766" id="chtl-script" type="text/javascript" src="https://chatling.ai/js/embed.js" />
+
         {/* Meta Pixel NoScript */}
         <noscript>
           <img
@@ -151,17 +155,6 @@ export default function RootLayout({
       </head>
       <body>
         {children}
-
-        {/* Chatbot Script - Lazy load */}
-        <Script id="chatbot-config" strategy="lazyOnload">
-          {`window.chtlConfig = { chatbotId: "9941775766" };`}
-        </Script>
-        <Script
-          src="https://chatling.ai/js/embed.js"
-          data-id="9941775766"
-          strategy="lazyOnload"
-          async
-        />
 
         {/* Microsoft Clarity - Lazy load */}
         <Script id="clarity-script" strategy="lazyOnload">
