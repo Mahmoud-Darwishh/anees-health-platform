@@ -138,7 +138,6 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/iconsax.css" />
         <link rel="stylesheet" href="/assets/css/custom.css" />
         <link rel="stylesheet" href="/assets/css/customstyleclient.css" />
-        <link rel="stylesheet" href="/assets/css/blog-grid.css" />
 
         {/* Meta Pixel NoScript */}
         <noscript>
