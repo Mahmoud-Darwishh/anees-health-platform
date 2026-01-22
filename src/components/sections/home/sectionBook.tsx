@@ -26,35 +26,41 @@ const SectionBook: React.FC = () => {
                                     <div className="col-md-12 aos" data-reveal>
                                             <Image
                                                 src="/assets/img/optimized/book-01.webp"
-                                            alt="img"
+                                                alt="img"
                                                 width={600}
                                                 height={400}
-                                            className="img-fluid"
+                                                className="img-fluid"
+                                                sizes="(max-width: 992px) 100vw, 600px"
+                                                style={{ width: '100%', height: 'auto' }}
                                                 loading="lazy"
                                                 quality={85}
-                                        />
+                                            />
                                     </div>
                                     <div className="col-sm-6 aos" data-reveal>
                                             <Image
                                                 src="/assets/img/optimized/book-02.webp"
-                                            alt="img"
+                                                alt="img"
                                                 width={400}
                                                 height={400}
-                                            className="img-fluid"
+                                                className="img-fluid"
+                                                sizes="(max-width: 576px) 50vw, 400px"
+                                                style={{ width: '100%', height: 'auto' }}
                                                 loading="lazy"
                                                 quality={85}
-                                        />
+                                            />
                                     </div>
                                     <div className="col-sm-6 aos" data-reveal>
                                             <Image
                                                 src="/assets/img/optimized/book-03.webp"
-                                            alt="img"
+                                                alt="img"
                                                 width={400}
                                                 height={400}
-                                            className="img-fluid"
+                                                className="img-fluid"
+                                                sizes="(max-width: 576px) 50vw, 400px"
+                                                style={{ width: '100%', height: 'auto' }}
                                                 loading="lazy"
                                                 quality={85}
-                                        />
+                                            />
                                     </div>
                                 </div>
                             </div>

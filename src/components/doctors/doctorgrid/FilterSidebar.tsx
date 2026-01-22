@@ -149,6 +149,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           id={specId}
+                          name="speciality"
                           aria-label={spec}
                           checked={filters.selectedSpecialities.includes(spec)}
                           onChange={() => toggleArrayFilter('selectedSpecialities', spec)}
@@ -174,6 +175,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                             className="form-check-input"
                             type="checkbox"
                             id={specId}
+                            name="speciality"
                             aria-label={spec}
                             checked={filters.selectedSpecialities.includes(spec)}
                             onChange={() => toggleArrayFilter('selectedSpecialities', spec)}
@@ -237,6 +239,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                       className="form-check-input"
                       type="checkbox"
                       id={withPrefix('gender-male')}
+                      name="gender"
                       aria-label={tg('filters.male')}
                       checked={filters.selectedGenders.includes('Male')}
                       onChange={() => toggleArrayFilter('selectedGenders', 'Male')}
@@ -252,6 +255,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                       className="form-check-input"
                       type="checkbox"
                       id={withPrefix('gender-female')}
+                      name="gender"
                       aria-label={tg('filters.female')}
                       checked={filters.selectedGenders.includes('Female')}
                       onChange={() => toggleArrayFilter('selectedGenders', 'Female')}
@@ -359,6 +363,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           id={expId}
+                          name="experience"
                           aria-label={tg('filters.years_plus', { count: yr })}
                           checked={filters.selectedExperience.includes(yr)}
                           onChange={() => toggleArrayFilter('selectedExperience', yr)}
@@ -384,6 +389,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                             className="form-check-input"
                             type="checkbox"
                             id={expId}
+                            name="experience"
                             aria-label={tg('filters.years_plus', { count: yr })}
                             checked={filters.selectedExperience.includes(yr)}
                             onChange={() => toggleArrayFilter('selectedExperience', yr)}
@@ -458,6 +464,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           id={channelId}
+                          name="channel"
                           aria-label={label}
                           checked={filters.selectedChannels.includes(id)}
                           onChange={() => toggleArrayFilter('selectedChannels', id)}
@@ -512,6 +519,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           id={langId}
+                          name="language"
                           aria-label={lang}
                           checked={filters.selectedLanguages.includes(lang)}
                           onChange={() => toggleArrayFilter('selectedLanguages', lang)}
@@ -566,6 +574,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           id={ratingId}
+                          name="rating"
                           aria-label={tg('filters.stars_up', { count: r })}
                           checked={filters.selectedRatings.includes(r)}
                           onChange={() => toggleArrayFilter('selectedRatings', r)}

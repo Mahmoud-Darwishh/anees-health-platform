@@ -78,7 +78,8 @@ export const metadata: Metadata = {
     // Additional metadata for AI crawlers
     'google-site-verification': process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
     'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || '',
-    'apple-mobile-web-app-capable': 'yes',
+    // Chrome deprecates the Apple-specific flag; use the generic equivalent
+    'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
     'apple-mobile-web-app-title': 'Anees Health',
   },

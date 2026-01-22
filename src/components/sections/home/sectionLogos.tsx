@@ -52,6 +52,7 @@ const SectionLogos: React.FC = () => {
                                             maxWidth: '100%',
                                             objectFit: 'contain' 
                                         }}
+                                        sizes="(max-width: 576px) 33vw, (max-width: 992px) 25vw, 150px"
                                         priority={logo.id <= 4}
                                     />
                                 </div>

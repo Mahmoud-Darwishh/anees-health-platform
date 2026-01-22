@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 import type { FilterState } from './types';
 
 type MessageValues = Record<string, string | number>;
@@ -27,7 +29,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             <nav aria-label="breadcrumb" className="page-breadcrumb">
               <ol className="breadcrumb">
                 <li className="breadcrumb-item">
-                  <a href="/">{tg('breadcrumb.home')}</a>
+                  <Link href="/">{tg('breadcrumb.home')}</Link>
                 </li>
                 <li className="breadcrumb-item active" aria-current="page">
                   {tg('breadcrumb.doctor')}
@@ -47,10 +49,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <i className="isax isax-search-normal-15" />
                   <div className="mb-0">
                     <input
+                      id="doctor-search-name"
+                      name="searchText"
                       type="text"
                       className="form-control doctor-search-input"
                       placeholder={tg('search.namePlaceholder')}
                       aria-label={tg('search.namePlaceholder')}
+                      autoComplete="off"
                       value={filters.searchText}
                       onChange={(e) =>
                         onFilterChange({ searchText: e.target.value })
@@ -63,10 +68,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <i className="isax isax-location" />
                   <div className="mb-0">
                     <input
+                      id="doctor-search-location"
+                      name="locationText"
                       type="text"
                       className="form-control doctor-search-input"
                       placeholder={tg('search.locationPlaceholder')}
                       aria-label={tg('search.locationPlaceholder')}
+                      autoComplete="off"
                       value={filters.locationText}
                       onChange={(e) =>
                         onFilterChange({ locationText: e.target.value })
@@ -91,16 +99,18 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </div>
 
         <div className="breadcrumb-bg">
-          <img
+          <Image
             src="/assets/img/bg/breadcrumb-icon.png"
             alt="img"
             className="breadcrumb-bg-03"
+            width={100}
+            height={100}
           />
-          <img
+          <Image
             src="/assets/img/bg/breadcrumb-icon.png"
             alt="img"
-            className="breadcrumb-bg-04"
-          />
+            className="breadcrumb-bg-04"            width={100}
+            height={100}          />
         </div>
       </div>
     </div>
