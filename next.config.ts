@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://payments.kashier.io https://chatling.ai https://*.chatling.ai",
               "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
               "img-src 'self' data: blob: https:",
-              "connect-src 'self' https://*.vercel-scripts.com https://vercel.live https://chatling.ai https://*.chatling.ai https://www.clarity.ms https://y.clarity.ms https://connect.facebook.net https://payments.kashier.io https://api.ipify.org https://www.cloudflare.com",
+              "connect-src 'self' https://*.vercel-scripts.com https://vercel.live https://chatling.ai https://*.chatling.ai https://www.clarity.ms https://y.clarity.ms https://e.clarity.ms https://connect.facebook.net https://payments.kashier.io https://api.ipify.org https://www.cloudflare.com",
               "frame-src 'self' https://chatling.ai https://*.chatling.ai https://payments.kashier.io",
             ].join('; '),
           },
