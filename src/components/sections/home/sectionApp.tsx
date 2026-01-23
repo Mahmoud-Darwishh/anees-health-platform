@@ -29,10 +29,10 @@ const SectionApp: React.FC = () => {
                                         </div>
                                         <div className="google-imgs aos" data-reveal>
                                             <Link href="#">
-                                                <img src="assets/img/icons/app-store-01.svg" alt="img" />
+                                                <img src="assets/img/icons/app-store-01.svg" alt="Download Anees Health app on Apple App Store" />
                                             </Link>
                                             <Link href="#">
-                                                <img src="assets/img/icons/google-play-01.svg" alt="img" />
+                                                <img src="assets/img/icons/google-play-01.svg" alt="Get Anees Health app on Google Play Store" />
                                             </Link>
                                         </div>
                                     </div>
@@ -41,7 +41,7 @@ const SectionApp: React.FC = () => {
                                     <div className="mobile-img">
                                       <Image
                                         src="/assets/img/optimized/mobile-img.webp"
-                                        alt="img"
+                                        alt="Anees Health mobile app interface - Book doctors and manage healthcare"
                                         width={800}
                                         height={800}
                                             className="img-fluid"

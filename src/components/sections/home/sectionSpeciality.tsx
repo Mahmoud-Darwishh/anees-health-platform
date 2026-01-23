@@ -142,11 +142,11 @@ const SectionSpeciality: React.FC = () => {
                         <Slider ref={setSlider} {...SpecialitySlider}>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/cardio.png" alt="img" />
+                                    <img src="assets/img/specialities/cardio.png" alt="Cardiology specialist - Heart doctors home visits Egypt" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/speciality-icon-01.svg"
-                                            alt="img"
+                                            alt="Cardiology icon"
                                         />
                                     </span>
                                 </div>
@@ -156,11 +156,11 @@ const SectionSpeciality: React.FC = () => {
                             </div>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/Ortho.png" alt="img" />
+                                    <img src="assets/img/specialities/Ortho.png" alt="Orthopedics specialist - Bone and joint doctors home visits" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/speciality-icon-02.svg"
-                                            alt="img"
+                                            alt="Orthopedics icon"
                                         />
                                     </span>
                                 </div>
@@ -170,11 +170,11 @@ const SectionSpeciality: React.FC = () => {
                             </div>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/GIT.png" alt="img" />
+                                    <img src="assets/img/specialities/GIT.png" alt="Gastroenterology specialist - Digestive system doctors Egypt" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/speciality-icon-033.svg"
-                                            alt="img"
+                                            alt="Gastroenterology icon"
                                         />
                                     </span>
                                 </div>
@@ -184,11 +184,11 @@ const SectionSpeciality: React.FC = () => {
                             </div>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/geriatrics.png" alt="img" />
+                                    <img src="assets/img/specialities/geriatrics.png" alt="Geriatrics specialist - Elderly care doctors Cairo Giza" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/geriatrics.svg"
-                                            alt="img"
+                                            alt="Geriatrics icon"
                                         />
                                     </span>
                                 </div>
@@ -198,11 +198,11 @@ const SectionSpeciality: React.FC = () => {
                             </div>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/psychiatry.png" alt="img" />
+                                    <img src="assets/img/specialities/psychiatry.png" alt="Psychiatry specialist - Mental health doctors home consultations" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/speciality-icon-05.svg"
-                                            alt="img"
+                                            alt="Psychiatry icon"
                                         />
                                     </span>
                                 </div>
@@ -212,11 +212,11 @@ const SectionSpeciality: React.FC = () => {
                             </div>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/Endocrine.png" alt="img" />
+                                    <img src="assets/img/specialities/Endocrine.png" alt="Endocrinology specialist - Diabetes and hormone doctors Egypt" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/speciality-icon-06.svg"
-                                            alt="img"
+                                            alt="Endocrinology icon"
                                         />
                                     </span>
                                 </div>
@@ -226,11 +226,11 @@ const SectionSpeciality: React.FC = () => {
                             </div>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
-                                    <img src="assets/img/specialities/Pulmonology.png" alt="img" />
+                                    <img src="assets/img/specialities/Pulmonology.png" alt="Pulmonology specialist - Respiratory and lung doctors home visits" />
                                     <span className="spaciality-icon">
                                         <img
                                             src="assets/img/specialities/speciality-icon-07.svg"
-                                            alt="img"
+                                            alt="Pulmonology icon"
                                         />
                                     </span>
                                 </div>

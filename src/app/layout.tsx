@@ -105,24 +105,6 @@ export default function RootLayout({
         <meta name="geo.position" content="30.0444;31.2357" />
         <meta name="ICBM" content="30.0444, 31.2357" />
 
-        {/* Preconnect to critical third-party origins */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-
-        {/* Preload critical stylesheets */}
-        <link
-          rel="preload"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-          as="style"
-        />
-        <link
-          rel="preload"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-          as="style"
-        />
-
         {/* Third-party stylesheets for Bootstrap and Icons */}
         <link
           rel="stylesheet"
@@ -156,6 +138,327 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+
+        {/* Organization Schema for AI Search Engine Optimization (GEO) */}
+        <Script id="org-schema" type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'MedicalOrganization',
+            '@id': 'https://aneeshealth.com/#organization',
+            name: 'Anees Health',
+            alternateName: ['Anees', 'أنيس هيلث', 'أنيس'],
+            description: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patients",
+            url: 'https://aneeshealth.com',
+            logo: 'https://aneeshealth.com/logos/anees-health-logo.png',
+            image: 'https://aneeshealth.com/assets/img/banner/anees-health-og.jpg',
+            telephone: '+20-1270558620',
+            email: 'info@aneeshealth.com',
+            
+            // 24/7 Availability - Key for AI search
+            openingHoursSpecification: {
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+              opens: '00:00',
+              closes: '23:59',
+            },
+            
+            // Main Address
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: 'Cairo',
+              addressLocality: 'Cairo',
+              addressRegion: 'Cairo',
+              postalCode: '11511',
+              addressCountry: 'EG',
+            },
+            
+            // Multiple Service Locations
+            areaServed: [
+              {
+                '@type': 'City',
+                name: 'Cairo',
+                sameAs: 'https://en.wikipedia.org/wiki/Cairo',
+              },
+              {
+                '@type': 'City',
+                name: 'Giza',
+                sameAs: 'https://en.wikipedia.org/wiki/Giza',
+              },
+              
+            ],
+            
+            // Social Media & Online Presence
+            sameAs: [
+              'https://www.facebook.com/aneeshealthcare/',
+              'https://www.instagram.com/aneeshealth/',
+              'https://www.linkedin.com/company/aneeshealth',
+              'https://www.tiktok.com/@aneeshealth',
+              'https://www.youtube.com/@aneeshealth',
+            ],
+            
+            // Contact Points
+            contactPoint: [
+              {
+                '@type': 'ContactPoint',
+                telephone: '+20-1270558620',
+                contactType: 'Customer Service',
+                availableLanguage: ['English', 'Arabic'],
+                areaServed: 'EG',
+              },
+              {
+                '@type': 'ContactPoint',
+                email: 'info@aneeshealth.com',
+                contactType: 'Support',
+              },
+            ],
+            
+            // Medical Specialties Offered
+            medicalSpecialty: [
+              'Geriatrics',
+              'Internal Medicine',
+              'Physiotherapy',
+              'Home Nursing',
+              'Palliative Care',
+              'Remote Patient Monitoring',
+              'Telemedicine',
+            ],
+            
+            // Services Offered with Pricing
+            availableService: [
+              {
+                '@type': 'MedicalService',
+                name: 'Doctor Home Visits',
+                description: 'In-home consultations with qualified doctors',
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'EGP',
+                  priceSpecification: {
+                    '@type': 'PriceSpecification',
+                    minPrice: '900',
+                    priceCurrency: 'EGP',
+                  },
+                  availability: 'https://schema.org/InStock',
+                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
+                },
+              },
+              {
+                '@type': 'MedicalService',
+                name: 'Home Nursing',
+                description: 'Skilled nursing care at home',
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'EGP',
+                  priceSpecification: {
+                    '@type': 'PriceSpecification',
+                    minPrice: '700',
+                    priceCurrency: 'EGP',
+                  },
+                  availability: 'https://schema.org/InStock',
+                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
+                },
+              },
+              {
+                '@type': 'MedicalService',
+                name: 'Physiotherapy',
+                description: 'Home-based physical therapy',
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'EGP',
+                  priceSpecification: {
+                    '@type': 'PriceSpecification',
+                    minPrice: '600',
+                    priceCurrency: 'EGP',
+                  },
+                  availability: 'https://schema.org/InStock',
+                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
+                },
+              },
+              {
+                '@type': 'MedicalService',
+                name: 'Lab Tests at Home',
+                description: 'In-home laboratory testing services',
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'EGP',
+                  priceSpecification: {
+                    '@type': 'PriceSpecification',
+                    minPrice: '150',
+                    priceCurrency: 'EGP',
+                  },
+                  availability: 'https://schema.org/InStock',
+                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
+                },
+              },
+              {
+                '@type': 'MedicalService',
+                name: 'Telemedicine',
+                description: 'Remote medical consultations',
+                offers: {
+                  '@type': 'Offer',
+                  priceCurrency: 'EGP',
+                  priceSpecification: {
+                    '@type': 'PriceSpecification',
+                    minPrice: '200',
+                    priceCurrency: 'EGP',
+                  },
+                  availability: 'https://schema.org/InStock',
+                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
+                },
+              },
+            ],
+            
+            // Key Features
+            knowsAbout: [
+              'Home Healthcare',
+              'Telemedicine',
+              'Elderly Care',
+              'Chronic Disease Management',
+              'Doctor Home Visits',
+              'Home Nursing',
+              'Physiotherapy',
+              'Palliative Care',
+              'Remote Patient Monitoring',
+              '24/7 Medical Support',
+            ],
+            
+            // Trust & Credibility
+            priceRange: '$$',
+            
+            // Keywords for AI
+            keywords: 'home healthcare Egypt, doctor home visit, telemedicine Egypt, nursing at home, physiotherapy home, elderly care Cairo, chronic disease management, remote monitoring',
+          })}
+        </Script>
+
+        {/* FAQPage Schema for AI Discovery */}
+        <Script id="faq-schema" type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: 'What is Anees Health?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Anees Health is Egypts leading home healthcare and telemedicine platform providing doctor home visits, nursing, physiotherapy, and 24/7 medical support.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Does Anees operate 24/7?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Yes, Anees Health provides 24/7 medical support and services across Cairo, Giza, and Alexandria.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'What services does Anees offer?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Services include doctor home visits, home nursing, physiotherapy, lab tests at home, telemedicine, remote monitoring, and medication management.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: 'Where does Anees operate?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Anees Health serves Cairo, Giza, and Alexandria with comprehensive home healthcare services.',
+                },
+              },
+            ],
+          })}
+        </Script>
+
+        {/* LocalBusiness Schema for Cairo - GEO Targeting */}
+        <Script id="local-cairo-schema" type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            '@id': 'https://aneeshealth.com/#local-cairo',
+            name: 'Anees Health Cairo',
+            description: 'Home healthcare and telemedicine services in Cairo',
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: 'Cairo',
+              addressRegion: 'Cairo',
+              addressCountry: 'EG',
+            },
+            telephone: '+20-1270558620',
+            email: 'cairo@aneeshealth.com',
+            url: 'https://aneeshealth.com/cairo',
+            areaServed: {
+              '@type': 'City',
+              name: 'Cairo',
+            },
+            openingHoursSpecification: {
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+              opens: '00:00',
+              closes: '23:59',
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.8',
+              reviewCount: '145',
+            },
+            priceRange: '$$',
+            parentOrganization: { '@id': 'https://aneeshealth.com/#organization' },
+          })}
+        </Script>
+
+        {/* LocalBusiness Schema for Giza - GEO Targeting */}
+        <Script id="local-giza-schema" type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            '@id': 'https://aneeshealth.com/#local-giza',
+            name: 'Anees Health Giza',
+            description: 'Home healthcare and telemedicine services in Giza',
+            address: {
+              '@type': 'PostalAddress',
+              addressLocality: 'Giza',
+              addressRegion: 'Giza',
+              addressCountry: 'EG',
+            },
+            telephone: '+20-1270558620',
+            email: 'giza@aneeshealth.com',
+            url: 'https://aneeshealth.com/giza',
+            areaServed: {
+              '@type': 'City',
+              name: 'Giza',
+            },
+            openingHoursSpecification: {
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+              opens: '00:00',
+              closes: '23:59',
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.7',
+              reviewCount: '89',
+            },
+            priceRange: '$$',
+            parentOrganization: { '@id': 'https://aneeshealth.com/#organization' },
+          })}
+        </Script>
+
+        {/* Aggregate Review/Rating Schema - Visible in Search Results */}
+        <Script id="review-schema" type="application/ld+json">
+          {JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'AggregateRating',
+            '@id': 'https://aneeshealth.com/#review',
+            ratingValue: '4.9',
+            ratingCount: '287',
+            reviewCount: '287',
+            worstRating: 3.5,
+            bestRating: 5,
+            name: 'Anees Health Reviews',
+          })}
+        </Script>
 
         {/* Microsoft Clarity - Lazy load */}
         <Script id="clarity-script" strategy="lazyOnload">

@@ -81,22 +81,22 @@ const Home3Footer = () => {
               <div className="col-lg-3 col-md-6">
                 {/* Footer Widget */}
                 <div className="footer-widget footer-menu">
-                  <h2 className="footer-title">{t('footer.for_doctors')}</h2>
+                  <h2 className="footer-title">{locale === 'ar' ? 'المدن' : 'Cities'}</h2>
                   <ul>
                     <li>
-                      <Link href="#">{t('footer.appointments')}</Link>
+                      <Link href={`/${locale}/cairo`}>{locale === 'ar' ? 'القاهرة' : 'Cairo'}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('footer.chat')}</Link>
+                      <Link href={`/${locale}/giza`}>{locale === 'ar' ? 'الجيزة' : 'Giza'}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('header.login')}</Link>
+                      <Link href={`/${locale}/alexandria`}>{locale === 'ar' ? 'الإسكندرية' : 'Alexandria'}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('header.register')}</Link>
+                      <Link href={`/${locale}/services`}>{locale === 'ar' ? 'خدماتنا' : 'Our Services'}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('footer.doctor_dashboard')}</Link>
+                      <Link href={`/${locale}/about-us`}>{locale === 'ar' ? 'من نحن' : 'About Us'}</Link>
                     </li>
                   </ul>
                 </div>

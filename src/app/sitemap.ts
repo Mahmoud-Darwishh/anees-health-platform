@@ -49,6 +49,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: 'weekly',
         priority: 0.7,
       },
+      // City pages - High priority for local SEO
+      {
+        url: `${baseUrl}/${locale}/cairo`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/${locale}/giza`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      },
+      {
+        url: `${baseUrl}/${locale}/alexandria`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      },
       // About pages
       {
         url: `${baseUrl}/${locale}/about-us`,

@@ -12,11 +12,15 @@ export async function generateMetadata({
   const { locale } = await params;
 
   return {
-    title: locale === 'ar' ? 'حجز الموعد' : 'Book Appointment',
+    title: locale === 'ar' ? 'احجز موعد - أنيس هيلث | رعاية منزلية' : 'Book Appointment | Anees Health - Home Healthcare',
     description:
       locale === 'ar'
-        ? 'احجز موعد مع طبيبك المفضل لزيارة منزلية أو استشارة طبية عن بعد'
-        : 'Book an appointment with your preferred doctor for home visits or telemedicine consultations',
+        ? 'احجز زيارة منزلية أو استشارة عن بعد مع أطبائنا المتخصصين عبر أنيس. حجز سهل وآمن'
+        : 'Book a home visit or telemedicine consultation with Anees specialists. Easy and secure appointment booking',
+    keywords:
+      locale === 'ar'
+        ? 'أنيس، حجز موعد، زيارة منزلية، استشارة طبية، دكتور أونلاين، تطبيب عن بعد'
+        : 'Anees, book appointment, home visit, doctor consultation, online doctor, telemedicine',
     robots: {
       index: false,
       follow: true,

@@ -26,7 +26,7 @@ const SectionBook: React.FC = () => {
                                     <div className="col-md-12 aos" data-reveal>
                                             <Image
                                                 src="/assets/img/optimized/book-01.webp"
-                                                alt="img"
+                                                alt="Doctor conducting home visit for elderly patient in Cairo - Anees Health"
                                                 width={600}
                                                 height={400}
                                                 className="img-fluid"
@@ -39,7 +39,7 @@ const SectionBook: React.FC = () => {
                                     <div className="col-sm-6 aos" data-reveal>
                                             <Image
                                                 src="/assets/img/optimized/book-02.webp"
-                                                alt="img"
+                                                alt="Professional home nursing care services Egypt - Anees Health"
                                                 width={400}
                                                 height={400}
                                                 className="img-fluid"
@@ -52,7 +52,7 @@ const SectionBook: React.FC = () => {
                                     <div className="col-sm-6 aos" data-reveal>
                                             <Image
                                                 src="/assets/img/optimized/book-03.webp"
-                                                alt="img"
+                                                alt="Home physiotherapy session for rehabilitation - Anees Health Egypt"
                                                 width={400}
                                                 height={400}
                                                 className="img-fluid"
