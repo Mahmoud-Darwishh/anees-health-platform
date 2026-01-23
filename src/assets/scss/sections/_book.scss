@@ -1,0 +1,53 @@
+@use "../base/colors";
+@use "../utils/mixins";
+@use "../base/typography";
+
+// Why Book With Us section styling
+.bookus-section {
+  background: colors.$secondarycolor;
+  position: relative;
+  overflow: hidden;
+
+  // Ensure gradient wins even when bg-dark is applied
+  &.bg-dark {
+    background: linear-gradient(#050f2b 0%, #021833 100%)
+  }
+  // Optional subtle overlay for depth
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(60% 50% at 50% 10%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+
+  .section-header {
+    .badge {
+      background: linear-gradient(135deg, colors.$primarycolor 0%, colors.$deer 100%);
+      color: colors.$white;
+      border: none;
+    }
+  }
+
+  .book-item {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 18px;
+
+    .book-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: colors.$white;
+    }
+
+    .book-info {
+      h6 { color: colors.$white; }
+      p  { color: rgba(255,255,255,0.85); }
+    }
+  }
+}

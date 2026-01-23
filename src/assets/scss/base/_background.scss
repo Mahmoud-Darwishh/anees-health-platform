@@ -44,7 +44,7 @@
     background-color: variables.$danger !important;
 }
 .bg-dark {
-    background-color: variables.$dark !important;
+    background-color: variables.$secondary !important;
 }
 .bg-light {
     background-color: variables.$light !important;
@@ -174,21 +174,21 @@
     }
 }
 .bg-dark {
-    background-color: variables.$dark !important;
+    background-color: variables.$secondary !important;
     &.bg-opacity-10 {
-        background-color: rgba(variables.$dark,0.1) !important;
+        background-color: rgba(variables.$secondary,0.1) !important;
     }
     &.bg-opacity-25 {
-        background-color: rgba(variables.$dark,0.25) !important;
+        background-color: rgba(variables.$secondary,0.25) !important;
     }
     &.bg-opacity-50 {
-        background-color: rgba(variables.$dark,0.50) !important;
+        background-color: rgba(variables.$secondary,0.50) !important;
     }
     &.bg-opacity-75 {
-        background-color: rgba(variables.$dark,0.75) !important;
+        background-color: rgba(variables.$secondary,0.75) !important;
     }
     &.bg-opacity-100 {
-        background-color: rgba(variables.$dark,1) !important;
+        background-color: rgba(variables.$secondary,1) !important;
     }
 }
 .bg-light {
