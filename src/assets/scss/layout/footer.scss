@@ -5,6 +5,11 @@
 
 .footer {
     background-color: colors.$blue;
+
+	// Gradient variant for footer-three
+	&.footer-three {
+		background-image: linear-gradient(90deg, #aa8642, #d4b16a);
+	}
 	&.footer-one {
 		.footer-bottom {
 			.copyright {
@@ -26,15 +31,16 @@
 		}
 		.footer-title {
 		    color: colors.$white;
-		    font-size: typography.$font__size__20;
+		    font-size: typography.$font__size__17;
 		    font-weight: typography.$bold;
-		    @include mixins.margin-padding(0 0 30px, null);
+		    letter-spacing: 0.2px;
+		    @include mixins.margin-padding(0 0 22px, null);
 		    text-transform: variables.$capitalize;
 		    @include mixins.respond-below(md) {
-		    	font-size: typography.$font__size__18;
+		    	font-size: typography.$font__size__16;
 		    }
 		    @include mixins.respond-below(sm) {
-		    	font-size: typography.$font__size__18;
+		    	font-size: typography.$font__size__15;
 		    }
 		}
 		.footer-widget {
@@ -54,21 +60,30 @@
 						}
 						a {
 							color: colors.$white;
-							font-size: typography.$font__size__15;
+							font-size: typography.$font__size__14;
+							line-height: 1.65;
 							padding-left: 20px;
 							position: variables.$relative;
-							@include mixins.transition(all 0.4s ease 0s);
+							@include mixins.transition(all 0.25s ease 0s);
+							opacity: 0.92;
+							font-weight: 400;
 							&:hover {
 								color: colors.$white;
-								letter-spacing: 0.5px;
-								padding-left: 30px;
+								opacity: 1;
+								padding-left: 24px;
 							}
 							&::before {
 								content: "\f101";
 								font-family: "Font Awesome 5 Free";
 								font-weight: 900;
-								margin-right: 5px;
+								margin-right: 6px;
+								font-size: typography.$font__size__11;
 								@include mixins.position(variables.$absolute, 0, null, null, 0);
+								opacity: 0.8;
+								transition: opacity 0.25s ease;
+							}
+							&:hover::before {
+								opacity: 1;
 							}
 						}
 				    }
@@ -80,9 +95,16 @@
 			.footer-about-content {
 				 p {
 					color: colors.$white;
+					font-size: typography.$font__size__14;
+					line-height: 1.7;
+					opacity: 0.93;
+					margin-bottom: 12px;
+					font-weight: 400;
 					&:last-child {
 						margin-bottom: 0;
-						color: variables.$gray-600;
+						color: colors.$white;
+						opacity: 0.85;
+						font-size: typography.$font__size__13;
 					}
 				}
 				.social-icon ul {
@@ -95,99 +117,68 @@
 			}
 			.footer-contact-info {
 				color: colors.$white;
-				font-size: typography.$font__size__15;
+				font-size: typography.$font__size__14;
 				.footer-address {
 					display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
+					display: -ms-flexbox;
+					display: flex;
+					margin-bottom: 14px;
 					span {
-						margin-right: 20px;
+						margin-right: 16px;
+						min-width: 20px;
 						i.fa-map-marker-alt {
-							font-size: typography.$font__size__20;
+							font-size: typography.$font__size__18;
+							opacity: 0.9;
 						}
 					}
 					p {
-						color: variables.$white;
-						@include mixins.margin-padding(0 0 1rem, null);
+						color: colors.$white;
+						line-height: 1.65;
+						opacity: 0.92;
+						margin: 0;
+						font-weight: 400;
 					}
 				}
 				p {
-					color: variables.$white;
+					color: colors.$white;
+					opacity: 0.92;
+					margin-bottom: 10px;
+					font-weight: 400;
+					line-height: 1.65;
+					&:last-child {
+						margin-bottom: 0;
+					}
 					i {
-						margin-right: 15px;
+						margin-right: 12px;
+						opacity: 0.85;
+						font-size: typography.$font__size__14;
+					}
+				}
+				.social-icon {
+					ul {
+						li {
+							a {
+								width: 30px;
+								height: 30px;
+								background-color: colors.$white;
+								color: colors.$primarycolor;
+								border-radius: 50%;
+								display: inline-flex;
+								align-items: center;
+								justify-content: center;
+								font-size: 16px;
+								transition: all 0.3s ease;
+								&:hover {
+									background-color: colors.$primarycolor;
+									color: colors.$white;
+									transform: scale(1.1);
+								}
+							}
+						}
 					}
 				}
 			}
 		}
-	}
-	.footer-bottom {
-		/* Bootstrap utilities handle: border-top, py-4 */
-		.copyright {
-			/* Layout and spacing handled by Bootstrap */
-			.copyright-text {
-				p {
-					/* Text color handled by Bootstrap text-white */
-					a {
-						color: variables.$gray-900;
-						font-weight: variables.$font-weight-medium;
-						@include mixins.transition(all 0.4s ease 0s);
-						&:hover {
-							color: variables.$primary;
-						}
-					}
-					&.title {
-						font-weight: typography.$regular;
-						@include mixins.margin-padding(10px 0 0, null);
-					}
-				}	
-			}
-			.policy-menu {
-			    /* Bootstrap utilities handle layout: list-unstyled, d-flex, gap-2, justify-content-end */
-			    /* Text color and link styling handled by Bootstrap text-white and text-decoration-none */
-			    a {
-					    &:hover, &:focus {
-					    	color: variables.$primary;
-					    	transition: color 0.3s ease;
-					    }
-					}
-					
-					/* Better mobile spacing */
-					@include mixins.respond-below(md) {
-						justify-content: center !important;
-						
-						li {
-							font-size: variables.$font-size-14;
-						}
-					}
-			}
-			
-			/* New simple policy links styling without list semantics */
-			.policy-links {
-				font-size: variables.$font-size-16;
-				
-				@include mixins.respond-below(md) {
-					font-size: variables.$font-size-14;
-				}
-				
-				a {
-					&:hover, &:focus {
-						color: variables.$primary !important;
-						transition: color 0.3s ease;
-					}
-				}
-			}
-
-			/* Remove all separators - we use manual pipe character */
-			.policy-menu li {
-				margin-right: 0;
-				padding-right: 0;
-				
-				&::after {
-					content: none !important;
-					display: none !important;
-				}
-			}
-		}		
 	}
 	&.inner-footer {
 		position: relative;
@@ -293,42 +284,85 @@
 		}
 		.footer-bottom {
 			background: variables.$light;		
-			border-top: 1px solid variables.$white;
+			border-top: 1px solid rgba(colors.$white, 0.2);
+			padding-top: 24px;
+			padding-bottom: 16px;
+			position: relative;
+			
+			// Decorative divider line above copyright
+			&::before {
+				content: "";
+				position: absolute;
+				top: 8px;
+				left: 15%;
+				right: 15%;
+				width: 70%;
+				height: 1px;
+				background: linear-gradient(
+					90deg,
+					transparent 0%,
+					rgba(colors.$white, 0.4) 25%,
+					rgba(colors.$white, 0.4) 75%,
+					transparent 100%
+				);
+				z-index: 1;
+			}
+			
 			.copyright {
-				padding: 16px 0 6px;	
+				padding: 8px 0 0;	
 				border: 0;
 				display: flex;
 				align-items: center;
 				justify-content: space-between;
 				flex-wrap: wrap;
+				gap: 16px;
 			}
 			.copyright-text {
-				margin-bottom: 10px;
+				margin-bottom: 0;
 				p {
-					font-size: variables.$font-size-16;
+					font-size: typography.$font__size__10;
 					color: variables.$text-color;
+					opacity: 0.88;
+					line-height: 1.5;
+					font-weight: 400;
 					@include mixins.respond-below(md) {
-						font-size: variables.$font-size-14;
+						font-size: typography.$font__size__10;
+						text-align: center;
 					}
 				}	
 			}
 			.policy-menu {
-			    font-size: variables.$font-size-16;
-				margin: 0 0 5px;
+			    font-size: typography.$font__size__10;
+				margin: 0;
 				@include mixins.respond-below(md) {
-					font-size: variables.$font-size-14;
+					font-size: typography.$font__size__10;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					width: 100%;
 				}
 			    li {
 				    display: inline-block;
 				    margin: 0;
 					padding: 0;
 					position: relative;
+					margin-right: 16px;
 					
 					a {
 					    color: variables.$gray-600;
+					    opacity: 0.85;
+					    @include mixins.transition(all 0.25s ease 0s);
+					    font-weight: 400;
 					    &:hover, &:focus {
 					    	color: variables.$primary;
+					    	opacity: 1;
+					    	text-decoration: underline;
+					    	text-decoration-thickness: 1px;
+					    	text-underline-offset: 3px;
 					    }
+					}
+					&:last-child {
+						margin-right: 0;
 					}
 				}
 			}
@@ -354,7 +388,7 @@
 				padding-right: 100px;
 				border: 1px solid variables.$gray-transparent;
 				font-size: variables.$font-size-14;
-				&:placeholder {
+				&::placeholder {
 					color: variables.$gray-300;
 				}
 			}

@@ -16,6 +16,8 @@
 @use '../assets/scss/sections/book';
 // Footer social icons styling
 @use '../assets/scss/components/footer-social';
+// Footer layout styling (includes footer-three gradient)
+@use '../assets/scss/layout/footer';
 
 // RTL support
 [dir='rtl'] {

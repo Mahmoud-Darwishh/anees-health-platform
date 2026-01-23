@@ -26,30 +26,6 @@ const Home3Footer = () => {
                     <p>
                       {t('footer.about_text')}
                     </p>
-                    <div className="social-icon">
-                      <ul className="list-unstyled d-flex gap-3 mb-0">
-                        <li>
-                          <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <i className="fa-brands fa-facebook" />
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <i className="fa-brands fa-tiktok" />
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <i className="fa-brands fa-instagram" />
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <i className="fa-brands fa-linkedin" />
-                          </Link>
-                        </li>
-                      </ul>
-                    </div>
                   </div>
                 </div>
                 {/* /Footer Widget */}
@@ -125,10 +101,34 @@ const Home3Footer = () => {
                         <span className="mb-0">+201270558620</span>
                       </div>
                     </div> 
-                    <p className="mb-0">
+                    <p className="mb-3">
                       <i className="fas fa-envelope me-3 mb-3" />
                       info@aneeshealth.com
                     </p>
+                    <div className="social-icon mt-3">
+                      <ul className="list-unstyled d-flex gap-3 mb-0">
+                        <li>
+                          <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <i className="fa-brands fa-facebook" />
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <i className="fa-brands fa-tiktok" />
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <i className="fa-brands fa-instagram" />
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <i className="fa-brands fa-linkedin" />
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
                 {/* /Footer Widget */}
