@@ -12,6 +12,8 @@
 @use '../assets/scss/packages';
 // Banner section styling
 @use '../assets/scss/sections/banner';
+// Footer social icons styling
+@use '../assets/scss/components/footer-social';
 
 // RTL support
 [dir='rtl'] {
