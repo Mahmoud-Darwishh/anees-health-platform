@@ -1,0 +1,550 @@
+/**
+ * Services Page - Professional Healthcare Services Showcase
+ * High-class, interactive design with RTL/LTR support
+ */
+
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+/* ============================================================================
+   INTRO SECTION
+   ============================================================================ */
+
+.introSection {
+  padding: 2rem 0 1rem;
+}
+
+.introCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($royal-blue, 0.08) 100%);
+  border: 1px solid rgba($primary, 0.12);
+
+  @media (min-width: 768px) {
+    padding: 2.5rem 2rem;
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  &::before {
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba($primary, 0.2) 0%, transparent 70%);
+    top: -140px;
+    inset-inline-end: -80px;
+  }
+
+  &::after {
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba($royal-blue, 0.18) 0%, transparent 70%);
+    bottom: -120px;
+    inset-inline-start: -60px;
+  }
+}
+
+.introEyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: $primary;
+  background: rgba($white, 0.75);
+  border: 1px solid rgba($primary, 0.2);
+  margin-bottom: 0.9rem;
+}
+
+.introTitle {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  line-height: 1.2;
+  color: $royal-blue;
+  font-weight: 700;
+}
+
+.introSubtitle {
+  margin: 0;
+  color: #4b5563;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  max-width: 680px;
+  margin-inline: auto;
+}
+
+.introDecor {
+  margin-top: 1.15rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.introDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $primary 0%, $royal-blue 100%);
+
+  &:nth-child(2) {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* ============================================================================
+   STATS SECTION
+   ============================================================================ */
+
+.statsSection {
+  padding: 2.75rem 0;
+  background: white;
+  margin-top: 0.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 2;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  padding: 0 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+  }
+}
+
+.statItem {
+  text-align: center;
+  padding: 1rem;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.statValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: $primary;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ============================================================================
+   SERVICES SECTION
+   ============================================================================ */
+
+.servicesSection {
+  padding: 3.5rem 0 4.25rem;
+
+  @media (min-width: 768px) {
+    padding: 5rem 0 6.25rem;
+  }
+}
+
+.servicesHeading {
+  text-align: center;
+  margin: 0 0 2.25rem;
+  padding: 0 1rem;
+  font-size: clamp(1.875rem, 4vw, 2.75rem);
+  font-weight: 700;
+  color: $royal-blue;
+}
+
+/* ============================================================================
+   SERVICE CARDS
+   ============================================================================ */
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  padding: 0 1rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.serviceCard {
+  position: relative;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, $primary 0%, $Crayola-Gold 100%);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+    transform-origin: left;
+  }
+
+  [dir="rtl"] &::before {
+    transform-origin: right;
+  }
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba($primary, 0.15);
+    border-color: rgba($primary, 0.2);
+
+    &::before {
+      transform: scaleX(1);
+    }
+
+    .serviceIcon {
+      background: linear-gradient(135deg, $primary 0%, $Crayola-Gold 100%);
+      transform: scale(1.1) rotate(5deg);
+
+      i {
+        color: white;
+      }
+    }
+
+    .expandIndicator {
+      background: $primary;
+      color: white;
+      transform: rotate(90deg);
+    }
+  }
+
+  &.expanded {
+    .serviceContent {
+      max-height: 1000px;
+      opacity: 1;
+      margin-top: 1.5rem;
+    }
+
+    .expandIndicator {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.serviceToggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  text-align: start;
+  cursor: pointer;
+}
+
+.serviceHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.serviceIcon {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($Crayola-Gold, 0.08) 100%);
+  border-radius: 0.75rem;
+  transition: all 0.4s ease;
+
+  i {
+    position: relative;
+    z-index: 2;
+    font-size: 1.75rem;
+    color: $primary;
+    transition: color 0.3s ease;
+  }
+}
+
+.serviceInfo {
+  flex: 1;
+}
+
+.serviceTitle {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: $royal-blue;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.serviceShortDesc {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.expandIndicator {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($primary, 0.1);
+  color: $primary;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.serviceContent {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.serviceDescription {
+  font-size: 1rem;
+  color: #4b5563;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #4b5563;
+
+  &::before {
+    content: '✓';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, $primary 0%, $Crayola-Gold 100%);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+}
+
+/* ============================================================================
+   CTA SECTION
+   ============================================================================ */
+
+.ctaSection {
+  padding: 4rem 0;
+  background: linear-gradient(135deg, $royal-blue 0%, $indigo-blue 100%);
+  position: relative;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(white, 0.05);
+  }
+
+  &::before {
+    width: 400px;
+    height: 400px;
+    top: -200px;
+    inset-inline-end: -100px;
+  }
+
+  &::after {
+    width: 300px;
+    height: 300px;
+    bottom: -150px;
+    inset-inline-start: -50px;
+  }
+}
+
+.ctaContent {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.ctaTitle {
+  font-size: clamp(1.875rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+.ctaDescription {
+  font-size: 1.125rem;
+  color: rgba(white, 0.9);
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+}
+
+.ctaButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btnPrimary,
+.btnSecondary {
+  padding: 1rem 2.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, $primary 0%, $Crayola-Gold 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba($primary, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba($primary, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btnSecondary {
+  background: white;
+  color: $royal-blue;
+
+  &:hover {
+    background: rgba(white, 0.95);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Stagger animation for service cards */
+.serviceCard {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease-out forwards;
+
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.1}s;
+    }
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Focus states for accessibility */
+.serviceToggle:focus-visible,
+.btnPrimary:focus-visible,
+.btnSecondary:focus-visible {
+  outline: 3px solid $primary;
+  outline-offset: 3px;
+}
+
+/* ============================================================================
+   RTL SPECIFIC ADJUSTMENTS
+   ============================================================================ */
+
+[dir="rtl"] {
+  .serviceCard::before {
+    transform-origin: right;
+  }
+
+  .expandIndicator {
+    transform: scaleX(-1);
+  }
+
+  .serviceCard.expanded .expandIndicator {
+    transform: scaleX(-1) rotate(180deg);
+  }
+}

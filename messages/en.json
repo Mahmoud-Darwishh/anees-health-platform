@@ -359,6 +359,103 @@
       "talk_doctors": "Talk to Doctors",
       "home_care": "Home Care Services"
     },
+    "servicesPage": {
+      "intro": {
+        "badge": "Professional Home Care"
+      },
+      "hero": {
+        "title": "Comprehensive Healthcare Services",
+        "subtitle": "Professional medical care delivered to your doorstep across Egypt",
+        "description": "Access world-class healthcare services in the comfort of your home. Our certified medical professionals provide specialized care tailored to your needs."
+      },
+      "categories": {
+        "title": "Explore Our Services",
+        "subtitle": "Discover the full range of healthcare solutions we offer"
+      },
+      "list": {
+        "title": "All Healthcare Services"
+      },
+      "items": {
+        "doctorVisits": {
+          "title": "Doctor Home Visits",
+          "shortDesc": "Professional medical consultations at your doorstep",
+          "description": "Get expert medical care without leaving home. Our certified doctors provide thorough consultations, examinations, and treatment plans tailored to your needs.",
+          "features": ["Board-certified physicians", "Same-day availability", "All medical specialties", "Comprehensive examinations"]
+        },
+        "elderlyCare": {
+          "title": "Elderly Care & Geriatrics",
+          "shortDesc": "Specialized care for seniors and aging patients",
+          "description": "Compassionate, specialized care for elderly patients including chronic disease management, mobility support, and comprehensive health monitoring for seniors.",
+          "features": ["Geriatric specialists", "Chronic disease management", "Mobility assistance", "Regular health monitoring"]
+        },
+        "telemedicine": {
+          "title": "Telemedicine Consultations",
+          "shortDesc": "Virtual healthcare consultations anytime, anywhere",
+          "description": "Connect with licensed doctors through secure video calls. Get medical advice, prescriptions, and follow-ups without leaving your home.",
+          "features": ["Video consultations", "24/7 availability", "Digital prescriptions", "Secure platform"]
+        },
+        "nursingCare": {
+          "title": "Home Nursing Care",
+          "shortDesc": "Professional nursing services at home",
+          "description": "Skilled nursing care including wound management, medication administration, vital signs monitoring, and post-operative care in your home.",
+          "features": ["Licensed nurses", "Wound care", "Medication management", "IV therapy"]
+        },
+        "physiotherapy": {
+          "title": "Home Physiotherapy",
+          "shortDesc": "Rehabilitation and physical therapy at home",
+          "description": "Professional physiotherapy sessions for rehabilitation, pain management, and mobility improvement delivered in the comfort of your home.",
+          "features": ["Certified therapists", "Personalized plans", "Modern equipment", "Progress tracking"]
+        },
+        "labTests": {
+          "title": "Lab Tests at Home",
+          "shortDesc": "Sample collection and diagnostic testing",
+          "description": "Convenient blood tests and diagnostic services with home sample collection and fast, accurate results delivered digitally.",
+          "features": ["Home sample collection", "Certified labs", "Fast results", "Digital reports"]
+        },
+        "medications": {
+          "title": "Medication Delivery",
+          "shortDesc": "Prescription delivery and medication management",
+          "description": "Get your prescribed medications delivered to your door with medication reminders and pharmaceutical consultation services.",
+          "features": ["Fast delivery", "Medication reminders", "Pharmaceutical consultation", "Refill management"]
+        },
+        "postOperative": {
+          "title": "Post-Operative Care",
+          "shortDesc": "Specialized care after surgical procedures",
+          "description": "Comprehensive post-surgery care including wound management, pain control, and recovery monitoring to ensure optimal healing.",
+          "features": ["Wound care", "Pain management", "Recovery monitoring", "Complication prevention"]
+        },
+        "remoteMonitoring": {
+          "title": "Remote Patient Monitoring",
+          "shortDesc": "Continuous health tracking for chronic conditions",
+          "description": "Advanced monitoring systems for tracking vital signs and managing chronic conditions with real-time alerts and professional oversight.",
+          "features": ["24/7 monitoring", "Real-time alerts", "Vital signs tracking", "Chronic disease management"]
+        },
+        "homeRadiology": {
+          "title": "Home Radiology & Scans",
+          "shortDesc": "Imaging services and diagnostic scans at home",
+          "description": "Professional radiological imaging services including X-rays, ultrasounds, and other diagnostic scans performed at your home by certified technicians.",
+          "features": ["Portable imaging equipment", "Certified radiologists", "Quick results", "Home appointment convenience"]
+        },
+        "palliativeCare": {
+          "title": "Palliative Care",
+          "shortDesc": "Compassionate care focused on comfort and dignity",
+          "description": "Specialized comfort-focused care designed to improve quality of life for patients with serious illnesses, including pain management, symptom relief, and emotional support.",
+          "features": ["Pain and symptom management", "Emotional and spiritual support", "Family counseling", "24/7 care coordination"]
+        }
+      },
+      "cta": {
+        "title": "Ready to Experience Quality Healthcare at Home?",
+        "description": "Book your service now and let our professionals take care of your health needs.",
+        "primaryButton": "Book a Service",
+        "secondaryButton": "Talk to Our Team"
+      },
+      "stats": {
+        "patients": "Patients Served",
+        "doctors": "Medical Professionals",
+        "satisfaction": "Satisfaction Rate",
+        "availability": "Service Availability"
+      }
+    },
     "about": {
       "title": "About Us",
       "description": "We are dedicated to providing quality healthcare through technology"

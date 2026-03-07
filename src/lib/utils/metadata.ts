@@ -176,11 +176,11 @@ export function generateServicesMetadata(locale: string): Metadata {
       ? 'خدماتنا الطبية - أنيس هيلث | رعاية منزلية' 
       : 'Our Services | Anees Health - Home Healthcare',
     description: isArabic
-      ? 'خدمات أنيس الشاملة: زيارات طبيب منزلي، تمريض منزلي، علاج طبيعي، معامل منزلية، مراقبة عن بعد، إدارة أدوية، رعاية ما بعد العمليات في جميع المناطق'
-      : 'Anees comprehensive services: home doctor visits, skilled nursing, physiotherapy, lab tests at home, remote monitoring, medication management, post-operative care available everywhere',
+      ? 'خدمات أنيس الشاملة في مصر: زيارات طبيب منزلي، رعاية المسنين، تمريض منزلي، علاج طبيعي منزلي، تحاليل وأشعات منزلية، مراقبة المرضى عن بُعد، الرعاية الملطفة، إدارة الأدوية، ورعاية ما بعد العمليات.'
+      : 'Anees comprehensive home healthcare services in Egypt: doctor home visits, elderly care, home nursing, physiotherapy, lab tests at home, home radiology scans, remote patient monitoring, palliative care, medication management, and post-operative care.',
     keywords: isArabic
-      ? 'أنيس، Anees، خدمات طبية منزلية مصر، رعاية صحية منزلية، تمريض منزلي، علاج طبيعي منزلي، دكتور منزلي، معامل منزلية، مراقبة عن بعد، رعاية ما بعد العمليات، إدارة أمراض مزمنة'
-      : 'Anees services, home medical services, home healthcare Egypt, home nursing, home physiotherapy, doctor home visits, remote monitoring, post-operative care, chronic disease management',
+      ? 'أنيس، Anees، خدمات صحية منزلية، خدمات طبية منزلية مصر، طبيب منزلي، زيارات طبيب منزلي، رعاية المسنين، رعاية كبار السن، تمريض منزلي، علاج طبيعي منزلي، تحاليل منزلية، أشعة منزلية، أشعات بالمنزل، مراقبة المريض عن بعد، الرعاية الملطفة، إدارة الأدوية، رعاية ما بعد العمليات، أمراض مزمنة'
+      : 'Anees services, home healthcare Egypt, home medical services, doctor home visit, doctor at home, elderly care, geriatrics, home nursing, home physiotherapy, lab tests at home, home radiology, scans at home, remote patient monitoring, palliative care, medication delivery, post-operative care, chronic disease management',
   });
 }
 
