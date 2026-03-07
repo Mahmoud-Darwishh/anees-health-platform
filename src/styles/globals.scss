@@ -79,6 +79,8 @@ a {
   --reveal-duration: 0.45s;
   --reveal-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --reveal-distance: 22px;
+  --mobile-bottom-nav-height: 56px;
+  --mobile-bottom-nav-offset: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
 }
 
 /* IntersectionObserver-based reveal */
@@ -132,6 +134,73 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+
+/* Show floating icons only after user starts scrolling */
+.whatsapp-floating-btn,
+#chtl-chat-icon-container,
+#chtl-open-chat-icon,
+#chtl-close-chat-icon,
+#chtl-launcher,
+.chtl-launcher,
+[id*='chtl'][class*='launcher'],
+[class*='chatling'][class*='launcher'] {
+  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+}
+
+html:not(.has-started-scroll) {
+  .whatsapp-floating-btn,
+  #chtl-chat-icon-container,
+  #chtl-open-chat-icon,
+  #chtl-close-chat-icon,
+  #chtl-launcher,
+  .chtl-launcher,
+  [id*='chtl'][class*='launcher'],
+  [class*='chatling'][class*='launcher'] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateY(8px);
+  }
+}
+
+html.has-started-scroll {
+  .whatsapp-floating-btn,
+  #chtl-chat-icon-container,
+  #chtl-open-chat-icon,
+  #chtl-close-chat-icon,
+  #chtl-launcher,
+  .chtl-launcher,
+  [id*='chtl'][class*='launcher'],
+  [class*='chatling'][class*='launcher'] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .whatsapp-floating-btn {
+    bottom: calc(var(--mobile-bottom-nav-offset) + 76px);
+    right: 20px;
+  }
+
+  .footer.footer-three {
+    padding-bottom: calc(var(--mobile-bottom-nav-offset) - 8px);
+  }
+
+  /* Chatling floating launcher/chat frame offset to avoid overlap with mobile CTA bar */
+  #chtl-chat-icon-container,
+  #chtl-chat-iframe.chtl-display-floating,
+  #chtl-open-chat-icon,
+  #chtl-close-chat-icon,
+  #chtl-launcher,
+  .chtl-launcher,
+  [id*='chtl'][class*='launcher'],
+  [class*='chatling'][class*='launcher'] {
+    bottom: calc(var(--mobile-bottom-nav-offset) + 10px) !important;
   }
 }
 
