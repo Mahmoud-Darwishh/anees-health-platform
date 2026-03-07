@@ -73,7 +73,7 @@ const SectionPackages: React.FC = () => {
         <div className="text-center package-cta aos" data-reveal>
           <p className="package-note">{t('contact_note')}</p>
           <Link
-            href={`/${locale}/contact`}
+            href={`/${locale}/contact-us`}
             className="btn btn-dark"
             aria-label={t('contact_us_aria')}
           >

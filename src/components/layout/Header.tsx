@@ -361,16 +361,6 @@ const Header: React.FC = () => {
                     </Link>
                   </li> */}
 
-                  {/* Register Button - Disabled for now */}
-                  {/* <li>
-                    <Link
-                      href={`/${locale}/register`}
-                      className="btn btn-md btn-dark d-inline-flex align-items-center rounded-pill"
-                    >
-                      <i className="isax isax-user-tick me-1" />
-                      {t('header.register')}
-                    </Link>
-                  </li> */}
                 </ul>
               </div>
             </nav>

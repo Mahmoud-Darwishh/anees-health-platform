@@ -494,7 +494,7 @@
     "section_5_item_4_title": "Additional Charges may apply for:",
     "section_5_additional_item_1": "After-hours services (10pm-7am): 25% surcharge",
     "section_5_additional_item_2": "Weekend/holiday services: 15% surcharge",
-    "section_5_additional_item_3": "Remote areas outside Cairo/Giza/Alexandria: Transportation fees",
+    "section_5_additional_item_3": "Remote areas outside primary service zones: Transportation fees",
     "section_5_additional_item_4": "Medical supplies and medications (billed separately at cost + 10%)",
     "section_5_item_5": "Insurance Claims: We assist with insurance documentation, but patients are responsible for pre-authorization and claim submissions",
     "section_5_item_6": "Refund Policy: Full refunds for canceled services by providers. No refunds for completed services unless severe quality issues are verified",
@@ -582,7 +582,7 @@
     "section_14_intro": "We reserve the right to modify these Terms at any time to reflect legal changes, service updates, or operational improvements. Material changes will be communicated via email and platform notifications 30 days before taking effect. Continued use of services after changes constitutes acceptance.",
 
     "section_15_title": "15. Service Availability",
-    "section_15_item_1": "Geographic Coverage: Currently serving Cairo, Giza, Alexandria, and select cities (expanding coverage continuously)",
+    "section_15_item_1": "Geographic Coverage: Currently serving multiple regions and select cities across Egypt (expanding coverage continuously)",
     "section_15_item_2": "Operating Hours: Platform available 24/7; home services available 7am-10pm (emergency services available 24/7 in select areas)",
     "section_15_item_3": "Service Interruptions: We strive for 99.9% uptime but cannot guarantee uninterrupted service",
     "section_15_item_4": "Platform Updates: Periodic maintenance may temporarily affect availability (scheduled during off-peak hours)",

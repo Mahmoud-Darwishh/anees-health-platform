@@ -8,8 +8,8 @@ export const metadata: Metadata = {
     default: 'Anees Health | Home Healthcare & Telemedicine Egypt',
     template: '%s | Anees Health',
   },
-  description: 'Anees Health is Egypt\'s leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Cairo, Giza, and Alexandria.',
-  keywords: 'Anees Health, home healthcare Egypt, doctor home visit, home nurse Egypt, telemedicine Egypt, physiotherapy at home, elderly care Cairo, chronic disease management, palliative home care, post operative care, lab tests at home, remote patient monitoring, medical equipment rental, رعاية صحية منزلية مصر، طبيب منزلي، تمريض منزلي',
+  description: 'Anees Health is Egypt\'s leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Egypt.',
+  keywords: 'Anees Health, home healthcare Egypt, doctor home visit, home nurse Egypt, telemedicine Egypt, physiotherapy at home, elderly care, chronic disease management, palliative home care, post operative care, lab tests at home, remote patient monitoring, medical equipment rental, رعاية صحية منزلية مصر، طبيب منزلي، تمريض منزلي',
   authors: [{ name: 'Anees Health' }],
   creator: 'Anees Health',
   publisher: 'Anees Health',
@@ -172,20 +172,11 @@ export default function RootLayout({
               addressCountry: 'EG',
             },
             
-            // Multiple Service Locations
-            areaServed: [
-              {
-                '@type': 'City',
-                name: 'Cairo',
-                sameAs: 'https://en.wikipedia.org/wiki/Cairo',
-              },
-              {
-                '@type': 'City',
-                name: 'Giza',
-                sameAs: 'https://en.wikipedia.org/wiki/Giza',
-              },
-              
-            ],
+            // Service Coverage
+            areaServed: {
+              '@type': 'Country',
+              name: 'Egypt',
+            },
             
             // Social Media & Online Presence
             sameAs: [
@@ -348,7 +339,7 @@ export default function RootLayout({
                 name: 'Does Anees operate 24/7?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Yes, Anees Health provides 24/7 medical support and services across Cairo, Giza, and Alexandria.',
+                  text: 'Yes, Anees Health provides 24/7 medical support and services across Egypt.',
                 },
               },
               {
@@ -364,84 +355,10 @@ export default function RootLayout({
                 name: 'Where does Anees operate?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'Anees Health serves Cairo, Giza, and Alexandria with comprehensive home healthcare services.',
+                  text: 'Anees Health serves multiple regions across Egypt with comprehensive home healthcare services.',
                 },
               },
             ],
-          })}
-        </Script>
-
-        {/* LocalBusiness Schema for Cairo - GEO Targeting */}
-        <Script id="local-cairo-schema" type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            '@id': 'https://aneeshealth.com/#local-cairo',
-            name: 'Anees Health Cairo',
-            description: 'Home healthcare and telemedicine services in Cairo',
-            address: {
-              '@type': 'PostalAddress',
-              addressLocality: 'Cairo',
-              addressRegion: 'Cairo',
-              addressCountry: 'EG',
-            },
-            telephone: '+20-1270558620',
-            email: 'cairo@aneeshealth.com',
-            url: 'https://aneeshealth.com/cairo',
-            areaServed: {
-              '@type': 'City',
-              name: 'Cairo',
-            },
-            openingHoursSpecification: {
-              '@type': 'OpeningHoursSpecification',
-              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-              opens: '00:00',
-              closes: '23:59',
-            },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '4.8',
-              reviewCount: '145',
-            },
-            priceRange: '$$',
-            parentOrganization: { '@id': 'https://aneeshealth.com/#organization' },
-          })}
-        </Script>
-
-        {/* LocalBusiness Schema for Giza - GEO Targeting */}
-        <Script id="local-giza-schema" type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'LocalBusiness',
-            '@id': 'https://aneeshealth.com/#local-giza',
-            name: 'Anees Health Giza',
-            description: 'Home healthcare and telemedicine services in Giza',
-            address: {
-              '@type': 'PostalAddress',
-              addressLocality: 'Giza',
-              addressRegion: 'Giza',
-              addressCountry: 'EG',
-            },
-            telephone: '+20-1270558620',
-            email: 'giza@aneeshealth.com',
-            url: 'https://aneeshealth.com/giza',
-            areaServed: {
-              '@type': 'City',
-              name: 'Giza',
-            },
-            openingHoursSpecification: {
-              '@type': 'OpeningHoursSpecification',
-              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-              opens: '00:00',
-              closes: '23:59',
-            },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '4.7',
-              reviewCount: '89',
-            },
-            priceRange: '$$',
-            parentOrganization: { '@id': 'https://aneeshealth.com/#organization' },
           })}
         </Script>
 

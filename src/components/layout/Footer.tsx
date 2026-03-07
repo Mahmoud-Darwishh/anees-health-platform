@@ -57,17 +57,8 @@ const Home3Footer = () => {
               <div className="col-lg-3 col-md-6">
                 {/* Footer Widget */}
                 <div className="footer-widget footer-menu">
-                  <h2 className="footer-title">{locale === 'ar' ? 'المدن' : 'Cities'}</h2>
+                  <h2 className="footer-title">{locale === 'ar' ? 'روابط سريعة' : 'Quick Links'}</h2>
                   <ul>
-                    <li>
-                      <Link href={`/${locale}/cairo`}>{locale === 'ar' ? 'القاهرة' : 'Cairo'}</Link>
-                    </li>
-                    <li>
-                      <Link href={`/${locale}/giza`}>{locale === 'ar' ? 'الجيزة' : 'Giza'}</Link>
-                    </li>
-                    <li>
-                      <Link href={`/${locale}/alexandria`}>{locale === 'ar' ? 'الإسكندرية' : 'Alexandria'}</Link>
-                    </li>
                     <li>
                       <Link href={`/${locale}/services`}>{locale === 'ar' ? 'خدماتنا' : 'Our Services'}</Link>
                     </li>

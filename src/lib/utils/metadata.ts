@@ -134,11 +134,11 @@ export function generateHomeMetadata(locale: string): Metadata {
       ? 'أنيس هيلث - رعاية صحية منزلية وتطبيب عن بعد مصر'
       : 'Anees Health - Home Healthcare & Telemedicine Egypt',
     description: isArabic
-      ? 'أنيس: منصة رائدة في مصر للرعاية الصحية المنزلية والتطبيب عن بعد—زيارات طبيب منزلي، تمريض ماهر، علاج طبيعي، معامل منزلية، مراقبة عن بعد في القاهرة والجيزة والإسكندرية'
-      : "Anees: Egypt's leading home healthcare and telemedicine platform—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring across Cairo, Giza, and Alexandria",
+      ? 'أنيس: منصة رائدة في مصر للرعاية الصحية المنزلية والتطبيب عن بعد—زيارات طبيب منزلي، تمريض ماهر، علاج طبيعي، معامل منزلية، مراقبة عن بعد في مختلف المناطق'
+      : "Anees: Egypt's leading home healthcare and telemedicine platform—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring across Egypt",
     keywords: isArabic
-      ? 'أنيس، Anees، رعاية صحية منزلية مصر، زيارة طبيب منزلي، دكتور منزلي، ممرضة منزلية، طبيب في البيت، تطبيب عن بعد، علاج طبيعي منزلي، رعاية كبار السن، إدارة الأمراض المزمنة، القاهرة، الجيزة، الإسكندرية'
-      : 'Anees, home healthcare Egypt, doctor home visit, home doctor, home nurse, telemedicine Egypt, home physiotherapy, elderly care, chronic disease management, Cairo, Giza, Alexandria, remote monitoring, lab at home',
+      ? 'أنيس، Anees، رعاية صحية منزلية مصر، زيارة طبيب منزلي، دكتور منزلي، ممرضة منزلية، طبيب في البيت، تطبيب عن بعد، علاج طبيعي منزلي، رعاية كبار السن، إدارة الأمراض المزمنة'
+      : 'Anees, home healthcare Egypt, doctor home visit, home doctor, home nurse, telemedicine Egypt, home physiotherapy, elderly care, chronic disease management, remote monitoring, lab at home',
   });
 }
 
@@ -155,11 +155,11 @@ export function generateDoctorsMetadata(locale: string): Metadata {
       ? 'أطبائنا - أنيس هيلث | زيارات منزلية' 
       : 'Our Doctors | Anees Health - Home Visits',
     description: isArabic
-      ? 'فريق متخصص من الأطباء المعتمدين في أنيس للزيارات المنزلية والتطبيب عن بعد—طب باطني، طب مسنين، علاج طبيعي بالقاهرة والجيزة والإسكندرية'
-      : 'Certified doctors on Anees platform for home visits and telemedicine—internal medicine, geriatrics, physiotherapy specialists available in Cairo, Giza, and Alexandria',
+      ? 'فريق متخصص من الأطباء المعتمدين في أنيس للزيارات المنزلية والتطبيب عن بعد—طب باطني، طب مسنين، علاج طبيعي في مختلف المناطق'
+      : 'Certified doctors on Anees platform for home visits and telemedicine—internal medicine, geriatrics, and physiotherapy specialists available across Egypt',
     keywords: isArabic
       ? 'أنيس، Anees، أطباء زيارة منزلية مصر، طبيب منزلي، دكتور منزلي، طبيب في البيت، أطباء متخصصون، أطباء مسنين، طبيب باطنة، علاج طبيعي منزلي، أطباء القاهرة، أطباء الجيزة'
-      : 'Anees, home visit doctors Egypt, doctor at home, specialist physicians, geriatric doctors, internal medicine, home physiotherapists, Cairo doctors, Giza doctors, Alexandria doctors, professional healthcare',
+      : 'Anees, home visit doctors Egypt, doctor at home, specialist physicians, geriatric doctors, internal medicine, home physiotherapists, professional healthcare',
   });
 }
 
@@ -197,11 +197,11 @@ export function generateCoverageMetadata(locale: string): Metadata {
       ? 'مناطق تغطيتنا - أنيس هيلث | خريطة الخدمات' 
       : 'Service Coverage | Anees Health - Where We Serve',
     description: isArabic
-      ? 'خرائط خدمات أنيس في القاهرة والجيزة والإسكندرية—رعاية صحية منزلية في منطقتك. تحقق من توفر خدماتنا والعناوين المخدومة'
-      : 'Anees service coverage maps in Cairo, Giza, and Alexandria—home healthcare available in your area. Check service availability and covered locations',
+      ? 'خرائط خدمات أنيس في مختلف المناطق—رعاية صحية منزلية في منطقتك. تحقق من توفر خدماتنا والعناوين المخدومة'
+      : 'Anees service coverage maps across Egypt—home healthcare available in your area. Check service availability and covered locations',
     keywords: isArabic
-      ? 'أنيس، Anees، مناطق تغطية، خدمات طبية القاهرة، خدمات الجيزة، خدمات الإسكندرية، رعاية منزلية مصر، مناطق الخدمة'
-      : 'Anees coverage, service areas Cairo, Giza, Alexandria, home healthcare locations, service coverage Egypt, available areas',
+      ? 'أنيس، Anees، مناطق تغطية، خدمات طبية، رعاية منزلية مصر، مناطق الخدمة'
+      : 'Anees coverage, service areas Egypt, home healthcare locations, service coverage Egypt, available areas',
   });
 }
 
@@ -319,8 +319,8 @@ export function generateAboutMetadata(locale: string): Metadata {
     path: `/${locale}/about-us`,
     title: isArabic ? 'من نحن - أنيس هيلث | رعاية صحية منزلية' : 'About Anees Health - Home Healthcare Platform Egypt',
     description: isArabic
-      ? 'تعرف على أنيس: منصة الرعاية الصحية المنزلية الرائدة في مصر. نقدم رعاية صحية عالية الجودة للمسنين والمرضى المزمنين في منازلهم بالقاهرة والجيزة والإسكندرية'
-      : 'About Anees: Egypt\'s leading home healthcare platform. We deliver quality healthcare for seniors and chronic patients at home across Cairo, Giza, and Alexandria',
+      ? 'تعرف على أنيس: منصة الرعاية الصحية المنزلية الرائدة في مصر. نقدم رعاية صحية عالية الجودة للمسنين والمرضى المزمنين في منازلهم في مختلف المناطق'
+      : 'About Anees: Egypt\'s leading home healthcare platform. We deliver quality healthcare for seniors and chronic patients at home across Egypt',
     keywords: isArabic
       ? 'أنيس، Anees، من نحن، رسالتنا، رؤيتنا، رعاية صحية منزلية مصر، فريق أنيس، تاريخنا'
       : 'Anees, about us, our mission, our vision, home healthcare Egypt, Anees team, our story',

@@ -36,8 +36,8 @@ export function generateOrganizationSchema(locale: string = 'en') {
 		alternateName: locale === 'ar' ? 'أنيس هيلث' : 'Anees Health',
 		description:
 			locale === 'ar'
-				? 'منصة رائدة في مصر للرعاية الصحية المنزلية والتطبيب عن بعد للمسنين ومرضى الأمراض المزمنة—زيارات طبيب منزلي، تمريض ماهر، علاج طبيعي، معامل منزلية، مراقبة عن بعد، إدارة الأدوية، ودعم طبي على مدار الساعة في القاهرة والجيزة والإسكندرية'
-				: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Cairo, Giza, and Alexandria",
+				? 'منصة رائدة في مصر للرعاية الصحية المنزلية والتطبيب عن بعد للمسنين ومرضى الأمراض المزمنة—زيارات طبيب منزلي، تمريض ماهر، علاج طبيعي، معامل منزلية، مراقبة عن بعد، إدارة الأدوية، ودعم طبي على مدار الساعة في مختلف المناطق'
+				: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Egypt",
 		url: config.api.baseUrl,
 		logo: `${config.api.baseUrl}/logos/anees-health-logo.png`,
 		image: `${config.api.baseUrl}/assets/img/banner/anees-health-og.jpg`,
@@ -58,16 +58,8 @@ export function generateOrganizationSchema(locale: string = 'en') {
 		},
 		areaServed: [
 			{
-				'@type': 'City',
-				name: locale === 'ar' ? 'القاهرة' : 'Cairo',
-			},
-			{
-				'@type': 'City',
-				name: locale === 'ar' ? 'الجيزة' : 'Giza',
-			},
-			{
-				'@type': 'City',
-				name: locale === 'ar' ? 'الإسكندرية' : 'Alexandria',
+				'@type': 'Country',
+				name: locale === 'ar' ? 'مصر' : 'Egypt',
 			},
 		],
 		sameAs: [
