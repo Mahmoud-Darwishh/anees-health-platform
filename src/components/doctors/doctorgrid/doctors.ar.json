@@ -378,7 +378,7 @@
       "عيادة أنيس الصحية",
       "Dar Tabib Clinic"
     ],
-    "experienceYears": 3,
+    "experienceYears": 6,
     "bio": "Dedicated Physical Therapist with expertise in post-surgical rehabilitation, sports injury recovery, and chronic pain management. Uses evidence-based techniques to help patients restore function and improve mobility.",
     "certifications": [
       "Licensed Physical Therapist",
@@ -1844,6 +1844,219 @@
         "name": "طارق أحمد",
         "rating": 4.8,
         "text": "معالج متميز مع فهم عميق لإعادة التأهيل الرياضي. ساعدني على العودة لممارسة الرياضة."
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "image": "assets/img/doctor-grid-optimized/31.webp",
+    "rating": 5,
+    "speciality": "أمراض المخ والأعصاب",
+    "specialityColorClass": "active-bar-primary",
+    "specialityTextClass": "text-primary",
+    "availabilityStatus": "متاح",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "أ.د. أحمد شوقي",
+    "location": "القاهرة، مصر",
+    "duration": "عن بُعد",
+    "consultationFee": "١٠٠٠ جنيه",
+    "maxConsultationFee": "٢٥٠٠ جنيه",
+    "professionalTitle": "مدرس مساعد أمراض المخ والأعصاب - جامعة الأزهر",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "ذكر",
+    "channels": [
+      "من زيارة منزلية",
+      "فيديو",
+      "محادثة"
+    ],
+    "languages": [
+      "العربية",
+      "الإنجليزية"
+    ],
+    "clinics": [
+      "مستشفى الحسين الجامعي",
+      "مستشفى سيد جلال الجامعي"
+    ],
+    "experienceYears": 12,
+    "bio": "مدرس مساعد أمراض المخ والأعصاب بجامعة الأزهر بالقاهرة، يعمل في مستشفيات جامعة الأزهر (الحسين الجامعي - سيد جلال الجامعي). حاصل على ماجستير طب المخ والأعصاب والطب النفسي ودكتوراه طب المخ والأعصاب من جامعة الأزهر. عضو الجمعية المصرية لطب وجراحة المخ والأعصاب. متخصص في تشخيص وعلاج أمراض الجهاز العصبي المختلفة.",
+    "certifications": [
+      "دكتوراه طب المخ والأعصاب - جامعة الأزهر",
+      "ماجستير طب المخ والأعصاب والطب النفسي",
+      "عضو الجمعية المصرية لطب وجراحة المخ والأعصاب",
+      "مدرس مساعد بجامعة الأزهر"
+    ],
+    "education": [
+      {
+        "degree": "دكتوراه طب المخ والأعصاب",
+        "university": "جامعة الأزهر",
+        "year": "2020"
+      },
+      {
+        "degree": "ماجستير طب المخ والأعصاب والطب النفسي",
+        "university": "جامعة الأزهر",
+        "year": "2016"
+      },
+      {
+        "degree": "بكالوريوس الطب والجراحة",
+        "university": "جامعة الأزهر",
+        "year": "2012"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "١٠٠٠ جنيه",
+      "homeVisit": "١٥٠٠ جنيه",
+      "clinicVisit": "١٠٠٠ جنيه"
+    },
+    "successRate": "97%",
+    "avgWaitTime": "18 دقيقة",
+    "totalPatients": "2,500+",
+    "areaCoverage": [
+      "مدينة نصر",
+      "القاهرة الجديدة",
+      "مصر الجديدة",
+      "الزيتون",
+      "عين شمس",
+      "المطرية"
+    ],
+    "clinicDetails": [
+      {
+        "name": "مستشفى الحسين الجامعي",
+        "location": "الأزهر، القاهرة",
+        "address": "مستشفيات جامعة الأزهر - الحسين الجامعي",
+        "hours": "9:00 صباحاً - 5:00 مساءً",
+        "slots": "5 مواعيد متاحة",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.263!3d30.047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMTUnNDIuMCJF!5e0!3m2!1sar!2seg!4v1234567890"
+      },
+      {
+        "name": "مستشفى سيد جلال الجامعي",
+        "location": "الأزهر، القاهرة",
+        "address": "مستشفيات جامعة الأزهر - سيد جلال الجامعي",
+        "hours": "9:00 صباحاً - 5:00 مساءً",
+        "slots": "4 مواعيد متاحة",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.263!3d30.047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMTUnNDIuMCJF!5e0!3m2!1sar!2seg!4v1234567890"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "محمد حسن",
+        "rating": 5,
+        "text": "دكتور ممتاز ومحترف. ساعدني في علاج الصداع المزمن وشرح كل شيء بوضوح."
+      },
+      {
+        "name": "فاطمة علي",
+        "rating": 5,
+        "text": "طبيب متميز بخبرة عالية. أنصح به بشدة لأي حالة تتعلق بأمراض المخ والأعصاب."
+      },
+      {
+        "name": "أحمد سعيد",
+        "rating": 5,
+        "text": "تجربة رائعة. الدكتور صبور ويهتم بالتفاصيل. العلاج كان فعال جداً."
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "image": "assets/img/doctor-grid-optimized/32.webp",
+    "rating": 4.9,
+    "speciality": "التغذية وعلاج السمنة",
+    "specialityColorClass": "active-bar-success",
+    "specialityTextClass": "text-success",
+    "availabilityStatus": "متاح",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "د. إسراء أمين",
+    "location": "القاهرة، مصر",
+    "duration": "عن بُعد",
+    "consultationFee": "٦٠٠ جنيه",
+    "maxConsultationFee": "١٥٠٠ جنيه",
+    "professionalTitle": "أخصائي التغذية وعلاج السمنة - مدرس مساعد بكلية العلاج الطبيعي",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "أنثى",
+    "channels": [
+      "من زيارة منزلية",
+      "فيديو",
+      "محادثة"
+    ],
+    "languages": [
+      "العربية",
+      "الإنجليزية"
+    ],
+    "clinics": [
+      "عيادة أنيس الصحية"
+    ],
+    "experienceYears": 8,
+    "bio": "أخصائي التغذية وعلاج السمنة، مدرس مساعد بكلية العلاج الطبيعي جامعة القاهرة. حاصلة على ماجستير ودكتوراه العلاج الطبيعي من جامعة القاهرة، ودبلومة التغذية العلاجية الأمريكية. عضو الجمعيات المصرية والأوروبية للتغذية وعلاج السمنة (EMASO & EASHTN). تقدم خدمات متكاملة لعلاج السمنة باستخدام جهاز InBody لقياس نسبة الدهون والعضلات والمياه بالجسم ومعدل الحرق، بالإضافة إلى أجهزة تفتيت الدهون المتطورة.",
+    "certifications": [
+      "دكتوراه العلاج الطبيعي - جامعة القاهرة",
+      "ماجستير العلاج الطبيعي - جامعة القاهرة",
+      "دبلومة التغذية العلاجية الأمريكية",
+      "عضو EMASO & EASHTN للتغذية وعلاج السمنة",
+      "مدرس مساعد بكلية العلاج الطبيعي"
+    ],
+    "education": [
+      {
+        "degree": "دكتوراه العلاج الطبيعي",
+        "university": "جامعة القاهرة",
+        "year": "2021"
+      },
+      {
+        "degree": "ماجستير العلاج الطبيعي",
+        "university": "جامعة القاهرة",
+        "year": "2017"
+      },
+      {
+        "degree": "دبلومة التغذية العلاجية",
+        "university": "المعهد الأمريكي للتغذية",
+        "year": "2018"
+      },
+      {
+        "degree": "بكالوريوس العلاج الطبيعي",
+        "university": "جامعة القاهرة",
+        "year": "2014"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "٦٠٠ جنيه",
+      "homeVisit": "١٠٠٠ جنيه",
+      "clinicVisit": "٦٠٠ جنيه"
+    },
+    "successRate": "95%",
+    "avgWaitTime": "10 دقيقة",
+    "totalPatients": "1,800+",
+    "areaCoverage": [
+      "مدينة نصر",
+      "القاهرة الجديدة",
+      "التجمع الخامس",
+      "المعادي",
+      "الزمالك",
+      "مصر الجديدة"
+    ],
+    "clinicDetails": [
+      {
+        "name": "عيادة أنيس الصحية",
+        "location": "مدينة نصر، القاهرة",
+        "address": "شارع مصطفى النحاس رقم 15، الحي الثامن، مدينة نصر",
+        "hours": "10:00 صباحاً - 7:00 مساءً",
+        "slots": "6 مواعيد متاحة",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.345!3d30.045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMjAnNDIuMCJF!5e0!3m2!1sar!2seg!4v1234567890"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "نورهان محمد",
+        "rating": 5,
+        "text": "د. إسراء محترفة جداً! فقدت 15 كيلو في 3 أشهر بنظام صحي ومتابعة دقيقة. النتائج من أول جلسة كانت واضحة."
+      },
+      {
+        "name": "مريم أحمد",
+        "rating": 5,
+        "text": "تجربة ممتازة. جهاز InBody ساعدني أفهم تكوين جسمي بدقة والبرنامج الغذائي كان سهل ومناسب."
+      },
+      {
+        "name": "سارة حسن",
+        "rating": 4.9,
+        "text": "دكتورة رائعة ومتابعة مستمرة. أجهزة تفتيت الدهون فعالة جداً والنظام الغذائي مش صعب."
       }
     ]
   }

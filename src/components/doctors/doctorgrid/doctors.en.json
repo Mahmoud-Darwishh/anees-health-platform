@@ -378,7 +378,7 @@
       "Anees Health Clinic",
       "Dar Tabib Clinic"
     ],
-    "experienceYears": 3,
+    "experienceYears": 6,
     "bio": "Dedicated Physical Therapist with expertise in post-surgical rehabilitation, sports injury recovery, and chronic pain management. Uses evidence-based techniques to help patients restore function and improve mobility.",
     "certifications": [
       "Licensed Physical Therapist",
@@ -1844,6 +1844,219 @@
         "name": "Tariq Ahmed",
         "rating": 4.8,
         "text": "Excellent therapist with a deep understanding of sports rehabilitation. Helped me return to my athletic activities."
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "image": "assets/img/doctor-grid-optimized/31.webp",
+    "rating": 5,
+    "speciality": "Neurology",
+    "specialityColorClass": "active-bar-primary",
+    "specialityTextClass": "text-primary",
+    "availabilityStatus": "Available",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "Prof. Dr. Ahmed Shawky",
+    "location": "Cairo, Egypt",
+    "duration": "Tele-Medicine",
+    "consultationFee": "EGP 1000",
+    "maxConsultationFee": "EGP 2500",
+    "professionalTitle": "Assistant Professor of Neurology - Al-Azhar University",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "Male",
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Al-Hussein University Hospital",
+      "Sayed Galal University Hospital"
+    ],
+    "experienceYears": 12,
+    "bio": "Assistant Professor of Neurology at Al-Azhar University in Cairo, working at Al-Azhar University Hospitals (Al-Hussein University Hospital and Sayed Galal University Hospital). Holder of a Master's degree in Neurology and Psychiatry and a PhD in Neurology from Al-Azhar University. Member of the Egyptian Society of Neurology and Neurosurgery. Specialized in diagnosing and treating various neurological disorders.",
+    "certifications": [
+      "PhD in Neurology - Al-Azhar University",
+      "Master's in Neurology and Psychiatry",
+      "Member of Egyptian Society of Neurology and Neurosurgery",
+      "Assistant Professor at Al-Azhar University"
+    ],
+    "education": [
+      {
+        "degree": "PhD in Neurology",
+        "university": "Al-Azhar University",
+        "year": "2020"
+      },
+      {
+        "degree": "Master's in Neurology and Psychiatry",
+        "university": "Al-Azhar University",
+        "year": "2016"
+      },
+      {
+        "degree": "Bachelor of Medicine and Surgery",
+        "university": "Al-Azhar University",
+        "year": "2012"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "EGP 1000",
+      "homeVisit": "EGP 1500",
+      "clinicVisit": "EGP 1000"
+    },
+    "successRate": "97%",
+    "avgWaitTime": "18 min",
+    "totalPatients": "2,500+",
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Heliopolis",
+      "El-Zeitoun",
+      "Ain Shams",
+      "El-Matareya"
+    ],
+    "clinicDetails": [
+      {
+        "name": "Al-Hussein University Hospital",
+        "location": "Al-Azhar, Cairo",
+        "address": "Al-Azhar University Hospitals - Al-Hussein University Hospital",
+        "hours": "9:00 AM - 5:00 PM",
+        "slots": "5 slots available",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.263!3d30.047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMTUnNDIuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+      },
+      {
+        "name": "Sayed Galal University Hospital",
+        "location": "Al-Azhar, Cairo",
+        "address": "Al-Azhar University Hospitals - Sayed Galal University Hospital",
+        "hours": "9:00 AM - 5:00 PM",
+        "slots": "4 slots available",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.263!3d30.047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMTUnNDIuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "Mohamed Hassan",
+        "rating": 5,
+        "text": "Excellent and professional doctor. Helped me treat chronic headaches and explained everything clearly."
+      },
+      {
+        "name": "Fatima Ali",
+        "rating": 5,
+        "text": "Distinguished physician with high expertise. Highly recommend for any neurological conditions."
+      },
+      {
+        "name": "Ahmed Saeed",
+        "rating": 5,
+        "text": "Wonderful experience. The doctor is patient and detail-oriented. Treatment was very effective."
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "image": "assets/img/doctor-grid-optimized/32.webp",
+    "rating": 4.9,
+    "speciality": "Nutrition & Obesity",
+    "specialityColorClass": "active-bar-success",
+    "specialityTextClass": "text-success",
+    "availabilityStatus": "Available",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "Dr. Esraa Amin",
+    "location": "Cairo, Egypt",
+    "duration": "Tele-Medicine",
+    "consultationFee": "EGP 600",
+    "maxConsultationFee": "EGP 1500",
+    "professionalTitle": "Nutrition & Obesity Consultant - Lecturer of Physical Therapy",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "Female",
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Health Clinic"
+    ],
+    "experienceYears": 8,
+    "bio": "Consultant of Nutrition and Obesity Treatment, Lecturer of Physical Therapy at Cairo University. Holder of PhD and Master's in Physical Therapy from Cairo University and American Nutrition Diploma. Member of EMASO & EASHTN (Egyptian and European associations for nutrition and obesity). Provides comprehensive obesity treatment services using InBody device to measure fat, muscle, and water percentages, as well as basal metabolic rate. Utilizes advanced lipolysis devices with visible results from the first session.",
+    "certifications": [
+      "PhD in Physical Therapy - Cairo University",
+      "Master's in Physical Therapy - Cairo University",
+      "American Nutrition Diploma",
+      "Member of EMASO & EASHTN for Nutrition and Obesity",
+      "Lecturer of Physical Therapy"
+    ],
+    "education": [
+      {
+        "degree": "PhD in Physical Therapy",
+        "university": "Cairo University",
+        "year": "2021"
+      },
+      {
+        "degree": "Master's in Physical Therapy",
+        "university": "Cairo University",
+        "year": "2017"
+      },
+      {
+        "degree": "American Nutrition Diploma",
+        "university": "American Institute of Nutrition",
+        "year": "2018"
+      },
+      {
+        "degree": "Bachelor of Physical Therapy",
+        "university": "Cairo University",
+        "year": "2014"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "EGP 600",
+      "homeVisit": "EGP 1000",
+      "clinicVisit": "EGP 600"
+    },
+    "successRate": "95%",
+    "avgWaitTime": "10 min",
+    "totalPatients": "1,800+",
+    "areaCoverage": [
+      "Nasr City",
+      "New Cairo",
+      "Fifth Settlement",
+      "Maadi",
+      "Zamalek",
+      "Heliopolis"
+    ],
+    "clinicDetails": [
+      {
+        "name": "Anees Health Clinic",
+        "location": "Nasr City, Cairo",
+        "address": "15 Mostafa El-Nahas Street, 8th District, Nasr City",
+        "hours": "10:00 AM - 7:00 PM",
+        "slots": "6 slots available",
+        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.345!3d30.045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMjAnNDIuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+      }
+    ],
+    "testimonials": [
+      {
+        "name": "Nourhan Mohamed",
+        "rating": 5,
+        "text": "Dr. Esraa is very professional! Lost 15 kg in 3 months with a healthy diet and precise follow-up. Results were visible from the first session."
+      },
+      {
+        "name": "Maryam Ahmed",
+        "rating": 5,
+        "text": "Excellent experience. InBody device helped me understand my body composition accurately and the diet plan was easy and suitable."
+      },
+      {
+        "name": "Sara Hassan",
+        "rating": 4.9,
+        "text": "Wonderful doctor with continuous follow-up. Lipolysis devices are very effective and the diet plan is not difficult."
       }
     ]
   }

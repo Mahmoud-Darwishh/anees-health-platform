@@ -137,19 +137,8 @@ a {
   }
 }
 
-/* Show floating icons only after user starts scrolling */
-.whatsapp-floating-btn,
-#chtl-chat-icon-container,
-#chtl-open-chat-icon,
-#chtl-close-chat-icon,
-#chtl-launcher,
-.chtl-launcher,
-[id*='chtl'][class*='launcher'],
-[class*='chatling'][class*='launcher'] {
-  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
-}
-
-html:not(.has-started-scroll) {
+/* Show floating icons only after user starts scrolling (mobile only) */
+@media (max-width: 767.98px) {
   .whatsapp-floating-btn,
   #chtl-chat-icon-container,
   #chtl-open-chat-icon,
@@ -158,26 +147,39 @@ html:not(.has-started-scroll) {
   .chtl-launcher,
   [id*='chtl'][class*='launcher'],
   [class*='chatling'][class*='launcher'] {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    transform: translateY(8px);
+    transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
   }
-}
 
-html.has-started-scroll {
-  .whatsapp-floating-btn,
-  #chtl-chat-icon-container,
-  #chtl-open-chat-icon,
-  #chtl-close-chat-icon,
-  #chtl-launcher,
-  .chtl-launcher,
-  [id*='chtl'][class*='launcher'],
-  [class*='chatling'][class*='launcher'] {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: none;
+  html:not(.has-started-scroll) {
+    .whatsapp-floating-btn,
+    #chtl-chat-icon-container,
+    #chtl-open-chat-icon,
+    #chtl-close-chat-icon,
+    #chtl-launcher,
+    .chtl-launcher,
+    [id*='chtl'][class*='launcher'],
+    [class*='chatling'][class*='launcher'] {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transform: translateY(8px);
+    }
+  }
+
+  html.has-started-scroll {
+    .whatsapp-floating-btn,
+    #chtl-chat-icon-container,
+    #chtl-open-chat-icon,
+    #chtl-close-chat-icon,
+    #chtl-launcher,
+    .chtl-launcher,
+    [id*='chtl'][class*='launcher'],
+    [class*='chatling'][class*='launcher'] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: none;
+    }
   }
 }
 
