@@ -4,7 +4,10 @@
 export const config = {
   // API Configuration
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+    baseUrl:
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      'http://localhost:3000',
     timeout: 30000,
   },
 
@@ -34,6 +37,17 @@ export const config = {
   pagination: {
     defaultPageSize: 10,
     maxPageSize: 100,
+  },
+
+  // Brand and social profiles used for SEO/GEO consistency
+  brand: {
+    socialProfiles: [
+      'https://www.facebook.com/aneeshealthcare/',
+      'https://www.instagram.com/aneeshealth/',
+      'https://www.linkedin.com/company/aneeshealth',
+      'https://www.tiktok.com/@aneeshealth',
+      'https://www.youtube.com/@aneeshealth',
+    ],
   },
 };
 

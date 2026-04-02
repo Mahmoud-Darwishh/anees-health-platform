@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { logger } from '@/lib/utils/app-logger';
 
 /**
  * Validate Kashier Signature
@@ -26,9 +27,7 @@ function validateSignature(
     .update(finalUrl)
     .digest('hex');
 
-  console.log('Signature validation:', {
-    received: query.signature,
-    calculated: signature,
+  logger.debug('Signature validation', {
     match: signature === query.signature,
   });
 
@@ -46,14 +45,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const apiKey = process.env.KASHIER_API_KEY;
 
-    console.log('📥 Webhook received:', {
+    logger.info('Webhook received', {
       orderId: body.merchantOrderId,
-      transactionId: body.transactionId,
       status: body.paymentStatus,
     });
 
     if (!apiKey) {
-      console.error('❌ Kashier API key not configured');
+      logger.error('Kashier API key not configured');
       return NextResponse.json(
         { error: 'Payment gateway not configured' },
         { status: 500 }
@@ -64,30 +62,23 @@ export async function POST(request: NextRequest) {
     const isValid = validateSignature(body, apiKey);
 
     if (!isValid) {
-      console.error('❌ Invalid webhook signature');
+      logger.error('Invalid webhook signature', { orderId: body.merchantOrderId });
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
       );
     }
 
-    console.log('✅ Signature validated successfully');
-
-    // Log payment details
-    console.log('💳 Payment details:', {
+    logger.info('Payment webhook validated', {
       orderId: body.merchantOrderId,
       transactionId: body.transactionId,
       status: body.paymentStatus,
-      amount: body.amount,
-      currency: body.currency,
-      cardBrand: body.cardBrand,
-      maskedCard: body.maskedCard,
     });
 
     // TODO: Update booking status in database
     // Based on payment status, update the booking record
     if (body.paymentStatus === 'SUCCESS') {
-      console.log('✅ Payment successful - Update booking status to PAID');
+      logger.info('Payment successful — pending DB update', { orderId: body.merchantOrderId });
       // await updateBookingPaymentStatus(body.merchantOrderId, {
       //   status: 'paid',
       //   transactionId: body.transactionId,
@@ -95,7 +86,7 @@ export async function POST(request: NextRequest) {
       //   paidAt: new Date(),
       // });
     } else {
-      console.log('❌ Payment failed');
+      logger.warn('Payment failed', { orderId: body.merchantOrderId, status: body.paymentStatus });
       // await updateBookingPaymentStatus(body.merchantOrderId, {
       //   status: 'failed',
       //   transactionId: body.transactionId,
@@ -110,7 +101,7 @@ export async function POST(request: NextRequest) {
       status: body.paymentStatus,
     });
   } catch (error) {
-    console.error('❌ Webhook error:', error);
+    logger.error('Webhook processing error', error instanceof Error ? error.message : String(error));
     const errorMessage = error instanceof Error ? error.message : 'Webhook processing failed';
     
     return NextResponse.json(

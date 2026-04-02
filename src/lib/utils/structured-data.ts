@@ -16,6 +16,7 @@
 
 import { config } from '../config';
 import type { Doctor } from '../models/doctor.types';
+import { generateDoctorSlug } from './slug';
 
 export interface StructuredDataProps {
 	locale?: string;
@@ -63,10 +64,7 @@ export function generateOrganizationSchema(locale: string = 'en') {
 			},
 		],
 		sameAs: [
-			'https://www.facebook.com/aneeshealth',
-			'https://www.instagram.com/aneeshealth',
-			'https://www.linkedin.com/company/anees-health',
-			'https://twitter.com/aneeshealth',
+			...config.brand.socialProfiles,
 		],
 		contactPoint: {
 			'@type': 'ContactPoint',
@@ -316,7 +314,7 @@ export function generateDoctorsCollectionSchema(
 				image: doctor.image.startsWith('http')
 					? doctor.image
 					: `${baseUrl}/${doctor.image}`,
-				url: `${baseUrl}/${locale}/doctors/${doctor.profileLink}`,
+				url: `${baseUrl}/${locale}/doctors/${generateDoctorSlug(doctor.doctorName)}`,
 				medicalSpecialty: doctor.speciality,
 				aggregateRating: doctor.rating
 					? {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { logger } from '@/lib/utils/app-logger';
 
 /**
  * Generate Kashier Order Hash
@@ -10,11 +11,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { amount, currency, orderId, customerId } = body;
 
-    console.log('Generate hash request:', { amount, currency, orderId, customerId });
+    logger.info('Generate hash request', { orderId, currency });
 
     // Validate required fields
     if (!amount || !currency || !orderId) {
-      console.error('Missing required fields');
+      logger.warn('Generate hash: missing required fields', { amount, currency, orderId });
       return NextResponse.json(
         { error: 'Missing required fields: amount, currency, orderId' },
         { status: 400 }
@@ -27,15 +28,11 @@ export async function POST(request: NextRequest) {
     const secretKey = process.env.KASHIER_SECRET_KEY || process.env.KASHIER_API_KEY;
     const mode = process.env.KASHIER_MODE === 'live' ? 'live' : 'test'; // Default to test
 
-    console.log('Environment check:', {
-      merchantId: merchantId ? 'SET' : 'MISSING',
-      secretKey: secretKey ? 'SET' : 'MISSING',
-      mode,
-      modeEnv: process.env.KASHIER_MODE || 'not set (defaulting to test)'
-    });
-
     if (!merchantId || !secretKey) {
-      console.error('Kashier credentials not configured');
+      logger.error('Kashier credentials not configured', {
+        merchantId: merchantId ? 'SET' : 'MISSING',
+        secretKey: secretKey ? 'SET' : 'MISSING',
+      });
       return NextResponse.json(
         { error: 'Payment gateway not configured. Please add KASHIER_MERCHANT_ID and KASHIER_SECRET_KEY (or KASHIER_API_KEY) to environment variables.' },
         { status: 500 }
@@ -51,23 +48,13 @@ export async function POST(request: NextRequest) {
       customerId ? '.' + customerId : ''
     }`;
 
-    console.log('Hash generation details:', {
-      path,
-      secretKeyLength: trimmedSecretKey.length,
-      merchantId,
-      orderId,
-      amount,
-      currency,
-      customerId
-    });
-
     // Generate HMAC SHA256 hash using Secret Key (as per Kashier documentation)
     const hash = crypto
       .createHmac('sha256', trimmedSecretKey)
       .update(path)
       .digest('hex');
 
-    console.log('✅ Hash generated:', hash);
+    logger.debug('Hash generated', { orderId });
 
     // Return payment configuration
     return NextResponse.json({
@@ -80,7 +67,7 @@ export async function POST(request: NextRequest) {
       customerId,
     });
   } catch (error) {
-    console.error('Error generating payment hash:', error);
+    logger.error('Error generating payment hash', error instanceof Error ? error.message : String(error));
     const errorMessage = error instanceof Error ? error.message : 'Failed to generate payment hash';
     return NextResponse.json(
       { error: errorMessage },

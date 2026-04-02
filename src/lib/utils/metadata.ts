@@ -237,7 +237,7 @@ export function generateDoctorProfileMetadata(
 
   const description = isArabic
     ? `احجز مع ${doctor.doctorName} (${doctor.professionalTitle}) عبر أنيس. ${doctor.experienceYears}+ سنوات خبرة في ${doctor.speciality}. متخصص في الزيارات المنزلية في ${city}. يتحدث ${doctor.languages.join('، ')}. اطلب طبيب في البيت الآن.`
-    : `Book with ${doctor.doctorName} (${doctor.professionalTitle}) on Anees. ${doctor.experienceYears}+ years in ${doctor.speciality}. Home visit specialist in ${city}. Speaks ${doctor.channels.join(', ')}. Request doctor-at-home now.`;
+    : `Book with ${doctor.doctorName} (${doctor.professionalTitle}) on Anees. ${doctor.experienceYears}+ years in ${doctor.speciality}. Home visit specialist in ${city}. Speaks ${doctor.languages.join(', ')}. Request doctor-at-home now.`;
 
   const keywords = isArabic
     ? `أنيس، ${doctor.doctorName}، ${doctor.speciality}، دكتور ${city}، طبيب منزلي ${city}، زيارة منزلية ${city}، دكتور في البيت، ${doctor.professionalTitle}، أنيس ${doctor.speciality}`

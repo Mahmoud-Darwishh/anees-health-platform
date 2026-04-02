@@ -14,9 +14,10 @@ interface ServiceCardProps {
   isExpanded: boolean;
   onToggle: () => void;
   t: ReturnType<typeof useTranslations>;
+  locale: string;
 }
 
-function ServiceCard({ service, isExpanded, onToggle, t }: ServiceCardProps) {
+function ServiceCard({ service, isExpanded, onToggle, t, locale }: ServiceCardProps) {
   const title = t(service.translationKeys.title);
   const shortDesc = t(service.translationKeys.shortDesc);
   const description = t(service.translationKeys.description);
@@ -56,6 +57,13 @@ function ServiceCard({ service, isExpanded, onToggle, t }: ServiceCardProps) {
             </li>
           ))}
         </ul>
+        {service.landingSlug ? (
+          <div className="mt-3">
+            <Link href={`/${locale}/services/${service.landingSlug}`} className="btn btn-outline-primary btn-sm">
+              {t('common.view')}
+            </Link>
+          </div>
+        ) : null}
       </div>
     </article>
   );
@@ -142,6 +150,7 @@ export default function ServicesPage() {
                 isExpanded={expandedService === service.id}
                 onToggle={() => toggleService(service.id)}
                 t={t}
+                locale={locale}
               />
             ))}
           </div>

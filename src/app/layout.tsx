@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import { locales } from '@/i18n/request';
 import Script from 'next/script';
+import { config } from '@/lib/config';
+
+const siteUrl = config.api.baseUrl;
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aneeshealth.com'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: 'Anees Health | Home Healthcare & Telemedicine Egypt',
     template: '%s | Anees Health',
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
     title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
     description: 'Trusted home healthcare and telemedicine across Egypt: doctor home visits, skilled nursing, physiotherapy, lab at home, chronic disease management, and 24/7 medical support for seniors and families.',
     siteName: 'Anees Health',
-    url: 'https://aneeshealth.com/',
+    url: `${siteUrl}/`,
     type: 'website',
     locale: 'en_US',
     alternateLocale: ['ar_EG'],
@@ -49,10 +52,10 @@ export const metadata: Metadata = {
     images: ['/assets/img/banner/anees-health-og.jpg'],
   },
   alternates: {
-    canonical: 'https://aneeshealth.com/',
+    canonical: `${siteUrl}/`,
     languages: {
-      'en-US': 'https://aneeshealth.com/en',
-      'ar-EG': 'https://aneeshealth.com/ar',
+      'en-US': `${siteUrl}/en`,
+      'ar-EG': `${siteUrl}/ar`,
     },
   },
   robots: {
@@ -179,13 +182,7 @@ export default function RootLayout({
             },
             
             // Social Media & Online Presence
-            sameAs: [
-              'https://www.facebook.com/aneeshealthcare/',
-              'https://www.instagram.com/aneeshealth/',
-              'https://www.linkedin.com/company/aneeshealth',
-              'https://www.tiktok.com/@aneeshealth',
-              'https://www.youtube.com/@aneeshealth',
-            ],
+            sameAs: config.brand.socialProfiles,
             
             // Contact Points
             contactPoint: [

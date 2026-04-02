@@ -6,6 +6,7 @@
 export interface ServiceItem {
   id: string;
   icon: string;
+  landingSlug?: string;
   translationKeys: {
     title: string;
     shortDesc: string;
@@ -18,6 +19,7 @@ export const SERVICES: ServiceItem[] = [
   {
     id: 'doctorVisits',
     icon: 'isax isax-health',
+    landingSlug: 'doctor-at-home',
     translationKeys: {
       title: 'home.servicesPage.items.doctorVisits.title',
       shortDesc: 'home.servicesPage.items.doctorVisits.shortDesc',
@@ -28,6 +30,7 @@ export const SERVICES: ServiceItem[] = [
   {
     id: 'elderlyCare',
     icon: 'isax isax-heart-add',
+    landingSlug: 'elderly-care-at-home',
     translationKeys: {
       title: 'home.servicesPage.items.elderlyCare.title',
       shortDesc: 'home.servicesPage.items.elderlyCare.shortDesc',
@@ -58,6 +61,7 @@ export const SERVICES: ServiceItem[] = [
   {
     id: 'physiotherapy',
     icon: 'isax isax-activity',
+    landingSlug: 'physiotherapy-at-home',
     translationKeys: {
       title: 'home.servicesPage.items.physiotherapy.title',
       shortDesc: 'home.servicesPage.items.physiotherapy.shortDesc',

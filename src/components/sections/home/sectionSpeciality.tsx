@@ -151,7 +151,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.cardiology')}</Link>
+                                    <Link href={`/${locale}/specialties/cardiology`}>{t('home.specialities.cardiology')}</Link>
                                 </h6>
                             </div>
                             <div className="spaciality-item">
@@ -165,7 +165,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.orthopedics')}</Link>
+                                    <Link href={`/${locale}/specialties/orthopedic-surgery`}>{t('home.specialities.orthopedics')}</Link>
                                 </h6>
                             </div>
                             <div className="spaciality-item">
@@ -179,7 +179,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.gastroenterology')}</Link>
+                                    <Link href={`/${locale}/specialties/internal-medicine-gastroenterology`}>{t('home.specialities.gastroenterology')}</Link>
                                 </h6>
                             </div>
                             <div className="spaciality-item">
@@ -193,7 +193,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.geriatrics')}</Link>
+                                    <Link href={`/${locale}/specialties/geriatric-medicine`}>{t('home.specialities.geriatrics')}</Link>
                                 </h6>
                             </div>
                             <div className="spaciality-item">
@@ -207,7 +207,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.psychiatry')}</Link>
+                                    <Link href={`/${locale}/specialties/neuropsychiatry`}>{t('home.specialities.psychiatry')}</Link>
                                 </h6>
                             </div>
                             <div className="spaciality-item">
@@ -221,7 +221,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.endocrinology')}</Link>
+                                    <Link href={`/${locale}/specialties/endocrinology`}>{t('home.specialities.endocrinology')}</Link>
                                 </h6>
                             </div>
                             <div className="spaciality-item">
@@ -235,7 +235,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.pulmonology')}</Link>
+                                    <Link href={`/${locale}/specialties/pulmonology`}>{t('home.specialities.pulmonology')}</Link>
                                 </h6>
                             </div>
                             
@@ -250,7 +250,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.nephrology')}</Link>
+                                    <Link href={`/${locale}/specialties/nephrology`}>{t('home.specialities.nephrology')}</Link>
                                 </h6>
                                 
                             
@@ -266,7 +266,7 @@ const SectionSpeciality: React.FC = () => {
                                     </span>
                                 </div>
                                 <h6>
-                                    <Link href={`/${locale}/doctors`}>{t('home.specialities.neurology')}</Link>
+                                    <Link href={`/${locale}/specialties/neuropsychiatry`}>{t('home.specialities.neurology')}</Link>
                                 </h6>
 
                             </div>

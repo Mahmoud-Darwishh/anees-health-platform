@@ -57,13 +57,13 @@ const Home3Footer = () => {
               <div className="col-lg-3 col-md-6">
                 {/* Footer Widget */}
                 <div className="footer-widget footer-menu">
-                  <h2 className="footer-title">{locale === 'ar' ? 'روابط سريعة' : 'Quick Links'}</h2>
+                    <h2 className="footer-title">{t('footer.quick_links')}</h2>
                   <ul>
                     <li>
-                      <Link href={`/${locale}/services`}>{locale === 'ar' ? 'خدماتنا' : 'Our Services'}</Link>
+                        <Link href={`/${locale}/services`}>{t('footer.our_services')}</Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/about-us`}>{locale === 'ar' ? 'من نحن' : 'About Us'}</Link>
+                        <Link href={`/${locale}/about-us`}>{t('footer.about_us')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -100,21 +100,25 @@ const Home3Footer = () => {
                       <ul className="list-unstyled d-flex gap-3 mb-0">
                         <li>
                           <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <span className="visually-hidden">{t('footer.social_facebook')}</span>
                             <i className="fa-brands fa-facebook" />
                           </Link>
                         </li>
                         <li>
                           <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <span className="visually-hidden">{t('footer.social_tiktok')}</span>
                             <i className="fa-brands fa-tiktok" />
                           </Link>
                         </li>
                         <li>
                           <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <span className="visually-hidden">{t('footer.social_instagram')}</span>
                             <i className="fa-brands fa-instagram" />
                           </Link>
                         </li>
                         <li>
                           <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <span className="visually-hidden">{t('footer.social_linkedin')}</span>
                             <i className="fa-brands fa-linkedin" />
                           </Link>
                         </li>

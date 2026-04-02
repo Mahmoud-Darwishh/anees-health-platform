@@ -2,7 +2,7 @@
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
-import { locales } from '@/i18n/request';
+import { locales, type Locale } from '@/i18n/request';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
 import FloatingIconsOnScroll from '@/components/common/FloatingIconsOnScroll';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
@@ -21,23 +21,23 @@ export default async function LocaleLayout({
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const $locale = (await params).locale;
+    const locale = (await params).locale;
 
-  if (!locales.includes($locale as any)) {
+    if (!locales.includes(locale as Locale)) {
     notFound();
   }
 
   const messages = await getMessages();
-  const direction = $locale === 'ar' ? 'rtl' : 'ltr';
+    const direction = locale === 'ar' ? 'rtl' : 'ltr';
 
   // Generate structured data for this locale
-  const organizationSchema = generateOrganizationSchema($locale);
+    const organizationSchema = generateOrganizationSchema(locale);
   const localBusinessSchema = generateLocalBusinessSchema();
-  const websiteSchema = generateWebsiteSchema($locale);
+    const websiteSchema = generateWebsiteSchema(locale);
 
   return (
-    <NextIntlClientProvider messages={messages} locale={$locale} timeZone="Africa/Cairo">
-      <div dir={direction} lang={$locale}>
+      <NextIntlClientProvider messages={messages} locale={locale} timeZone="Africa/Cairo">
+        <div dir={direction} lang={locale}>
         {/* Structured Data for SEO & GEO */}
         <script
           type="application/ld+json"

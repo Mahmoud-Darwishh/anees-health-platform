@@ -1,26 +1,27 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Slider from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
+import type { Doctor } from "@/lib/models/doctor.types";
 import { generateDoctorSlug } from "@/lib/utils/slug";
 import doctorsDataEn from "../../doctors/doctorgrid/doctors.en.json";
 import doctorsDataAr from "../../doctors/doctorgrid/doctors.ar.json";
 
-const SectionDoctor: React.FC = () => {
+const SectionDoctor = () => {
   const t = useTranslations();
   const locale = useLocale();
   const doctorsData = locale === 'ar' ? doctorsDataAr : doctorsDataEn;
   const isRTL = locale === "ar";
-  const [slider, setSlider] = useState<any>(null);
+  const [slider, setSlider] = useState<Slider | null>(null);
   const [slidesToShow, setSlidesToShow] = useState<number>(1);
   const featuredDoctors = useMemo(() => doctorsData.slice(0, 6), [doctorsData]);
 
   // Create slug mapping from English doctors data to ensure consistent slugs across locales
   const slugMap = useMemo(() => {
     const map = new Map<number, string>();
-    (doctorsDataEn as any[]).forEach((doc) => {
+    (doctorsDataEn as Doctor[]).forEach((doc) => {
       map.set(doc.id, generateDoctorSlug(doc.doctorName));
     });
     return map;

@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
-const Header: React.FC = () => {
+const Header = () => {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();

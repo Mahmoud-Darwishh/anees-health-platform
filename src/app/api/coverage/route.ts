@@ -8,6 +8,7 @@ import {
   type CoverageData,
 } from '@/lib/utils/coverage';
 import { logCoverageCheck } from '@/lib/utils/logger';
+import { logger } from '@/lib/utils/app-logger';
 
 function getCairoTimestamp(): string {
   const now = new Date();
@@ -124,7 +125,7 @@ export async function GET(request: NextRequest) {
         areaName: result.area?.name,
         ip,
         userAgent,
-      }).catch(err => console.error('Logging error:', err));
+      }).catch(err => logger.error('Coverage check log error', err instanceof Error ? err.message : String(err)));
 
       // Push anonymized check data to SheetDB (fire-and-forget)
       // SheetDB logging (requires sheet header row: latitude, longitude, covered, areaName, timestamp)
@@ -154,14 +155,14 @@ export async function GET(request: NextRequest) {
 
             if (!res.ok) {
               const body = await res.text();
-              console.error('SheetDB logging error:', res.status, body);
+              logger.error('SheetDB logging error', { status: res.status, body });
             }
           } catch (err) {
-            console.error('SheetDB logging error:', err);
+            logger.error('SheetDB logging error', err instanceof Error ? err.message : String(err));
           }
         })();
       } catch (err) {
-        console.error('SheetDB logging setup error:', err);
+        logger.error('SheetDB logging setup error', err instanceof Error ? err.message : String(err));
       }
 
       return NextResponse.json({
@@ -202,7 +203,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Coverage check error:', error);
+    logger.error('Coverage check error', error instanceof Error ? error.message : String(error));
     return NextResponse.json(
       {
         success: false,

@@ -18,6 +18,7 @@ export default function DoctorProfileContent({
   locale,
 }: DoctorProfileContentProps) {
   const isArabic = locale === 'ar';
+  const city = doctor.location.split(',')[0]?.trim() || doctor.location;
 
   // Always render numerals in English for consistency across locales
   const formatNumberEn = (value: number | string) =>
@@ -42,7 +43,42 @@ export default function DoctorProfileContent({
     bookNow: isArabic ? 'احجز الآن' : 'Book Now',
     languages: isArabic ? 'اللغات' : 'Languages',
     areas: isArabic ? 'مناطق التغطية' : 'Coverage Areas',
+    overview: isArabic ? 'لماذا هذا الطبيب على أنيس' : 'Why book this doctor on Anees',
+    overviewBody: isArabic
+      ? `${doctor.doctorName} يقدم خدمات ${doctor.speciality} عبر أنيس مع إمكانية الزيارات المنزلية والاستشارات الطبية. إذا كنت تبحث عن ${doctor.speciality} في ${city} أو عن طبيب في البيت من خلال أنيس، فهذه الصفحة توفر معلومات الخبرة والخدمات والمناطق المغطاة وروابط الحجز المباشر.`
+      : `${doctor.doctorName} provides ${doctor.speciality} care through Anees with home visits and medical consultations. If someone is searching for a ${doctor.speciality} doctor in ${city} or a doctor-at-home on Anees, this page gives the experience, service options, coverage areas, and direct booking access.`,
+    faq: isArabic ? 'أسئلة شائعة' : 'Frequently asked questions',
   };
+
+  const faqItems = isArabic
+    ? [
+        {
+          question: `هل يقدم ${doctor.doctorName} زيارات منزلية عبر أنيس؟`,
+          answer: `نعم، تعرض هذه الصفحة خدمات ${doctor.doctorName} عبر أنيس بما في ذلك الزيارة المنزلية حسب التوفر وخيارات الحجز الموضحة أعلاه.`,
+        },
+        {
+          question: `ما تخصص ${doctor.doctorName} في ${city}؟`,
+          answer: `${doctor.doctorName} متخصص في ${doctor.speciality} ويقدم رعاية طبية عبر أنيس للمرضى في ${city} والمناطق المغطاة المذكورة في الصفحة.`,
+        },
+        {
+          question: `كيف أحجز مع ${doctor.doctorName} على أنيس؟`,
+          answer: `يمكنك استخدام زر الحجز في هذه الصفحة للوصول إلى رحلة الحجز على أنيس وطلب الزيارة أو الاستشارة المناسبة.`,
+        },
+      ]
+    : [
+        {
+          question: `Does ${doctor.doctorName} offer home visits on Anees?`,
+          answer: `Yes. This page lists ${doctor.doctorName}'s services on Anees, including home visit availability when offered and the booking options shown above.`,
+        },
+        {
+          question: `What specialty does ${doctor.doctorName} provide in ${city}?`,
+          answer: `${doctor.doctorName} specializes in ${doctor.speciality} and provides care through Anees for patients in ${city} and the covered areas listed on this page.`,
+        },
+        {
+          question: `How do I book ${doctor.doctorName} on Anees?`,
+          answer: `Use the booking button on this page to start the Anees booking flow and request the most suitable consultation or home visit option.`,
+        },
+      ];
 
   return (
     <div className="doctor-profile-container">
@@ -150,6 +186,15 @@ export default function DoctorProfileContent({
           </div>
         </section>
       )}
+
+      <section className="doctor-about py-2">
+        <div className="container">
+          <h2 className="section-title">{labels.overview}</h2>
+          <div className="about-content">
+            <p className="bio-text">{labels.overviewBody}</p>
+          </div>
+        </div>
+      </section>
 
       {/* ======= SERVICES & PRICING ======= */}
       <section className="doctor-services py-4">
@@ -310,6 +355,22 @@ export default function DoctorProfileContent({
           </div>
         </section>
       )}
+
+      <section className="doctor-about py-3">
+        <div className="container">
+          <h2 className="section-title">{labels.faq}</h2>
+          <div className="row g-3">
+            {faqItems.map((item) => (
+              <div key={item.question} className="col-12">
+                <div className="education-block h-100">
+                  <h3 className="block-title mb-2">{item.question}</h3>
+                  <p className="mb-0 text-muted">{item.answer}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ======= CHAT COMING SOON ======= */}
       <section className="doctor-chat py-3">

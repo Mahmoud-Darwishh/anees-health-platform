@@ -9,6 +9,7 @@
 import { MetadataRoute } from 'next';
 import { getAllDoctorSlugs } from '@/lib/api/doctors';
 import { config } from '@/lib/config';
+import { getAllServiceLandingSlugs, getAllSpecialtyLandings } from '@/lib/seo/search-discovery';
 
 // List of featured/prominent doctors for higher SEO priority
 const PROMINENT_DOCTORS = [
@@ -19,10 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = config.api.baseUrl;
   const locales = config.locales.supported as string[];
   const slugs = await getAllDoctorSlugs();
+  const serviceLandingSlugs = getAllServiceLandingSlugs();
 
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of locales) {
+    const specialtyLandings = await getAllSpecialtyLandings(locale as 'en' | 'ar');
+
     // Main pages with priority for searchable content
     entries.push(
       {
@@ -42,6 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(),
         changeFrequency: 'weekly',
         priority: 0.9, // Increased for elderly care & geriatrics searches
+      },
+      {
+        url: `${baseUrl}/${locale}/specialties`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.9,
       },
       {
         url: `${baseUrl}/${locale}/coverage`,
@@ -77,6 +87,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.3,
       }
     );
+
+    for (const serviceSlug of serviceLandingSlugs) {
+      entries.push({
+        url: `${baseUrl}/${locale}/services/${serviceSlug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.88,
+      });
+    }
+
+    for (const specialty of specialtyLandings) {
+      entries.push({
+        url: `${baseUrl}/${locale}/specialties/${specialty.slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.86,
+      });
+    }
 
     // Doctor profiles - with prominence for featured doctors
     for (const slug of slugs) {

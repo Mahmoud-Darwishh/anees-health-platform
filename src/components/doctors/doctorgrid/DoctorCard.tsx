@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { generateDoctorSlug } from '@/lib/utils/slug';
+import { generateDoctorSlug, generateSeoSlug } from '@/lib/utils/slug';
 import doctorsDataEn from './doctors.en.json';
 import type { Doctor } from './types';
 
@@ -18,6 +18,10 @@ const canonicalSlugById = new Map<number, string>(
   (doctorsDataEn as Doctor[]).map((doc) => [doc.id, generateDoctorSlug(doc.doctorName)])
 );
 
+const specialtySlugByDoctorId = new Map<number, string>(
+  (doctorsDataEn as Doctor[]).map((doc) => [doc.id, generateSeoSlug(doc.speciality)])
+);
+
 export const DoctorCard = memo(function DoctorCard({
   doctor,
   locale,
@@ -26,6 +30,7 @@ export const DoctorCard = memo(function DoctorCard({
   // Generate stable slug from canonical (English) mapping to keep URLs identical across locales
   const doctorSlug = canonicalSlugById.get(doctor.id) || generateDoctorSlug(doctor.doctorName);
   const profileHref = `/${locale}/doctors/${doctorSlug}`;
+  const specialtyHref = `/${locale}/specialties/${specialtySlugByDoctorId.get(doctor.id) || generateSeoSlug(doctor.speciality)}`;
 
   return (
     <div className="col-xxl-4 col-md-6 mb-4">
@@ -56,7 +61,7 @@ export const DoctorCard = memo(function DoctorCard({
           <div
             className={`d-flex active-bar ${doctor.specialityColorClass || ''} align-items-center justify-content-between p-3 pb-2`}
           >
-            <Link href="#" className={`${doctor.specialityTextClass || ''} fw-medium fs-14`}>
+            <Link href={specialtyHref} className={`${doctor.specialityTextClass || ''} fw-medium fs-14`}>
               {doctor.speciality}
             </Link>
           </div>

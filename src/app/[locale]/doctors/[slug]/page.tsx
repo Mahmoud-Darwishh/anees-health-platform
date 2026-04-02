@@ -12,6 +12,7 @@ import { getDoctorBySlug, getAllDoctorSlugs, extractCity } from '@/lib/api/docto
 import {
   generatePhysicianSchema,
   generateBreadcrumbSchema,
+  generateFAQSchema,
   renderJsonLd,
 } from '@/lib/utils/structured-data';
 import { generateDoctorProfileMetadata } from '@/lib/utils/metadata';
@@ -104,6 +105,38 @@ export default async function DoctorProfilePage({
     ]
   );
 
+  const faqSchema = generateFAQSchema(
+    locale === 'ar'
+      ? [
+          {
+            question: `هل يقدم ${doctor.doctorName} زيارات منزلية عبر أنيس؟`,
+            answer: `نعم، تعرض صفحة الطبيب على أنيس خدمات ${doctor.doctorName} وخيارات الحجز المتاحة بما في ذلك الزيارات المنزلية عند توفرها.`,
+          },
+          {
+            question: `ما تخصص ${doctor.doctorName}؟`,
+            answer: `${doctor.doctorName} متخصص في ${doctor.speciality} ويقدم خدماته الطبية عبر أنيس.`,
+          },
+          {
+            question: `كيف يمكنني حجز ${doctor.doctorName} على أنيس؟`,
+            answer: `يمكنك الدخول إلى رحلة الحجز من هذه الصفحة واختيار الخدمة المناسبة مع أنيس.`,
+          },
+        ]
+      : [
+          {
+            question: `Does ${doctor.doctorName} offer home visits on Anees?`,
+            answer: `Yes. The doctor page on Anees lists ${doctor.doctorName}'s available services and booking options, including home visits when offered.`,
+          },
+          {
+            question: `What specialty does ${doctor.doctorName} provide?`,
+            answer: `${doctor.doctorName} specializes in ${doctor.speciality} and is available through Anees.`,
+          },
+          {
+            question: `How can I book ${doctor.doctorName} on Anees?`,
+            answer: `You can use the booking flow linked from this page to request the most suitable appointment or home visit.`,
+          },
+        ]
+  );
+
   return (
     <>
       {/* Structured Data - Physician Schema */}
@@ -115,6 +148,10 @@ export default async function DoctorProfilePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(faqSchema) }}
       />
       
       <Header />
