@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 
 const SectionService: React.FC = () => {
@@ -9,74 +8,30 @@ const SectionService: React.FC = () => {
     const locale = useLocale();
     const isRTL = locale === 'ar';
 
-    useEffect(() => {
-        const scrollers = document.querySelectorAll(".horizontal-slide");
+    const serviceItems = [
+        t('home.services.multi_speciality'),
+        t('home.services.lab_testing'),
+        t('home.services.medicines'),
+        t('home.services.hospitals'),
+        t('home.services.healthcare'),
+        t('home.services.talk_doctors'),
+        t('home.services.home_care'),
+    ];
 
-        scrollers.forEach((scroller) => {
-            const scrollerInner = scroller.querySelector(".slide-list");
-            if (!scrollerInner) return;
-
-            const scrollerContent = Array.from(scrollerInner.children);
-            // Duplicate items twice to guarantee seamless infinite scroll in all locales.
-            for (let i = 0; i < 2; i += 1) {
-                scrollerContent.forEach((item) => {
-                    const duplicatedItem = item.cloneNode(true) as Element;
-                    duplicatedItem.setAttribute("aria-hidden", "true");
-                    scrollerInner.appendChild(duplicatedItem);
-                });
-            }
-        });
-    }, []);
+    const loopItems = [...serviceItems, ...serviceItems];
 
 
     return (
         <>
             {/* Services Section */}
-            <section className="services-section aos" data-reveal>
-                <div
-                    className="horizontal-slide d-flex"
-                    data-direction={isRTL ? "left" : "right"}
-                    data-speed="medium"
-                    /*data-speed={isRTL ? "medium" : "medium"}*/
-                >
-                    <div className="slide-list d-flex gap-4">
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">
-                                    {t('home.services.multi_speciality')}
-                                </Link>
-                            </h6>
-                        </div>
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">{t('home.services.lab_testing')}</Link>
-                            </h6>
-                        </div>
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">{t('home.services.medicines')}</Link>
-                            </h6>
-                        </div>
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">{t('home.services.hospitals')}</Link>
-                            </h6>
-                        </div>
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">{t('home.services.healthcare')}</Link>
-                            </h6>
-                        </div>
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">{t('home.services.talk_doctors')}</Link>
-                            </h6>
-                        </div>
-                        <div className="services-slide">
-                            <h6>
-                                <Link href="#">{t('home.services.home_care')}</Link>
-                            </h6>
-                        </div>
+            <section className="services-section services-ribbon-section">
+                <div className={`services-ribbon ${isRTL ? 'rtl' : 'ltr'}`}>
+                    <div className="services-ribbon-track" aria-live="off">
+                        {loopItems.map((label, idx) => (
+                            <div className="services-ribbon-item" key={`${label}-${idx}`}>
+                                <span>{label}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>

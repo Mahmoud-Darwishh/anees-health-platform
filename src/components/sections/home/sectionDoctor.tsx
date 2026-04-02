@@ -132,11 +132,11 @@ const SectionDoctor = () => {
   return (
     <section className="doctor-section">
       <div className="container">
-        <div className="section-header sec-header-one text-center aos" data-reveal>
+        <div className="section-header sec-header-one text-center">
           <span className="badge badge-primary">{t("home.doctors.title")}</span>
           <h2>{t("home.doctors.subtitle")}</h2>
         </div>
-        <div className="doctors-slider slick-margins slick-arrow-center aos" data-reveal>
+        <div className="doctors-slider slick-margins slick-arrow-center">
           <Slider ref={setSlider} key={locale} {...Doctoroptions}>
             {featuredDoctors.map((doc) => {
               const doctorSlug = slugMap.get(doc.id) || generateDoctorSlug(doc.doctorName);

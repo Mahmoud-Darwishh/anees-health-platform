@@ -8,6 +8,15 @@
   animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+// Reveal observer controls entry animation when data-reveal is used.
+.banner-animate-in[data-reveal],
+.animate-slide-up[data-reveal],
+.credential-animate[data-reveal] {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+
 // Slide Up Animation with Delay Support
 .animate-slide-up {
   opacity: 0;

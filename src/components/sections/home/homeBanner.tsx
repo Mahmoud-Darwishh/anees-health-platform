@@ -38,7 +38,7 @@ const HomeBanner: React.FC = () => {
                         <div className="col-lg-7 order-2 order-lg-1">
                             <div className="banner-content banner-animate-in">
                                 {/* Trust Score Badge */}
-                                <div className="trust-badge mb-3 animate-slide-up" data-delay="0.1">
+                                <div className="trust-badge mb-3 animate-slide-up">
                                     <div className="trust-badge__rating">
                                         <div className="trust-stars" aria-label={`${t('home.banner.trust_score')}: 4.8 ${t('home.banner.out_of')} 5`}>
                                             {[1, 2, 3, 4, 5].map((star, index) => (
@@ -55,27 +55,27 @@ const HomeBanner: React.FC = () => {
                                     </span>
                                 </div>
 
-                                <h1 className="banner-title animate-slide-up" data-delay="0.3">
+                                <h1 className="banner-title animate-slide-up">
                                     <span className="banner-title__highlight title-underline-animate">{t('home.banner.title_highlight')}</span>
                                     <span>{t('home.banner.title_rest')}</span>
                                 </h1>
                                 
                                 {/* Professional Subtitle */}
-                                <p className="banner-subtitle animate-slide-up" data-delay="0.4">
+                                <p className="banner-subtitle animate-slide-up">
                                     {t('home.banner.professional_subtitle')}
                                 </p>
 
                                 {/* Business Credentials */}
-                                <div className="credentials-row animate-slide-up" data-delay="0.5">
-                                    <div className="credential-item credential-animate" data-delay="0.6">
+                                <div className="credentials-row animate-slide-up">
+                                    <div className="credential-item credential-animate">
                                         <i className="isax isax-shield-tick medical-icon-pulse" aria-hidden="true" />
                                         <span>{t('home.banner.licensed_verified')}</span>
                                     </div>
-                                    <div className="credential-item credential-animate" data-delay="0.7">
+                                    <div className="credential-item credential-animate">
                                         <i className="isax isax-clock medical-icon-pulse" aria-hidden="true" />
                                         <span>{t('home.banner.available_24_7')}</span>
                                     </div>
-                                    <div className="credential-item credential-animate" data-delay="0.8">
+                                    <div className="credential-item credential-animate">
                                         <i className="isax isax-call-calling medical-icon-pulse" aria-hidden="true" />
                                         <span>{t('home.banner.instant_booking')}</span>
                                     </div>

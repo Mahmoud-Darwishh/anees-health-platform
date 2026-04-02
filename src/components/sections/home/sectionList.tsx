@@ -15,7 +15,7 @@ const SectionList: React.FC = () => {
           <div className="list-card card mb-0">
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-center justify-content-xl-between flex-wrap gap-4 list-wraps">
-                <Link href="/booking" className="list-item aos" data-reveal>
+                <Link href="/booking" className="list-item">
                   <div className="list-icon bg-bony" >
                     <img src="assets/img/icons/stethoscope.svg" alt="Doctor home visit icon - Book appointment" />
                   </div>
@@ -24,8 +24,8 @@ const SectionList: React.FC = () => {
 
                 <Link
                   href={`/${locale}/doctors`}
-                  className="list-item aos"
-                  data-reveal
+                  className="list-item"
+                 
                 >
                   <div className="list-icon bg-primary">
                     <img src="assets/img/icons/list-icon-02.svg" alt="Physiotherapy icon - Home physical therapy" />
@@ -35,15 +35,15 @@ const SectionList: React.FC = () => {
                 
                 <Link
                   href="/pages/hospitals"
-                  className="list-item aos"
-                  data-reveal
+                  className="list-item"
+                 
                 >
                   <div className="list-icon bg-deer">
                     <img src="assets/img/icons/hospital.svg" alt="Hospital icon - Healthcare facilities" />
                   </div>
                   <h6>{t('home.list.hospitals')}</h6>
                 </Link>
-                <Link href="/" className="list-item aos" data-reveal>
+                <Link href="/" className="list-item">
                   <div className="list-icon bg-metallic-blue">
                     <img src="assets/img/icons/nurse.svg" alt="Home nursing icon - Professional nursing care" />
                   </div>
@@ -51,8 +51,8 @@ const SectionList: React.FC = () => {
                 </Link>
                 <Link
                   href="#"
-                  className="list-item aos"
-                  data-reveal
+                  className="list-item"
+                 
                 >
                   <div className="list-icon bg-royal-blue">
                     <img src="assets/img/icons/list-icon-01.svg" alt="Telemedicine icon - Remote medical consultations" />
@@ -61,8 +61,8 @@ const SectionList: React.FC = () => {
                 </Link>
                 <Link
                   href="/"
-                  className="list-item aos"
-                  data-reveal
+                  className="list-item"
+                 
                 >
                   <div className="list-icon bg-indigo-blue">
                     <img src="assets/img/icons/lab.svg" alt="Laboratory testing icon - Home lab tests" />
@@ -71,8 +71,8 @@ const SectionList: React.FC = () => {
                 </Link>
                 <Link
                   href="#"
-                  className="list-item aos"
-                  data-reveal
+                  className="list-item"
+                 
                 >
                   <div className="list-icon bg-primary">
                     <img src="assets/img/icons/x-ray.svg" alt="X-ray and radiology icon - Medical imaging services" />

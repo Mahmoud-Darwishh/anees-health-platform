@@ -53,7 +53,13 @@ export function useReveal(
 
     const observer = getObserver(options, prefersReducedMotion);
 
-    nodes.forEach((node) => {
+    nodes.forEach((node, index) => {
+      const datasetDelay = node.dataset.revealDelay;
+      const parsedDelay = datasetDelay ? Number(datasetDelay) : NaN;
+      const staggerDelay = (index % 6) * 65;
+      const delay = Number.isFinite(parsedDelay) ? Math.max(0, parsedDelay) : staggerDelay;
+
+      node.style.setProperty('--reveal-delay', `${delay}ms`);
       node.classList.remove('is-visible');
       node.classList.add('reveal-prep');
       observer?.observe(node);

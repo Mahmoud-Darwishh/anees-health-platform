@@ -76,9 +76,10 @@ a {
 }
 
 :root {
-  --reveal-duration: 0.45s;
-  --reveal-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --reveal-distance: 22px;
+  --reveal-duration: 0.30s;
+  --reveal-ease: cubic-bezier(0.22, 0.7, 0.3, 1);
+  --reveal-distance: 12px;
+  --reveal-delay: 0ms;
   --mobile-bottom-nav-height: 56px;
   --mobile-bottom-nav-offset: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
 }
@@ -87,19 +88,36 @@ a {
 [data-reveal] {
   opacity: 1;
   transform: none;
+  backface-visibility: hidden;
 }
 
 [data-reveal].reveal-prep {
   opacity: 0;
-  transform: translateY(var(--reveal-distance));
-  transition: opacity var(--reveal-duration) var(--reveal-ease),
-    transform var(--reveal-duration) var(--reveal-ease);
+  transform: translate3d(0, var(--reveal-distance), 0);
+  transition: opacity var(--reveal-duration) var(--reveal-ease) var(--reveal-delay),
+    transform var(--reveal-duration) var(--reveal-ease) var(--reveal-delay);
   will-change: opacity, transform;
 }
 
 [data-reveal].is-visible {
   opacity: 1;
   transform: none;
+}
+
+/* Ensure legacy .aos classes cannot override homepage reveal logic */
+.main-wrapper .aos:not([data-reveal]) {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.main-wrapper [data-reveal].aos.reveal-prep {
+  opacity: 0 !important;
+  transform: translate3d(0, var(--reveal-distance), 0) !important;
+}
+
+.main-wrapper [data-reveal].aos.is-visible {
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 /* WhatsApp Floating Button */
@@ -215,54 +233,3 @@ a {
   }
 }*/
 
-/* Hero Section Enhancements */
-.trust-badge {
-  .star-icon {
-    line-height: 1;
-  }
-}
-
-.credentials-row {
-  .credential-item {
-    transition: transform 0.2s ease;
-    
-    &:hover {
-      transform: translateY(-2px);
-    }
-  }
-}
-
-/* Geriatrics Easter Egg Animation */
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  15% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  85% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
-  }
-}
-
-.geriatrics-easter-egg {
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid #667eea;
-  }
-}

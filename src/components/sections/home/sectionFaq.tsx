@@ -14,15 +14,15 @@ const SectionFaq: React.FC = () => {
             <section className="faq-section-one">
                 <div className="container">
                     <div
-                        className="section-header sec-header-one text-center aos"
-                        data-reveal
+                        className="section-header sec-header-one text-center"
+                       
                     >
                         <span className="badge badge-primary">{t('home.faqs.badge')}</span>
                         <h2>{t('home.faqs.title')}</h2>
                     </div>
                     <div className="row">
                         <div className="col-md-10 mx-auto">
-                            <div className="faq-info aos" data-reveal>
+                            <div className="faq-info">
                                 <div className="accordion" id={parentId}>
                                     {/* FAQ Item */}
                                     <div className="accordion-item">

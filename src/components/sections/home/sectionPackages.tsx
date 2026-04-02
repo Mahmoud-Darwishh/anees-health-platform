@@ -16,8 +16,8 @@ const SectionPackages: React.FC = () => {
     <section className="packages-section">
       <div className="container">
         <div
-          className="section-header sec-header-one text-center aos"
-          data-reveal
+          className="section-header sec-header-one text-center"
+         
         >
           <span className="badge badge-primary">{t('badge')}</span>
           <h2>{t('title')}</h2>
@@ -31,7 +31,7 @@ const SectionPackages: React.FC = () => {
             
             return (
               <div key={packageId} className="col-lg-4 col-md-6">
-                <div className={`package-card ${className} aos`} data-reveal>
+                <div className={`package-card ${className}`}>
                   <div className="package-header">
                     <p className="package-tagline">{pkg.tagline}</p>
                     <h3 className="package-name">
@@ -70,7 +70,7 @@ const SectionPackages: React.FC = () => {
           })}
         </div>
 
-        <div className="text-center package-cta aos" data-reveal>
+        <div className="text-center package-cta">
           <p className="package-note">{t('contact_note')}</p>
           <Link
             href={`/${locale}/contact-us`}

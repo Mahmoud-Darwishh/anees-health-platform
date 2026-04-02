@@ -23,7 +23,7 @@ const SectionBook: React.FC = () => {
                         <div className="col-lg-6">
                             <div className="bookus-img">
                                 <div className="row g-3">
-                                    <div className="col-md-12 aos" data-reveal>
+                                    <div className="col-md-12">
                                             <Image
                                                 src="/assets/img/optimized/book-01.webp"
                                                 alt="Doctor conducting home visit for elderly patient in Cairo - Anees Health"
@@ -36,7 +36,7 @@ const SectionBook: React.FC = () => {
                                                 quality={85}
                                             />
                                     </div>
-                                    <div className="col-sm-6 aos" data-reveal>
+                                    <div className="col-sm-6">
                                             <Image
                                                 src="/assets/img/optimized/book-02.webp"
                                                 alt="Professional home nursing care services Egypt - Anees Health"
@@ -49,7 +49,7 @@ const SectionBook: React.FC = () => {
                                                 quality={85}
                                             />
                                     </div>
-                                    <div className="col-sm-6 aos" data-reveal>
+                                    <div className="col-sm-6">
                                             <Image
                                                 src="/assets/img/optimized/book-03.webp"
                                                 alt="Home physiotherapy session for rehabilitation - Anees Health Egypt"
@@ -67,8 +67,8 @@ const SectionBook: React.FC = () => {
                         </div>
                         <div className="col-lg-6">
                             <div
-                                className="section-header sec-header-one mb-2 aos"
-                                data-reveal
+                                className="section-header sec-header-one mb-2"
+                               
                             >
                                 <span className="badge badge-primary">{t('home.booking.title')}</span>
                                 <h2 className="text-white mb-3">
@@ -81,7 +81,7 @@ const SectionBook: React.FC = () => {
                             <p className="text-light mb-4">
                                 {t('home.booking.description')}
                             </p>
-                            <div className="faq-info aos" data-reveal>
+                            <div className="faq-info">
                                 <div className="accordion" id={faqParentId}>
                                     {/* FAQ Item */}
                                     <div className="accordion-item">

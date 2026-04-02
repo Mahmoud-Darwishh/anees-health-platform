@@ -23,13 +23,13 @@ const SectionLogos: React.FC = () => {
             {/* Logos Section */}
             <section className="logo-section py-5">
                 <div className="container">
-                    <div className="section-header sec-header-one text-center aos">
+                    <div className="section-header sec-header-one text-center">
                         <span className="badge badge-primary">{t('home.testimonials.hub_title')}</span>
                         <h2>{t('home.testimonials.experience_title')}</h2>
                     </div>
                     <div className="row justify-content-center mt-5">
                         {clientLogos.map((logo) => (
-                            <div key={logo.id} className="col-lg-2 col-md-3 col-sm-4 col-4 mb-5 aos">
+                            <div key={logo.id} className="col-lg-2 col-md-3 col-sm-4 col-4 mb-5">
                                 <div 
                                     className="logo-item p-3" 
                                     style={{ 

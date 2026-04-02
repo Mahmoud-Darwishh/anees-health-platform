@@ -132,13 +132,13 @@ const SectionSpeciality: React.FC = () => {
             <section className="speciality-section">
                 <div className="container">
                     <div
-                        className="section-header sec-header-one text-center aos"
-                        data-reveal
+                        className="section-header sec-header-one text-center"
+                       
                     >
                         <span className="badge badge-primary">{t('home.specialities.title')}</span>
                         <h2>{t('home.specialities.subtitle')}</h2>
                     </div>
-                    <div className="spciality-slider slick-margins slick-arrow-center aos" data-reveal>
+                    <div className="spciality-slider slick-margins slick-arrow-center">
                         <Slider ref={setSlider} {...SpecialitySlider}>
                             <div className="spaciality-item">
                                 <div className="spaciality-img">
