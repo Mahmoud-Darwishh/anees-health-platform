@@ -1,9 +1,11 @@
 import { useLocale, useTranslations } from 'next-intl';
 import Script from 'next/script';
+import Link from 'next/link';
 import { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+import { Reveal } from '@/components/common/Reveal';
 import { generateAboutMetadata } from '@/lib/utils/metadata';
 import {
   generateBreadcrumbSchema,
@@ -11,6 +13,7 @@ import {
   renderJsonLd,
 } from '@/lib/utils/structured-data';
 import { config } from '@/lib/config';
+import styles from './about-us.module.scss';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -22,6 +25,21 @@ export default function AboutUsPage() {
   const common = useTranslations('common');
   const locale = useLocale();
   const baseUrl = config.api.baseUrl;
+  const isArabic = locale === 'ar';
+
+  const pillars = [
+    { title: t('pillar_1_title'), text: t('pillar_1_text') },
+    { title: t('pillar_2_title'), text: t('pillar_2_text') },
+    { title: t('pillar_3_title'), text: t('pillar_3_text') },
+    { title: t('pillar_4_title'), text: t('pillar_4_text') },
+  ];
+
+  const stats = [
+    { value: t('stat_1_value'), label: t('stat_1_label') },
+    { value: t('stat_2_value'), label: t('stat_2_label') },
+    { value: t('stat_3_value'), label: t('stat_3_label') },
+    { value: t('stat_4_value'), label: t('stat_4_label') },
+  ];
 
   const breadcrumbItems = [
     { label: common('home'), href: `/${locale}` },
@@ -37,7 +55,7 @@ export default function AboutUsPage() {
   const articleSchema = generateArticleSchema(
     {
       title: t('title'),
-      description: t('headline'),
+      description: t('hero_subtitle'),
       datePublished: '2024-01-01',
       author: 'Anees Health',
     },
@@ -47,7 +65,6 @@ export default function AboutUsPage() {
 
   return (
     <>
-      {/* Structured Data */}
       <Script
         id="about-breadcrumb-schema"
         type="application/ld+json"
@@ -63,143 +80,172 @@ export default function AboutUsPage() {
 
       <Breadcrumb items={breadcrumbItems} title={t('title')} />
 
-      {/* About Us */}
-      <section className="about-section">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6 col-md-12">
-              <div className="section-inner-header about-inner-header">
-                <h6>{t('about_company_label')}</h6>
-                <h2>{t('headline')}</h2>
-              </div>
-              <div className="about-content">
-                <div className="about-content-details">
-                  <p>{t('paragraph_1')}</p>
-                  <p>{t('paragraph_2')}</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-6 col-md-12">
-              <div className="about-img-info">
-                <div className="row">
-                  <div className="col-md-6">
-                    <div className="about-inner-img">
-                      <div className="about-img">
-                        <img src="/assets/img/about-img1.png" className="img-fluid" alt="Home healthcare service" />
-                      </div>
-                      <div className="about-img">
-                        <img src="/assets/img/about-img2.png" className="img-fluid" alt="Telemedicine consultation" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="about-inner-img">
-                      <div className="about-box">
-                        <h4>{t('years_experience')}</h4>
-                      </div>
-                      <div className="about-img">
-                        <img src="/assets/img/about-img3.png" className="img-fluid" alt="Experienced care providers" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className={styles.aboutPage}>
+        <Reveal as="section" className={styles.heroSection}>
+          <div className="container">
+            <div className="row align-items-center g-4">
+              <div className="col-lg-7">
+                <span className={styles.heroBadge}>{t('hero_badge')}</span>
+                <h1 className={styles.heroTitle}>{t('hero_title')}</h1>
+                <p className={styles.heroSubtitle}>{t('hero_subtitle')}</p>
 
-      {/* Why Choose Us */}
-      <section className="why-choose-section">
-        <div className="container">
-          <div className="row">
-            <div className="col-md-12">
-              <div className="section-inner-header text-center">
-                <h2>{t('why_title')}</h2>
-              </div>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-lg-3 col-md-6 d-flex">
-              <div className="card why-choose-card w-100">
-                <div className="card-body">
-                  <div className="why-choose-icon"><span><img src="/assets/img/icons/choose-01.svg" alt="Experienced professionals" /></span></div>
-                  <div className="why-choose-content">
-                    <h4>{t('why_item_1_title')}</h4>
-                    <p>{t('why_item_1_text')}</p>
-                  </div>
+                <div className={styles.foundedByCard}>
+                  <p className={styles.foundedLabel}>{t('founded_label')}</p>
+                  <p className={styles.foundedValue}>{t('founded_value')}</p>
                 </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6 d-flex">
-              <div className="card why-choose-card w-100">
-                <div className="card-body">
-                  <div className="why-choose-icon"><span><img src="/assets/img/icons/choose-02.svg" alt="Available 24/7" /></span></div>
-                  <div className="why-choose-content">
-                    <h4>{t('why_item_2_title')}</h4>
-                    <p>{t('why_item_2_text')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6 d-flex">
-              <div className="card why-choose-card w-100">
-                <div className="card-body">
-                  <div className="why-choose-icon"><span><img src="/assets/img/icons/choose-03.svg" alt="Quality assurance" /></span></div>
-                  <div className="why-choose-content">
-                    <h4>{t('why_item_3_title')}</h4>
-                    <p>{t('why_item_3_text')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6 d-flex">
-              <div className="card why-choose-card w-100">
-                <div className="card-body">
-                  <div className="why-choose-icon"><span><img src="/assets/img/icons/choose-04.svg" alt="Compassionate nursing" /></span></div>
-                  <div className="why-choose-content">
-                    <h4>{t('why_item_4_title')}</h4>
-                    <p>{t('why_item_4_text')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="way-section">
-        <div className="container">
-          <div className="way-bg">
-            <div className="row align-items-end">
-              <div className="col-lg-7 col-md-12">
-                <div className="section-inner-header way-inner-header mb-0">
-                  <h2>{t('cta_title')}</h2>
-                  <p>{t('cta_text')}</p>
-                  <a href={`/${locale}`} className="btn btn-primary">
-                    {t('cta_button')}
-                  </a>
+                <div className="d-flex flex-wrap gap-2">
+                  <span className={styles.heroPill}>{t('hero_pill_1')}</span>
+                  <span className={styles.heroPill}>{t('hero_pill_2')}</span>
+                  <span className={styles.heroPill}>{t('hero_pill_3')}</span>
+                  <span className={styles.heroPill}>{t('hero_pill_4')}</span>
+                </div>
+
+                <div className={styles.trustScoreWrap} aria-label={t('trust_aria')}>
+                  <span className={styles.trustStars} aria-hidden="true">★★★★☆</span>
+                  <span className={styles.trustValue}>{t('trust_value')}</span>
+                  <span className={styles.trustDivider}>|</span>
+                  <span className={styles.trustText}>{t('trust_text')}</span>
                 </div>
               </div>
-              <div className="col-lg-5 col-md-12">
-                <div className="way-img">
-                  <img src="/assets/img/way-img.png" className="img-fluid" alt="Get in touch with Anees" />
+
+              <div className="col-lg-5">
+                <div className={styles.heroMedia}>
+                  <div className={styles.imageStack}>
+                    <img
+                      src="/assets/img/about-img1.png"
+                      alt={t('hero_img_1_alt')}
+                      className={styles.heroImagePrimary}
+                    />
+                    <img
+                      src="/assets/img/about-img2.png"
+                      alt={t('hero_img_2_alt')}
+                      className={styles.heroImageSecondary}
+                    />
+                  </div>
                 </div>
-              </div>
-            </div>
-            {/* Decorative shapes */}
-            <div className="way-shapes-img">
-              <div className="way-shapes-left">
-                <img src="/assets/img/shape-06.png" alt="shape" />
-              </div>
-              <div className="way-shapes-right">
-                <img src="/assets/img/shape-07.png" alt="shape" />
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </Reveal>
+
+        <Reveal as="section" className={styles.storySection}>
+          <div className="container">
+            <div className="row g-4 align-items-stretch">
+              <div className="col-lg-7">
+                <article className={styles.storyCard}>
+                  <h2>{t('story_title')}</h2>
+                  <p>{t('story_paragraph_1')}</p>
+                  <p>{t('story_paragraph_2')}</p>
+                </article>
+              </div>
+              <div className="col-lg-5">
+                <div className={styles.missionVisionWrap}>
+                  <article className={styles.focusCard}>
+                    <h3>{t('mission_title')}</h3>
+                    <p>{t('mission_text')}</p>
+                  </article>
+                  <article className={styles.focusCard}>
+                    <h3>{t('vision_title')}</h3>
+                    <p>{t('vision_text')}</p>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal as="section" className={styles.pillarsSection}>
+          <div className="container">
+            <div className="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+              <h2 className={styles.sectionTitle}>{t('pillars_title')}</h2>
+              <span className={styles.sectionTag}>{t('pillars_tag')}</span>
+            </div>
+            <div className="row g-4">
+              {pillars.map((pillar) => (
+                <div className="col-lg-3 col-md-6" key={pillar.title}>
+                  <article className={styles.pillarCard}>
+                    <h3>{pillar.title}</h3>
+                    <p>{pillar.text}</p>
+                  </article>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal as="section" className={styles.statsSection}>
+          <div className="container">
+            <div className="row g-3">
+              {stats.map((stat) => (
+                <div className="col-lg-3 col-md-6" key={stat.label}>
+                  <div className={styles.statCard}>
+                    <h3>{stat.value}</h3>
+                    <p>{stat.label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal as="section" className={styles.ctaSection}>
+          <div className="container">
+            <div className={styles.ctaCard}>
+              <div>
+                <h2>{t('cta_title')}</h2>
+                <p>{t('cta_text')}</p>
+              </div>
+              <div className="d-flex flex-wrap gap-2">
+                <Link href={`/${locale}/booking`} className={`btn btn-primary ${styles.ctaBtn}`}>
+                  {t('cta_primary')}
+                </Link>
+                <Link href={`/${locale}/contact-us`} className={`btn btn-outline-primary ${styles.ctaBtnSecondary}`}>
+                  {t('cta_secondary')}
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+      </div>
+
+      <Script
+        id="about-founders-note"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: renderJsonLd({
+            '@context': 'https://schema.org',
+            '@type': 'AboutPage',
+            inLanguage: isArabic ? 'ar-EG' : 'en-US',
+            name: t('title'),
+            mainEntity: {
+              '@type': 'Organization',
+              name: 'Anees Health',
+              description: t('founders_search_statement'),
+              url: `${baseUrl}/${locale}`,
+              founder: [
+                {
+                  '@type': 'Person',
+                  name: t('founder_1_name'),
+                  description: t('founders_search_statement'),
+                },
+                {
+                  '@type': 'Person',
+                  name: t('founder_2_name'),
+                  description: t('founders_search_statement'),
+                },
+              ],
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: t('trust_value'),
+                bestRating: '5',
+                ratingCount: '1500',
+              },
+            },
+          }),
+        }}
+      />
 
       <Footer />
     </>

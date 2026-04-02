@@ -1,0 +1,69 @@
+@use "@/assets/scss/utils/variables" as *;
+
+// Coming Soon badge displayed above the section title
+.comingSoonBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 50px;
+  background-color: $primary;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+
+  // Pulse dot
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.9;
+    animation: pulse 1.6s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+}
+
+// Note beneath the store buttons
+.comingSoonNote {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-style: italic;
+}
+
+// Wrapper that dims the store icons
+.storeButtons {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  // Prevent interaction — app is not live yet
+  pointer-events: none;
+  user-select: none;
+
+  img {
+    opacity: 0.45;
+    filter: grayscale(0.3);
+  }
+}
+
+// Stretch the app-bgs.png background to fill the entire card
+:global(.app-bg)::before {
+  background-size: 100% 100%;
+  background-position: center;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%       { transform: scale(1.35); opacity: 0.5; }
+}
