@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+import RelatedLinks from '@/components/common/RelatedLinks';
 import { config } from '@/lib/config';
 import { generatePageMetadata } from '@/lib/utils/metadata';
 import { generateBreadcrumbSchema, generateDoctorsCollectionSchema, renderJsonLd } from '@/lib/utils/structured-data';
@@ -116,6 +117,17 @@ export default async function ServiceLandingPage({ params }: ServiceLandingPageP
           </div>
         </div>
       </section>
+      <RelatedLinks
+        locale={locale}
+        title={locale === 'ar' ? 'روابط مفيدة لهذه الخدمة' : 'Useful links for this service'}
+        links={[
+          { href: `/${locale}/services`, label: locale === 'ar' ? 'جميع الخدمات' : 'All services' },
+          { href: `/${locale}/specialties`, label: locale === 'ar' ? 'جميع التخصصات' : 'All specialties' },
+          { href: `/${locale}/doctors`, label: locale === 'ar' ? 'تصفح الأطباء' : 'Browse doctors' },
+          { href: `/${locale}/coverage`, label: locale === 'ar' ? 'تحقق من التغطية' : 'Check coverage' },
+          { href: `/${locale}/booking`, label: locale === 'ar' ? 'ابدأ الحجز' : 'Start booking' },
+        ]}
+      />
       <Footer />
     </>
   );

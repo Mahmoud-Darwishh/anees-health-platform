@@ -9,6 +9,26 @@ import { generateDoctorSlug } from "@/lib/utils/slug";
 import doctorsDataEn from "../../doctors/doctorgrid/doctors.en.json";
 import doctorsDataAr from "../../doctors/doctorgrid/doctors.ar.json";
 
+interface ArrowProps {
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+}
+
+const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
+  <div className="spciality-nav nav-bottom owl-nav ">
+    <button type="button" role="presentation" className="owl-next" onClick={onClick}>
+      <i className="fa-solid fa-chevron-right" />
+    </button>
+  </div>
+);
+
+const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
+  <div className="spciality-nav nav-bottom owl-nav">
+    <button type="button" role="presentation" className="owl-prev" onClick={onClick}>
+      <i className="fa-solid fa-chevron-left" />
+    </button>
+  </div>
+);
+
 const SectionDoctor = () => {
   const t = useTranslations();
   const locale = useLocale();
@@ -50,26 +70,6 @@ const SectionDoctor = () => {
       slider.slickGoTo(0);
     }
   }, [locale, slider, slidesToShow]);
-
-  interface ArrowProps {
-    onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  }
-
-  const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
-    <div className="spciality-nav nav-bottom owl-nav ">
-      <button type="button" role="presentation" className="owl-next" onClick={onClick}>
-        <i className="fa-solid fa-chevron-right" />
-      </button>
-    </div>
-  );
-
-  const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
-    <div className="spciality-nav nav-bottom owl-nav">
-      <button type="button" role="presentation" className="owl-prev" onClick={onClick}>
-        <i className="fa-solid fa-chevron-left" />
-      </button>
-    </div>
-  );
 
   const Doctoroptions = {
     slidesToShow,

@@ -108,6 +108,14 @@ export default function RootLayout({
         <meta name="geo.position" content="30.0444;31.2357" />
         <meta name="ICBM" content="30.0444, 31.2357" />
 
+        {/* Connection warm-up for render-critical and third-party origins */}
+        <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+        <link rel="dns-prefetch" href="//chatling.ai" />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://chatling.ai" crossOrigin="anonymous" />
+
         {/* Third-party stylesheets for Bootstrap and Icons */}
         <link
           rel="stylesheet"
@@ -123,17 +131,16 @@ export default function RootLayout({
         <link rel="stylesheet" href="/assets/css/iconfont.css" />
         <link rel="stylesheet" href="/assets/css/iconsax.css" />
         <link rel="stylesheet" href="/assets/css/custom.css" />
-        <link rel="stylesheet" href="/assets/css/customstyleclient.css" />
-
-        {/* Chatbot Script */}
-        <script dangerouslySetInnerHTML={{ __html: `window.chtlConfig = { chatbotId: "9941775766" }` }} />
-        <script async data-id="9941775766" id="chtl-script" type="text/javascript" src="https://chatling.ai/js/embed.js" />
+        <noscript>
+          <link rel="stylesheet" href="/assets/css/customstyleclient.css" />
+        </noscript>
 
         {/* Meta Pixel NoScript */}
         <noscript>
           <img
             height="1"
             width="1"
+            alt=""
             style={{ display: 'none' }}
             src="https://www.facebook.com/tr?id=1319531606525674&ev=PageView&noscript=1"
           />
@@ -382,6 +389,35 @@ export default function RootLayout({
               t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
               y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
             })(window, document, "clarity", "script", "u69yeirgmi");
+          `}
+        </Script>
+
+        {/* Chatling - Lazy load to improve first paint */}
+        <Script id="chatling-script" strategy="lazyOnload">
+          {`
+            window.chtlConfig = { chatbotId: "9941775766" };
+            (function () {
+              var s = document.createElement('script');
+              s.async = true;
+              s.id = 'chtl-script';
+              s.setAttribute('data-id', '9941775766');
+              s.src = 'https://chatling.ai/js/embed.js';
+              document.body.appendChild(s);
+            })();
+          `}
+        </Script>
+
+        {/* Defer non-critical legacy CSS */}
+        <Script id="defer-customstyleclient-css" strategy="lazyOnload">
+          {`
+            (function () {
+              if (document.querySelector('link[data-deferred-css="customstyleclient"]')) return;
+              var link = document.createElement('link');
+              link.rel = 'stylesheet';
+              link.href = '/assets/css/customstyleclient.css';
+              link.setAttribute('data-deferred-css', 'customstyleclient');
+              document.head.appendChild(link);
+            })();
           `}
         </Script>
 

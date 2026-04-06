@@ -21,6 +21,7 @@ import DoctorProfileContent from '@/components/doctors/profile/DoctorProfileCont
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+import RelatedLinks from '@/components/common/RelatedLinks';
 
 interface DoctorProfilePageProps {
   params: Promise<{
@@ -159,6 +160,17 @@ export default async function DoctorProfilePage({
       <article dir={dir} className="doctor-profile-page">
         <DoctorProfileContent doctor={doctor} locale={locale} />
       </article>
+      <RelatedLinks
+        locale={locale}
+        title={locale === 'ar' ? 'روابط مرتبطة بالطبيب' : 'Links related to this doctor'}
+        links={[
+          { href: `/${locale}/doctors`, label: locale === 'ar' ? 'كل الأطباء' : 'All doctors' },
+          { href: `/${locale}/specialties`, label: locale === 'ar' ? 'تخصصات طبية' : 'Medical specialties' },
+          { href: `/${locale}/services`, label: locale === 'ar' ? 'الخدمات الطبية' : 'Medical services' },
+          { href: `/${locale}/coverage`, label: locale === 'ar' ? 'تحقق من التغطية' : 'Check coverage' },
+          { href: `/${locale}/booking`, label: locale === 'ar' ? 'احجز استشارة' : 'Book consultation' },
+        ]}
+      />
       <Footer />
     </>
   );

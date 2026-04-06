@@ -5,11 +5,31 @@ import Link from 'next/link';
 import Slider from "react-slick";
 import { useTranslations, useLocale } from 'next-intl';
 
+interface ArrowProps {
+    onClick?: React.MouseEventHandler<HTMLButtonElement>;
+}
+
+const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
+    <div className="spciality-nav nav-bottom owl-nav">
+        <button type="button" role="presentation" className="owl-next" onClick={onClick}>
+            <i className="fa-solid fa-chevron-right" />
+        </button>
+    </div>
+);
+
+const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
+    <div className="spciality-nav nav-bottom owl-nav">
+        <button type="button" role="presentation" className="owl-prev" onClick={onClick}>
+            <i className="fa-solid fa-chevron-left" />
+        </button>
+    </div>
+);
+
 const SectionSpeciality: React.FC = () => {
     const t = useTranslations();
     const locale = useLocale();
     const isRTL = locale === 'ar';
-    const [slider, setSlider] = useState<any>(null);
+    const [slider, setSlider] = useState<Slider | null>(null);
     const [slidesToShow, setSlidesToShow] = useState<number>(2);
     
     const resolveSlides = useMemo(() => {
@@ -38,26 +58,6 @@ const SectionSpeciality: React.FC = () => {
         }
     }, [locale, slider, slidesToShow]);
     
-    interface ArrowProps {
-        onClick?: React.MouseEventHandler<HTMLButtonElement>;
-    }
-
-    const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
-        <div className="spciality-nav nav-bottom owl-nav">
-            <button type="button" role="presentation" className="owl-next" onClick={onClick}>
-                <i className="fa-solid fa-chevron-right" />
-            </button>
-        </div>
-    );
-
-    const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
-        <div className="spciality-nav nav-bottom owl-nav">
-            <button type="button" role="presentation" className="owl-prev" onClick={onClick}>
-                <i className="fa-solid fa-chevron-left" />
-            </button>
-        </div>
-    );
-
     const SpecialitySlider = {
         slidesToShow,
         slidesToScroll: 1,

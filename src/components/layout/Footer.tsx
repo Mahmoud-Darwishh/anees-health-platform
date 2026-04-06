@@ -20,7 +20,7 @@ const Home3Footer = () => {
                 {/* Footer Widget */}
                 <div className="footer-widget footer-about">
                   <div className="footer-logo">
-                    <img src="/assets/img/footer-logo.png" alt="logo" />
+                    <img src="/assets/img/footer-logo.png" alt={t('header.title')} />
                   </div>
                   <div className="footer-about-content">
                     <p>
@@ -39,16 +39,16 @@ const Home3Footer = () => {
                       <Link href={`/${locale}/doctors`}>{t('footer.search_doctors')}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('header.login')}</Link>
+                      <Link href={`/${locale}/booking`}>{t('footer.booking')}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('header.register')}</Link>
+                      <Link href={`/${locale}/coverage`}>{t('nav.coverage')}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('footer.booking')}</Link>
+                      <Link href={`/${locale}/specialties`}>{t('footer.specialities')}</Link>
                     </li>
                     <li>
-                      <Link href="#">{t('footer.patient_dashboard')}</Link>
+                      <Link href={`/${locale}/contact-us`}>{t('footer.contact')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -64,6 +64,12 @@ const Home3Footer = () => {
                     </li>
                     <li>
                         <Link href={`/${locale}/about-us`}>{t('footer.about_us')}</Link>
+                    </li>
+                    <li>
+                        <Link href={`/${locale}/doctors`}>{t('nav.doctors')}</Link>
+                    </li>
+                    <li>
+                        <Link href={`/${locale}/coverage`}>{t('nav.coverage')}</Link>
                     </li>
                   </ul>
                 </div>
@@ -88,38 +94,38 @@ const Home3Footer = () => {
                     <div className="d-flex align-items-start gap-3 mb-2">
                       <i className="fa-solid fa-mobile-screen-button mt-1" aria-hidden="true" />
                       <div className="d-flex flex-column">
-                        <span className="mb-1">+201096185922</span>
-                        <span className="mb-0">+201270558620</span>
+                        <a className="mb-1 text-white text-decoration-none" href="tel:+201096185922">+201096185922</a>
+                        <a className="mb-0 text-white text-decoration-none" href="tel:+201270558620">+201270558620</a>
                       </div>
                     </div> 
                     <p className="mb-3">
-                      <i className="fas fa-envelope me-3 mb-3" />
-                      info@aneeshealth.com
+                      <i className="fas fa-envelope me-3 mb-3" aria-hidden="true" />
+                      <a className="text-white text-decoration-none" href="mailto:info@aneeshealth.com">info@aneeshealth.com</a>
                     </p>
                     <div className="social-icon mt-3">
                       <ul className="list-unstyled d-flex gap-3 mb-0">
                         <li>
                           <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <span className="visually-hidden">{t('footer.social_facebook')}</span>
-                            <i className="fa-brands fa-facebook" />
+                            <i className="fa-brands fa-facebook" aria-hidden="true" />
                           </Link>
                         </li>
                         <li>
                           <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <span className="visually-hidden">{t('footer.social_tiktok')}</span>
-                            <i className="fa-brands fa-tiktok" />
+                            <i className="fa-brands fa-tiktok" aria-hidden="true" />
                           </Link>
                         </li>
                         <li>
                           <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <span className="visually-hidden">{t('footer.social_instagram')}</span>
-                            <i className="fa-brands fa-instagram" />
+                            <i className="fa-brands fa-instagram" aria-hidden="true" />
                           </Link>
                         </li>
                         <li>
                           <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
                             <span className="visually-hidden">{t('footer.social_linkedin')}</span>
-                            <i className="fa-brands fa-linkedin" />
+                            <i className="fa-brands fa-linkedin" aria-hidden="true" />
                           </Link>
                         </li>
                       </ul>

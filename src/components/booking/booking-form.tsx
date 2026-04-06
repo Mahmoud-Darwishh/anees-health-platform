@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
-import { useCallback, useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   BookingFormState,
   calculateBookingPrice,
@@ -40,25 +40,26 @@ interface BookingFormProps {
   preSelectedPackage?: PackageType | null;
 }
 
+function createInitialFormState(preSelectedPackage?: PackageType | null): BookingFormState {
+  if (!preSelectedPackage) {
+    return INITIAL_FORM_STATE;
+  }
+
+  return {
+    ...INITIAL_FORM_STATE,
+    visitType: 'package',
+    packageType: preSelectedPackage,
+  };
+}
+
 export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: BookingFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
-  const [formState, setFormState] = useState<BookingFormState>(INITIAL_FORM_STATE);
+  const [formState, setFormState] = useState<BookingFormState>(() => createInitialFormState(preSelectedPackage));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Handle pre-selected package from URL
-  useEffect(() => {
-    if (preSelectedPackage) {
-      setFormState(prev => ({
-        ...prev,
-        visitType: 'package',
-        packageType: preSelectedPackage,
-      }));
-    }
-  }, [preSelectedPackage]);
 
   // Clean phone number - remove country code and leading 0
   const cleanPhoneNumber = (value: string, countryCode: string): string => {
@@ -78,11 +79,10 @@ export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: 
   };
 
   // Update form field
-  const handleFieldChange = useCallback(
-    (field: keyof BookingFormState, value: any) => {
+  const handleFieldChange = (field: keyof BookingFormState, value: BookingFormState[keyof BookingFormState]) => {
       // Clean phone number - remove leading 0 or country code
       if (field === 'phoneNumber') {
-        value = cleanPhoneNumber(value, formState.countryCode);
+        value = cleanPhoneNumber(String(value ?? ''), formState.countryCode);
       }
 
       setFormState((prev) => {
@@ -124,9 +124,7 @@ export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: 
           return updated;
         });
       }
-    },
-    [errors]
-  );
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -363,7 +361,7 @@ export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: 
                       />
                       <label htmlFor="wai" className={styles.optionContent}>
                         <div>
-                          <span className={styles.optionTitle}>Wa'i - وَعْي</span>
+                          <span className={styles.optionTitle}>Wa&apos;i - وَعْي</span>
                           <span className={styles.optionSubtitle}>
                             {locale === 'ar' 
                               ? 'الزهايمر والخرف - 8,000 جنيه' 

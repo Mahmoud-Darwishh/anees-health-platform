@@ -333,43 +333,40 @@ const DoctorGrid = () => {
                       </button>
                       <ul className="dropdown-menu dropdown-menu-end">
                         <li>
-                          <a
-                            href="#"
+                          <button
+                            type="button"
                             className="dropdown-item"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               setSortOrder('none');
                               setCurrentPage(1);
                             }}
                           >
                             {tg('sort.relevance')}
-                          </a>
+                          </button>
                         </li>
                         <li>
-                          <a
-                            href="#"
+                          <button
+                            type="button"
                             className="dropdown-item"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               setSortOrder('low');
                               setCurrentPage(1);
                             }}
                           >
                             {tg('sort.priceAsc')}
-                          </a>
+                          </button>
                         </li>
                         <li>
-                          <a
-                            href="#"
+                          <button
+                            type="button"
                             className="dropdown-item"
-                            onClick={(e) => {
-                              e.preventDefault();
+                            onClick={() => {
                               setSortOrder('high');
                               setCurrentPage(1);
                             }}
                           >
                             {tg('sort.priceDesc')}
-                          </a>
+                          </button>
                         </li>
                       </ul>
                     </div>

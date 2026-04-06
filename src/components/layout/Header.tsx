@@ -30,10 +30,6 @@ const Header = () => {
     
     // For hash links, only highlight when on home page AND hash matches current URL hash
     if (href.includes('#')) {
-      const baseHref = href.split('#')[0];
-      const hashPart = href.split('#')[1];
-      const isOnBasePage = pathname === baseHref || pathname === `${baseHref}/`;
-      
       // Don't mark hash links as active - they're anchor links, not separate pages
       return false;
     }
@@ -105,93 +101,11 @@ const Header = () => {
   return (
     <div>
       <>
-      {/*
-        <div className="header-topbar">
-          <div className="container">
-            <div className="topbar-info">
-              <div className="d-flex align-items-center gap-3 header-info">
-                <p>
-                  <i className="isax isax-message-text5 me-1" />
-                  info@example.com
-                </p>
-                <p>
-                  <i className="isax isax-call5 me-1" />
-                  +1 66589 14556
-                </p>
-              </div>
-              <ul>
-                <li className="header-theme">
-                  <DarkModeToggle />
-                </li>
-                <li className="d-inline-flex align-items-center drop-header">
-                          <img
-                            src="assets/img/flags/france-flag.svg"
-                            className="me-2"
-                            alt="flag"
-                          />
-                          FRA
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="dropdown dropdown-amt">
-                    <Link
-                      href="#"
-                      className="dropdown-toggle"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                    >
-                      USD
-                    </Link>
-                    <ul className="dropdown-menu p-2 mt-2">
-                      <li>
-                        <Link className="dropdown-item rounded" href="#">
-                          USD
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className="dropdown-item rounded" href="#">
-                          YEN
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className="dropdown-item rounded" href="#">
-                          EURO
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                </li>
-                <li className="social-header">
-                  <div className="social-icon">
-                    <Link href="#">
-                      <i className="fa-brands fa-facebook" />
-                    </Link>
-                    <Link href="#">
-                      <i className="fa-brands fa-x-twitter" />
-                    </Link>
-                    <Link href="#">
-                      <i className="fa-brands fa-instagram" />
-                    </Link>
-                    <Link href="#">
-                      <i className="fa-brands fa-linkedin" />
-                    </Link>
-                    <Link href="#">
-                      <i className="fa-brands fa-pinterest" />
-                    </Link>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>   */}
-
-
         <header className={headerClass}>
           <div className="container">
             <nav className="navbar navbar-expand-lg header-nav">
               <div className="navbar-header">
-                <Link id="mobile_btn" href="#" onClick={onHandleMobileMenu}>
+                <Link id="mobile_btn" href="#" onClick={onHandleMobileMenu} aria-label="Open menu">
                   <span className="bar-icon">
                     <span />
                     <span />
@@ -205,7 +119,7 @@ const Header = () => {
                   <img
                     src="/assets/img/anees-logo.png"
                     className="img-fluid"
-                    alt="Logo"
+                    alt={t('header.title')}
                   />
                 </Link>
               </div>
@@ -216,7 +130,7 @@ const Header = () => {
                       <img
                         src="/assets/img/anees-logo.png"
                         className="img-fluid"
-                        alt="Logo"
+                        alt={t('header.title')}
                       />
                     </Link>
                     <Link
@@ -224,6 +138,7 @@ const Header = () => {
                       className="menu-close"
                       href="#"
                       onClick={onHandleCloseMenu}
+                      aria-label="Close menu"
                     >
                       <i className="fas fa-times" />
                     </Link>
@@ -296,7 +211,7 @@ const Header = () => {
                 </div>
                 <ul className="nav header-navbar-rht">
                   <li className="searchbar">
-                    <Link href="#" onClick={toggleSearch}>
+                    <Link href="#" onClick={toggleSearch} aria-label={t('common.search')}>
                       <i className="feather-search" />
                     </Link>
                     <div
@@ -349,18 +264,6 @@ const Header = () => {
                       <span>{t('header.bookNow')}</span>
                     </Link>
                   </li>
-
-                  {/* Login Button - Disabled for now, to be reused in future */}
-                  {/* <li className="nav-item">
-                    <Link
-                      href="#"
-                      className="btn btn-md btn-primary-gradient d-flex align-items-center rounded-pill"
-                    >
-                      <i className="isax isax-lock-1 me-2" />
-                      <span>{t('header.login')}</span>
-                    </Link>
-                  </li> */}
-
                 </ul>
               </div>
             </nav>

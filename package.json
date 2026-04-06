@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seo:links": "node scripts/seo-link-audit.mjs",
+    "seo:backlinks": "node scripts/backlink-quality-audit.mjs",
+    "seo:authority": "node scripts/seo-authority-dashboard.mjs"
   },
   "dependencies": {
     "@types/leaflet": "^1.9.21",

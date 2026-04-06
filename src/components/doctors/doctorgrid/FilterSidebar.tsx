@@ -78,16 +78,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         <div className="card-header">
           <div className="d-flex align-items-center filter-head justify-content-between">
             <h4>{tg('filters.title')}</h4>
-            <a
-              href="#"
+            <button
+              type="button"
               className="text-secondary text-decoration-underline"
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 onClearAll();
               }}
             >
               {tg('filters.clear')}
-            </a>
+            </button>
           </div>
           <div className="filter-input">
             <div className="position-relative input-icon">
@@ -190,16 +189,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
                 {specialities.length > 3 && (
                   <div className="view-all">
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
+                    <button
+                      type="button"
+                      onClick={() => {
                         setShowMoreSpecialities(!showMoreSpecialities);
                       }}
                       className="text-secondary text-decoration-underline"
                     >
                       {showMoreSpecialities ? tg('filters.view_less') : tg('filters.view_more')}
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -403,16 +401,15 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   })}
 
                 <div className="view-all">
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
+                  <button
+                    type="button"
+                    onClick={() => {
                       setShowMoreExperience(!showMoreExperience);
                     }}
                     className="text-secondary text-decoration-underline"
                   >
                     {showMoreExperience ? tg('filters.view_less') : tg('filters.view_more')}
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

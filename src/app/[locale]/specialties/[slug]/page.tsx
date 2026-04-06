@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+import RelatedLinks from '@/components/common/RelatedLinks';
 import { config } from '@/lib/config';
 import { generatePageMetadata } from '@/lib/utils/metadata';
 import { generateBreadcrumbSchema, generateDoctorsCollectionSchema, renderJsonLd } from '@/lib/utils/structured-data';
@@ -121,6 +122,17 @@ export default async function SpecialtyPage({ params }: SpecialtyPageProps) {
           </div>
         </div>
       </section>
+      <RelatedLinks
+        locale={locale}
+        title={locale === 'ar' ? 'روابط مرتبطة بهذا التخصص' : 'Links related to this specialty'}
+        links={[
+          { href: `/${locale}/specialties`, label: locale === 'ar' ? 'كل التخصصات' : 'All specialties' },
+          { href: `/${locale}/doctors?search=${encodeURIComponent(data.specialtyName)}`, label: locale === 'ar' ? 'أطباء هذا التخصص' : 'Doctors in this specialty' },
+          { href: `/${locale}/services`, label: locale === 'ar' ? 'الخدمات المرتبطة' : 'Related services' },
+          { href: `/${locale}/coverage`, label: locale === 'ar' ? 'المناطق المغطاة' : 'Covered areas' },
+          { href: `/${locale}/booking`, label: locale === 'ar' ? 'احجز الآن' : 'Book now' },
+        ]}
+      />
       <Footer />
     </>
   );

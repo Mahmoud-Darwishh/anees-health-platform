@@ -2,82 +2,15 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import styles from './sectionApp.module.scss'
 
 const SectionApp: React.FC = () => {
     const t = useTranslations();
-    const locale = useLocale();
     return (
         <div>
             <>
-                {/* App Section */} {/*}
-                <section className="app-section app-sec-one p-0">
-                    <div className="container">
-                        <div className="app-bg">
-                            <div className="row">
-                                <div className="col-lg-6 col-md-12 d-flex">
-                                    <div className="app-content d-flex flex-column justify-content-center">
-                                        <div className="app-header">
-                                            <h3 className="display-6 text-white">
-                                                Download Anees Health App today!
-                                            </h3>
-                                            <p className="text-light">
-                                                To download an app related to a doctor or medical services,
-                                                you can typically visit the app store on your device.
-                                            </p>
-                                        </div>
-                                        <div className="google-imgs">
-                                            <Link href="#">
-                                                <img src="assets/img/icons/app-store-01.svg" alt="Download Anees Health app on Apple App Store" />
-                                            </Link>
-                                            <Link href="#">
-                                                <img src="assets/img/icons/google-play-01.svg" alt="Get Anees Health app on Google Play Store" />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-lg-6 col-md-12">
-                                    <div className="mobile-img">
-                                      <Image
-                                        src="/assets/img/optimized/mobile-img.webp"
-                                        alt="Anees Health mobile app interface - Book doctors and manage healthcare"
-                                        width={800}
-                                        height={800}
-                                            className="img-fluid"
-                                        loading="lazy"
-                                        quality={85}
-                                        />
-                                    </div>
-                                </div>
-                                
-                            </div>
-                            <div className="app-bgs">
-                                <img
-                                    src="assets/img/bg/app-bg-02.png"
-                                    alt="img"
-                                    className="app-bg-01"
-                                />
-                                <img
-                                    src="assets/img/bg/app-bg-03.png"
-                                    alt="img"
-                                    className="app-bg-02"
-                                />
-                                <img
-                                    src="assets/img/bg/app-bg-04.png"
-                                    alt="img"
-                                    className="app-bg-03"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="download-bg">
-                        <img src="assets/img/bg/download-bg.png" alt="img" />
-                    </div>
-                </section> */}
-                {/* /App Section */}
-
-                      {/* App Section */}
+        {/* App Section */}
       <section className="app-section pt-0">
         <div className="container">
           <div className="app-bg">

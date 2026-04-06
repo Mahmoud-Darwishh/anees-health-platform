@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useId } from 'react'
-import Link from 'next/link'
 import Image from 'next/image'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -86,8 +85,8 @@ const SectionBook: React.FC = () => {
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
                                         <h2 className="accordion-header" id={headingOneId}>
-                                            <Link
-                                                href="#"
+                                            <button
+                                                type="button"
                                                 className="accordion-button"
                                                 data-bs-toggle="collapse"
                                                 data-bs-target={`#${collapseOneId}`}
@@ -95,7 +94,7 @@ const SectionBook: React.FC = () => {
                                                 aria-controls={collapseOneId}
                                             >
                                                 01 . {t('home.booking.vision')}
-                                            </Link>
+                                            </button>
                                         </h2>
                                         <div
                                             id={collapseOneId}
@@ -116,15 +115,15 @@ const SectionBook: React.FC = () => {
                                     {/* FAQ Item */}
                                     <div className="accordion-item">
                                         <h2 className="accordion-header" id={headingTwoId}>
-                                            <Link
-                                                href="#"
+                                            <button
+                                                type="button"
                                                 className="accordion-button collapsed"
                                                 data-bs-toggle="collapse"
                                                 data-bs-target={`#${collapseTwoId}`}
                                                 aria-controls={collapseTwoId}
                                             >
                                                 02 . {t('home.booking.mission')}
-                                            </Link>
+                                            </button>
                                         </h2>
                                         <div
                                             id={collapseTwoId}
