@@ -19,15 +19,17 @@ const GeneralHomeOne: React.FC = () => {
   return (
     <div className='main-wrapper'>
       <Header />
-      <HomeBanner />
-      <SectionSpeciality />
-      <SectionDoctor />
-      <SectionService />
-      <SectionBook />
-      <SectionPackages />
-      <SectionLogos />
-      <SectionFaq />
-      <SectionApp />
+      <main id="main-content" tabIndex={-1}>
+        <HomeBanner />
+        <SectionSpeciality />
+        <SectionDoctor />
+        <SectionService />
+        <SectionBook />
+        <SectionPackages />
+        <SectionLogos />
+        <SectionFaq />
+        <SectionApp />
+      </main>
       <Footer />
     </div>
   )

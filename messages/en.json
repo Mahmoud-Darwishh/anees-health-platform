@@ -15,6 +15,9 @@
   "common": {
     "home": "Home",
     "search": "Search",
+    "skip_to_main_content": "Skip to main content",
+    "open_menu": "Open navigation menu",
+    "close_menu": "Close navigation menu",
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
@@ -1151,6 +1154,7 @@
   "mobileNav": {
     "navLabel": "Mobile Navigation",
     "ourDoctors": "Our Doctors",
-    "bookNow": "Book Now"
+    "bookNow": "Book Now",
+    "bookingAvailable": "New booking available"
   }
 }

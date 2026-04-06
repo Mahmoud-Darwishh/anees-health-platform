@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -76,7 +76,7 @@ export default function BookingPage({ locale }: PageContentProps) {
       />
 
       {/* Main Content */}
-      <main className={styles.mainContent}>
+      <main id="main-content" tabIndex={-1} className={styles.mainContent}>
         {showSuccessMessage ? (
           <div className={styles.successMessage} role="alert">
             <h2>✅ {t('success.title')}</h2>

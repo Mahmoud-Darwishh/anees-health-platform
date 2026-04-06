@@ -1,5 +1,6 @@
 ﻿import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { locales, type Locale } from '@/i18n/request';
@@ -28,6 +29,7 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages();
+  const t = await getTranslations({ locale, namespace: 'common' });
     const direction = locale === 'ar' ? 'rtl' : 'ltr';
 
   // Generate structured data for this locale
@@ -38,6 +40,7 @@ export default async function LocaleLayout({
   return (
       <NextIntlClientProvider messages={messages} locale={locale} timeZone="Africa/Cairo">
         <div dir={direction} lang={locale}>
+        <a href="#main-content" className="skip-link">{t('skip_to_main_content')}</a>
         {/* Structured Data for SEO & GEO */}
         <script
           type="application/ld+json"

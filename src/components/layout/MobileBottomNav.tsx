@@ -59,7 +59,7 @@ export default function MobileBottomNav() {
           
           <span className={styles.navIconWrapper} aria-hidden="true">
             {/* FontAwesome stethoscope icon */}
-            <i className="fas fa-user-doctor" />
+            <i className="fas fa-user-doctor" aria-hidden="true" />
             
             {/* Animated icon ring */}
             <span className={styles.iconRing} />
@@ -93,10 +93,10 @@ export default function MobileBottomNav() {
           
           <span className={styles.navIconWrapper} aria-hidden="true">
             {/* FontAwesome calendar icon */}
-            <i className="fas fa-calendar-check" />
+            <i className="fas fa-calendar-check" aria-hidden="true" />
             
             {/* Notification badge */}
-            <span className={styles.badge} aria-label="New booking available">
+            <span className={styles.badge} aria-label={t('bookingAvailable')}>
               <span className={styles.badgePulse} />
             </span>
           </span>

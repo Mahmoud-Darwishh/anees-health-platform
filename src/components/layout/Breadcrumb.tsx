@@ -44,12 +44,14 @@ const Breadcrumb = ({ items, title }: BreadcrumbProps) => {
       <div className="breadcrumb-bg">
         <img
           src="/assets/img/bg/breadcrumb-icon.png"
-          alt="img"
+          alt=""
+          aria-hidden="true"
           className="breadcrumb-bg-03"
         />
         <img
           src="/assets/img/bg/breadcrumb-icon.png"
-          alt="img"
+          alt=""
+          aria-hidden="true"
           className="breadcrumb-bg-04"
         />
       </div>

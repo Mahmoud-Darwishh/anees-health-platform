@@ -15,6 +15,9 @@
   "common": {
     "home": "الرئيسية",
     "search": "بحث",
+    "skip_to_main_content": "تخطي إلى المحتوى الرئيسي",
+    "open_menu": "افتح قائمة التنقل",
+    "close_menu": "أغلق قائمة التنقل",
     "loading": "جاري التحميل...",
     "error": "خطأ",
     "success": "نجح",
@@ -1154,6 +1157,7 @@
   "mobileNav": {
     "navLabel": "التنقل على الهاتف المحمول",
     "ourDoctors": "أطباؤنا",
-    "bookNow": "احجز الآن"
+    "bookNow": "احجز الآن",
+    "bookingAvailable": "حجز جديد متاح"
   }
 }
