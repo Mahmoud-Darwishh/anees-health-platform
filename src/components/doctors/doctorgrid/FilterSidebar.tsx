@@ -80,7 +80,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             <h4>{tg('filters.title')}</h4>
             <button
               type="button"
-              className="text-secondary text-decoration-underline"
+              className="filter-action-btn"
               onClick={() => {
                 onClearAll();
               }}
@@ -194,7 +194,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                       onClick={() => {
                         setShowMoreSpecialities(!showMoreSpecialities);
                       }}
-                      className="text-secondary text-decoration-underline"
+                      className="filter-action-btn"
                     >
                       {showMoreSpecialities ? tg('filters.view_less') : tg('filters.view_more')}
                     </button>
@@ -406,7 +406,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     onClick={() => {
                       setShowMoreExperience(!showMoreExperience);
                     }}
-                    className="text-secondary text-decoration-underline"
+                    className="filter-action-btn"
                   >
                     {showMoreExperience ? tg('filters.view_less') : tg('filters.view_more')}
                   </button>
