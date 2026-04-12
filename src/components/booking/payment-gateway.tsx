@@ -1,237 +1,141 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import styles from './payment-gateway.module.scss';
 
 interface PaymentGatewayProps {
   orderId: string;
   amount: string;
   currency: string;
-  customerId?: string;
+  customerName?: string;
+  customerPhone?: string;
   locale: string;
-  onPaymentSuccess?: () => void;
-  autoOpen?: boolean; // Auto-open modal without showing summary
 }
+
+type GatewayState = 'loading' | 'ready' | 'error';
 
 export default function PaymentGateway({
   orderId,
   amount,
   currency,
-  customerId,
+  customerName,
+  customerPhone,
   locale,
-  onPaymentSuccess,
-  autoOpen = true, // Default to auto-open
 }: PaymentGatewayProps) {
   const t = useTranslations('payment');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [state, setState] = useState<GatewayState>('loading');
+  const [sessionUrl, setSessionUrl] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    console.log('✅ Payment component mounted');
-    
-    // If autoOpen is true, automatically start payment process
-    if (autoOpen) {
-      console.log('🚀 Auto-opening payment modal');
-      handlePayment();
-    }
-    
-    return () => {
-      console.log('🔌 Payment component unmounted');
-    };
-  }, [autoOpen]);
+    let cancelled = false;
 
-  const handlePayment = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    async function createSession() {
+      try {
+        setState('loading');
 
-      console.log('🚀 Starting payment process:', { orderId, amount, currency });
+        const response = await fetch('/api/bookings/payment/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId: orderId,
+            amount: parseFloat(amount),
+            currency,
+            locale,
+            customerName,
+            customerPhone,
+          }),
+        });
 
-      // Validate required fields
-      if (!orderId || !amount || !currency) {
-        const errMsg = 'Missing payment information. Please try again.';
-        console.error(errMsg);
-        throw new Error(errMsg);
-      }
+        const data = await response.json();
 
-      // Generate hash from backend
-      console.log('📡 Requesting hash generation from /api/payment/generate-hash...');
+        if (cancelled) return;
 
-      const hashResponse = await fetch('/api/payment/generate-hash', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: String(orderId),
-          amount: String(amount),
-          currency: String(currency),
-          customerId,
-        }),
-      });
-
-      console.log('📊 Hash API response status:', hashResponse.status);
-
-      if (!hashResponse.ok) {
-        const errorText = await hashResponse.text();
-        console.error('❌ Hash generation failed with status', hashResponse.status);
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          errorData = { error: errorText };
+        if (!response.ok || !data.success) {
+          setErrorMessage(data.message || t('errorGeneric'));
+          setState('error');
+          return;
         }
-        throw new Error(errorData.error || `API Error: ${hashResponse.status}`);
+
+        setSessionUrl(data.sessionUrl);
+        setState('ready');
+      } catch {
+        if (cancelled) return;
+        setErrorMessage(t('errorGeneric'));
+        setState('error');
       }
-
-      const responseData = await hashResponse.json();
-      console.log('📊 Hash API response received');
-
-      const { hash, merchantId, mode } = responseData;
-
-      if (!hash || !merchantId) {
-        console.error('❌ Invalid response from hash API');
-        throw new Error('Invalid payment configuration received from server');
-      }
-
-      console.log('✅ Hash generated successfully');
-
-      // Build redirect URL (prefer env for production/live compliance)
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-      const redirectUrl = process.env.KASHIER_REDIRECT || `${siteUrl}/${locale}/payment/redirect`;
-      const webhookUrl = process.env.KASHIER_WEBHOOK || `${siteUrl}/api/payment/webhook`;
-
-      // IMPORTANT: Use test mode URL if mode is 'test'
-      const baseUrl = mode === 'test' 
-        ? 'https://test-payments.kashier.io/' 
-        : 'https://payments.kashier.io/';
-      
-      console.log('🔧 Payment mode:', mode, '| Base URL:', baseUrl);
-
-      // Build Kashier Hosted Payment Page URL (for iframe src)
-      const kashierUrl = new URL(baseUrl);
-      kashierUrl.searchParams.append('merchantId', merchantId);
-      kashierUrl.searchParams.append('orderId', orderId);
-      kashierUrl.searchParams.append('amount', String(amount));
-      kashierUrl.searchParams.append('currency', currency);
-      kashierUrl.searchParams.append('hash', hash);
-      kashierUrl.searchParams.append('mode', mode);
-      kashierUrl.searchParams.append('merchantRedirect', redirectUrl);
-      kashierUrl.searchParams.append('serverWebhook', webhookUrl);
-      kashierUrl.searchParams.append('type', 'iframe');
-      kashierUrl.searchParams.append('display', locale === 'ar' ? 'ar' : 'en');
-      kashierUrl.searchParams.append('allowedMethods', 'card,wallet,fawry,bank_installments');
-      kashierUrl.searchParams.append('brandColor', 'rgba(170, 134, 66, 0.9)');
-      kashierUrl.searchParams.append('enable3DS', 'true');
-      kashierUrl.searchParams.append('interactionSource', 'Ecommerce');
-      
-      if (customerId) {
-        kashierUrl.searchParams.append('customer', JSON.stringify({ id: customerId }));
-      }
-
-      console.log('📋 Kashier I-frame URL:', kashierUrl.toString());
-      
-      // Set payment URL and show modal
-      setPaymentUrl(kashierUrl.toString());
-      setShowModal(true);
-      setLoading(false);
-      
-      console.log('🎬 Opening payment modal...');
-      
-    } catch (err) {
-      console.error('❌ Payment error occurred:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Payment initialization failed';
-      console.error('📋 Error message:', errorMessage);
-      setError(errorMessage);
-      setLoading(false);
     }
-  };
 
-  const closeModal = () => {
-    console.log('❌ Closing payment modal');
-    setShowModal(false);
-    setPaymentUrl(null);
-  };
+    createSession();
+    return () => { cancelled = true; };
+  }, [orderId, amount, currency, locale, t]);
 
   return (
-    <>
-      {/* Only show summary if not auto-opening */}
-      {!autoOpen && (
-        <div className={styles.paymentContainer}>
-          <div className={styles.paymentHeader}>
-            <h1>{t('completePayment')}</h1>
-            <p>{t('securePayment')}</p>
-          </div>
+    <section className={styles.paymentGateway} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+      <div className={styles.container}>
+        {/* Header */}
+        <div className={styles.header}>
+          <h1 className={styles.title}>{t('title')}</h1>
+          <p className={styles.subtitle}>
+            {t('subtitle', { orderId })}
+          </p>
+        </div>
 
-          <div className={styles.orderSummary}>
-            <h3>{t('orderSummary')}</h3>
-            <div className={styles.summaryRow}>
-              <span>{t('orderId')}:</span>
-              <strong>{orderId}</strong>
-            </div>
-            <div className={styles.summaryRow}>
-              <span>{t('amount')}:</span>
-              <strong>
-                {amount} {currency}
-              </strong>
-            </div>
-          </div>
+        {/* Order Summary Bar */}
+        <div className={styles.orderBar}>
+          <span className={styles.orderLabel}>{t('orderTotal')}</span>
+          <span className={styles.orderAmount}>
+            {amount} <span className={styles.currency}>{currency}</span>
+          </span>
+        </div>
 
-          {error && (
-            <div className={styles.errorState}>
-              <div className={styles.errorIcon}>⚠️</div>
-              <p>{error}</p>
+        {/* Payment Frame */}
+        <div className={styles.frameWrapper}>
+          {state === 'loading' && (
+            <div className={styles.loadingState}>
+              <div className={styles.spinner} />
+              <p>{t('loading')}</p>
             </div>
           )}
 
-          <div className={styles.paymentActions}>
-            <button
-              onClick={handlePayment}
-              disabled={loading}
-              className={styles.payButton}
-            >
-              {loading ? (
-                <>
-                  <span className={styles.spinner}></span>
-                  {t('processing')}
-                </>
-              ) : (
-                <>💳 {t('payNow')}</>
-              )}
-            </button>
-
-            <button 
-              onClick={() => {
-                if (onPaymentSuccess) onPaymentSuccess();
-              }}
-              className={styles.cancelButton}
-            >
-              {t('cancel')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Payment Modal with I-frame - Full Screen */}
-      {showModal && paymentUrl && (
-        <div className={styles.modalOverlay} onClick={closeModal}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.iframeContainer}>
-              <iframe
-                ref={iframeRef}
-                src={paymentUrl}
-                title="Kashier Payment Gateway"
-                className={styles.paymentIframe}
-                allow="payment"
-                sandbox="allow-same-origin allow-forms allow-scripts allow-popups allow-top-navigation"
-              />
+          {state === 'error' && (
+            <div className={styles.errorState}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
+              <p className={styles.errorMessage}>{errorMessage}</p>
+              <button
+                className={styles.retryButton}
+                onClick={() => window.location.reload()}
+              >
+                {t('retry')}
+              </button>
             </div>
-          </div>
+          )}
+
+          {state === 'ready' && sessionUrl && (
+            <iframe
+              src={sessionUrl}
+              className={styles.paymentFrame}
+              title={t('iframeTitle')}
+              allow="payment"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+            />
+          )}
         </div>
-      )}
-    </>
+
+        {/* Security Note */}
+        <div className={styles.securityNote}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path d="M7 11V7a5 5 0 0110 0v4" />
+          </svg>
+          <span>{t('securityNote')}</span>
+        </div>
+      </div>
+    </section>
   );
 }

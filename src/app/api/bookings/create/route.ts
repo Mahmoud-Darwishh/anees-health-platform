@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateBookingForm, CreateBookingIntentRequest, CreateBookingIntentResponse, calculateBookingPrice } from '@/lib/models/booking.types';
+import { validateBookingForm, CreateBookingIntentRequest, calculateBookingPrice } from '@/lib/models/booking.types';
 
 /**
  * POST /api/bookings/create
@@ -89,11 +89,11 @@ export async function POST(request: NextRequest) {
       phone: body.phoneNumber,
     });
 
-    const response: CreateBookingIntentResponse = {
+    const response = {
       success: true,
       bookingId,
       amount,
-      currency: 'EGP',
+      currency: 'EGP' as const,
     };
 
     return NextResponse.json(response, { status: 201 });

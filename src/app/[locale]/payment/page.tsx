@@ -1,4 +1,3 @@
-import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
 import PaymentGateway from '@/components/booking/payment-gateway';
 
@@ -8,7 +7,8 @@ interface PaymentPageProps {
     orderId?: string;
     amount?: string;
     currency?: string;
-    customerId?: string;
+    customerName?: string;
+    customerPhone?: string;
   }>;
 }
 
@@ -28,7 +28,8 @@ export default async function PaymentPage(props: PaymentPageProps) {
         orderId={searchParams.orderId}
         amount={searchParams.amount}
         currency={searchParams.currency}
-        customerId={searchParams.customerId}
+        customerName={searchParams.customerName}
+        customerPhone={searchParams.customerPhone}
         locale={locale}
       />
     </main>

@@ -345,3 +345,19 @@
     transition: none;
   }
 }
+
+/* ============================================================================
+   ERROR BANNER
+   ============================================================================ */
+
+.errorBanner {
+  max-width: 1400px;
+  margin: 0 auto 1rem;
+  padding: 0.875rem 1.25rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.95rem;
+  font-weight: 500;
+}

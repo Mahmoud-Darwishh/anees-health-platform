@@ -9,8 +9,6 @@ import {
   NURSING_TYPES,
   NURSING_HOURS,
   NURSING_DURATIONS,
-  calculateProcessingFee,
-  calculateTotalWithFee,
 } from '@/lib/models/booking.types';
 import { generateBookingMessage } from '@/lib/utils/booking-utils';
 import styles from '@/assets/scss/components/booking-summary.module.scss';
@@ -19,14 +17,12 @@ interface BookingSummaryProps {
   formState: BookingFormState;
   totalPrice: number;
   isSubmitting: boolean;
-  onPayNow?: (formData: BookingFormState) => void;
 }
 
 export default function BookingSummary({
   formState,
   totalPrice,
   isSubmitting,
-  onPayNow,
 }: BookingSummaryProps) {
   const t = useTranslations('booking');
   const locale = useLocale();
@@ -103,17 +99,6 @@ export default function BookingSummary({
   };
 
   const hasServiceSelection = !!formState.visitType;
-
-  const handlePaymentClick = () => {
-    // Triggered by parent component via callback/state
-    console.log('🚀 Pay Now clicked from summary');
-    if (onPayNow) {
-      console.log('✅ onPayNow callback exists, calling it');
-      onPayNow(formState);
-    } else {
-      console.log('❌ onPayNow callback not provided');
-    }
-  };
 
   const handleWhatsAppClick = () => {
     const message = generateBookingMessage(formState, totalPrice, locale);
@@ -275,20 +260,11 @@ export default function BookingSummary({
                 </span>
               </div>
 
-              {/* Processing Fee */}
-              <div className={styles.pricingRow}>
-                <span className={styles.pricingLabel}>Processing Fee</span>
-                <span className={styles.pricingValue}>
-                  {calculateProcessingFee(totalPrice)}
-                  <span className={styles.currency}>{t('summary.currency')}</span>
-                </span>
-              </div>
-
               {/* Total Price */}
               <div className={styles.priceBox}>
                 <span className={styles.priceLabel}>{t('summary.totalPrice')}</span>
                 <span className={styles.priceValue}>
-                  {calculateTotalWithFee(totalPrice)}
+                  {totalPrice}
                   <span className={styles.currency}>{t('summary.currency')}</span>
                 </span>
               </div>
@@ -296,15 +272,6 @@ export default function BookingSummary({
 
             {/* Action Buttons */}
             <div className={styles.actionButtons}>
-              <button
-                className={styles.payButton}
-                onClick={handlePaymentClick}
-                disabled={isSubmitting || totalPrice === 0}
-                type="button"
-              >
-                {t('actions.payNow')}
-              </button>
-
               <button
                 className={styles.whatsappButton}
                 onClick={handleWhatsAppClick}

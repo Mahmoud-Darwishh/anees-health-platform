@@ -35,8 +35,7 @@ const INITIAL_FORM_STATE: BookingFormState = {
 };
 
 interface BookingFormProps {
-  onSubmit?: (formData: BookingFormState) => void;
-  onPayNow?: (formData: BookingFormState) => void;
+  onSubmit?: (formData: BookingFormState) => void | Promise<void>;
   preSelectedPackage?: PackageType | null;
 }
 
@@ -52,7 +51,7 @@ function createInitialFormState(preSelectedPackage?: PackageType | null): Bookin
   };
 }
 
-export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: BookingFormProps) {
+export default function BookingForm({ onSubmit, preSelectedPackage }: BookingFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -852,18 +851,14 @@ export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: 
               </fieldset>
             )}
 
-            {/* Submit Button - Now "Pay Now" that triggers payment directly */}
+            {/* Submit Button */}
             <button
               type="button"
               className={styles.submitButton}
               disabled={isSubmitting}
-              onClick={() => {
-                console.log('🔵 Pay Now button clicked');
-                console.log('Form state:', formState);
-                
+              onClick={async () => {
                 // Validate form first
                 const validationErrors = validateBookingForm(formState);
-                console.log('Validation errors:', validationErrors);
                 
                 if (validationErrors.length > 0) {
                   const errorMap: Record<string, string> = {};
@@ -871,33 +866,22 @@ export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: 
                     errorMap[error.field] = t(error.message);
                   });
                   setErrors(errorMap);
-                  console.log('❌ Form validation failed');
                   return;
                 }
 
-                console.log('✅ Form validation passed');
-
-                // Store booking data
-                if (typeof window !== 'undefined') {
-                  sessionStorage.setItem('pendingBooking', JSON.stringify({
-                    ...formState,
-                    createdAt: new Date().toISOString()
-                  }));
-                }
-
-                // Trigger payment directly
-                console.log('🚀 Triggering payment with onPayNow callback');
-                if (onPayNow) {
-                  console.log('✅ onPayNow callback exists, calling it');
-                  onPayNow(formState);
-                } else {
-                  console.log('❌ onPayNow callback not provided');
+                if (onSubmit) {
+                  setIsSubmitting(true);
+                  try {
+                    await onSubmit(formState);
+                  } finally {
+                    setIsSubmitting(false);
+                  }
                 }
               }}
             >
               {isSubmitting
                 ? t('booking.actions.processing')
-                : '💳 ' + t('booking.actions.proceedToPayment')}
+                : t('booking.actions.submitBooking')}
             </button>
           </div>
         </form>
@@ -908,7 +892,6 @@ export default function BookingForm({ onSubmit, onPayNow, preSelectedPackage }: 
             formState={formState}
             totalPrice={totalPrice}
             isSubmitting={isSubmitting}
-            onPayNow={onPayNow}
           />
         </aside>
       </div>

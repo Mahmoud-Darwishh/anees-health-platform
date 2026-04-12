@@ -1087,11 +1087,10 @@
       "selectService": "Select a service to see pricing"
     },
     "actions": {
-      "payNow": "Pay Now",
+      "submitBooking": "Proceed to Payment",
       "chatWithTeam": "Chat with Care Team",
       "processing": "Processing...",
       "confirm": "Confirm Booking",
-      "proceedToPayment": "Proceed to Payment",
       "expandSummary": "Expand Summary",
       "collapseSummary": "Collapse Summary"
     },
@@ -1125,39 +1124,42 @@
     "how_it_works": "How It Works",
     "step1": "Select your preferred service type and provide your information",
     "step2": "Review the pricing and booking details in the summary",
-    "step3": "Complete payment and receive booking confirmation",
+    "step3": "Complete payment securely and our care team will confirm your booking",
     "need_help": "Need Help?",
     "contact_support": "If you have any questions or need assistance with your booking, please contact our care team.",
     "contact_button": "Contact Us"
-  },
-  "payment": {
-    "initializing": "Initializing Payment",
-    "pleaseWait": "Please wait while we set up your secure payment...",
-    "processing": "Processing...",
-    "error": "Payment Error",
-    "backToBooking": "Back to Booking",
-    "completePayment": "Complete Your Payment",
-    "securePayment": "Secure payment powered by Kashier",
-    "orderSummary": "Order Summary",
-    "orderId": "Order ID",
-    "amount": "Amount",
-    "payNow": "Pay Now",
-    "cancel": "Cancel",
-    "clickBelow": "Click the button above to open the secure payment window and complete your transaction.",
-    "paymentSuccess": "Payment Successful!",
-    "paymentFailed": "Payment Failed",
-    "paymentSuccessMessage": "Your payment has been processed successfully. We'll send you a confirmation email shortly.",
-    "paymentFailedMessage": "We couldn't process your payment. Please try again or use a different payment method.",
-    "transactionId": "Transaction ID",
-    "paymentMethod": "Payment Method",
-    "returnHome": "Return to Home",
-    "tryAgain": "Try Again",
-    "confirmationEmail": "A confirmation email with your booking details has been sent to your email address."
   },
   "mobileNav": {
     "navLabel": "Mobile Navigation",
     "ourDoctors": "Our Doctors",
     "bookNow": "Book Now",
     "bookingAvailable": "New booking available"
+  },
+  "payment": {
+    "title": "Complete Payment",
+    "subtitle": "Order: {orderId}",
+    "orderTotal": "Order Total",
+    "loading": "Preparing secure payment...",
+    "errorGeneric": "Unable to initiate payment. Please try again.",
+    "retry": "Try Again",
+    "iframeTitle": "Secure Payment",
+    "securityNote": "Your payment is secured with 256-bit encryption",
+    "proceedToPayment": "Proceed to Payment",
+    "result": {
+      "successTitle": "Payment Successful!",
+      "successMessage": "Your booking has been confirmed. You will receive a confirmation shortly.",
+      "failureTitle": "Payment Failed",
+      "failureMessage": "Your payment could not be processed. Please try again or contact support.",
+      "orderId": "Order ID",
+      "transactionId": "Transaction ID",
+      "amount": "Amount",
+      "paymentMethod": "Payment Method",
+      "status": "Status",
+      "paid": "Paid",
+      "failed": "Failed",
+      "backToHome": "Back to Home",
+      "tryAgain": "Try Again",
+      "contactSupport": "Contact Support"
+    }
   }
 }

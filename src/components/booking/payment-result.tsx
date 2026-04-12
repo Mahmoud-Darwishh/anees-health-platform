@@ -5,7 +5,7 @@ import Link from 'next/link';
 import styles from './payment-result.module.scss';
 
 interface PaymentResultProps {
-  status: string;
+  status?: string;
   orderId?: string;
   transactionId?: string;
   amount?: string;
@@ -26,79 +26,98 @@ export default function PaymentResult({
   locale,
 }: PaymentResultProps) {
   const t = useTranslations('payment');
+  const dir = locale === 'ar' ? 'rtl' : 'ltr';
+
   const isSuccess = status === 'SUCCESS';
 
   return (
-    <div className={styles.resultContainer}>
-      <div className={`${styles.resultCard} ${isSuccess ? styles.success : styles.failure}`}>
-        <div className={styles.iconWrapper}>
-          {isSuccess ? (
-            <div className={styles.successIcon}>✓</div>
-          ) : (
-            <div className={styles.failureIcon}>✕</div>
-          )}
-        </div>
-
-        <h1 className={styles.resultTitle}>
-          {isSuccess ? t('paymentSuccess') : t('paymentFailed')}
-        </h1>
-
-        <p className={styles.resultMessage}>
-          {isSuccess
-            ? t('paymentSuccessMessage')
-            : t('paymentFailedMessage')}
-        </p>
-
-        {isSuccess && (
-          <div className={styles.paymentDetails}>
-            {orderId && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>{t('orderId')}:</span>
-                <span className={styles.value}>{orderId}</span>
-              </div>
-            )}
-            {transactionId && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>{t('transactionId')}:</span>
-                <span className={styles.value}>{transactionId}</span>
-              </div>
-            )}
-            {amount && currency && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>{t('amount')}:</span>
-                <span className={styles.value}>
-                  {amount} {currency}
-                </span>
-              </div>
-            )}
-            {cardBrand && maskedCard && (
-              <div className={styles.detailRow}>
-                <span className={styles.label}>{t('paymentMethod')}:</span>
-                <span className={styles.value}>
-                  {cardBrand} •••• {maskedCard.slice(-4)}
-                </span>
-              </div>
+    <section className={styles.resultPage} dir={dir}>
+      <div className={styles.container}>
+        <div className={`${styles.resultCard} ${isSuccess ? styles.success : styles.failure}`}>
+          {/* Status Icon */}
+          <div className={styles.iconWrapper}>
+            {isSuccess ? (
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            ) : (
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </svg>
             )}
           </div>
-        )}
 
-        <div className={styles.actions}>
-          <Link href={`/${locale}`} className={styles.primaryButton}>
-            {t('returnHome')}
-          </Link>
-          {!isSuccess && (
-            <Link href={`/${locale}/booking`} className={styles.secondaryButton}>
-              {t('tryAgain')}
-            </Link>
+          {/* Status Title */}
+          <h1 className={styles.title}>
+            {isSuccess ? t('result.successTitle') : t('result.failureTitle')}
+          </h1>
+
+          <p className={styles.message}>
+            {isSuccess ? t('result.successMessage') : t('result.failureMessage')}
+          </p>
+
+          {/* Transaction Details */}
+          {(orderId || transactionId || amount) && (
+            <div className={styles.details}>
+              {orderId && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>{t('result.orderId')}</span>
+                  <span className={styles.detailValue}>{orderId}</span>
+                </div>
+              )}
+              {transactionId && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>{t('result.transactionId')}</span>
+                  <span className={styles.detailValue}>{transactionId}</span>
+                </div>
+              )}
+              {amount && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>{t('result.amount')}</span>
+                  <span className={styles.detailValue}>
+                    {amount} {currency || 'EGP'}
+                  </span>
+                </div>
+              )}
+              {cardBrand && maskedCard && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>{t('result.paymentMethod')}</span>
+                  <span className={styles.detailValue}>
+                    {cardBrand} {maskedCard}
+                  </span>
+                </div>
+              )}
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>{t('result.status')}</span>
+                <span className={`${styles.detailValue} ${isSuccess ? styles.statusSuccess : styles.statusFailed}`}>
+                  {isSuccess ? t('result.paid') : t('result.failed')}
+                </span>
+              </div>
+            </div>
           )}
-        </div>
 
-        {isSuccess && (
-          <div className={styles.confirmationNotice}>
-            <p>{t('confirmationEmail')}</p>
+          {/* Actions */}
+          <div className={styles.actions}>
+            {isSuccess ? (
+              <Link href={`/${locale}`} className={styles.primaryButton}>
+                {t('result.backToHome')}
+              </Link>
+            ) : (
+              <>
+                <Link href={`/${locale}/booking`} className={styles.primaryButton}>
+                  {t('result.tryAgain')}
+                </Link>
+                <Link href={`/${locale}/contact`} className={styles.secondaryButton}>
+                  {t('result.contactSupport')}
+                </Link>
+              </>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

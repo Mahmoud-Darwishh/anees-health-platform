@@ -1,151 +1,96 @@
 @use '../../assets/scss/utils/variables' as *;
 @use '../../assets/scss/utils/mixins' as *;
 
-// Variables for consistency
-$border-radius-sm: 8px;
-$border-radius-md: 12px;
-$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-$shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
-$shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.16);
-$transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.paymentGateway {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: $body-bg;
+}
 
-// ===== Payment Summary Section (Non-Auto Mode) =====
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
 
-.paymentHeader {
+.header {
   text-align: center;
-  margin-bottom: 2rem;
-
-  h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: $dark;
-    margin-bottom: 0.5rem;
-  }
-
-  p {
-    color: #6b7280;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-}
-
-.orderSummary {
-  background: white;
-  border-radius: $border-radius-md;
-  padding: 1.5rem;
-  box-shadow: $shadow-sm;
-  max-width: 500px;
-  width: 100%;
   margin-bottom: 1.5rem;
-  border: 1px solid #e5e7eb;
-
-  h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: $dark;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
-  }
 }
 
-.summaryRow {
+.title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: $title-color;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: $text-muted;
+}
+
+.orderBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.625rem 0;
-  font-size: 0.95rem;
-
-  span {
-    color: #6b7280;
-    font-weight: 500;
-  }
-
-  strong {
-    color: $dark;
-    font-weight: 600;
-  }
+  padding: 1rem 1.25rem;
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
 }
 
-.paymentActions {
-  text-align: center;
-  max-width: 500px;
+.orderLabel {
+  font-weight: 600;
+  color: $title-color;
+}
+
+.orderAmount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $primary;
+}
+
+.currency {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: $text-muted;
+}
+
+.frameWrapper {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 480px;
+  position: relative;
+}
+
+.paymentFrame {
   width: 100%;
+  min-height: 480px;
+  border: none;
+  display: block;
+}
+
+.loadingState,
+.errorState {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.payButton {
-  width: 100%;
-  padding: 1rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(135deg, $primary 0%, $Crayola-Gold 100%);
-  border: none;
-  border-radius: $border-radius-md;
-  cursor: pointer;
-  transition: $transition-default;
-  box-shadow: $shadow-sm;
-  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: $shadow-md;
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-}
-
-.cancelButton {
-  @extend .payButton;
-  background: #f3f4f6;
-  color: $dark;
-  box-shadow: $shadow-sm;
-
-  &:hover:not(:disabled) {
-    background: #e5e7eb;
-  }
-}
-
-.errorState {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: $border-radius-md;
-  padding: 2rem 1.5rem;
+  min-height: 300px;
+  padding: 2rem;
   text-align: center;
-  max-width: 500px;
-  width: 100%;
-  margin-bottom: 1.5rem;
-
-  p {
-    color: #991b1b;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin: 0;
-  }
+  color: $text-muted;
+  gap: 1rem;
 }
-
-// ===== Loading Spinner =====
 
 .spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  width: 40px;
+  height: 40px;
+  border: 3px solid $gray-200;
+  border-top-color: $primary;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -156,92 +101,55 @@ $transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-// ===== Modal Styles (Professional) =====
+.errorState {
+  color: $danger;
+}
 
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+.errorMessage {
+  font-size: 1rem;
+  max-width: 400px;
+}
+
+.retryButton {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: $primary;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: $primary-hover;
+  }
+}
+
+.securityNote {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-  padding: 1rem;
-  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: $text-muted;
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+  svg {
+    flex-shrink: 0;
+    color: $success;
   }
 }
 
-.modalContent {
-  background: white;
-  border-radius: $border-radius-md;
-  overflow: hidden;
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: $shadow-lg;
-  max-width: 90vw;
-  max-height: 90vh;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  
-  // Responsive sizing
-  @media (min-width: 768px) {
-    max-width: 800px;
-    max-height: 85vh;
+@include respond-below(custom767) {
+  .paymentGateway {
+    padding: 1rem 0.5rem;
   }
 
-  @media (min-width: 1024px) {
-    max-width: 900px;
-    max-height: 90vh;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.iframeContainer {
-  width: 100%;
-  height: 100%;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; // Important: allows flex children to shrink below content size
-  
-  @media (min-width: 768px) {
-    min-height: auto;
+  .title {
+    font-size: 1.35rem;
   }
 
-  @media (min-width: 1024px) {
-    min-height: auto;
-  }
-}
-
-.paymentIframe {
-  width: 100%;
-  height: 100%;
-  flex: 1;
-  border: none;
-  display: block;
-  
-  // Hide scrollbar on iframe
-  &::-webkit-scrollbar {
-    display: none;
+  .paymentFrame {
+    min-height: 540px;
   }
 }

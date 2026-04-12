@@ -84,14 +84,6 @@ export interface CreateBookingIntentRequest {
   nursingDuration?: NursingDuration;
 }
 
-export interface CreateBookingIntentResponse {
-  success: boolean;
-  bookingId: string;
-  amount: number;
-  currency: 'EGP';
-  message?: string;
-}
-
 export interface BookingValidationError {
   field: string;
   message: string;
@@ -154,21 +146,6 @@ export const NURSING_DURATIONS = [
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
-
-/**
- * Calculate processing fee (2.75% rounded up)
- */
-export function calculateProcessingFee(basePrice: number): number {
-  const fee = basePrice * 0.0275;
-  return Math.ceil(fee); // Round up
-}
-
-/**
- * Calculate total price including processing fee
- */
-export function calculateTotalWithFee(basePrice: number): number {
-  return basePrice + calculateProcessingFee(basePrice);
-}
 
 /**
  * Calculate total booking price based on selections

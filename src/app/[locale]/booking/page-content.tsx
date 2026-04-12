@@ -1,14 +1,13 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import BookingForm from '@/components/booking/booking-form';
-import PaymentGateway from '@/components/booking/payment-gateway';
-import { BookingFormState, calculateBookingPrice, calculateTotalWithFee, PackageType } from '@/lib/models/booking.types';
+import { BookingFormState, PackageType } from '@/lib/models/booking.types';
 import styles from './page.module.scss';
 
 interface PageContentProps {
@@ -18,50 +17,44 @@ interface PageContentProps {
 export default function BookingPage({ locale }: PageContentProps) {
   const t = useTranslations('booking');
   const searchParams = useSearchParams();
+  const router = useRouter();
   const preSelectedPackage = searchParams.get('package') as PackageType | null;
-  
-  const [formState, setFormState] = useState<BookingFormState | null>(null);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [showPayment, setShowPayment] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const [orderId, setOrderId] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handlePayNow = useCallback((state: BookingFormState) => {
-    setFormState(state);
-    // Calculate price based on booking
-    const basePrice = calculateBookingPrice(state);
-    const priceWithFee = calculateTotalWithFee(basePrice);
-    setTotalPrice(basePrice);
-    
-    // Generate order ID
-    const newOrderId = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-    setOrderId(newOrderId);
-    
-    // Store booking data in sessionStorage for webhook reference
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('pendingBooking', JSON.stringify({
-        ...state,
-        orderId: newOrderId,
-        basePrice: basePrice,
-        totalPrice: priceWithFee,
-        createdAt: new Date().toISOString()
-      }));
+  const handleBookingSubmit = async (formData: BookingFormState) => {
+    try {
+      setSubmitError(null);
+
+      // Step 1: Create booking intent on the server
+      const response = await fetch('/api/bookings/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setSubmitError(data.message || t('validation.allFieldsRequired'));
+        return;
+      }
+
+      // Step 2: Redirect to payment page with booking details
+      const paymentParams = new URLSearchParams({
+        orderId: data.bookingId,
+        amount: String(data.amount),
+        currency: data.currency,
+        ...(formData.fullName && { customerName: formData.fullName }),
+        ...(formData.phoneNumber && {
+          customerPhone: `+${formData.countryCode}${formData.phoneNumber}`,
+        }),
+      });
+
+      router.push(`/${locale}/payment?${paymentParams.toString()}`);
+    } catch {
+      setSubmitError(t('validation.allFieldsRequired'));
     }
-    
-    // Show payment modal immediately
-    setShowPayment(true);
-  }, []);
-
-  const handlePaymentSuccess = useCallback(() => {
-    setShowPayment(false);
-    setShowSuccessMessage(true);
-    // Reset form for new booking
-    setTimeout(() => {
-      setFormState(null);
-      setTotalPrice(0);
-      setShowSuccessMessage(false);
-    }, 3000);
-  }, []);
+  };
 
   return (
     <div className={styles.bookingPageContainer}>
@@ -77,38 +70,15 @@ export default function BookingPage({ locale }: PageContentProps) {
 
       {/* Main Content */}
       <main id="main-content" tabIndex={-1} className={styles.mainContent}>
-        {showSuccessMessage ? (
-          <div className={styles.successMessage} role="alert">
-            <h2>✅ {t('success.title')}</h2>
-            <p>{t('success.message')}</p>
-            <button
-              onClick={() => {
-                setShowSuccessMessage(false);
-                setFormState(null);
-              }}
-              className={styles.newBookingButton}
-            >
-              {t('newBooking')}
-            </button>
+        {submitError && (
+          <div className={styles.errorBanner} role="alert">
+            {submitError}
           </div>
-        ) : (
-          <>
-            <BookingForm onPayNow={handlePayNow} preSelectedPackage={preSelectedPackage} />
-            
-            {/* Payment Modal - Overlay the booking form */}
-            {showPayment && orderId && (
-              <PaymentGateway
-                key={orderId}
-                orderId={orderId}
-                amount={String(calculateTotalWithFee(totalPrice))}
-                currency="EGP"
-                customerId={formState?.phoneNumber}
-                locale={locale}
-                onPaymentSuccess={handlePaymentSuccess}
-              />
-            )}
-          </>
         )}
+        <BookingForm
+          onSubmit={handleBookingSubmit}
+          preSelectedPackage={preSelectedPackage}
+        />
       </main>
 
       <Footer />
