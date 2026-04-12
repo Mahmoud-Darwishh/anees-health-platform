@@ -19,6 +19,40 @@ export default function DoctorProfileContent({
 }: DoctorProfileContentProps) {
   const isArabic = locale === 'ar';
   const city = doctor.location.split(',')[0]?.trim() || doctor.location;
+  const hospitalsAndClinics =
+    Array.isArray(doctor['Hospitals and Clinics']) && doctor['Hospitals and Clinics'].length > 0
+      ? doctor['Hospitals and Clinics']
+      : doctor.clinics;
+
+  const isUnavailableValue = (value: string | undefined | null) => {
+    const normalized = String(value ?? '')
+      .trim()
+      .toLowerCase();
+
+    return (
+      !normalized ||
+      normalized === 'n/a' ||
+      normalized === 'na' ||
+      normalized === '-' ||
+      normalized === '--' ||
+      normalized === 'not available' ||
+      normalized === 'not specified' ||
+      normalized === 'غير متاح'
+    );
+  };
+
+  const hasAnyVisiblePrice =
+    !isUnavailableValue(doctor.pricing.telemedicine) ||
+    !isUnavailableValue(doctor.pricing.homeVisit) ||
+    !isUnavailableValue(doctor.pricing.clinicVisit);
+
+  const formatPrice = (value: string) => {
+    if (isUnavailableValue(value)) {
+      return isArabic ? 'السعر غير متاح' : 'Price unavailable';
+    }
+
+    return value;
+  };
 
   // Always render numerals in English for consistency across locales
   const formatNumberEn = (value: number | string) =>
@@ -31,16 +65,20 @@ export default function DoctorProfileContent({
     patients: isArabic ? 'مرضى' : 'Patients',
     successRate: isArabic ? 'نسبة النجاح' : 'Success Rate',
     services: isArabic ? 'الخدمات والأسعار' : 'Services & Pricing',
+    servicesNote: isArabic
+      ? 'قد تختلف الأسعار حسب الحالة ونوع الخدمة.'
+      : 'Pricing can vary based on case complexity and service type.',
     telemedicine: isArabic ? 'استشارة عن بُعد' : 'Telemedicine',
     homeVisit: isArabic ? 'زيارة منزلية' : 'Home Visit',
     clinicVisit: isArabic ? 'زيارة العيادة' : 'Clinic Visit',
     education: isArabic ? 'التعليم والشهادات' : 'Education & Certifications',
     educationHeading: isArabic ? 'التعليم' : 'Education',
     certifications: isArabic ? 'الشهادات' : 'Certifications',
-    clinics: isArabic ? 'العيادات' : 'Clinics',
+    clinics: isArabic ? 'المستشفيات والعيادات' : 'Hospitals and Clinics',
     reviews: isArabic ? 'آراء المرضى' : 'Patient Reviews',
     availability: isArabic ? 'التوفر' : 'Availability',
     bookNow: isArabic ? 'احجز الآن' : 'Book Now',
+    contact: isArabic ? 'تواصل' : 'Contact',
     languages: isArabic ? 'اللغات' : 'Languages',
     areas: isArabic ? 'مناطق التغطية' : 'Coverage Areas',
     overview: isArabic ? 'لماذا هذا الطبيب على أنيس' : 'Why book this doctor on Anees',
@@ -163,10 +201,10 @@ export default function DoctorProfileContent({
                       <i className="isax isax-calendar-1"></i>
                       {labels.bookNow}
                     </Link>
-                    <button className="btn btn-outline-primary btn-lg">
+                    <Link href={`/${locale}/contact`} className="btn btn-outline-primary btn-lg">
                       <i className="isax isax-message"></i>
-                      {isArabic ? 'تواصل' : 'Contact'}
-                    </button>
+                      {labels.contact}
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -200,6 +238,9 @@ export default function DoctorProfileContent({
       <section className="doctor-services py-4">
         <div className="container">
           <h2 className="section-title">{labels.services}</h2>
+          {!hasAnyVisiblePrice && (
+            <p className="section-note">{labels.servicesNote}</p>
+          )}
           <div className="services-grid">
             {/* Telemedicine */}
             <div className="service-card">
@@ -207,7 +248,13 @@ export default function DoctorProfileContent({
                 <i className="isax isax-video"></i>
               </div>
               <h3>{labels.telemedicine}</h3>
-              <p className="service-price">{doctor.pricing.telemedicine}</p>
+              <p
+                className={`service-price ${
+                  isUnavailableValue(doctor.pricing.telemedicine) ? 'is-unavailable' : ''
+                }`}
+              >
+                {formatPrice(doctor.pricing.telemedicine)}
+              </p>
               <p className="service-desc">
                 {isArabic ? 'استشارة آمنة من المنزل' : 'Secure online consultation'}
               </p>
@@ -219,7 +266,13 @@ export default function DoctorProfileContent({
                 <i className="isax isax-home-1"></i>
               </div>
               <h3>{labels.homeVisit}</h3>
-              <p className="service-price">{doctor.pricing.homeVisit}</p>
+              <p
+                className={`service-price ${
+                  isUnavailableValue(doctor.pricing.homeVisit) ? 'is-unavailable' : ''
+                }`}
+              >
+                {formatPrice(doctor.pricing.homeVisit)}
+              </p>
               <p className="service-desc">
                 {isArabic ? 'زيارة منزلية مريحة' : 'Convenient home visit'}
               </p>
@@ -231,7 +284,13 @@ export default function DoctorProfileContent({
                 <i className="isax isax-hospital"></i>
               </div>
               <h3>{labels.clinicVisit}</h3>
-              <p className="service-price">{doctor.pricing.clinicVisit}</p>
+              <p
+                className={`service-price ${
+                  isUnavailableValue(doctor.pricing.clinicVisit) ? 'is-unavailable' : ''
+                }`}
+              >
+                {formatPrice(doctor.pricing.clinicVisit)}
+              </p>
               <p className="service-desc">
                 {isArabic ? 'زيارة متخصصة في العيادة' : 'Specialized clinic visit'}
               </p>
@@ -286,12 +345,23 @@ export default function DoctorProfileContent({
       </section>
 
       {/* ======= CLINICS ======= */}
-      {doctor.clinicDetails.length > 0 && (
+      {(doctor.clinicDetails.length > 0 || hospitalsAndClinics.length > 0) && (
         <section className="doctor-clinics py-3">
           <div className="container">
             <h2 className="section-title">{labels.clinics}</h2>
-            <div className="clinics-grid">
-              {doctor.clinicDetails.map((clinic, idx) => (
+            {hospitalsAndClinics.length > 0 && (
+              <div className="network-list" aria-label={labels.clinics}>
+                {hospitalsAndClinics.map((item) => (
+                  <span key={item} className="network-item">
+                    <i className="isax isax-hospital"></i>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            )}
+            {doctor.clinicDetails.length > 0 && (
+              <div className="clinics-grid">
+                {doctor.clinicDetails.map((clinic, idx) => (
                 <div key={idx} className="clinic-card">
                   <div className="clinic-header">
                     <h3>{clinic.name}</h3>
@@ -308,8 +378,9 @@ export default function DoctorProfileContent({
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -356,16 +427,19 @@ export default function DoctorProfileContent({
         </section>
       )}
 
-      <section className="doctor-about py-3">
+      <section className="doctor-faq py-3">
         <div className="container">
           <h2 className="section-title">{labels.faq}</h2>
-          <div className="row g-3">
+          <div className="faq-grid">
             {faqItems.map((item) => (
-              <div key={item.question} className="col-12">
-                <div className="education-block h-100">
-                  <h3 className="block-title mb-2">{item.question}</h3>
-                  <p className="mb-0 text-muted">{item.answer}</p>
+              <div key={item.question} className="faq-card">
+                <div className="faq-question-row">
+                  <h3 className="faq-question">{item.question}</h3>
+                  <span className="faq-icon" aria-hidden="true">
+                    <i className="isax isax-message-question"></i>
+                  </span>
                 </div>
+                <p className="faq-answer">{item.answer}</p>
               </div>
             ))}
           </div>

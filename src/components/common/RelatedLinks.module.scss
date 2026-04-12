@@ -1,0 +1,81 @@
+.relatedLinksSection {
+  .relatedLinksCard {
+    border-radius: 16px;
+    background: linear-gradient(140deg, rgba(170, 134, 66, 0.08) 0%, #ffffff 42%, #ffffff 100%);
+    overflow: hidden;
+  }
+
+  .sectionNote {
+    color: #6c757d;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    max-width: 560px;
+  }
+
+  .linksCount {
+    background: rgba(170, 134, 66, 0.12);
+    color: #8b6f3d;
+    border: 1px solid rgba(170, 134, 66, 0.25);
+    border-radius: 999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .linksGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+
+    @media (max-width: 991px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .relatedLinkItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: 1px solid rgba(170, 134, 66, 0.18);
+    background: rgba(170, 134, 66, 0.04);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    color: #2f3337;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+
+    @media (max-width: 576px) {
+      padding: 0.75rem;
+      font-size: 0.92rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(170, 134, 66, 0.1);
+      border-color: rgba(170, 134, 66, 0.38);
+      color: #1f2327;
+      transform: translateY(-1px);
+      outline: none;
+    }
+  }
+
+  .linkStart {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+
+    span {
+      overflow-wrap: anywhere;
+    }
+
+    i {
+      color: #aa8642;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+  }
+}

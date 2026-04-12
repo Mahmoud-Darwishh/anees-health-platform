@@ -234,6 +234,19 @@ $gray-light: #f0f2f5;
       font-size: 1.1rem;
       color: $primary;
     }
+
+    span {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .status-pill,
+    .location-chip,
+    .languages-list {
+      width: 100%;
+      justify-content: flex-start;
+    }
   }
 }
 
@@ -371,6 +384,12 @@ $gray-light: #f0f2f5;
       margin-bottom: 1.5rem;
     }
   }
+
+  .section-note {
+    margin: -0.9rem 0 1.5rem;
+    color: $text-muted;
+    font-size: 0.9rem;
+  }
 }
 
 // ======= ABOUT SECTION =======
@@ -457,6 +476,12 @@ $gray-light: #f0f2f5;
       font-weight: 800;
       color: $primary;
       margin-bottom: 0.35rem;
+
+      &.is-unavailable {
+        color: $text-muted;
+        font-size: 1rem;
+        font-weight: 600;
+      }
     }
 
     .service-desc {
@@ -583,6 +608,30 @@ $gray-light: #f0f2f5;
 // ======= CLINICS SECTION =======
 .doctor-clinics {
   background: $white;
+
+  .network-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .network-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid rgba($primary, 0.3);
+    background: rgba($primary, 0.06);
+    color: $primary;
+    font-size: 0.85rem;
+    font-weight: 600;
+
+    i {
+      font-size: 0.95rem;
+    }
+  }
 
   .clinics-grid {
     display: grid;
@@ -823,6 +872,98 @@ $gray-light: #f0f2f5;
         margin-left: 0;
       }
     }
+  }
+}
+
+// ======= FAQ SECTION =======
+.doctor-faq {
+  position: relative;
+  border-bottom: 1px solid $border-color;
+  background: linear-gradient(145deg, rgba($primary, 0.05), rgba($white, 1));
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: $text-dark;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 1rem;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(to right, $primary, $primary-light);
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 1.4rem;
+      margin-bottom: 1.25rem;
+    }
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .faq-card {
+    background: $white;
+    border: 1px solid rgba($primary, 0.2);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    transition: all 0.25s ease;
+
+    &:hover {
+      border-color: rgba($primary, 0.45);
+      box-shadow: 0 8px 20px rgba($primary, 0.12);
+      transform: translateY(-2px);
+    }
+  }
+
+  .faq-question-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .faq-question {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    color: $text-dark;
+    line-height: 1.5;
+  }
+
+  .faq-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba($primary, 0.12);
+    color: $primary;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+
+    i {
+      font-size: 1rem;
+    }
+  }
+
+  .faq-answer {
+    margin: 0;
+    color: $text-muted;
+    font-size: 0.95rem;
+    line-height: 1.7;
   }
 }
 

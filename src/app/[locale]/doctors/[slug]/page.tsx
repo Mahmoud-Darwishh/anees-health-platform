@@ -170,11 +170,15 @@ export default async function DoctorProfilePage({
         locale={locale}
         title={locale === 'ar' ? 'روابط مرتبطة بالطبيب' : 'Links related to this doctor'}
         links={[
+          { href: `/${locale}/booking`, label: locale === 'ar' ? 'احجز مع الطبيب الآن' : 'Book this doctor now' },
           { href: `/${locale}/doctors`, label: locale === 'ar' ? 'كل الأطباء' : 'All doctors' },
-          { href: `/${locale}/specialties`, label: locale === 'ar' ? 'تخصصات طبية' : 'Medical specialties' },
-          { href: `/${locale}/services`, label: locale === 'ar' ? 'الخدمات الطبية' : 'Medical services' },
-          { href: `/${locale}/coverage`, label: locale === 'ar' ? 'تحقق من التغطية' : 'Check coverage' },
-          { href: `/${locale}/booking`, label: locale === 'ar' ? 'احجز استشارة' : 'Book consultation' },
+          {
+            href: `/${locale}/doctors?search=${encodeURIComponent(doctor.speciality)}`,
+            label: locale === 'ar' ? 'أطباء بنفس التخصص' : 'Doctors in the same specialty',
+          },
+          { href: `/${locale}/specialties`, label: locale === 'ar' ? 'استكشف التخصصات الطبية' : 'Explore medical specialties' },
+          { href: `/${locale}/services`, label: locale === 'ar' ? 'الخدمات الطبية المتاحة' : 'Available medical services' },
+          { href: `/${locale}/coverage`, label: locale === 'ar' ? 'تحقق من نطاق التغطية' : 'Check coverage area' },
         ]}
       />
       <Footer />

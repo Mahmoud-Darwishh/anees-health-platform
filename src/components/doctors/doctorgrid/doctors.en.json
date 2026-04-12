@@ -2,8 +2,8 @@
   {
     "id": 1,
     "image": "assets/img/doctor-grid-optimized/10.webp",
-    "rating": 5,
     "speciality": "Neuropsychiatry",
+    "rating": 4.9,
     "specialityColorClass": "active-bar-info",
     "specialityTextClass": "text-info",
     "availabilityStatus": "Available",
@@ -11,9 +11,9 @@
     "doctorName": "Dr. Mohamed Farwiez",
     "location": "Cairo, Egypt",
     "duration": "Tele-Medicine",
-    "consultationFee": "EGP 500",
-    "maxConsultationFee": "EGP 2500",
-    "professionalTitle": "Neuropsychiatry Consultant",
+    "consultationFee": "N/A",
+    "maxConsultationFee": "N/A",
+    "professionalTitle": "Consultant of Neuropsychiatry",
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
     "gender": "Male",
@@ -26,75 +26,94 @@
       "Arabic",
       "English"
     ],
-    "clinics": [
+    "Hospitals and Clinics": [
+      "Wadi El Nile Hospital",
+      "EgyptAir Hospital",
+      "Ain Shams University Hospitals",
+      "Al Ahly Club - Football Sector Medical Team",
       "Anees Health Clinic"
     ],
-    "experienceYears": 8,
-    "bio": "Experienced Neuropsychiatry Consultant with 8+ years of specialized experience in treating neurological and psychiatric disorders. Dedicated to providing compassionate, evidence-based care to patients with mental health challenges and neurological conditions.",
+    "clinics": [
+      "Wadi El Nile Hospital",
+      "EgyptAir Hospital",
+      "Ain Shams University Hospitals",
+      "Al Ahly Club - Football Sector Medical Team",
+      "Anees Health Clinic"
+    ],
+    "experienceYears": 13,
+    "bio": "Dr. Mohamed Farwiez is a Neuropsychiatry consultant with over 13 years of clinical experience in mental health and neuropsychiatry. He is a Lecturer of Psychiatry at the Faculty of Medicine, Ain Shams University, combining academic excellence with extensive hands-on clinical expertise. His areas of expertise include general adult psychiatry, child and adolescent psychiatry, addiction treatment, geriatric psychiatry, consultation-liaison psychiatry, EEG, and Transcranial Magnetic Stimulation (TMS). He has worked in leading psychiatric institutions and major hospitals in Cairo, further strengthening his multidisciplinary clinical experience.",
     "certifications": [
-      "Board Certified in Psychiatry",
-      "Neuropsychiatry Specialist",
-      "International Medical License"
+      "PhD in Psychiatry (2022)",
+      "Master's Degree in Neurology and Psychiatry (2019)",
+      "Sports Psychiatry Consultant - Al Ahly Football Sector"
     ],
     "education": [
       {
-        "degree": "MD in Psychiatry",
-        "university": "Cairo University",
-        "year": "2012"
-      },
-      {
-        "degree": "Fellowship in Neuropsychiatry",
+        "degree": "Bachelor of Medicine and Surgery with Honors",
         "university": "Ain Shams University",
-        "year": "2015"
+        "year": "Not specified"
       },
       {
-        "degree": "Board Certification",
-        "university": "Egyptian Medical Syndicate",
-        "year": "2016"
+        "degree": "Master's Degree in Neurology and Psychiatry",
+        "university": "Ain Shams University",
+        "year": "2019"
+      },
+      {
+        "degree": "PhD in Psychiatry",
+        "university": "Ain Shams University",
+        "year": "2022"
       }
     ],
     "pricing": {
-      "telemedicine": "EGP 500",
-      "homeVisit": "EGP 1000",
-      "clinicVisit": "EGP 750"
+      "telemedicine": "N/A",
+      "homeVisit": "N/A",
+      "clinicVisit": "N/A"
     },
     "successRate": "96%",
     "avgWaitTime": "15 min",
-    "totalPatients": "1,800+",
+    "totalPatients": "100+",
     "areaCoverage": [
-      "Nasr City",
-      "New Cairo",
+      "Cairo",
       "Heliopolis",
+      "Nasr City",
       "Maadi",
-      "Downtown Cairo"
+      "New Cairo"
     ],
     "clinicDetails": [
       {
-        "name": "Anees Health Clinic",
-        "location": "Nasr City, Cairo",
-        "address": "15 Mostafa El-Nahas Street, 8th District, Nasr City",
-        "hours": "9:00 AM - 7:00 PM",
-        "slots": "6 slots available",
-        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.345!3d30.045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMjAnNDIuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+        "name": "Wadi El Nile Hospital",
+        "location": "Cairo",
+        "address": "Cairo, Egypt",
+        "hours": "By appointment",
+        "slots": "Available by schedule",
+        "mapUrl": ""
+      },
+      {
+        "name": "EgyptAir Hospital",
+        "location": "Cairo",
+        "address": "Cairo, Egypt",
+        "hours": "By appointment",
+        "slots": "Available by schedule",
+        "mapUrl": ""
+      },
+      {
+        "name": "Ain Shams University Hospitals",
+        "location": "Cairo",
+        "address": "Cairo, Egypt",
+        "hours": "By appointment",
+        "slots": "Available by schedule",
+        "mapUrl": ""
+      },
+      {
+        "name": "Al Ahly Club - Football Sector Medical Team",
+        "location": "Cairo",
+        "address": "Cairo, Egypt",
+        "hours": "By appointment",
+        "slots": "Available by schedule",
+        "mapUrl": ""
       }
     ],
-    "testimonials": [
-      {
-        "name": "Ahmed Hassan",
-        "rating": 5,
-        "text": "Dr. Farwiez is an excellent doctor. Very professional and caring. Helped me through a difficult time."
-      },
-      {
-        "name": "Fatima Ali",
-        "rating": 5,
-        "text": "Highly recommended! The doctor took time to explain everything clearly."
-      },
-      {
-        "name": "Omar Mahmoud",
-        "rating": 4.5,
-        "text": "Great experience. Very knowledgeable and patient-focused."
-      }
-    ]
+    "testimonials": []
   },
   {
     "id": 3,

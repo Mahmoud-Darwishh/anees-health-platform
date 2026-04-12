@@ -36,18 +36,21 @@ function loadDoctorsData(): LocalizedDoctorData {
 }
 
 /**
- * In-memory cache of doctors data
- * Future: Replace with Prisma/database queries
+ * Read-through accessor for doctor data.
+ * Always loads latest JSON so content edits are reflected without server restart.
  */
-const doctorsData: LocalizedDoctorData = loadDoctorsData();
+function getDoctorsData(): LocalizedDoctorData {
+  return loadDoctorsData();
+}
 
 /**
- * Canonical slug map keyed by doctor id (derived from English names)
+ * Build canonical slug map keyed by doctor id (derived from English names)
  * Guarantees stable slugs across locales
  */
-const canonicalSlugById: Map<number, string> = new Map(
-  doctorsData.en.map((doc) => [doc.id, generateDoctorSlug(doc.doctorName)])
-);
+function getCanonicalSlugMap(): Map<number, string> {
+  const data = getDoctorsData();
+  return new Map(data.en.map((doc) => [doc.id, generateDoctorSlug(doc.doctorName)]));
+}
 
 /**
  * Resolve canonical slug for a doctor id
@@ -55,6 +58,7 @@ const canonicalSlugById: Map<number, string> = new Map(
  * @returns Canonical slug or null
  */
 function getCanonicalSlugById(id: number): string | null {
+  const canonicalSlugById = getCanonicalSlugMap();
   return canonicalSlugById.get(id) || null;
 }
 
@@ -72,6 +76,7 @@ export async function getDoctorCanonicalSlugById(id: number): Promise<string | n
  * @returns Array of doctors
  */
 export async function getDoctors(locale: 'en' | 'ar'): Promise<Doctor[]> {
+  const doctorsData = getDoctorsData();
   const doctors = doctorsData[locale];
   
   if (!Array.isArray(doctors)) {

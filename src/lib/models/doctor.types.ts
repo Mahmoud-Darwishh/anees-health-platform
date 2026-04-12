@@ -54,6 +54,7 @@ export interface Doctor {
   gender: string;
   channels: string[];
   languages: string[];
+  'Hospitals and Clinics'?: string[];
   clinics: string[];
   experienceYears: number;
   bio: string;

@@ -2,7 +2,7 @@
   {
     "id": 1,
     "image": "assets/img/doctor-grid-optimized/10.webp",
-    "rating": 5,
+    "rating": 4.9,
     "speciality": "الطب النفسي العصبي",
     "specialityColorClass": "active-bar-info",
     "specialityTextClass": "text-info",
@@ -11,8 +11,8 @@
     "doctorName": "د. محمد فرويز",
     "location": "القاهرة، مصر",
     "duration": "عن بُعد",
-    "consultationFee": "٥٠٠ جنيه",
-    "maxConsultationFee": "٢٥٠٠ جنيه",
+    "consultationFee": "غير متاح",
+    "maxConsultationFee": "غير متاح",
     "professionalTitle": "استشاري الطب النفسي العصبي",
     "profileLink": "/patient/doctor-profile",
     "bookingLink": "/booking",
@@ -26,75 +26,94 @@
       "العربية",
       "الإنجليزية"
     ],
-    "clinics": [
+    "Hospitals and Clinics": [
+      "مستشفى وادي النيل",
+      "مستشفى مصر للطيران",
+      "مستشفيات جامعة عين شمس",
+      "الفريق الطبي لقطاع كرة القدم بالنادي الأهلي",
       "عيادة أنيس الصحية"
     ],
-    "experienceYears": 8,
-    "bio": "Experienced Neuropsychiatry Consultant with 8+ years of specialized experience in treating neurological and psychiatric disorders. Dedicated to providing compassionate, evidence-based care to patients with mental health challenges and neurological conditions.",
+    "clinics": [
+      "مستشفى وادي النيل",
+      "مستشفى مصر للطيران",
+      "مستشفيات جامعة عين شمس",
+      "الفريق الطبي لقطاع كرة القدم بالنادي الأهلي",
+      "عيادة أنيس الصحية"
+    ],
+    "experienceYears": 13,
+    "bio": "الدكتور محمد فرويز هو استشاري الطب النفسي العصبي، ويتمتع بخبرة إكلينيكية تزيد عن 13 عامًا في الصحة النفسية والطب النفسي العصبي. يشغل منصب مدرس الطب النفسي بكلية الطب - جامعة عين شمس، ويجمع بين التميز الأكاديمي والخبرة العملية الواسعة. تشمل مجالات خبرته الطب النفسي العام للبالغين، وطب نفس الأطفال والمراهقين، وعلاج الإدمان، وطب نفس المسنين، والطب النفسي التواصلي، ورسم المخ (EEG)، والعلاج بالتحفيز المغناطيسي عبر الجمجمة (TMS). وقد عمل في مؤسسات نفسية رائدة ومستشفيات كبرى في القاهرة، مما عزز خبرته الإكلينيكية متعددة التخصصات.",
     "certifications": [
-      "Board Certified in Psychiatry",
-      "Neuropsychiatry Specialist",
-      "International Medical License"
+      "دكتوراه في الطب النفسي (2022)",
+      "ماجستير في طب المخ والأعصاب والطب النفسي (2019)",
+      "استشاري الطب النفسي الرياضي - قطاع كرة القدم بالنادي الأهلي"
     ],
     "education": [
       {
-        "degree": "MD in Psychiatry",
-        "university": "Cairo University",
-        "year": "2012"
+        "degree": "بكالوريوس الطب والجراحة بتقدير امتياز مع مرتبة الشرف",
+        "university": "جامعة عين شمس",
+        "year": "غير محدد"
       },
       {
-        "degree": "Fellowship in Neuropsychiatry",
+        "degree": "ماجستير في طب المخ والأعصاب والطب النفسي",
         "university": "Ain Shams University",
-        "year": "2015"
+        "year": "2019"
       },
       {
-        "degree": "Board Certification",
-        "university": "Egyptian Medical Syndicate",
-        "year": "2016"
+        "degree": "دكتوراه في الطب النفسي",
+        "university": "جامعة عين شمس",
+        "year": "2022"
       }
     ],
     "pricing": {
-      "telemedicine": "EGP 500",
-      "homeVisit": "EGP 1000",
-      "clinicVisit": "EGP 750"
+      "telemedicine": "غير متاح",
+      "homeVisit": "غير متاح",
+      "clinicVisit": "غير متاح"
     },
     "successRate": "96%",
     "avgWaitTime": "15 min",
-    "totalPatients": "1,800+",
+    "totalPatients": "100+",
     "areaCoverage": [
-      "Nasr City",
-      "New Cairo",
-      "Heliopolis",
-      "Maadi",
-      "Downtown Cairo"
+      "القاهرة",
+      "مصر الجديدة",
+      "مدينة نصر",
+      "المعادي",
+      "القاهرة الجديدة"
     ],
     "clinicDetails": [
       {
-        "name": "Anees Health Clinic",
-        "location": "Nasr City, Cairo",
-        "address": "15 Mostafa El-Nahas Street, 8th District, Nasr City",
-        "hours": "9:00 AM - 7:00 PM",
-        "slots": "6 slots available",
-        "mapUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.123!2d31.345!3d30.045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAyJzQyLjAiTiAzMcKwMjAnNDIuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+        "name": "مستشفى وادي النيل",
+        "location": "القاهرة",
+        "address": "القاهرة، مصر",
+        "hours": "حسب الحجز",
+        "slots": "متاح حسب المواعيد",
+        "mapUrl": ""
+      },
+      {
+        "name": "مستشفى مصر للطيران",
+        "location": "القاهرة",
+        "address": "القاهرة، مصر",
+        "hours": "حسب الحجز",
+        "slots": "متاح حسب المواعيد",
+        "mapUrl": ""
+      },
+      {
+        "name": "مستشفيات جامعة عين شمس",
+        "location": "القاهرة",
+        "address": "القاهرة، مصر",
+        "hours": "حسب الحجز",
+        "slots": "متاح حسب المواعيد",
+        "mapUrl": ""
+      },
+      {
+        "name": "الفريق الطبي لقطاع كرة القدم بالنادي الأهلي",
+        "location": "القاهرة",
+        "address": "القاهرة، مصر",
+        "hours": "حسب الحجز",
+        "slots": "متاح حسب المواعيد",
+        "mapUrl": ""
       }
     ],
-    "testimonials": [
-      {
-        "name": "Ahmed Hassan",
-        "rating": 5,
-        "text": "Dr. Farwiez is an excellent doctor. Very professional and caring. Helped me through a difficult time."
-      },
-      {
-        "name": "Fatima Ali",
-        "rating": 5,
-        "text": "Highly recommended! The doctor took time to explain everything clearly."
-      },
-      {
-        "name": "Omar Mahmoud",
-        "rating": 4.5,
-        "text": "Great experience. Very knowledgeable and patient-focused."
-      }
-    ]
+    "testimonials": []
   },
   {
     "id": 3,
