@@ -21,16 +21,17 @@ $bony: #684507;
 $primary: #aa8642;
 $deer: #ac9055;
 $Crayola-Gold: #E1C582;
-$royal-blue: #163155;
-$indigo-blue: #1C2E5D;
-$metallic-blue: #284574;
+$brand-dark-blue: #132c4d;
+$royal-blue: $brand-dark-blue;
+$indigo-blue: $brand-dark-blue;
+$metallic-blue: $brand-dark-blue;
 
 
 
 // Theme Colors Variables
 $primary: #aa8642;
 $primary-hover: color.adjust($primary, $lightness: -10%);
-$secondary: #163155;
+$secondary: $brand-dark-blue;
 $secondary-hover: color.adjust($secondary, $lightness: -10%);
 $success: #04BD6C;
 $success-hover: color.adjust($success, $lightness: -10%);
