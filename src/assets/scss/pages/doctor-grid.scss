@@ -652,6 +652,18 @@
   display: flex;
 }
 
+.home-doctor-slide {
+  display: flex;
+  height: 100%;
+  padding: 4px 10px;
+
+  .doctor-card-link,
+  .doctor-card-enhanced {
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .doctor-card-link:hover .doctor-card-enhanced {
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
   transform: translateY(-3px);
@@ -732,6 +744,11 @@
 @include mixins.respond-below(md) {
   .doctor-card-col {
     display: block;
+  }
+
+  .home-doctor-slide {
+    display: block;
+    padding: 4px 6px;
   }
 
   .doctor-card-link {

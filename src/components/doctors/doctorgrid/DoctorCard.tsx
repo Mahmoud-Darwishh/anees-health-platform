@@ -11,6 +11,7 @@ interface DoctorCardProps {
   doctor: Doctor;
   locale: string;
   tg: (key: string, values?: MessageValues) => string;
+  useGridColumn?: boolean;
 }
 
 // Canonical slugs derived from English names to stay stable across locales
@@ -22,6 +23,7 @@ export const DoctorCard = memo(function DoctorCard({
   doctor,
   locale,
   tg,
+  useGridColumn = true,
 }: DoctorCardProps) {
   // Generate stable slug from canonical (English) mapping to keep URLs identical across locales
   const doctorSlug = canonicalSlugById.get(doctor.id) || generateDoctorSlug(doctor.doctorName);
@@ -44,8 +46,8 @@ export const DoctorCard = memo(function DoctorCard({
     ? Math.max(0, doctor.channels.length - visibleChannels.length)
     : 0;
 
-  return (
-    <div className="col-xxl-4 col-md-6 mb-4 doctor-card-col">
+  const cardContent = (
+    <>
       <Link
         href={profileHref}
         className="doctor-card-link"
@@ -208,8 +210,14 @@ export const DoctorCard = memo(function DoctorCard({
           </div>
         </div>
       </Link>
-    </div>
+    </>
   );
+
+  if (!useGridColumn) {
+    return cardContent;
+  }
+
+  return <div className="col-xxl-4 col-md-6 mb-4 doctor-card-col">{cardContent}</div>;
 });
 
 DoctorCard.displayName = 'DoctorCard';

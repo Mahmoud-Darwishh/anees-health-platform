@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import Slider from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
-import type { Doctor } from "@/lib/models/doctor.types";
-import { generateDoctorSlug } from "@/lib/utils/slug";
+import { DoctorCard } from "@/components/doctors/doctorgrid/DoctorCard";
+import type { Doctor } from "@/components/doctors/doctorgrid/types";
 import doctorsDataEn from "../../doctors/doctorgrid/doctors.en.json";
 import doctorsDataAr from "../../doctors/doctorgrid/doctors.ar.json";
 
@@ -30,22 +29,15 @@ const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
 );
 
 const SectionDoctor = () => {
-  const t = useTranslations();
+  const t = useTranslations("home");
   const locale = useLocale();
+  const tg = (key: string, values?: Record<string, string | number>) =>
+    t(`doctorGrid.${key}`, values);
   const doctorsData = locale === 'ar' ? doctorsDataAr : doctorsDataEn;
   const isRTL = locale === "ar";
   const [slider, setSlider] = useState<Slider | null>(null);
   const [slidesToShow, setSlidesToShow] = useState<number>(1);
-  const featuredDoctors = useMemo(() => doctorsData.slice(0, 6), [doctorsData]);
-
-  // Create slug mapping from English doctors data to ensure consistent slugs across locales
-  const slugMap = useMemo(() => {
-    const map = new Map<number, string>();
-    (doctorsDataEn as Doctor[]).forEach((doc) => {
-      map.set(doc.id, generateDoctorSlug(doc.doctorName));
-    });
-    return map;
-  }, []);
+  const featuredDoctors = useMemo(() => doctorsData.slice(0, 6) as Doctor[], [doctorsData]);
 
   const resolveSlides = useMemo(() => {
     const resolver = (width: number) => {
@@ -133,67 +125,21 @@ const SectionDoctor = () => {
     <section className="doctor-section">
       <div className="container">
         <div className="section-header sec-header-one text-center">
-          <span className="badge badge-primary">{t("home.doctors.title")}</span>
-          <h2>{t("home.doctors.subtitle")}</h2>
+          <span className="badge badge-primary">{t("doctors.title")}</span>
+          <h2>{t("doctors.subtitle")}</h2>
         </div>
         <div className="doctors-slider slick-margins slick-arrow-center">
           <Slider ref={setSlider} key={locale} {...Doctoroptions}>
             {featuredDoctors.map((doc) => {
-              const doctorSlug = slugMap.get(doc.id) || generateDoctorSlug(doc.doctorName);
               return (
-                <Link href={`/${locale}/doctors/${doctorSlug}`} key={doc.id} style={{ textDecoration: 'none' }}>
-                  <div className="card" style={{ cursor: 'pointer', height: '100%' }}>
-                    <div className="card-img card-img-hover">
-                      <img src={doc.image} alt={doc.doctorName} loading="lazy" />
-                      {doc.rating ? (
-                        <div className="grid-overlay-item d-flex align-items-center justify-content-between">
-                          <span className="badge bg-orange">
-                            <i className="fa-solid fa-star me-1" />
-                            {doc.rating.toFixed(1)}
-                          </span>
-                        </div>
-                      ) : null}
-                    </div>
-                    <div className="card-body p-0">
-                      <div className={`d-flex active-bar align-items-center justify-content-between p-3`}>
-                        <span className={`fw-medium fs-14`}>
-                          {doc.speciality}
-                        </span>
-                        <span className={`bg-success-light badge d-inline-flex align-items-center`}>
-                          <i className="fa-solid fa-circle fs-5 me-1" />
-                          {doc.availabilityStatus || t("home.doctors.available")}
-                        </span>
-                      </div>
-                      <div className="p-3 pt-0">
-                        <div className="doctor-info-detail mb-3 pb-3">
-                          <h3 className="mb-1">
-                            <span>{doc.doctorName}</span>
-                          </h3>
-                          <div className="d-flex align-items-center">
-                            <p className="d-flex align-items-center mb-0 fs-14">
-                              <i className="isax isax-location me-2" />
-                              {doc.location}
-                            </p>
-                            <i className="fa-solid fa-circle fs-5 text-primary mx-2 me-1" />
-                            <span className="fs-14 fw-medium">{doc.duration}</span>
-                          </div>
-                        </div>
-                        <div className="d-flex align-items-center justify-content-between">
-                          <div>
-                            <p className="mb-1 fs-14">{t("home.doctors.consultation_fees")}</p>
-                            <h3 className="text-orange">{doc.consultationFee}</h3>
-                          </div>
-                          <button
-                            className="btn btn-md btn-dark d-inline-flex align-items-center rounded-pill text-truncate"
-                            style={{ cursor: 'pointer' }}
-                          >
-                            {t("home.doctors.book_now")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <div key={doc.id} className="home-doctor-slide">
+                  <DoctorCard
+                    doctor={doc}
+                    locale={locale}
+                    tg={tg}
+                    useGridColumn={false}
+                  />
+                </div>
               );
             })}
           </Slider>
