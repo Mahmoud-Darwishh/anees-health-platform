@@ -304,9 +304,10 @@ export function generateDoctorsCollectionSchema(
 				: 'List of doctors available for home visits and telemedicine consultations',
 		url: `${baseUrl}/${locale}/doctors`,
 		numberOfItems: doctors.length,
-		itemListElement: doctors.slice(0, 20).map((doctor, index) => ({
+		/*itemListElement: doctors.slice(0, 20)map((doctor, index) => ({*/
+		itemListElement: doctors.map((doctor, index) => ({
 			'@type': 'ListItem',
-			position: (currentPage - 1) * 20 + index + 1,
+			position: (currentPage - 1) * doctors.length + index + 1,
 			item: {
 				'@type': 'Physician',
 				name: doctor.doctorName,

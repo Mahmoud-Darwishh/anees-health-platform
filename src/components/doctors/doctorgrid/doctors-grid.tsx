@@ -1,7 +1,8 @@
 ﻿'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -21,6 +22,9 @@ const DoctorGrid = () => {
   const tg = (key: string, values?: MessageValues) =>
     t(`doctorGrid.${key}`, values);
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   useReveal(wrapperRef, [locale]);
 
@@ -67,6 +71,20 @@ const DoctorGrid = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const doctorsPerPage = 12;
 
+  const replacePageInUrl = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (page <= 1) {
+        params.delete('page');
+      } else {
+        params.set('page', String(page));
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams]
+  );
+
   const deferredSearchText = useDeferredValue(filters.searchText);
   const deferredLocationText = useDeferredValue(filters.locationText);
 
@@ -82,8 +100,9 @@ const DoctorGrid = () => {
   const handleFilterChange = useCallback((updates: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
     setCurrentPage(1);
+    replacePageInUrl(1);
     setShowMobileFilters(false);
-  }, []);
+  }, [replacePageInUrl]);
 
   const handleClearAll = useCallback(() => {
     setFilters({
@@ -98,20 +117,23 @@ const DoctorGrid = () => {
       locationText: '',
     });
     setCurrentPage(1);
+    replacePageInUrl(1);
     setSortOrder('none');
     setShowMobileFilters(false);
-  }, [maxPrice, minPrice]);
+  }, [maxPrice, minPrice, replacePageInUrl]);
 
   const handleSearch = useCallback(() => {
     setCurrentPage(1);
-  }, []);
+    replacePageInUrl(1);
+  }, [replacePageInUrl]);
 
   const handlePageChange = useCallback((newPage: number) => {
     setCurrentPage(newPage);
+    replacePageInUrl(newPage);
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-  }, []);
+  }, [replacePageInUrl]);
 
   // Filter doctors
   const filteredDoctors = useMemo(() => {
@@ -212,10 +234,41 @@ const DoctorGrid = () => {
 
   // Paginate
   const totalPages = Math.ceil(filteredAndSorted.length / doctorsPerPage);
+
+  useEffect(() => {
+    const raw = Number(searchParams.get('page') || '1');
+    const safeFromUrl = Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 1;
+    const maxPage = Math.max(1, totalPages || 1);
+    const nextPage = Math.min(safeFromUrl, maxPage);
+
+    if (nextPage !== currentPage) {
+      setCurrentPage(nextPage);
+    }
+  }, [searchParams, totalPages, currentPage]);
+
+  useEffect(() => {
+    if (totalPages <= 0) {
+      return;
+    }
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+      replacePageInUrl(totalPages);
+    }
+  }, [currentPage, totalPages, replacePageInUrl]);
+
   const startIndex = (currentPage - 1) * doctorsPerPage;
   const currentDoctors = filteredAndSorted.slice(
     startIndex,
     startIndex + doctorsPerPage
+  );
+
+  const handleSortChange = useCallback(
+    (nextSort: SortOrder) => {
+      setSortOrder(nextSort);
+      setCurrentPage(1);
+      replacePageInUrl(1);
+    },
+    [replacePageInUrl]
   );
 
   return (
@@ -336,10 +389,7 @@ const DoctorGrid = () => {
                           <button
                             type="button"
                             className="dropdown-item"
-                            onClick={() => {
-                              setSortOrder('none');
-                              setCurrentPage(1);
-                            }}
+                            onClick={() => handleSortChange('none')}
                           >
                             {tg('sort.relevance')}
                           </button>
@@ -348,10 +398,7 @@ const DoctorGrid = () => {
                           <button
                             type="button"
                             className="dropdown-item"
-                            onClick={() => {
-                              setSortOrder('low');
-                              setCurrentPage(1);
-                            }}
+                            onClick={() => handleSortChange('low')}
                           >
                             {tg('sort.priceAsc')}
                           </button>
@@ -360,10 +407,7 @@ const DoctorGrid = () => {
                           <button
                             type="button"
                             className="dropdown-item"
-                            onClick={() => {
-                              setSortOrder('high');
-                              setCurrentPage(1);
-                            }}
+                            onClick={() => handleSortChange('high')}
                           >
                             {tg('sort.priceDesc')}
                           </button>

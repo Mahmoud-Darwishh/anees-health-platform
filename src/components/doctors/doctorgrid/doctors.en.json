@@ -2059,5 +2059,154 @@
         "text": "Wonderful doctor with continuous follow-up. Lipolysis devices are very effective and the diet plan is not difficult."
       }
     ]
+  },
+  {
+    "id": 33,
+    "image": "assets/img/doctor-grid-optimized/33.webp",
+    "rating": 4.8,
+    "speciality": "Physiotherapy",
+    "specialityColorClass": "active-bar-warning",
+    "specialityTextClass": "text-warning",
+    "availabilityStatus": "Available",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "Dr. Ismail Wagdy Zahran",
+    "location": "Cairo, Egypt",
+    "duration": "Home Visit",
+    "consultationFee": "EGP 500",
+    "maxConsultationFee": "EGP 0",
+    "professionalTitle": "Physiotherapy Specialist - Neurological & Motor Rehabilitation",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "Male",
+    "channels": [
+      "Home",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Home Physiotherapy Service"
+    ],
+    "experienceYears": 4,
+    "bio": "Physiotherapy specialist focused on neurological and motor rehabilitation. Teaching assistant at Galala University and a master's researcher, with more than 4 years of practical experience helping patients through different recovery stages.",
+    "certifications": [
+      "Neurological Rehabilitation Specialist",
+      "Motor Rehabilitation Specialist",
+      "Teaching Assistant - Galala University",
+      "Master's Researcher in Physical Therapy"
+    ],
+    "education": [
+      {
+        "degree": "Bachelor's Degree in Physiotherapy",
+        "university": "Galala University",
+        "year": "2021"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "EGP 500",
+      "homeVisit": "EGP 500",
+      "clinicVisit": "EGP 0"
+    },
+    "successRate": "93%",
+    "avgWaitTime": "16 min",
+    "totalPatients": "900+",
+    "areaCoverage": [
+      "Dokki",
+      "Zamalek",
+      "Mohandessin"
+    ],
+    "clinicDetails": [
+      {
+        "name": "Anees Home Physiotherapy Service",
+        "location": "Dokki, Cairo",
+        "address": "Dokki, Zamalek, and Mohandessin coverage",
+        "hours": "9:00 AM - 7:00 PM",
+        "slots": "4 slots available",
+        "mapUrl": ""
+      }
+    ],
+    "testimonials": []
+  },
+  {
+    "id": 34,
+    "image": "assets/img/doctor-grid-optimized/34.webp",
+    "rating": 4.9,
+    "speciality": "Physiotherapy",
+    "specialityColorClass": "active-bar-warning",
+    "specialityTextClass": "text-warning",
+    "availabilityStatus": "Available",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "Dr. Hossam Mortada Noureldin",
+    "location": "Giza, Egypt",
+    "duration": "Tele-Medicine",
+    "consultationFee": "EGP 600",
+    "maxConsultationFee": "EGP 300",
+    "professionalTitle": "Physiotherapy Specialist - Assistant Lecturer of Biomechanics",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "Male",
+    "channels": [
+      "Home",
+      "video",
+      "chat"
+    ],
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "clinics": [
+      "Anees Home Physiotherapy Service"
+    ],
+    "experienceYears": 5,
+    "bio": "Assistant Lecturer of Biomechanics at Galala University. Holds an MSc in Biomechanics from the Faculty of Physical Therapy, Cairo University, and an MSc in Regulatory Science and Health Safety from Arizona State University. Currently completing a PhD and providing advanced rehabilitation care.",
+    "certifications": [
+      "Assistant Lecturer of Biomechanics - Galala University",
+      "MSc in Biomechanics - Cairo University",
+      "MSc in Regulatory Science and Health Safety - Arizona State University",
+      "PhD Candidate in Physical Therapy"
+    ],
+    "education": [
+      {
+        "degree": "Bachelor's Degree in Physiotherapy",
+        "university": "Faculty of Physical Therapy",
+        "year": "2018"
+      },
+      {
+        "degree": "Master's (M.Sc.) in Biomechanics",
+        "university": "Cairo University",
+        "year": "2022"
+      },
+      {
+        "degree": "Master's (M.Sc.) in Regulatory Science and Health Safety",
+        "university": "Arizona State University",
+        "year": "2023"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "EGP 600",
+      "homeVisit": "EGP 600",
+      "clinicVisit": "EGP 300"
+    },
+    "successRate": "95%",
+    "avgWaitTime": "14 min",
+    "totalPatients": "1,200+",
+    "areaCoverage": [
+      "Haram",
+      "Faisal",
+      "6th of October City"
+    ],
+    "clinicDetails": [
+      {
+        "name": "Anees Home Physiotherapy Service",
+        "location": "Haram, Giza",
+        "address": "Haram, Faisal, and 6th of October coverage",
+        "hours": "10:00 AM - 8:00 PM",
+        "slots": "5 slots available",
+        "mapUrl": ""
+      }
+    ],
+    "testimonials": []
   }
 ]

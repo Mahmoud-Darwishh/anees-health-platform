@@ -2059,5 +2059,154 @@
         "text": "دكتورة رائعة ومتابعة مستمرة. أجهزة تفتيت الدهون فعالة جداً والنظام الغذائي مش صعب."
       }
     ]
+  },
+  {
+    "id": 33,
+    "image": "assets/img/doctor-grid-optimized/33.webp",
+    "rating": 4.8,
+    "speciality": "العلاج الطبيعي",
+    "specialityColorClass": "active-bar-warning",
+    "specialityTextClass": "text-warning",
+    "availabilityStatus": "متاح",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "د. إسماعيل وجدي زهران",
+    "location": "القاهرة، مصر",
+    "duration": "زيارة منزلية",
+    "consultationFee": "٥٠٠ جنيه",
+    "maxConsultationFee": "٠ جنيه",
+    "professionalTitle": "أخصائي العلاج الطبيعي - التأهيل العصبي والحركي",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "ذكر",
+    "channels": [
+      "زيارة منزلية",
+      "محادثة"
+    ],
+    "languages": [
+      "العربية",
+      "الإنجليزية"
+    ],
+    "clinics": [
+      "خدمة أنيس للعلاج الطبيعي المنزلي"
+    ],
+    "experienceYears": 4,
+    "bio": "أخصائي علاج طبيعي متخصص في التأهيل العصبي والحركي، معيد بجامعة الجلالة وباحث ماجستير، بخبرة عملية تزيد عن 4 سنوات في مساعدة المرضى خلال مختلف مراحل التعافي.",
+    "certifications": [
+      "أخصائي التأهيل العصبي",
+      "أخصائي التأهيل الحركي",
+      "معيد - جامعة الجلالة",
+      "باحث ماجستير في العلاج الطبيعي"
+    ],
+    "education": [
+      {
+        "degree": "درجة البكالوريوس في العلاج الطبيعي",
+        "university": "جامعة الجلالة",
+        "year": "2021"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "٥٠٠ جنيه",
+      "homeVisit": "٥٠٠ جنيه",
+      "clinicVisit": "٠ جنيه"
+    },
+    "successRate": "93%",
+    "avgWaitTime": "16 دقيقة",
+    "totalPatients": "900+",
+    "areaCoverage": [
+      "الدقي",
+      "الزمالك",
+      "المهندسين"
+    ],
+    "clinicDetails": [
+      {
+        "name": "خدمة أنيس للعلاج الطبيعي المنزلي",
+        "location": "الدقي، القاهرة",
+        "address": "تغطية: الدقي، الزمالك، المهندسين",
+        "hours": "9:00 صباحاً - 7:00 مساءً",
+        "slots": "4 مواعيد متاحة",
+        "mapUrl": ""
+      }
+    ],
+    "testimonials": []
+  },
+  {
+    "id": 34,
+    "image": "assets/img/doctor-grid-optimized/34.webp",
+    "rating": 4.9,
+    "speciality": "العلاج الطبيعي",
+    "specialityColorClass": "active-bar-warning",
+    "specialityTextClass": "text-warning",
+    "availabilityStatus": "متاح",
+    "availabilityBadgeClass": "bg-success-light",
+    "doctorName": "د. حسام مرتضى نورالدين",
+    "location": "الجيزة، مصر",
+    "duration": "عن بُعد",
+    "consultationFee": "٦٠٠ جنيه",
+    "maxConsultationFee": "٣٠٠ جنيه",
+    "professionalTitle": "أخصائي العلاج الطبيعي - مدرس مساعد للميكانيكا الحيوية",
+    "profileLink": "/patient/doctor-profile",
+    "bookingLink": "/booking",
+    "gender": "ذكر",
+    "channels": [
+      "زيارة منزلية",
+      "فيديو",
+      "محادثة"
+    ],
+    "languages": [
+      "العربية",
+      "الإنجليزية"
+    ],
+    "clinics": [
+      "خدمة أنيس للعلاج الطبيعي المنزلي"
+    ],
+    "experienceYears": 5,
+    "bio": "مدرس مساعد للميكانيكا الحيوية بجامعة الجلالة. حاصل على ماجستير في الميكانيكا الحيوية من كلية العلاج الطبيعي بجامعة القاهرة، وماجستير في العلوم التنظيمية والسلامة الصحية من جامعة أريزونا ستيت، ويستكمل حالياً درجة الدكتوراه مع خبرة عملية في التأهيل المتقدم.",
+    "certifications": [
+      "مدرس مساعد للميكانيكا الحيوية - جامعة الجلالة",
+      "ماجستير الميكانيكا الحيوية - جامعة القاهرة",
+      "ماجستير العلوم التنظيمية والسلامة الصحية - جامعة أريزونا ستيت",
+      "باحث دكتوراه في العلاج الطبيعي"
+    ],
+    "education": [
+      {
+        "degree": "درجة البكالوريوس في العلاج الطبيعي",
+        "university": "كلية العلاج الطبيعي",
+        "year": "2018"
+      },
+      {
+        "degree": "ماجستير (M.Sc.) في الميكانيكا الحيوية",
+        "university": "جامعة القاهرة",
+        "year": "2022"
+      },
+      {
+        "degree": "ماجستير (M.Sc.) في العلوم التنظيمية والسلامة الصحية",
+        "university": "جامعة أريزونا ستيت",
+        "year": "2023"
+      }
+    ],
+    "pricing": {
+      "telemedicine": "٦٠٠ جنيه",
+      "homeVisit": "٦٠٠ جنيه",
+      "clinicVisit": "٣٠٠ جنيه"
+    },
+    "successRate": "95%",
+    "avgWaitTime": "14 دقيقة",
+    "totalPatients": "1,200+",
+    "areaCoverage": [
+      "الهرم",
+      "فيصل",
+      "مدينة 6 أكتوبر"
+    ],
+    "clinicDetails": [
+      {
+        "name": "خدمة أنيس للعلاج الطبيعي المنزلي",
+        "location": "الهرم، الجيزة",
+        "address": "تغطية: الهرم، فيصل، مدينة 6 أكتوبر",
+        "hours": "10:00 صباحاً - 8:00 مساءً",
+        "slots": "5 مواعيد متاحة",
+        "mapUrl": ""
+      }
+    ],
+    "testimonials": []
   }
 ]

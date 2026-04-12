@@ -59,6 +59,14 @@ function getCanonicalSlugById(id: number): string | null {
 }
 
 /**
+ * Public canonical slug resolver by doctor id
+ * Used by SEO pages to create locale-safe links to doctor profile pages.
+ */
+export async function getDoctorCanonicalSlugById(id: number): Promise<string | null> {
+  return getCanonicalSlugById(id);
+}
+
+/**
  * Get all doctors for a specific locale
  * @param locale - Language code
  * @returns Array of doctors

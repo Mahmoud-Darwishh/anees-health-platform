@@ -7,8 +7,8 @@
  */
 
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { getDoctorBySlug, getAllDoctorSlugs, extractCity } from '@/lib/api/doctors';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getDoctorBySlug, getAllDoctorSlugs, getDoctorCanonicalSlugById } from '@/lib/api/doctors';
 import {
   generatePhysicianSchema,
   generateBreadcrumbSchema,
@@ -62,7 +62,8 @@ export async function generateMetadata({
     };
   }
 
-  return generateDoctorProfileMetadata(doctor, locale, slug);
+  const canonicalSlug = await getDoctorCanonicalSlugById(Number(doctor.id));
+  return generateDoctorProfileMetadata(doctor, locale, canonicalSlug || slug);
 }
 
 export default async function DoctorProfilePage({
@@ -75,8 +76,13 @@ export default async function DoctorProfilePage({
     notFound();
   }
 
+  const canonicalSlug = await getDoctorCanonicalSlugById(Number(doctor.id));
+  if (canonicalSlug && canonicalSlug !== slug) {
+    permanentRedirect(`/${locale}/doctors/${canonicalSlug}`);
+  }
+
   const baseUrl = config.api.baseUrl;
-  const canonicalUrl = `${baseUrl}/${locale}/doctors/${slug}`;
+  const canonicalUrl = `${baseUrl}/${locale}/doctors/${canonicalSlug || slug}`;
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
 
   // Breadcrumb items for navigation
