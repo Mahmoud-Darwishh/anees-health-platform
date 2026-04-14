@@ -1,7 +1,15 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import { locales } from '@/i18n/request';
 import Script from 'next/script';
 import { config } from '@/lib/config';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 const siteUrl = config.api.baseUrl;
 
@@ -98,7 +106,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en" dir="ltr" className={inter.variable}>
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -128,12 +136,8 @@ export default function RootLayout({
 
         {/* Legacy website stylesheets */}
         <link rel="stylesheet" href="/assets/css/feather.css" />
-        <link rel="stylesheet" href="/assets/css/iconfont.css" />
         <link rel="stylesheet" href="/assets/css/iconsax.css" />
         <link rel="stylesheet" href="/assets/css/custom.css" />
-        <noscript>
-          <link rel="stylesheet" href="/assets/css/customstyleclient.css" />
-        </noscript>
 
         {/* Meta Pixel NoScript */}
         <noscript>

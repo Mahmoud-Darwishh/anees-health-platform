@@ -166,23 +166,6 @@ ul {
 .text-sm {
     font-size: typography.$font__size__14 !important;
 }
-.material-icons {
-	font-family: 'Material Icons';
-	font-weight: variables.$font-weight-normal;
-	font-style: variables.$normal;
-	font-size: typography.$font__size__24;
-	display: variables.$inline__block;
-	line-height: 1;
-	text-transform: none;
-	letter-spacing: variables.$normal;
-	word-wrap: variables.$normal;
-	white-space: variables.$nowrap;
-	direction: ltr;
-	-webkit-font-smoothing: antialiased;
-	text-rendering: optimizeLegibility;
-	-moz-osx-font-smoothing: grayscale;
-	font-feature-settings: 'liga';
-}
 .small, small {
     font-size: 80%;
     font-weight: typography.$regular;
