@@ -52,8 +52,7 @@ export async function POST(request: NextRequest) {
     // ── Build redirect & webhook URLs ─────────────────────────────────
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const displayLocale = locale === 'ar' ? 'ar' : 'en';
-    const merchantRedirect =
-      process.env.KASHIER_REDIRECT || `${siteUrl}/${displayLocale}/payment/redirect`;
+    const merchantRedirect = `${siteUrl}/${displayLocale}/payment/redirect`;
     const serverWebhook =
       process.env.KASHIER_WEBHOOK || `${siteUrl}/api/bookings/payment/webhook`;
 
