@@ -167,6 +167,28 @@ export default function RootLayout({
             image: 'https://aneeshealth.com/assets/img/banner/anees-health-og.jpg',
             telephone: '+20-1270558620',
             email: 'info@aneeshealth.com',
+            founder: [
+              {
+                '@type': 'Person',
+                '@id': 'https://aneeshealth.com/en/doctors/dr-mahmoud-darwish#person',
+                name: 'Dr. Mahmoud Darwish',
+                url: 'https://aneeshealth.com/en/doctors/dr-mahmoud-darwish',
+                jobTitle: 'Co-Founder',
+                worksFor: {
+                  '@id': 'https://aneeshealth.com/#organization',
+                },
+              },
+              {
+                '@type': 'Person',
+                '@id': 'https://aneeshealth.com/en/doctors/dr-ahmed-oraby#person',
+                name: 'Dr. Ahmed Oraby',
+                url: 'https://aneeshealth.com/en/doctors/dr-ahmed-oraby',
+                jobTitle: 'Co-Founder',
+                worksFor: {
+                  '@id': 'https://aneeshealth.com/#organization',
+                },
+              },
+            ],
             
             // 24/7 Availability - Key for AI search
             openingHoursSpecification: {

@@ -201,10 +201,16 @@ export default function DoctorProfileContent({
                       <i className="isax isax-calendar-1"></i>
                       {labels.bookNow}
                     </Link>
-                    <Link href={`/${locale}/contact`} className="btn btn-outline-primary btn-lg">
+                    <button
+                      type="button"
+                      className="btn btn-outline-primary btn-lg disabled"
+                      disabled
+                      aria-disabled="true"
+                      title={isArabic ? 'التواصل غير متاح حالياً' : 'Contact is currently unavailable'}
+                    >
                       <i className="isax isax-message"></i>
                       {labels.contact}
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>

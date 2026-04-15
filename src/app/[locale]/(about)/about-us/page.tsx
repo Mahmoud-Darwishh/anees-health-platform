@@ -1,12 +1,12 @@
 import { useLocale, useTranslations } from 'next-intl';
 import Script from 'next/script';
 import Link from 'next/link';
-import { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { Reveal } from '@/components/common/Reveal';
 import { generateAboutMetadata } from '@/lib/utils/metadata';
+import { generateDoctorSlug } from '@/lib/utils/slug';
 import {
   generateBreadcrumbSchema,
   generateArticleSchema,
@@ -26,6 +26,10 @@ export default function AboutUsPage() {
   const locale = useLocale();
   const baseUrl = config.api.baseUrl;
   const isArabic = locale === 'ar';
+  const founder1Slug = generateDoctorSlug('Dr. Mahmoud Darwish');
+  const founder2Slug = generateDoctorSlug('Dr. Ahmed Oraby');
+  const founder1Url = `${baseUrl}/en/doctors/${founder1Slug}`;
+  const founder2Url = `${baseUrl}/en/doctors/${founder2Slug}`;
 
   const pillars = [
     { title: t('pillar_1_title'), text: t('pillar_1_text') },
@@ -155,6 +159,27 @@ export default function AboutUsPage() {
           </div>
         </Reveal>
 
+        <Reveal as="section" className={styles.leadershipSection}>
+          <div className="container">
+            <article className={styles.leadershipCard}>
+              <div>
+                <h2>{t('founders_title')}</h2>
+                <p>{t('founders_subtitle')}</p>
+                <p className={styles.leadershipSearchCopy}>{t('founders_search_statement')}</p>
+              </div>
+              <p className={styles.leadershipNames}>
+                <Link href={`/${locale}/doctors/${founder1Slug}`} className={styles.founderLink}>
+                  {t('founder_1_name')}
+                </Link>
+                <span className={styles.namesDivider} aria-hidden="true">•</span>
+                <Link href={`/${locale}/doctors/${founder2Slug}`} className={styles.founderLink}>
+                  {t('founder_2_name')}
+                </Link>
+              </p>
+            </article>
+          </div>
+        </Reveal>
+
         <Reveal as="section" className={styles.pillarsSection}>
           <div className="container">
             <div className="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
@@ -221,21 +246,29 @@ export default function AboutUsPage() {
             name: t('title'),
             mainEntity: {
               '@type': 'Organization',
+              '@id': `${baseUrl}#organization`,
               name: 'Anees Health',
               description: t('founders_search_statement'),
               url: `${baseUrl}/${locale}`,
               founder: [
                 {
                   '@type': 'Person',
+                  '@id': `${founder1Url}#person`,
                   name: t('founder_1_name'),
+                  url: founder1Url,
                   description: t('founders_search_statement'),
+                  jobTitle: isArabic ? 'مؤسس مشارك' : 'Co-Founder',
                 },
                 {
                   '@type': 'Person',
+                  '@id': `${founder2Url}#person`,
                   name: t('founder_2_name'),
+                  url: founder2Url,
                   description: t('founders_search_statement'),
+                  jobTitle: isArabic ? 'مؤسس مشارك' : 'Co-Founder',
                 },
               ],
+              sameAs: [founder1Url, founder2Url],
               aggregateRating: {
                 '@type': 'AggregateRating',
                 ratingValue: t('trust_value'),

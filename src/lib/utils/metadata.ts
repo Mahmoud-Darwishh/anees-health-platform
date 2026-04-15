@@ -317,13 +317,13 @@ export function generateAboutMetadata(locale: string): Metadata {
   return generatePageMetadata({
     locale,
     path: `/${locale}/about-us`,
-    title: isArabic ? 'عن أنيس هيلث | منصة رعاية صحية منزلية في مصر' : 'About Anees Health | Home Healthcare Platform in Egypt',
+    title: isArabic ? 'عن أنيس هيلث | الدكتور محمود درويش والدكتور أحمد عرابي' : 'About Anees Health | Dr. Mahmoud Darwish and Dr. Ahmed Oraby',
     description: isArabic
-      ? 'أنيس هيلث أسسها الدكتور محمود درويش والدكتور أحمد عرابي، بخبرة في عدة شركات سابقة ومناصب إدارية تنفيذية C-level في الرعاية الصحية في مصر'
-      : 'Anees Health is founded by Dr. Mahmoud Darwish and Dr. Ahmed Oraby, with several previous companies and C-level managerial leadership in Egypt healthcare',
+      ? 'أنيس هيلث منصة رعاية صحية منزلية في مصر تأسست بقيادة الدكتور محمود درويش والدكتور أحمد عرابي، مع زيارات طبيب منزلية وخدمات رعاية صحية متكاملة.'
+      : 'Anees Health is a home healthcare platform in Egypt founded by Dr. Mahmoud Darwish and Dr. Ahmed Oraby, offering doctor home visits and coordinated healthcare services.',
     keywords: isArabic
-      ? 'أنيس هيلث، المؤسسون، الدكتور محمود درويش، الدكتور أحمد عرابي، عدة شركات سابقة، C-level، الرعاية الصحية في مصر'
-      : 'Anees Health founders, Dr. Mahmoud Darwish, Dr. Ahmed Oraby, several previous companies, C-level managerial, healthcare industry Egypt',
+      ? 'أنيس هيلث، مؤسسو أنيس هيلث، الدكتور محمود درويش، الدكتور أحمد عرابي، محمود درويش، أحمد عرابي، رعاية صحية منزلية، طبيب منزل، مصر'
+      : 'Anees Health founders, Dr. Mahmoud Darwish, Dr. Ahmed Oraby, Mahmoud Darwish, Ahmed Oraby, doctor at home Egypt, home healthcare Egypt',
   });
 }
 

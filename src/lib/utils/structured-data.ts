@@ -29,6 +29,11 @@ export interface StructuredDataProps {
  * Used for brand identity and social presence
  */
 export function generateOrganizationSchema(locale: string = 'en') {
+	const founderStatement =
+		locale === 'ar'
+			? 'تأسست أنيس هيلث في مصر بقيادة الدكتور محمود درويش والدكتور أحمد عرابي.'
+			: 'Anees Health was founded in Egypt by Dr. Mahmoud Darwish and Dr. Ahmed Oraby.';
+
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'MedicalOrganization',
@@ -73,6 +78,30 @@ export function generateOrganizationSchema(locale: string = 'en') {
 			availableLanguage: ['English', 'Arabic'],
 			areaServed: 'EG',
 		},
+		founder: [
+			{
+				'@type': 'Person',
+				'@id': `${config.api.baseUrl}/en/doctors/dr-mahmoud-darwish#person`,
+				name: locale === 'ar' ? 'الدكتور محمود درويش' : 'Dr. Mahmoud Darwish',
+				url: `${config.api.baseUrl}/en/doctors/dr-mahmoud-darwish`,
+				description: founderStatement,
+				jobTitle: locale === 'ar' ? 'مؤسس مشارك' : 'Co-Founder',
+				worksFor: {
+					'@id': `${config.api.baseUrl}#organization`,
+				},
+			},
+			{
+				'@type': 'Person',
+				'@id': `${config.api.baseUrl}/en/doctors/dr-ahmed-oraby#person`,
+				name: locale === 'ar' ? 'الدكتور أحمد عرابي' : 'Dr. Ahmed Oraby',
+				url: `${config.api.baseUrl}/en/doctors/dr-ahmed-oraby`,
+				description: founderStatement,
+				jobTitle: locale === 'ar' ? 'مؤسس مشارك' : 'Co-Founder',
+				worksFor: {
+					'@id': `${config.api.baseUrl}#organization`,
+				},
+			},
+		],
 		knowsAbout: [
 			'Home Healthcare',
 			'Telemedicine',
