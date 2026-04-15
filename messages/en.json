@@ -365,6 +365,13 @@
       "talk_doctors": "Talk to Doctors",
       "home_care": "Home Care Services"
     },
+    "ourServices": {
+      "label": "Our Services",
+      "heading": "Healthcare, Delivered to You",
+      "description": "World-class medical professionals at your doorstep — from routine check-ups to specialized care, all across Egypt.",
+      "learnMore": "Learn more",
+      "viewAll": "View All Services"
+    },
     "servicesPage": {
       "intro": {
         "badge": "Professional Home Care"
@@ -413,10 +420,10 @@
           "features": ["Certified therapists", "Personalized plans", "Modern equipment", "Progress tracking"]
         },
         "labTests": {
-          "title": "Lab Tests at Home",
-          "shortDesc": "Sample collection and diagnostic testing",
-          "description": "Convenient blood tests and diagnostic services with home sample collection and fast, accurate results delivered digitally.",
-          "features": ["Home sample collection", "Certified labs", "Fast results", "Digital reports"]
+          "title": "Labs & Scans at Home",
+          "shortDesc": "Lab tests, imaging, and diagnostic scans at your doorstep",
+          "description": "Convenient blood tests, diagnostic imaging, and scans with home sample collection and fast, accurate results delivered digitally.",
+          "features": ["Home sample collection", "Diagnostic scans", "Certified labs", "Digital reports"]
         },
         "medications": {
           "title": "Medication Delivery",

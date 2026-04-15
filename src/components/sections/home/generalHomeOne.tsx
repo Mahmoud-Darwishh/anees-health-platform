@@ -5,7 +5,7 @@ import Header from '@/components/layout/Header'
 import HomeBanner from './homeBanner'
 import Footer from '@/components/layout/Footer'
 
-import SectionSpeciality from './sectionSpeciality';
+import SectionOurServices from './sectionOurServices';
 import SectionDoctor from './sectionDoctor';
 import SectionService from './sectionService';
 import SectionBook from './sectionBook';
@@ -21,7 +21,7 @@ const GeneralHomeOne: React.FC = () => {
       <Header />
       <main id="main-content" tabIndex={-1}>
         <HomeBanner />
-        <SectionSpeciality />
+        <SectionOurServices />
         <SectionDoctor />
         <SectionService />
         <SectionBook />

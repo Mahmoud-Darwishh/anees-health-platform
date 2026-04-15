@@ -8,26 +8,6 @@ import type { Doctor } from "@/components/doctors/doctorgrid/types";
 import doctorsDataEn from "../../doctors/doctorgrid/doctors.en.json";
 import doctorsDataAr from "../../doctors/doctorgrid/doctors.ar.json";
 
-interface ArrowProps {
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-}
-
-const CustomNextArrow: React.FC<ArrowProps> = ({ onClick }) => (
-  <div className="spciality-nav nav-bottom owl-nav ">
-    <button type="button" role="presentation" className="owl-next" onClick={onClick}>
-      <i className="fa-solid fa-chevron-right" />
-    </button>
-  </div>
-);
-
-const CustomPrevArrow: React.FC<ArrowProps> = ({ onClick }) => (
-  <div className="spciality-nav nav-bottom owl-nav">
-    <button type="button" role="presentation" className="owl-prev" onClick={onClick}>
-      <i className="fa-solid fa-chevron-left" />
-    </button>
-  </div>
-);
-
 const SectionDoctor = () => {
   const t = useTranslations("home");
   const locale = useLocale();
@@ -67,9 +47,7 @@ const SectionDoctor = () => {
     slidesToShow,
     slidesToScroll: 1,
     dots: false,
-    arrows: true,
-    nextArrow: <CustomNextArrow />,
-    prevArrow: <CustomPrevArrow />,
+    arrows: false,
     infinite: true,
     rtl: isRTL,
     initialSlide: 0,
@@ -113,7 +91,6 @@ const SectionDoctor = () => {
         settings: {
           slidesToShow: 2,
           rtl: isRTL,
-          arrows: false,
           swipe: true,
           touchMove: true,
         },
@@ -143,6 +120,24 @@ const SectionDoctor = () => {
               );
             })}
           </Slider>
+          <div className="owl-nav nav-bottom">
+            <button
+              type="button"
+              aria-label="Previous"
+              className="owl-prev"
+              onClick={() => slider?.slickPrev()}
+            >
+              <i className="fa-solid fa-chevron-left" />
+            </button>
+            <button
+              type="button"
+              aria-label="Next"
+              className="owl-next"
+              onClick={() => slider?.slickNext()}
+            >
+              <i className="fa-solid fa-chevron-right" />
+            </button>
+          </div>
         </div>
       </div>
     </section>
