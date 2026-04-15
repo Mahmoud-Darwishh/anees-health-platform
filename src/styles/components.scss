@@ -99,170 +99,6 @@
   }
 }
 
-.services-ribbon-section {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
-.services-ribbon {
-  position: relative;
-  width: 100%;
-  overflow: visible;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(95deg, rgba(10, 28, 58, 0.9) 0%, rgba(16, 43, 86, 0.9) 100%);
-  box-shadow: 0 8px 20px rgba(8, 19, 40, 0.22);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-
-  &::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: -8px;
-    transform: translateX(-50%);
-    width: 68%;
-    height: 6px;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(170, 134, 66, 0) 0%, rgba(170, 134, 66, 0.6) 50%, rgba(170, 134, 66, 0) 100%);
-    filter: blur(0.4px);
-    pointer-events: none;
-  }
-}
-
-.services-ribbon-track {
-  display: flex;
-  align-items: center;
-  gap: 2.5rem;
-  width: max-content;
-  padding: 0.85rem 1.2rem;
-  animation: services-ribbon-ltr 36s linear infinite;
-  will-change: transform;
-}
-
-.services-ribbon-item {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  color: #ffffff;
-
-  &::after {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    margin-inline-start: 1.2rem;
-    background: rgba(255, 255, 255, 0.42);
-  }
-
-  span {
-    display: inline-block;
-    font-size: 0.95rem;
-    font-weight: 400;
-    line-height: 1.25;
-    white-space: nowrap;
-    text-align: center;
-    letter-spacing: 0.1px;
-  }
-}
-
-.services-ribbon.rtl {
-  .services-ribbon-track {
-    animation-name: services-ribbon-rtl;
-  }
-
-  .services-ribbon-item span {
-    font-family: 'Cairo', 'Inter', 'Segoe UI', sans-serif;
-    font-size: 0.93rem;
-    font-weight: 400;
-  }
-}
-
-.services-ribbon:hover .services-ribbon-track {
-  animation-play-state: paused;
-}
-
-@keyframes services-ribbon-ltr {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes services-ribbon-rtl {
-  from {
-    transform: translateX(-50%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@media (max-width: 767.98px) {
-  .services-ribbon-section {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-
-  .services-ribbon::after {
-    bottom: -6px;
-    width: 62%;
-    height: 5px;
-    background: linear-gradient(90deg, rgba(170, 134, 66, 0) 0%, rgba(170, 134, 66, 0.5) 50%, rgba(170, 134, 66, 0) 100%);
-  }
-
-  .services-ribbon-track {
-    gap: 1.7rem;
-    padding: 0.72rem 0.95rem;
-    animation-duration: 28s;
-  }
-
-  .services-ribbon-item {
-    &::after {
-      width: 5px;
-      height: 5px;
-      margin-inline-start: 0.85rem;
-    }
-
-    span {
-      font-size: 0.9rem;
-    }
-  }
-
-  .services-ribbon.rtl .services-ribbon-item span {
-    font-size: 0.9rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .services-ribbon-track {
-    animation: none;
-    transform: none;
-  }
-}
-
-@media (max-width: 479.98px) {
-  .services-ribbon-track {
-    gap: 1.3rem;
-    padding: 0.6rem 0.75rem;
-    animation-duration: 22s;
-  }
-
-  .services-ribbon-item {
-    &::after {
-      width: 4px;
-      height: 4px;
-      margin-inline-start: 0.65rem;
-    }
-
-    span {
-      font-size: 0.82rem;
-    }
-  }
-}
-
 // ─── Doctor section mobile fixes ────────────────────────────────
 // Touch-target compliant nav buttons on mobile
 @media (max-width: 767.98px) {
@@ -310,6 +146,40 @@
 }
 
 // ─── FAQ section mobile refinements ─────────────────────────────
+// Ensure accordion icon glyph is perfectly centered in the square box.
+.faq-info {
+  .accordion-button {
+    &::after {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      text-align: center;
+      box-sizing: border-box;
+      padding: 0;
+      background-position: center;
+      background-repeat: no-repeat;
+      flex-shrink: 0;
+    }
+  }
+}
+
+[dir='rtl'] {
+  .faq-info {
+    .accordion-button {
+      // In RTL, keep text on the right and push the icon to the opposite side (left).
+      display: flex;
+      align-items: center;
+      text-align: right;
+
+      &::after {
+        margin-inline-start: auto;
+        margin-inline-end: 0;
+      }
+    }
+  }
+}
+
 @media (max-width: 575.98px) {
   .faq-section {
     padding: 40px 0 30px;

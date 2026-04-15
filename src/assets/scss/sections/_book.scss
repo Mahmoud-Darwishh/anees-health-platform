@@ -29,6 +29,14 @@
     }
   }
 
+  .bookus-img {
+    .img-fluid {
+      max-width: 78%;
+      margin-inline: auto;
+      display: block;
+    }
+  }
+
   .book-item {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.12);
@@ -48,6 +56,16 @@
     .book-info {
       h6 { color: colors.$white; }
       p  { color: rgba(255,255,255,0.85); }
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .bookus-section {
+    .bookus-img {
+      .img-fluid {
+        max-width: 100%;
+      }
     }
   }
 }

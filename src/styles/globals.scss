@@ -143,22 +143,6 @@ a {
   transform: none;
 }
 
-/* Ensure legacy .aos classes cannot override homepage reveal logic */
-.main-wrapper .aos:not([data-reveal]) {
-  opacity: 1 !important;
-  transform: none !important;
-}
-
-.main-wrapper [data-reveal].aos.reveal-prep {
-  opacity: 0 !important;
-  transform: translate3d(0, var(--reveal-distance), 0) !important;
-}
-
-.main-wrapper [data-reveal].aos.is-visible {
-  opacity: 1 !important;
-  transform: none !important;
-}
-
 /* WhatsApp Floating Button */
 .whatsapp-floating-btn {
   position: fixed;

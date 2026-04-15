@@ -7,7 +7,6 @@ import Footer from '@/components/layout/Footer'
 
 import SectionOurServices from './sectionOurServices';
 import SectionDoctor from './sectionDoctor';
-import SectionService from './sectionService';
 import SectionBook from './sectionBook';
 import SectionLogos from './sectionLogos';
 import SectionFaq from './sectionFaq';
@@ -23,7 +22,6 @@ const GeneralHomeOne: React.FC = () => {
         <HomeBanner />
         <SectionOurServices />
         <SectionDoctor />
-        <SectionService />
         <SectionBook />
         <SectionPackages />
         <SectionLogos />

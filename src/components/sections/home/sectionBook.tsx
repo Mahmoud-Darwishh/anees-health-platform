@@ -2,11 +2,10 @@
 
 import React, { useId } from 'react'
 import Image from 'next/image'
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 const SectionBook: React.FC = () => {
     const t = useTranslations();
-    const locale = useLocale();
     const accordionBaseId = useId();
     const faqParentId = `${accordionBaseId}-faq`;
     const headingOneId = `${accordionBaseId}-heading-vision`;
@@ -24,38 +23,12 @@ const SectionBook: React.FC = () => {
                                 <div className="row g-3">
                                     <div className="col-md-12">
                                             <Image
-                                                src="/assets/img/optimized/book-01.webp"
-                                                alt="Doctor conducting home visit for elderly patient in Cairo - Anees Health"
-                                                width={600}
-                                                height={400}
-                                                className="img-fluid"
-                                                sizes="(max-width: 992px) 100vw, 600px"
-                                                style={{ width: '100%', height: 'auto' }}
-                                                loading="lazy"
-                                                quality={85}
-                                            />
-                                    </div>
-                                    <div className="col-sm-6">
-                                            <Image
                                                 src="/assets/img/optimized/book-02.webp"
                                                 alt="Professional home nursing care services Egypt - Anees Health"
                                                 width={400}
                                                 height={400}
                                                 className="img-fluid"
-                                                sizes="(max-width: 576px) 50vw, 400px"
-                                                style={{ width: '100%', height: 'auto' }}
-                                                loading="lazy"
-                                                quality={85}
-                                            />
-                                    </div>
-                                    <div className="col-sm-6">
-                                            <Image
-                                                src="/assets/img/optimized/book-03.webp"
-                                                alt="Home physiotherapy session for rehabilitation - Anees Health Egypt"
-                                                width={400}
-                                                height={400}
-                                                className="img-fluid"
-                                                sizes="(max-width: 576px) 50vw, 400px"
+                                                sizes="(max-width: 992px) 100vw, 600px"
                                                 style={{ width: '100%', height: 'auto' }}
                                                 loading="lazy"
                                                 quality={85}

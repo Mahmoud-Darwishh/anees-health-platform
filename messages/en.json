@@ -237,7 +237,7 @@
       "badge": "Health Packages",
       "title": "Comprehensive Care Packages for Your Needs",
       "subtitle": "Choose the perfect health package designed to support your specific health journey",
-      "book_now": "Booking Now",
+      "book_now": "Book Now",
       "contact_note": "Have questions or need a custom package? We're here to help.",
       "contact_us": "Contact Us",
       "contact_us_aria": "Contact us to learn more about our health packages",
@@ -352,18 +352,6 @@
         "title": "24/7 Support",
         "description": "Round-the-clock medical assistance"
       }
-    },
-    "services": {
-      "title": "Our Services",
-      "description": "Comprehensive healthcare solutions for everyone",
-      "multi_speciality": "Multi Speciality Treatments & Doctors",
-      "lab_testing": "Lab Testing Services",
-      "medicines": "Medicines & Supplies",
-      "hospitals": "Hospitals & Clinics",
-      "health_care": "Health Care Services",
-      "healthcare": "Health Care Services",
-      "talk_doctors": "Talk to Doctors",
-      "home_care": "Home Care Services"
     },
     "ourServices": {
       "label": "Our Services",
