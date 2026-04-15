@@ -411,20 +411,6 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Defer non-critical legacy CSS */}
-        <Script id="defer-customstyleclient-css" strategy="lazyOnload">
-          {`
-            (function () {
-              if (document.querySelector('link[data-deferred-css="customstyleclient"]')) return;
-              var link = document.createElement('link');
-              link.rel = 'stylesheet';
-              link.href = '/assets/css/customstyleclient.css';
-              link.setAttribute('data-deferred-css', 'customstyleclient');
-              document.head.appendChild(link);
-            })();
-          `}
-        </Script>
-
         {/* Meta Pixel - Lazy load */}
         <Script id="facebook-pixel" strategy="lazyOnload">
           {`

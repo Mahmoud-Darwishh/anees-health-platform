@@ -30,7 +30,7 @@ const SectionPackages: React.FC = () => {
             const className = packageThemes[packageId];
             
             return (
-              <div key={packageId} className="col-lg-4 col-md-6">
+              <div key={packageId} className="col-lg-4 col-md-6 col-12">
                 <div className={`package-card ${className}`}>
                   <div className="package-header">
                     <p className="package-tagline">{pkg.tagline}</p>

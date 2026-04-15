@@ -29,14 +29,14 @@ const SectionLogos: React.FC = () => {
                     </div>
                     <div className="row justify-content-center mt-5">
                         {clientLogos.map((logo) => (
-                            <div key={logo.id} className="col-lg-2 col-md-3 col-sm-4 col-4 mb-5">
+                            <div key={logo.id} className="col-lg-2 col-md-3 col-sm-4 col-6 mb-4">
                                 <div 
-                                    className="logo-item p-3" 
+                                    className="logo-item p-2 p-md-3" 
                                     style={{ 
                                         display: 'flex', 
                                         alignItems: 'center', 
                                         justifyContent: 'center',
-                                        minHeight: '120px',
+                                        minHeight: '90px',
                                         position: 'relative'
                                     }}
                                 >
@@ -46,10 +46,9 @@ const SectionLogos: React.FC = () => {
                                         width={logo.width}
                                         height={logo.height}
                                         style={{ 
-                                            height: 'auto', 
+                                            width: '100%',
+                                            height: 'auto',
                                             maxHeight: '80px', 
-                                            width: 'auto', 
-                                            maxWidth: '100%',
                                             objectFit: 'contain' 
                                         }}
                                         sizes="(max-width: 576px) 33vw, (max-width: 992px) 25vw, 150px"

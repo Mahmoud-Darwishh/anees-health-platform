@@ -243,3 +243,96 @@
   }
 }
 
+@media (max-width: 479.98px) {
+  .services-ribbon-track {
+    gap: 1.3rem;
+    padding: 0.6rem 0.75rem;
+    animation-duration: 22s;
+  }
+
+  .services-ribbon-item {
+    &::after {
+      width: 4px;
+      height: 4px;
+      margin-inline-start: 0.65rem;
+    }
+
+    span {
+      font-size: 0.82rem;
+    }
+  }
+}
+
+// ─── Doctor section mobile fixes ────────────────────────────────
+// Touch-target compliant nav buttons on mobile
+@media (max-width: 767.98px) {
+  .owl-nav.nav-bottom {
+    margin-top: 20px;
+  }
+
+  .owl-nav.nav-bottom .owl-prev,
+  .owl-nav.nav-bottom .owl-next {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+  }
+
+  .owl-nav.nav-bottom .owl-next {
+    margin-left: 14px;
+  }
+
+  .doctor-section {
+    padding: 50px 0 40px;
+
+    .section-header {
+      margin-bottom: 28px;
+
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .doctor-section {
+    padding: 40px 0 30px;
+
+    .section-header h2 {
+      font-size: 1.375rem;
+    }
+  }
+
+  // Full-width single doctor card on small phones
+  .home-doctor-slide {
+    padding: 4px 4px;
+  }
+}
+
+// ─── FAQ section mobile refinements ─────────────────────────────
+@media (max-width: 575.98px) {
+  .faq-section {
+    padding: 40px 0 30px;
+
+    .section-header h2 {
+      font-size: 1.375rem;
+    }
+  }
+
+  .accordion-button {
+    font-size: 0.9rem;
+    padding: 0.875rem 1rem;
+  }
+}
+
+// ─── Book section mobile refinements ────────────────────────────
+@media (max-width: 575.98px) {
+  .bookus-section {
+    padding: 40px 0 30px;
+
+    .section-header h2 {
+      font-size: 1.375rem;
+    }
+  }
+}
+
