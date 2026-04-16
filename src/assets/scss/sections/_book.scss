@@ -68,4 +68,20 @@
       }
     }
   }
+
+  [dir='rtl'] {
+    .bookus-section {
+      .book-item {
+        text-align: center;
+
+        .book-icon {
+          margin-inline: auto;
+        }
+
+        .book-info {
+          text-align: center;
+        }
+      }
+    }
+  }
 }
