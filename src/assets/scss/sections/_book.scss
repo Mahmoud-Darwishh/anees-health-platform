@@ -72,6 +72,9 @@
   [dir='rtl'] {
     .bookus-section {
       .book-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         text-align: center;
 
         .book-icon {
@@ -81,6 +84,7 @@
         }
 
         .book-info {
+          width: 100%;
           text-align: center;
 
           h6,
