@@ -33,7 +33,6 @@ export const metadata: Metadata = {
     icon: '/assets/img/fav.png',
     apple: '/logos/anees-health-logo.png',
   },
-  manifest: '/manifest.json',
   openGraph: {
     title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
     description: 'Trusted home healthcare and telemedicine across Egypt: doctor home visits, skilled nursing, physiotherapy, lab at home, chronic disease management, and 24/7 medical support for seniors and families.',

@@ -1,11 +1,13 @@
 ﻿import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { locales, type Locale } from '@/i18n/request';
 import WhatsAppButton from '@/components/common/WhatsAppButton';
 import FloatingIconsOnScroll from '@/components/common/FloatingIconsOnScroll';
+import PwaInstallPrompt from '@/components/common/PwaInstallPrompt';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import {
   generateOrganizationSchema,
@@ -14,6 +16,19 @@ import {
 } from '@/lib/utils/structured-data';
 import '@/styles/globals.scss';
 import '@/styles/legacy.scss';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const normalizedLocale = locale === 'ar' ? 'ar' : 'en';
+
+  return {
+    manifest: `/manifest-${normalizedLocale}.webmanifest`,
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -59,6 +74,7 @@ export default async function LocaleLayout({
         <FloatingIconsOnScroll />
         <WhatsAppButton />
         <MobileBottomNav />
+        <PwaInstallPrompt />
       </div>
       {/* Bootstrap JS */}
       <Script

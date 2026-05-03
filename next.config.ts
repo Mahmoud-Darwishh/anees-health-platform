@@ -1,7 +1,25 @@
 ﻿import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import withPWAInit from '@ducanh2912/next-pwa';
+import { runtimeCaching } from '@ducanh2912/next-pwa';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const withPWA = withPWAInit({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development' && process.env.ENABLE_PWA_DEV !== 'true',
+  register: true,
+  reloadOnOnline: true,
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  customWorkerSrc: 'worker',
+  workboxOptions: {
+    runtimeCaching,
+    cleanupOutdatedCaches: true,
+  },
+  fallbacks: {
+    document: '/~offline',
+  },
+});
 
 const nextConfig: NextConfig = {
   // Image optimization for WebP and AVIF formats
@@ -21,6 +39,9 @@ const nextConfig: NextConfig = {
   sassOptions: {
     silenceDeprecations: ['legacy-js-api'],
     sourceMap: false,
+  },
+  env: {
+    NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version ?? '1.1.0',
   },
   async headers() {
     return [
@@ -76,4 +97,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withPWA(withNextIntl(nextConfig));

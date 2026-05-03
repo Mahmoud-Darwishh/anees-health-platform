@@ -1,0 +1,77 @@
+@use '../../assets/scss/utils/variables';
+
+.prompt {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--mobile-bottom-nav-offset) + 20px);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+  border: 1px solid #c8ddf5;
+  box-shadow: 0 12px 30px rgba(15, 48, 87, 0.16);
+}
+
+.title {
+  margin: 0;
+  color: variables.$brand-dark-blue;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.description {
+  margin: 0;
+  color: #3b567a;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary {
+  background: #0a67c6;
+  color: #ffffff;
+}
+
+.secondary {
+  background: #ecf2fb;
+  color: #143f73;
+}
+
+.status {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #325581;
+}
+
+@media (min-width: 768px) {
+  .prompt {
+    left: auto;
+    max-width: 430px;
+    right: 16px;
+    bottom: 18px;
+  }
+}
+
+@media (display-mode: standalone) {
+  .prompt {
+    display: none;
+  }
+}

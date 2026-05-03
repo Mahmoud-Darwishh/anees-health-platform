@@ -62,6 +62,45 @@ npm run build
 npm start
 ```
 
+## Progressive Web App (PWA)
+
+- Built with `@ducanh2912/next-pwa` and Workbox runtime caching.
+- Locale-aware manifests:
+	- `/manifest-en.webmanifest` starts at `/en`
+	- `/manifest-ar.webmanifest` starts at `/ar`
+- Offline fallback route: `/~offline`
+- Install/update prompt and notification controls:
+	- shared prompt component in common UI
+	- full settings screen at `/en/settings/pwa` and `/ar/settings/pwa`
+
+### Push Notifications Backend
+
+- Public key endpoint: `GET /api/pwa/public-key`
+- Subscription management: `POST` and `DELETE /api/pwa/subscriptions`
+- Protected sending endpoint: `POST /api/pwa/send`
+- Subscription storage: in-memory.
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+ENABLE_PWA_DEV=false
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=...
+VAPID_PRIVATE_KEY=...
+VAPID_SUBJECT=mailto:security@aneeshealth.com
+PWA_PUSH_SERVER_KEY=...
+```
+
+### Send Notification Example
+
+```bash
+curl -X POST http://localhost:3000/api/pwa/send \
+	-H "Content-Type: application/json" \
+	-H "x-pwa-server-key: YOUR_PWA_PUSH_SERVER_KEY" \
+	-d '{"title":"Anees Update","body":"Your appointment has been updated","url":"/en/booking"}'
+```
+
 ## Roadmap
 
 - Booking: normalized entities (patients, providers, slots, appointments, payments) with SSR-friendly flows.

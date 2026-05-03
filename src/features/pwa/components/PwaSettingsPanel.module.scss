@@ -1,0 +1,90 @@
+@use '../../../assets/scss/utils/variables';
+
+.wrapper {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px 12px 56px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  color: variables.$brand-dark-blue;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #496485;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #d9e6f8;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(15, 48, 87, 0.08);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: variables.$brand-dark-blue;
+}
+
+.meta {
+  margin-top: 8px;
+  color: #4c6787;
+  font-size: 0.92rem;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary {
+  background: #0a67c6;
+  color: #ffffff;
+}
+
+.secondary {
+  background: #ebf3ff;
+  color: #16467d;
+}
+
+.status {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f2f8ff;
+  color: #2f557f;
+  font-size: 0.86rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
