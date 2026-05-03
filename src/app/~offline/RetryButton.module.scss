@@ -1,0 +1,21 @@
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #0a67c6;
+  color: #ffffff;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  &:hover {
+    background: #0758a9;
+  }
+}
+
+.retryIcon {
+  flex-shrink: 0;
+}
