@@ -1,6 +1,6 @@
 ﻿# Anees Health Platform
 
-A bilingual (English/Arabic) health-tech platform built with Next.js (App Router) and TypeScript, designed for long-term scalability across telemedicine, booking, and real-time chat.
+A bilingual (English/Arabic) health-tech platform built with Next.js (App Router) and TypeScript, designed for long-term scalability across EHR, telemedicine, booking, and real-time chat.
 
 ## Highlights
 
