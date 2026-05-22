@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(npx eslint *)",
+      "Read(//c/Users/madyo/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/4a9981cc-3afa-4ab9-9820-5322703af413/6f350e4e-8c86-4d37-ac6c-e29e3368ca4f/skills/xlsx/**)",
+      "Bash(python -c ' *)",
+      "Bash(npm install *)"
+    ]
+  }
+}

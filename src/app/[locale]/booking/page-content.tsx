@@ -6,7 +6,7 @@ import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
-import BookingForm from '@/components/booking/booking-form';
+import BookingForm from '@/features/booking/components/booking-form';
 import { BookingFormState, PackageType } from '@/lib/models/booking.types';
 import styles from './page.module.scss';
 

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import crypto from 'crypto';
-import PaymentResult from '@/components/booking/payment-result';
+import PaymentResult from '@/features/booking/components/payment-result';
 
 interface PaymentRedirectPageProps {
   params: Promise<{ locale: string }>;

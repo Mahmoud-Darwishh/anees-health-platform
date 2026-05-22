@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
-import DoctorGrid from '@/components/doctors/doctorgrid/doctors-grid';
+import DoctorGrid from '@/features/doctors/components/doctorgrid/doctors-grid';
 import { generateDoctorsMetadata } from '@/lib/utils/metadata';
 import {
   generateDoctorsCollectionSchema,

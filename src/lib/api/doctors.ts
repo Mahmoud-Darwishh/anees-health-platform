@@ -14,7 +14,7 @@ import { join } from 'path';
  */
 function loadDoctorsData(): LocalizedDoctorData {
   try {
-    const basePath = join(process.cwd(), 'src', 'components', 'doctors', 'doctorgrid');
+    const basePath = join(process.cwd(), 'src', 'features', 'doctors', 'components', 'doctorgrid');
     
     const enPath = join(basePath, 'doctors.en.json');
     const arPath = join(basePath, 'doctors.ar.json');

@@ -1,276 +1,281 @@
-# AI Contributor Instructions – Health-Tech Platform (Next.js)
+# AI Contributor Instructions — Anees Health Platform
 
-You are an AI engineering assistant contributing to a **production-grade, bilingual health-tech platform** built with **Next.js (App Router) and TypeScript**.
+You are contributing to a **production-grade, bilingual (EN/AR) health-tech platform** built with **Next.js 16 App Router, React 19, and TypeScript strict mode**. Target region: MENA (starting Egypt). The platform will eventually handle PHI, so **security, accessibility, and i18n are not optional**.
 
-Your goal is to **produce clean, scalable, secure, and accessible code** suitable for a regulated medical domain.
+Your output must reflect the standards of a senior engineer building a regulated, long-lived medical platform.
 
 ---
 
 ## 0. Quick Start
 
-### Build & Run Commands
 ```bash
-npm run dev    # Dev server → http://localhost:3000/en  (also /ar)
-npm run build  # Production build
-npm run lint   # ESLint (next/core-web-vitals + TypeScript)
+npm run dev      # http://localhost:3000/en  (also /ar)
+npm run build    # Production build
+npm run lint     # ESLint (next/core-web-vitals + TypeScript)
+npx tsc --noEmit # Type check only
 ```
-No test runner is configured yet (Playwright/Vitest planned — do not add tests without being asked).
 
-### Key Exemplar Files
+**No test runner is configured yet** (Vitest/Playwright planned — do not add tests without being asked).
+
+### Key exemplar files
 
 | Concern | File |
-|---------|------|
+|---|---|
 | Locale layout, RTL/LTR, providers | `src/app/[locale]/layout.tsx` |
-| Client component + i18n hooks | `src/components/booking/booking-form.tsx` |
+| Client component + i18n hooks | `src/features/booking/components/booking-form.tsx` |
+| Server-side data loader (current pattern) | `src/lib/api/doctors.ts` |
 | Reveal animation hook | `src/hooks/useReveal.ts` |
 | Design tokens | `src/assets/scss/utils/variables.scss` |
 | Responsive mixins | `src/assets/scss/utils/mixins.scss` |
-| Domain types | `src/types/index.ts` |
+| Domain types | `src/lib/models/{booking,doctor}.types.ts` |
 | i18n configuration | `src/i18n/request.ts` |
+| Service worker (push + offline) | `worker/index.ts` |
+| Locale-aware PWA manifest | `public/manifest-{en,ar}.webmanifest` |
 
 ---
 
 ## 1. Project Context
 
-**Platform characteristics**
-
-* Framework: **Next.js (App Router) + TypeScript**
-* Localization: **English (`/en`) & Arabic (`/ar`)**
-* Directionality: **LTR / RTL**
-* Domain: **Healthcare / Telemedicine**
-* Target region: **MENA (starting with Egypt)**
-
-**Core architectural goals**
-
-* Long-term scalability
-* SSR-first where possible
-* Accessibility & internationalization by default
-* Future readiness for booking, telemedicine, chat, payments, and dashboards
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript strict
+- **i18n:** `next-intl` 4.6 — locales: `en`, `ar` (LTR / RTL)
+- **Styling:** SCSS modules + design tokens (no Tailwind, no styled-components)
+- **PWA:** `@ducanh2912/next-pwa` with custom worker
+- **Maps:** Leaflet (coverage page) + GeoJSON in `public/assets/coverage/`
+- **Payments:** Kashier (HMAC-signed webhooks)
+- **Database:** None yet — doctor data is JSON; bookings are not persisted
+- **Auth:** None yet
+- **Domain:** Healthcare / telemedicine
 
 ---
 
-## 2. Non-Negotiable Engineering Principles
+## 2. Current Architecture
+
+```
+src/
+├── app/                         # Next.js routes (App Router)
+│   ├── [locale]/                # Localized routes (en/ar)
+│   │   ├── (about)/about-us
+│   │   ├── (contact)/contact-us
+│   │   ├── (legal)/{privacy-policy,terms-and-conditions}
+│   │   ├── booking
+│   │   ├── coverage
+│   │   ├── doctors/[slug]
+│   │   ├── services/[slug]
+│   │   ├── specialties/[slug]
+│   │   ├── payment/redirect
+│   │   └── settings/pwa
+│   ├── api/                     # Route handlers (bookings, coverage, pwa)
+│   └── ~offline/                # PWA offline fallback
+│
+├── features/                    # Domain modules — feature-first
+│   ├── booking/components/
+│   ├── doctors/components/{doctorgrid,profile}
+│   ├── coverage/components/
+│   └── pwa/{components,hooks}
+│
+├── components/                  # Truly shared UI (NOT domain-specific)
+│   ├── common/                  # Reveal, WhatsApp, PwaInstallPrompt, RelatedLinks
+│   ├── layout/                  # Header, Footer, Breadcrumb, MobileBottomNav
+│   └── sections/home/           # Home page section compositions
+│
+├── lib/
+│   ├── api/                     # Server-side data access (doctors.ts)
+│   ├── config/                  # App config, booking pricing
+│   ├── models/                  # Domain types (booking.types, doctor.types)
+│   ├── pwa/                     # subscription-store, push helpers
+│   ├── seo/                     # Search/discovery
+│   └── utils/                   # logger, app-logger, slug, structured-data, metadata
+│
+├── hooks/                       # Cross-cutting hooks (useReveal)
+├── i18n/                        # next-intl request config
+├── assets/scss/                 # SCSS architecture (base, layout, components, pages, utils)
+├── styles/                      # Global stylesheet entry
+└── types/                       # Global TS types
+```
+
+### Where new code belongs
+
+- **Domain-specific UI / hooks / services** → `src/features/<domain>/`
+- **App-wide UI primitives** (used by 3+ unrelated features) → `src/components/`
+- **Cross-cutting utilities** (no feature ownership) → `src/lib/`
+- **Pages and API routes** → `src/app/`
+
+When a `features/<domain>/` module grows, follow this scalable layout:
+```
+features/<domain>/
+├── components/   # UI
+├── hooks/        # Feature-local hooks
+├── services/     # Business logic (callable from server actions + API routes)
+├── api/          # Client-side fetchers
+├── schemas/      # Zod (shared client+server)
+├── store/        # Feature state (Zustand)
+└── types/        # Feature types
+```
+
+---
+
+## 3. Non-Negotiable Engineering Principles
 
 ### Architecture
 
-* Prefer **server components** by default
-  → Use client components *only* when interactivity is required.
-* Keep **layout-level concerns** (Header, Footer, Providers) centralized.
-* Avoid duplicating logic across pages or locales.
-* UI must remain **thin**; business logic belongs in API routes or backend services.
+- **Server components by default.** Use `'use client'` only when you need state, effects, or browser APIs.
+- Keep layout-level concerns (Header, Footer, Providers) centralized in `app/[locale]/layout.tsx`.
+- UI is **thin** — business logic belongs in services / API routes, not components.
+- Never duplicate logic across pages or locales — extract to `lib/` or `features/<domain>/services/`.
 
 ### TypeScript
 
-* **Strict typing is mandatory**
-* Avoid `any` unless absolutely unavoidable (and explain why)
-* Prefer typed hooks, props, and domain models
-* Domain entities should be normalized and reusable
+- Strict typing is mandatory. Avoid `any` (and justify if unavoidable).
+- Prefer typed props, hooks, and domain models from `src/lib/models/`.
+- Domain entities should be normalized and reusable.
+
+### Path aliases
+
+- `@/*` → `src/*`. **Use it always** — no `../../` cross-folder relative imports.
 
 ---
 
-## 3. Styling & Design System Rules
+## 4. Styling & Design System
 
-* **No ad-hoc inline styles**
-
-  * Allowed only if no other option fits (and justify it)
-* Use:
-
-  * CSS Modules / SCSS
-  * Shared design tokens (colors, spacing, typography, motion)
-* Avoid `!important`
-* Prefer scoped, predictable class names
-* Prefrer **Sass @use** over `@import` for styles organization
-* prefer Bootstrap utility classes for layout and spacing where possible
-* Ensure RTL styles are handled correctly via layout and utility classes
-* Do not create custom RTL styles unless absolutely necessary
-* When creating lists of items (e.g., menus, social icons), ensure proper spacing and alignment for both LTR and RTL using utility classes or shared styles
+- **No ad-hoc inline styles.** Justify if no alternative exists.
+- Use:
+  - CSS Modules / SCSS Modules (co-located `.module.scss`)
+  - Shared tokens from `src/assets/scss/utils/variables.scss`
+  - Bootstrap utility classes for spacing/layout where appropriate
+- **`@use` only** — never `@import`. Modernize legacy `@import` you find.
+- Avoid `!important`. Prefer scoped, predictable class names.
+- Named breakpoints (`custom360`, `custom479`, `custom767`, `custom991`, `custom1199`, `md`, `lg`) live in `mixins.scss` — do not add ad-hoc pixel values.
+- Use `respond-above(bp)` / `respond-below(bp)` mixins, not media-query strings.
 
 ---
 
-## 4. Motion & Interactions
+## 5. Motion & Interactions
 
-* Use **IntersectionObserver-based reveal**
-
-  * `data-reveal` attributes + shared `<Reveal />` component
-* Do **not** use:
-
-  * AOS
-  * global animation hacks
-* Motion tokens must be centralized
-* Always respect:
-
-  * `prefers-reduced-motion`
-* Content must remain visible during SSR/CSR handoff
+- **`<Reveal as="..." />`** wrapper sets `data-reveal`; an IntersectionObserver fades content in.
+- Programmatic use: `useReveal(ref, deps, options)` — **always pass `locale`/`pathname` as deps** so animations replay on route change.
+- Motion tokens: `--reveal-duration`, `--reveal-ease`, `--reveal-distance` — never hardcode durations.
+- `prefers-reduced-motion` is respected automatically — do not add separate checks.
+- **No AOS, no global animation hacks.**
 
 ---
 
-## 5. Internationalization & RTL/LTR
+## 6. Internationalization & RTL
 
-* Locale **must be read from the route**
-* No hardcoded text or layout direction
-* All content belongs in **message bundles**
-* Layout, spacing, and alignment must adapt correctly to RTL
-* Accessibility must work in **both languages**
-
----
-
-## 6. Accessibility (Required)
-
-* Use semantic HTML
-* Provide:
-
-  * `aria-labels`
-  * proper focus states
-  * keyboard navigation
-* Ensure screen readers handle bilingual content correctly
-* Never break accessibility for visual polish
+- Locale **must be read from the route** (`useLocale()` client, `params.locale` server).
+- All copy lives in `messages/{en,ar}.json` — never hardcode strings.
+- Server: `getTranslations({ locale, namespace })`. Client: `useTranslations(namespace)`.
+- **`html[dir]` in `[locale]/layout.tsx` is the single source of truth.** Do not override `dir` on inner containers.
+- Timezone is hardcoded to `Africa/Cairo` in `NextIntlClientProvider` — update if expanding regions.
+- Accessibility must work in both languages (RTL focus order, screen reader pronunciation).
 
 ---
 
-## 7. Health-Tech & Security Awareness
+## 7. Accessibility (Required)
 
-You must assume:
-
-* Future handling of **PHI (Protected Health Information)**
-* Strict privacy and security requirements
-
-Therefore:
-
-* Never expose secrets client-side
-* Authentication must support **role-based access**:
-
-  * Patient
-  * Doctor
-  * Admin
-* Session handling must be secure
-* API boundaries must be explicit and auditable
+- Semantic HTML, proper headings, landmarks.
+- `aria-label`, visible focus states, full keyboard navigation.
+- Never sacrifice accessibility for visual polish.
+- Test screen readers in both locales.
 
 ---
 
-## 8. Future Feature Readiness
+## 8. Health-Tech & Security
 
-### Booking
+Assume the platform will handle **PHI (Protected Health Information)** in the near future. Therefore:
 
-* Design around normalized entities:
-
-  * Patients
-  * Providers
-  * Slots
-  * Appointments
-  * Payments
-* Flows must be SSR-friendly with client hydration
-
-### Telemedicine
-
-* Assume WebRTC or RTC provider
-* Separate:
-
-  * Signaling
-  * Media
-* Plan for:
-
-  * Secure tokens
-  * Waiting rooms
-  * Session lifecycle
-
-### Chat
-
-* Abstract real-time layer (WebSocket / RTC)
-* Support:
-
-  * Persistence
-  * Read receipts
-  * Offline cache
-* Use components and tokens — no inline styling hacks
+- Never expose secrets client-side. Server-only logic stays out of `'use client'` files.
+- Validate every input at the API boundary — never rely solely on client validation.
+- Authentication (when added) must support role-based access: `patient`, `doctor`, `admin`.
+- Sessions must be secure (HTTP-only cookies, CSRF protection, rotation).
+- API boundaries must be explicit and auditable — log meaningful events (without logging PHI).
+- Any new third-party (analytics, RTC, CDN, payment SDK) requires updating **CSP headers in `next.config.ts`**.
 
 ---
 
-## 9. Observability & Reliability
+## 9. API & Data Patterns
 
-* Guard critical flows with:
-
-  * Retries
-  * Graceful degradation
-* Log meaningful events
-* Prepare for metrics and monitoring
-* Errors should fail **safely and visibly**
-
----
-
-## 10. Branching & Contribution Rules
-
-* `main` branch must always be production-ready
-* New features go in **feature branches**
-* Keep modules isolated:
-
-  * booking/
-  * telemedicine/
-  * chat/
-  * payments/
-  * dashboards/
+- **Route pattern:** `src/app/api/{domain}/{action}/route.ts`
+- **Server-only logic** (price calc, PHI validation, HMAC verification) must never be imported into client components.
+- **Current data sources:**
+  - Doctors: JSON files in `src/features/doctors/components/doctorgrid/`, loaded via `readFileSync` in `src/lib/api/doctors.ts`
+  - PWA subscriptions: in-memory `Map` in `src/lib/pwa/subscription-store.ts` (⚠️ lost on restart)
+  - Bookings: no persistence yet
+- **When DB is added:** create `features/<domain>/services/` for business logic and a thin repository in `src/lib/db/` for queries.
 
 ---
 
-## 11. AI Behavior Rules
+## 10. PWA Specifics
+
+- Custom service worker: `worker/index.ts` (push + notification click).
+- Manifests are locale-aware: `public/manifest-{en,ar}.webmanifest`; the layout sets `metadata.manifest` accordingly. The legacy `manifest.json` was removed.
+- Push backend lives at `/api/pwa/{public-key,subscriptions,send}`. `send` requires the `x-pwa-server-key` header.
+- VAPID env vars: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `PWA_PUSH_SERVER_KEY`.
+
+---
+
+## 11. Observability & Reliability
+
+- `@/lib/utils/app-logger` — general server logger (suppresses debug/info in production).
+- `@/lib/utils/logger` — **coverage-check file logging only** (writes JSONL). Do not repurpose for general logs.
+- Guard critical flows with retries and graceful degradation.
+- Errors should fail safely and visibly to the user, with structured logs server-side.
+- No error-tracking service is integrated yet (Sentry planned).
+
+---
+
+## 12. Future Feature Readiness
+
+| Feature | Design notes |
+|---|---|
+| **Booking** | Normalized entities (Patient, Provider, Slot, Appointment, Payment). SSR-friendly, client hydration for interactivity. |
+| **Telemedicine** | Plan around WebRTC or RTC provider. Separate signaling vs media. Secure tokens, waiting rooms, session lifecycle. |
+| **Chat** | Abstract real-time layer (WebSocket / RTC). Support persistence, read receipts, offline cache. |
+| **EHR** | Strict access control, audit logs, encryption at rest. Plan schema before implementing. |
+| **Dashboards** | Patient + doctor + admin views. RBAC enforced at API + UI. |
+
+Keep feature modules isolated under `src/features/` — do not couple them through `components/`.
+
+---
+
+## 13. Scaling Roadmap (Pending Decisions)
+
+The platform is **frontend-scaffold-ready but not backend-ready**. Before adding heavy features, these decisions need to be made — confirm with the maintainer first:
+
+1. **Database + ORM** → Postgres + Prisma recommended
+2. **Auth** → Auth.js (NextAuth v5) or Clerk
+3. **Validation** → Zod (shared client+server schemas)
+4. **State management** → Zustand (cross-page flows) + TanStack Query (server cache)
+5. **Forms** → `react-hook-form` + Zod resolver
+6. **Observability** → Sentry + `pino` structured logging
+7. **Testing** → Vitest (unit) + Playwright (e2e)
+8. **Env validation** → `@t3-oss/env-nextjs` to fail fast on missing vars
+9. **Compliance** → encryption at rest, audit log table, RBAC, BAA-eligible vendors if handling real PHI
+
+---
+
+## 14. Known Pitfalls
+
+| Pitfall | Where | Guidance |
+|---|---|---|
+| **Doctors JSON path is hardcoded** | `src/lib/api/doctors.ts` uses `readFileSync` with a literal path | Any move/rename of the JSON files must update the loader. |
+| **PWA subscriptions volatile** | `src/lib/pwa/subscription-store.ts` | In-memory `Map`; lost on restart. Move to DB before production. |
+| **CSP must be updated for new third-parties** | `next.config.ts` headers | Adding analytics, RTC, CDN, payment SDK → update `Content-Security-Policy`. |
+| **Kashier webhook** | `src/app/api/bookings/payment/webhook/route.ts` | Validates HMAC; never log raw payloads. |
+| **`cleanPhoneNumber()`** | Egypt-specific E.164 formatting | Flag as tech debt when internationalizing. |
+| **`useReveal` deps missing** | Always pass `locale`/`pathname` as deps | Without them, animations don't replay on route change. |
+| **`html[dir]` overrides** | Set once in `[locale]/layout.tsx` | Do not override on inner elements. |
+| **Bootstrap loaded via `<Script>`** | Coexists with SCSS modules | Do not introduce Tailwind — CSS isolation conflict. |
+| **PHI logging** | Anywhere | Never log identifiers, names, or contact info. Hash if needed (see `logCoverageCheck`). |
+
+---
+
+## 15. AI Behavior Rules
 
 When generating code or suggestions:
 
-* Prefer **clarity over cleverness**
-* Prefer **reusability over shortcuts**
-* Prefer **explicitness over magic**
-* If unsure, ask for clarification instead of guessing
-* Never introduce patterns that contradict this document
-
-Your output should reflect the standards of a **senior engineer building a regulated, long-lived medical platform**.
-
----
-
-## 12. Implementation Details (Concrete)
-
-### i18n — next-intl 4.6
-
-* Plugin registered in `next.config.ts` via `createNextIntlPlugin('./src/i18n/request.ts')`
-* Messages: `/messages/en.json` and `/messages/ar.json`
-* Server components: `getTranslations({ locale, namespace })`
-* Client components: `useTranslations(namespace)` and `useLocale()`
-* Timezone hardcoded to `"Africa/Cairo"` in `NextIntlClientProvider` — update for other regions
-
-### SCSS Conventions
-
-* **`@use` only** — never `@import`; modernize any legacy files you encounter
-* Tokens path: `src/assets/scss/utils/variables.scss`
-* Responsive helpers: `respond-above(bp)` / `respond-below(bp)` defined in `mixins.scss`
-  * Named breakpoints include `custom360`, `custom479`, `custom767`, `custom991`, `custom1199` — use these, do not add ad-hoc pixel values
-* Component styles: co-located `.module.scss` files imported directly into the TSX file
-* Global aggregation: `src/styles/globals.scss` — register new section/component SCSS here
-
-### Reveal Animations
-
-* Wrap sections with `<Reveal as="section" className="...">` — this sets `data-reveal`
-* For programmatic use: `useReveal(ref, deps, options)` — pass `locale` / `pathname` as deps so animations replay on route change
-* Motion tokens: `--reveal-duration`, `--reveal-ease`, `--reveal-distance` — never hardcode durations
-* The hook automatically respects `prefers-reduced-motion` — do not add separate checks
-
-### API Routes
-
-* Pattern: `src/app/api/{domain}/{action}/route.ts`
-* Price calculation (`calculateBookingPrice()`) and PHI validation live **server-side only** — never import into client components
-* Validate input at the API boundary; do not rely solely on client-side validation
-
-### Path Aliases
-
-* `@/*` resolves to `src/*` (set in `tsconfig.json`) — use this everywhere, no relative `../../` imports
-
----
-
-## 13. Known Pitfalls
-
-| Pitfall | Guidance |
-|---------|----------|
-| **`.tsx.old` files in root** | Ignore; do not re-add to `tsconfig.json` `include` |
-| **Bootstrap loaded via `<Script>`** | Do not mix with Tailwind — CSS isolation conflict |
-| **`cleanPhoneNumber()`** | Egypt-specific E.164 formatting; flag as tech-debt if internationalizing |
-| **`useReveal` deps missing** | Always pass locale/pathname as deps — animations will not replay without them |
-| **CSP in `next.config.ts`** | Any new third-party integration (analytics, RTC, CDN) requires updating `Content-Security-Policy` headers |
-| **Direction set at HTML root** | `html[dir]` is the single source of truth — do not override `dir` on inner containers |
-| **No database yet** | Booking/doctor data is mocked; TODOs in API route files mark pending DB integration — design schema before implementing |
+- Prefer **clarity over cleverness**, **reusability over shortcuts**, **explicitness over magic**.
+- If unsure, **ask for clarification** — do not guess.
+- Never introduce patterns that contradict this document.
+- Do **not** add tests, dependencies, abstractions, or refactors that weren't requested.
+- When you discover dead code, stale references, or hardcoded paths during a task, **flag them** — do not silently delete or restructure.
+- **Branch hygiene:** `main` stays production-ready. New features → feature branches. Keep feature modules isolated.

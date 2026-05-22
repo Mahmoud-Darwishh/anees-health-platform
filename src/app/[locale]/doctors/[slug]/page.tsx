@@ -17,7 +17,7 @@ import {
 } from '@/lib/utils/structured-data';
 import { generateDoctorProfileMetadata } from '@/lib/utils/metadata';
 import { config } from '@/lib/config';
-import DoctorProfileContent from '@/components/doctors/profile/DoctorProfileContent';
+import DoctorProfileContent from '@/features/doctors/components/profile/DoctorProfileContent';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';

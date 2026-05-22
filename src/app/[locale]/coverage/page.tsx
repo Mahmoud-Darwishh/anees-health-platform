@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
-import CoveragePageContent from '@/components/sections/coverage/CoveragePageContent';
+import CoveragePageContent from '@/features/coverage/components/CoveragePageContent';
 import { generateCoverageMetadata } from '@/lib/utils/metadata';
 import {
   generateBreadcrumbSchema,

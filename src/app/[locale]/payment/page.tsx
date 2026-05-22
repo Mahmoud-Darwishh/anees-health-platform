@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import PaymentGateway from '@/components/booking/payment-gateway';
+import PaymentGateway from '@/features/booking/components/payment-gateway';
 
 interface PaymentPageProps {
   params: Promise<{ locale: string }>;

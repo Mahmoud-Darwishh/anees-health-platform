@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Slider from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
-import { DoctorCard } from "@/components/doctors/doctorgrid/DoctorCard";
-import type { Doctor } from "@/components/doctors/doctorgrid/types";
-import doctorsDataEn from "../../doctors/doctorgrid/doctors.en.json";
-import doctorsDataAr from "../../doctors/doctorgrid/doctors.ar.json";
+import { DoctorCard } from "@/features/doctors/components/doctorgrid/DoctorCard";
+import type { Doctor } from "@/features/doctors/components/doctorgrid/types";
+import doctorsDataEn from "@/features/doctors/components/doctorgrid/doctors.en.json";
+import doctorsDataAr from "@/features/doctors/components/doctorgrid/doctors.ar.json";
 
 const SectionDoctor = () => {
   const t = useTranslations("home");

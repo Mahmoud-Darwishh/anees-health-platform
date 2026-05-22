@@ -7,7 +7,7 @@ import { useReveal } from '@/hooks/useReveal';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
-import CoverageCheckForm from '@/components/client/CoverageCheckForm';
+import CoverageCheckForm from '@/features/coverage/components/CoverageCheckForm';
 
 interface CoveragePageContentProps {
   locale: string;
