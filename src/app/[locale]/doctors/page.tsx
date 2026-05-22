@@ -63,7 +63,7 @@ export default async function DoctorsPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
       />
-      <DoctorGrid />
+      <DoctorGrid doctors={doctors} />
     </>
   );
 }

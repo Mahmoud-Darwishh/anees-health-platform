@@ -603,6 +603,67 @@ model Staff {
 }
 
 // ============================================================================
+// DOCTORS — Bilingual provider profiles (migrated from JSON)
+// ============================================================================
+
+model Doctor {
+  id                    Int      @id
+  slug                  String   @unique
+  image                 String
+  rating                Float
+  gender                String
+  location              String
+  experienceYears       Int
+  successRate           String
+  avgWaitTime           String
+  totalPatients         String
+  availabilityStatus    String
+  availabilityBadgeClass String
+  specialityColorClass  String
+  specialityTextClass   String
+  duration              String
+  channels              Json
+  languages             Json
+  clinics               Json
+  areaCoverage          Json
+  clinicDetails         Json
+  testimonials          Json
+  workHistory           Json?
+
+  // Pricing (stored as strings to match existing format e.g. "EGP 1500" / "N/A")
+  priceTelemedicine     String
+  priceHomeVisit        String
+  priceClinicVisit      String
+  consultationFee       String
+  maxConsultationFee    String
+
+  // English content
+  nameEn                String
+  specialityEn          String
+  professionalTitleEn   String
+  bioEn                 String?
+  certificationsEn      Json
+  educationEn           Json
+
+  // Arabic content
+  nameAr                String
+  specialityAr          String
+  professionalTitleAr   String
+  bioAr                 String?
+  certificationsAr      Json
+  educationAr           Json
+
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([slug])
+  @@index([specialityEn])
+  @@index([isActive])
+  @@map("doctors")
+}
+
+// ============================================================================
 // AUDIT LOG — Full history of every record change
 // ============================================================================
 

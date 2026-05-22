@@ -1,6 +1,23 @@
 import { PrismaClient } from '@prisma/client';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 const prisma = new PrismaClient();
+
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/^(dr\.|prof\.|dr)\s+/i, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function loadJson(filename: string): any[] {
+  const filePath = join(process.cwd(), 'src', 'features', 'doctors', 'components', 'doctorgrid', filename);
+  return JSON.parse(readFileSync(filePath, 'utf-8'));
+}
 
 async function main() {
   console.log('Seeding lookup tables...');
@@ -204,6 +221,70 @@ async function main() {
     });
   }
 
+  // ── Doctors ──────────────────────────────────────────────────────────────────
+  console.log('Seeding doctors...');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enDoctors: any[] = loadJson('doctors.en.json');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const arDoctors: any[] = loadJson('doctors.ar.json');
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const arById = new Map<number, any>(arDoctors.map((d) => [d.id, d]));
+
+  for (const en of enDoctors) {
+    const ar = arById.get(en.id) || en; // fallback to EN if AR missing
+
+    await prisma.doctor.upsert({
+      where: { id: en.id },
+      update: {},
+      create: {
+        id: en.id,
+        slug: generateSlug(en.doctorName),
+        image: en.image,
+        rating: en.rating,
+        gender: en.gender,
+        location: en.location,
+        experienceYears: en.experienceYears,
+        successRate: en.successRate,
+        avgWaitTime: en.avgWaitTime,
+        totalPatients: en.totalPatients,
+        availabilityStatus: en.availabilityStatus,
+        availabilityBadgeClass: en.availabilityBadgeClass,
+        specialityColorClass: en.specialityColorClass,
+        specialityTextClass: en.specialityTextClass,
+        duration: en.duration,
+        consultationFee: en.consultationFee,
+        maxConsultationFee: en.maxConsultationFee,
+        channels: en.channels,
+        languages: en.languages,
+        clinics: en.clinics,
+        areaCoverage: en.areaCoverage,
+        clinicDetails: en.clinicDetails,
+        testimonials: en.testimonials || [],
+        workHistory: en.workHistory || null,
+        priceTelemedicine: en.pricing?.telemedicine || 'N/A',
+        priceHomeVisit: en.pricing?.homeVisit || 'N/A',
+        priceClinicVisit: en.pricing?.clinicVisit || 'N/A',
+        // English
+        nameEn: en.doctorName,
+        specialityEn: en.speciality,
+        professionalTitleEn: en.professionalTitle,
+        bioEn: en.bio || null,
+        certificationsEn: en.certifications || [],
+        educationEn: en.education || [],
+        // Arabic
+        nameAr: ar.doctorName,
+        specialityAr: ar.speciality,
+        professionalTitleAr: ar.professionalTitle,
+        bioAr: ar.bio || null,
+        certificationsAr: ar.certifications || [],
+        educationAr: ar.education || [],
+      },
+    });
+  }
+
+  console.log(`Seeded ${enDoctors.length} doctors.`);
   console.log('Seed complete.');
 }
 

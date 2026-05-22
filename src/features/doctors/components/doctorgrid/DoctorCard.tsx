@@ -1,8 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
-import { generateDoctorSlug } from '@/lib/utils/slug';
-import doctorsDataEn from './doctors.en.json';
 import type { Doctor } from './types';
 
 type MessageValues = Record<string, string | number>;
@@ -14,20 +12,14 @@ interface DoctorCardProps {
   useGridColumn?: boolean;
 }
 
-// Canonical slugs derived from English names to stay stable across locales
-const canonicalSlugById = new Map<number, string>(
-  (doctorsDataEn as Doctor[]).map((doc) => [doc.id, generateDoctorSlug(doc.doctorName)])
-);
-
 export const DoctorCard = memo(function DoctorCard({
   doctor,
   locale,
   tg,
   useGridColumn = true,
 }: DoctorCardProps) {
-  // Generate stable slug from canonical (English) mapping to keep URLs identical across locales
-  const doctorSlug = canonicalSlugById.get(doctor.id) || generateDoctorSlug(doctor.doctorName);
-  const profileHref = `/${locale}/doctors/${doctorSlug}`;
+  // profileLink is already set to /doctors/<slug> by the data layer
+  const profileHref = `/${locale}${doctor.profileLink}`;
   const summaryText = (doctor.bio || '').trim();
   const summaryPreview =
     summaryText.length > 160 ? `${summaryText.slice(0, 160).trimEnd()}...` : summaryText;

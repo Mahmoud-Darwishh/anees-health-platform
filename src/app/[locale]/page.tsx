@@ -6,6 +6,7 @@ import {
   generateBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/utils/structured-data';
+import { getDoctors } from '@/lib/api/doctors';
 import { config } from '@/lib/config';
 
 export async function generateMetadata({
@@ -25,6 +26,9 @@ export default async function HomePage({
   const { locale } = await params;
   const baseUrl = config.api.baseUrl;
 
+  // Fetch doctors for the homepage featured slider (first 6 are shown)
+  const doctors = await getDoctors(locale as 'en' | 'ar');
+
   // Homepage breadcrumb
   const breadcrumbs = [
     {
@@ -43,7 +47,7 @@ export default async function HomePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
       />
-      <GeneralHomeOne />
+      <GeneralHomeOne doctors={doctors} />
     </>
   );
 }

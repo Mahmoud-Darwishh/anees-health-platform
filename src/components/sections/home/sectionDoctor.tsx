@@ -5,19 +5,20 @@ import Slider from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
 import { DoctorCard } from "@/features/doctors/components/doctorgrid/DoctorCard";
 import type { Doctor } from "@/features/doctors/components/doctorgrid/types";
-import doctorsDataEn from "@/features/doctors/components/doctorgrid/doctors.en.json";
-import doctorsDataAr from "@/features/doctors/components/doctorgrid/doctors.ar.json";
 
-const SectionDoctor = () => {
+interface SectionDoctorProps {
+  doctors: Doctor[];
+}
+
+const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
   const t = useTranslations("home");
   const locale = useLocale();
   const tg = (key: string, values?: Record<string, string | number>) =>
     t(`doctorGrid.${key}`, values);
-  const doctorsData = locale === 'ar' ? doctorsDataAr : doctorsDataEn;
   const isRTL = locale === "ar";
   const [slider, setSlider] = useState<Slider | null>(null);
   const [slidesToShow, setSlidesToShow] = useState<number>(1);
-  const featuredDoctors = useMemo(() => doctorsData.slice(0, 6) as Doctor[], [doctorsData]);
+  const featuredDoctors = useMemo(() => doctors.slice(0, 6), [doctors]);
 
   const resolveSlides = useMemo(() => {
     const resolver = (width: number) => {

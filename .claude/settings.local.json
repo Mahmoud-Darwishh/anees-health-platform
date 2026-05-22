@@ -7,7 +7,10 @@
       "Bash(node scripts/diagnose-env.mjs)",
       "Bash(node scripts/diagnose-kashier.mjs)",
       "Bash(npx tsx *)",
-      "Bash(cd \"c:/Users/madyo/Desktop/Anees NXTJS/anees-health-platform\" && rm -rf \"src/app/[locale]/payment/mock\" scripts/smoke-mock-payment.mjs && echo \"Removed mock files\" && ls \"src/app/[locale]/payment/\")"
+      "Bash(cd \"c:/Users/madyo/Desktop/Anees NXTJS/anees-health-platform\" && rm -rf \"src/app/[locale]/payment/mock\" scripts/smoke-mock-payment.mjs && echo \"Removed mock files\" && ls \"src/app/[locale]/payment/\")",
+      "WebFetch(domain:aneeshealth.com)",
+      "Bash(npx prisma *)",
+      "Bash(taskkill //F //IM node.exe)"
     ],
     "additionalDirectories": [
       "c:\\Users\\madyo\\Desktop\\Anees NXTJS\\anees-health-platform\\src\\app\\[locale]\\payment\\mock"

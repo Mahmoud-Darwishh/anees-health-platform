@@ -10,14 +10,16 @@ import { useReveal } from '@/hooks/useReveal';
 import { DoctorCard } from './DoctorCard';
 import { FilterSidebar } from './FilterSidebar';
 import { Pagination } from './Pagination';
-import doctorsDataAr from './doctors.ar.json';
-import doctorsDataEn from './doctors.en.json';
 import type { Doctor, FilterState, SortOrder } from './types';
 import { getChannels, getLanguages, uniqueSorted } from './utils';
 
 type MessageValues = Record<string, string | number>;
 
-const DoctorGrid = () => {
+interface DoctorGridProps {
+  doctors: Doctor[];
+}
+
+const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   const t = useTranslations('home');
   const tg = (key: string, values?: MessageValues) =>
     t(`doctorGrid.${key}`, values);
@@ -27,11 +29,6 @@ const DoctorGrid = () => {
   const searchParams = useSearchParams();
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   useReveal(wrapperRef, [locale]);
-
-  const doctors: Doctor[] = useMemo(
-    () => (locale === 'ar' ? (doctorsDataAr as Doctor[]) : (doctorsDataEn as Doctor[])),
-    [locale]
-  );
 
   // Calculate min and max prices from doctors with fallback values
   const prices = doctors
