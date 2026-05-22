@@ -36,10 +36,10 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Read Kashier credentials from env ─────────────────────────────
+    const mode = (process.env.KASHIER_MODE || 'live').toLowerCase();
     const secretKey = process.env.KASHIER_SECRET_KEY;
     const apiKey = process.env.KASHIER_API_KEY;
     const merchantId = process.env.KASHIER_MERCHANT_ID;
-    const mode = process.env.KASHIER_MODE || 'live';
 
     if (!secretKey || !apiKey || !merchantId) {
       console.error('[Payment] Missing Kashier environment variables');
@@ -55,6 +55,25 @@ export async function POST(request: NextRequest) {
     const merchantRedirect = `${siteUrl}/${displayLocale}/payment/redirect`;
     const serverWebhook =
       process.env.KASHIER_WEBHOOK || `${siteUrl}/api/bookings/payment/webhook`;
+
+    // Kashier (both live and test) rejects http/localhost URLs.
+    // Fail fast with a clear message so this isn't misdiagnosed as a credentials problem.
+    const isPublicHttps = /^https:\/\/(?!localhost|127\.|0\.0\.0\.0)/i.test(siteUrl);
+    if (!isPublicHttps) {
+      console.error(
+        `[Payment] ${mode} mode requires a public HTTPS NEXT_PUBLIC_SITE_URL. Got:`,
+        siteUrl,
+      );
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            `Payment gateway misconfigured: ${mode} mode needs a public HTTPS site URL. ` +
+            'Run a tunnel (cloudflared/ngrok) and set NEXT_PUBLIC_SITE_URL to the tunnel URL.',
+        },
+        { status: 503 },
+      );
+    }
 
     // ── Session expiry: 30 minutes from now ───────────────────────────
     const expireAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();

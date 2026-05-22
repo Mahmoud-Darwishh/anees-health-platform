@@ -41,7 +41,7 @@ npx tsc --noEmit # Type check only
 - **Styling:** SCSS modules + design tokens (no Tailwind, no styled-components)
 - **PWA:** `@ducanh2912/next-pwa` with custom worker
 - **Maps:** Leaflet (coverage page) + GeoJSON in `public/assets/coverage/`
-- **Payments:** Kashier (HMAC-signed webhooks)
+- **Payments:** Kashier (HMAC-signed webhooks). Two modes: `test` (sandbox), `live` (prod). Both require a public HTTPS site URL.
 - **Database:** None yet — doctor data is JSON; bookings are not persisted
 - **Auth:** None yet
 - **Domain:** Healthcare / telemedicine
@@ -260,7 +260,9 @@ The platform is **frontend-scaffold-ready but not backend-ready**. Before adding
 | **Doctors JSON path is hardcoded** | `src/lib/api/doctors.ts` uses `readFileSync` with a literal path | Any move/rename of the JSON files must update the loader. |
 | **PWA subscriptions volatile** | `src/lib/pwa/subscription-store.ts` | In-memory `Map`; lost on restart. Move to DB before production. |
 | **CSP must be updated for new third-parties** | `next.config.ts` headers | Adding analytics, RTC, CDN, payment SDK → update `Content-Security-Policy`. |
-| **Kashier webhook** | `src/app/api/bookings/payment/webhook/route.ts` | Validates HMAC; never log raw payloads. |
+| **Kashier modes** | `KASHIER_MODE` in `.env.local` | `test` (sandbox) and `live` (prod). Both require a public HTTPS `NEXT_PUBLIC_SITE_URL` — use cloudflared/ngrok for local dev. Test mode needs separate test credentials from Kashier dashboard. |
+| **`$` in env values** | `.env.local` | Escape literal `$` as `\$` — dotenv expands `$<name>` otherwise (silent truncation). |
+| **Kashier webhook** | `src/app/api/bookings/payment/webhook/route.ts` | Validates HMAC against `KASHIER_API_KEY`. Never log raw payloads. |
 | **`cleanPhoneNumber()`** | Egypt-specific E.164 formatting | Flag as tech debt when internationalizing. |
 | **`useReveal` deps missing** | Always pass `locale`/`pathname` as deps | Without them, animations don't replay on route change. |
 | **`html[dir]` overrides** | Set once in `[locale]/layout.tsx` | Do not override on inner elements. |

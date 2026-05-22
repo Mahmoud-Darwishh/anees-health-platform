@@ -61,14 +61,14 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
 
   // Validate signature if present
   const apiKey = process.env.KASHIER_API_KEY;
-  
+
   if (searchParams.signature && apiKey) {
     const queryParams = Object.fromEntries(
       Object.entries(searchParams).map(([key, value]) => [key, String(value)])
     );
-    
+
     const isValid = validateSignature(queryParams, apiKey);
-    
+
     if (!isValid) {
       console.error('❌ Invalid payment signature');
       // In production, you might want to show an error page

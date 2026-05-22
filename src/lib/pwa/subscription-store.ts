@@ -1,66 +1,62 @@
+import { prisma } from '@/lib/db/prisma';
+
 export type AppLocale = 'en' | 'ar';
 
 export type StoredPushSubscription = {
   endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
+  keys: { p256dh: string; auth: string };
   locale: AppLocale;
   createdAt: string;
   updatedAt: string;
 };
 
-type SubscriptionStore = Map<string, StoredPushSubscription>;
-
-type GlobalWithStore = typeof globalThis & {
-  __aneesPushStore?: SubscriptionStore;
-};
-
-const globalWithStore = globalThis as GlobalWithStore;
-
-const store = globalWithStore.__aneesPushStore ?? new Map<string, StoredPushSubscription>();
-
-if (!globalWithStore.__aneesPushStore) {
-  globalWithStore.__aneesPushStore = store;
-}
-
-export function upsertSubscription(
+export async function upsertSubscription(
   subscription: Pick<StoredPushSubscription, 'endpoint' | 'keys' | 'locale'>
 ): Promise<StoredPushSubscription> {
-  const existing = store.get(subscription.endpoint);
-  const now = new Date().toISOString();
-
-  const normalized: StoredPushSubscription = {
-    endpoint: subscription.endpoint,
-    keys: {
+  const record = await prisma.pushSubscription.upsert({
+    where: { endpoint: subscription.endpoint },
+    update: {
       p256dh: subscription.keys.p256dh,
       auth: subscription.keys.auth,
+      locale: subscription.locale,
     },
-    locale: subscription.locale,
-    createdAt: existing?.createdAt ?? now,
-    updatedAt: now,
+    create: {
+      endpoint: subscription.endpoint,
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+      locale: subscription.locale,
+    },
+  });
+
+  return {
+    endpoint: record.endpoint,
+    keys: { p256dh: record.p256dh, auth: record.auth },
+    locale: record.locale as AppLocale,
+    createdAt: record.createdAt.toISOString(),
+    updatedAt: record.updatedAt.toISOString(),
   };
-
-  store.set(subscription.endpoint, normalized);
-
-  return Promise.resolve(normalized);
 }
 
 export async function removeSubscription(endpoint: string) {
-  return store.delete(endpoint);
+  await prisma.pushSubscription.delete({ where: { endpoint } }).catch(() => null);
 }
 
-export async function listSubscriptions(locale?: AppLocale) {
-  const values = Array.from(store.values());
+export async function listSubscriptions(locale?: AppLocale): Promise<StoredPushSubscription[]> {
+  const records = await prisma.pushSubscription.findMany({
+    where: locale ? { locale } : undefined,
+  });
 
-  if (!locale) {
-    return values;
-  }
-  return values.filter((subscription) => subscription.locale === locale);
+  return records.map((r) => ({
+    endpoint: r.endpoint,
+    keys: { p256dh: r.p256dh, auth: r.auth },
+    locale: r.locale as AppLocale,
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  }));
 }
 
-export async function countSubscriptions(locale?: AppLocale) {
-  const subscriptions = await listSubscriptions(locale);
-  return subscriptions.length;
+export async function countSubscriptions(locale?: AppLocale): Promise<number> {
+  return prisma.pushSubscription.count({
+    where: locale ? { locale } : undefined,
+  });
 }

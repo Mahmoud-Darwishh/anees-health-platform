@@ -106,7 +106,9 @@ src/
 | **Doctors data is hardcoded JSON** | `src/features/doctors/components/doctorgrid/doctors.{en,ar}.json` | Loaded via `readFileSync` in `src/lib/api/doctors.ts`. Any path change must update that loader. |
 | **PWA subscriptions are in-memory** | `src/lib/pwa/subscription-store.ts` | Lost on server restart. Move to DB before production. |
 | **CSP in `next.config.ts`** | `next.config.ts` headers | Any new third-party (analytics, RTC, CDN, payment SDK) requires updating `Content-Security-Policy`. |
-| **Kashier webhook signing** | `src/app/api/bookings/payment/webhook/route.ts` | Validates HMAC; do not log raw payloads. |
+| **Kashier has 2 modes** | `KASHIER_MODE` in `.env.local` | `test` (test-api.kashier.io, sandbox), `live` (api.kashier.io, prod). BOTH reject `http://localhost` URLs — a tunnel (cloudflared/ngrok) is required for local dev. Test mode needs separate test credentials from the Kashier dashboard. |
+| **`$` in env values is expanded** | `.env.local` | dotenv treats `$<name>` as variable expansion. Escape literal `$` as `\$` (e.g. Kashier secret keys). |
+| **Kashier webhook signing** | `src/app/api/bookings/payment/webhook/route.ts` | Validates HMAC against `KASHIER_API_KEY`. Do not log raw payloads. |
 | **`cleanPhoneNumber()`** | Egypt-specific E.164 — flag when internationalizing. |
 | **`useReveal` deps** | Pass `locale`/`pathname` as deps so animations replay on route change. |
 | **PHI awareness** | Never log PHI. Never expose secrets client-side. Validate at API boundaries, not just client. |

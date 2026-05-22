@@ -4,9 +4,13 @@
       "Bash(npx tsc *)",
       "Bash(npx next *)",
       "Bash(npx eslint *)",
-      "Read(//c/Users/madyo/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/4a9981cc-3afa-4ab9-9820-5322703af413/6f350e4e-8c86-4d37-ac6c-e29e3368ca4f/skills/xlsx/**)",
-      "Bash(python -c ' *)",
-      "Bash(npm install *)"
+      "Bash(node scripts/diagnose-env.mjs)",
+      "Bash(node scripts/diagnose-kashier.mjs)",
+      "Bash(npx tsx *)",
+      "Bash(cd \"c:/Users/madyo/Desktop/Anees NXTJS/anees-health-platform\" && rm -rf \"src/app/[locale]/payment/mock\" scripts/smoke-mock-payment.mjs && echo \"Removed mock files\" && ls \"src/app/[locale]/payment/\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\madyo\\Desktop\\Anees NXTJS\\anees-health-platform\\src\\app\\[locale]\\payment\\mock"
     ]
   }
 }

@@ -1,0 +1,624 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum VisitStatus {
+  scheduled
+  in_progress
+  completed
+  cancelled
+  no_show
+  rescheduled
+}
+
+enum VisitType {
+  in_home
+  telemedicine
+}
+
+enum PatientGender {
+  M
+  F
+  other
+}
+
+enum PatientStatus {
+  new
+  active
+  lapsed
+  inactive
+}
+
+enum FamilyStatus {
+  active
+  inactive
+}
+
+enum ProviderStatus {
+  active
+  inactive
+  on_leave
+}
+
+enum ProviderPaymentType {
+  per_visit
+  package
+  salary
+  commission
+}
+
+enum ServiceStatus {
+  active
+  inactive
+  discontinued
+}
+
+enum CarePlanStatus {
+  active
+  completed
+  cancelled
+}
+
+enum InvoiceStatus {
+  issued
+  partial
+  paid
+  overdue
+  cancelled
+}
+
+enum InvoiceLinkedType {
+  visit
+  care_plan
+}
+
+enum OnlineBookingStatus {
+  pending
+  payment_pending
+  payment_completed
+  payment_failed
+  confirmed
+  cancelled
+  converted
+}
+
+enum OnlineVisitType {
+  homeVisit
+  telemedicine
+  package
+}
+
+enum OnlineServiceType {
+  doctorVisit
+  physiotherapy
+  nursing
+}
+
+enum OnlinePackageType {
+  haraka
+  wai
+  amal
+}
+
+enum StaffRole {
+  superadmin
+  admin
+  operator
+  finance
+  viewer
+}
+
+enum StaffStatus {
+  active
+  inactive
+  suspended
+}
+
+enum Locale {
+  en
+  ar
+}
+
+enum AuditAction {
+  create
+  update
+  delete
+}
+
+// ============================================================================
+// LOOKUP TABLES
+// ============================================================================
+
+model Area {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String
+  governorate   String
+  serviceActive Boolean  @default(true)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  families  Family[]
+  patients  Patient[]
+  providers Provider[]
+  visits    Visit[]
+
+  @@map("areas")
+}
+
+model ServiceCategory {
+  id                  String   @id @default(cuid())
+  code                String   @unique
+  name                String
+  defaultProviderRole String?
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  services Service[]
+
+  @@map("service_categories")
+}
+
+model ProviderRole {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  providers Provider[]
+  services  Service[]
+
+  @@map("provider_roles")
+}
+
+model PaymentMethod {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments        Payment[]
+  expenses        Expense[]
+  providerPayouts ProviderPayout[]
+
+  @@map("payment_methods")
+}
+
+model ExpenseCategory {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses Expense[]
+
+  @@map("expense_categories")
+}
+
+model ReferralSource {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  channelType String
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  patients Patient[]
+
+  @@map("referral_sources")
+}
+
+// ============================================================================
+// CORE TABLES
+// ============================================================================
+
+model Family {
+  id                  String       @id @default(cuid())
+  code                String       @unique
+  name                String?
+  primaryContactName  String?
+  primaryContactPhone String?
+  relationToPatients  String?
+  areaId              String?
+  registrationDate    DateTime     @db.Date
+  status              FamilyStatus @default(active)
+  notes               String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  area     Area?     @relation(fields: [areaId], references: [id])
+  patients Patient[]
+
+  @@index([areaId])
+  @@index([status])
+  @@map("families")
+}
+
+model Patient {
+  id               String        @id @default(cuid())
+  code             String        @unique
+  familyId         String?
+  fullName         String
+  phone            String
+  gender           PatientGender?
+  dateOfBirth      DateTime?     @db.Date
+  areaId           String?
+  addressDetail    String?
+  registrationDate DateTime      @db.Date @default(now())
+  primaryCaregiver String?
+  caregiverRelation String?
+  chiefComplaint   String?
+  referralSourceId String?
+  status           PatientStatus @default(new)
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  family         Family?         @relation(fields: [familyId], references: [id])
+  area           Area?           @relation(fields: [areaId], references: [id])
+  referralSource ReferralSource? @relation(fields: [referralSourceId], references: [id])
+  visits         Visit[]
+  carePlans      CarePlan[]
+  invoices       Invoice[]
+  payments       Payment[]
+
+  @@index([familyId])
+  @@index([areaId])
+  @@index([status])
+  @@index([referralSourceId])
+  @@index([phone])
+  @@map("patients")
+}
+
+model Provider {
+  id            String              @id @default(cuid())
+  code          String              @unique
+  fullName      String
+  roleId        String
+  specialty     String?
+  phone         String?
+  email         String?
+  joiningDate   DateTime            @db.Date
+  paymentType   ProviderPaymentType @default(per_visit)
+  baseRateEgp   Decimal             @db.Decimal(10, 2)
+  commissionPct Decimal?            @db.Decimal(5, 2)
+  primaryAreaId String?
+  status        ProviderStatus      @default(active)
+  notes         String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  role            ProviderRole     @relation(fields: [roleId], references: [id])
+  primaryArea     Area?            @relation(fields: [primaryAreaId], references: [id])
+  visits          Visit[]
+  providerPayouts ProviderPayout[]
+  expenses        Expense[]
+
+  @@index([roleId])
+  @@index([status])
+  @@index([primaryAreaId])
+  @@map("providers")
+}
+
+model Service {
+  id                       String        @id @default(cuid())
+  code                     String        @unique
+  name                     String
+  categoryId               String
+  requiredRoleId           String?
+  durationMins             Int
+  listPriceEgp             Decimal       @db.Decimal(10, 2)
+  defaultProviderPayoutEgp Decimal       @db.Decimal(10, 2)
+  description              String?
+  status                   ServiceStatus @default(active)
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+
+  category     ServiceCategory @relation(fields: [categoryId], references: [id])
+  requiredRole ProviderRole?   @relation(fields: [requiredRoleId], references: [id])
+  visits       Visit[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@map("services")
+}
+
+model Visit {
+  id                String      @id @default(cuid())
+  code              String      @unique
+  patientId         String
+  providerId        String?
+  serviceId         String
+  carePlanId        String?
+  bookedDate        DateTime    @db.Date
+  scheduledDate     DateTime    @db.Date
+  scheduledTime     String?
+  completedDatetime DateTime?
+  durationActualMin Int?
+  status            VisitStatus @default(scheduled)
+  areaId            String?
+  visitType         VisitType   @default(in_home)
+  servicePriceEgp   Decimal     @db.Decimal(10, 2)
+  discountEgp       Decimal     @db.Decimal(10, 2) @default(0)
+  netPriceEgp       Decimal     @db.Decimal(10, 2)
+  providerPayoutEgp Decimal     @db.Decimal(10, 2)
+  patientRating     Int?
+  bookedBy          String?
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  provider      Provider?     @relation(fields: [providerId], references: [id])
+  service       Service       @relation(fields: [serviceId], references: [id])
+  carePlan      CarePlan?     @relation(fields: [carePlanId], references: [id])
+  area          Area?         @relation(fields: [areaId], references: [id])
+  invoices      Invoice[]
+  expenses      Expense[]
+  onlineBooking OnlineBooking?
+
+  @@index([patientId])
+  @@index([providerId])
+  @@index([serviceId])
+  @@index([status])
+  @@index([scheduledDate])
+  @@index([areaId])
+  @@index([carePlanId])
+  @@map("visits")
+}
+
+model CarePlan {
+  id                 String         @id @default(cuid())
+  code               String         @unique
+  patientId          String
+  planName           String
+  startDate          DateTime       @db.Date
+  endDate            DateTime       @db.Date
+  totalVisitsPlanned Int
+  totalPriceEgp      Decimal        @db.Decimal(10, 2)
+  status             CarePlanStatus @default(active)
+  notes              String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  patient  Patient   @relation(fields: [patientId], references: [id])
+  visits   Visit[]
+  invoices Invoice[]
+
+  @@index([patientId])
+  @@index([status])
+  @@map("care_plans")
+}
+
+model Invoice {
+  id               String            @id @default(cuid())
+  code             String            @unique
+  patientId        String
+  invoiceDate      DateTime          @db.Date @default(now())
+  linkedType       InvoiceLinkedType
+  linkedVisitId    String?
+  linkedCarePlanId String?
+  grossAmountEgp   Decimal           @db.Decimal(10, 2)
+  discountPct      Decimal           @db.Decimal(5, 2) @default(0)
+  netAmountEgp     Decimal           @db.Decimal(10, 2)
+  dueDate          DateTime?         @db.Date
+  status           InvoiceStatus     @default(issued)
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  patient        Patient    @relation(fields: [patientId], references: [id])
+  linkedVisit    Visit?     @relation(fields: [linkedVisitId], references: [id])
+  linkedCarePlan CarePlan?  @relation(fields: [linkedCarePlanId], references: [id])
+  payments       Payment[]
+
+  @@index([patientId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([linkedVisitId])
+  @@index([linkedCarePlanId])
+  @@map("invoices")
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  invoiceId       String
+  patientId       String
+  paymentDate     DateTime @db.Date @default(now())
+  amountEgp       Decimal  @db.Decimal(10, 2)
+  paymentMethodId String
+  referenceNumber String?
+  receivedBy      String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  @@index([invoiceId])
+  @@index([patientId])
+  @@index([paymentDate])
+  @@map("payments")
+}
+
+model Expense {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  expenseDate      DateTime @db.Date
+  categoryId       String
+  subcategory      String?
+  vendorPayee      String?
+  amountEgp        Decimal  @db.Decimal(10, 2)
+  paymentMethodId  String?
+  linkedVisitId    String?
+  linkedProviderId String?
+  receiptRef       String?
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  category        ExpenseCategory @relation(fields: [categoryId], references: [id])
+  paymentMethod   PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
+  linkedVisit     Visit?          @relation(fields: [linkedVisitId], references: [id])
+  linkedProvider  Provider?       @relation(fields: [linkedProviderId], references: [id])
+
+  @@index([categoryId])
+  @@index([expenseDate])
+  @@index([linkedVisitId])
+  @@index([linkedProviderId])
+  @@map("expenses")
+}
+
+model ProviderPayout {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  providerId      String
+  periodStart     DateTime @db.Date
+  periodEnd       DateTime @db.Date
+  payoutDate      DateTime @db.Date
+  totalVisits     Int
+  grossAmountEgp  Decimal  @db.Decimal(10, 2)
+  deductionsEgp   Decimal  @db.Decimal(10, 2) @default(0)
+  netAmountEgp    Decimal  @db.Decimal(10, 2)
+  paymentMethodId String?
+  referenceNumber String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider      Provider       @relation(fields: [providerId], references: [id])
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+
+  @@index([providerId])
+  @@index([payoutDate])
+  @@map("provider_payouts")
+}
+
+// ============================================================================
+// ONLINE BOOKING — Website funnel → converts to Visit
+// ============================================================================
+
+model OnlineBooking {
+  id                   String              @id @default(cuid())
+  bookingRef           String              @unique
+  fullName             String
+  countryCode          String
+  phoneNumber          String
+  visitType            OnlineVisitType
+  serviceType          OnlineServiceType?
+  specialty            String?
+  packageType          OnlinePackageType?
+  preferredDate        DateTime?           @db.Date
+  timePreference       String?
+  sessionCount         String?
+  caseType             String?
+  nursingType          String?
+  nursingHoursPerDay   String?
+  nursingDuration      String?
+  amountEgp            Decimal             @db.Decimal(10, 2)
+  currency             String              @default("EGP")
+  status               OnlineBookingStatus @default(pending)
+
+  kashierSessionId     String?
+  kashierOrderId       String?
+  kashierTransactionId String?
+  paymentCompletedAt   DateTime?
+
+  convertedVisitId     String?  @unique
+  convertedAt          DateTime?
+
+  locale               Locale   @default(ar)
+  ipAddress            String?
+  userAgent            String?
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  convertedVisit Visit? @relation(fields: [convertedVisitId], references: [id])
+
+  @@index([bookingRef])
+  @@index([status])
+  @@index([phoneNumber])
+  @@index([createdAt])
+  @@map("online_bookings")
+}
+
+// ============================================================================
+// PWA PUSH SUBSCRIPTIONS
+// ============================================================================
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  locale    Locale   @default(ar)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locale])
+  @@map("push_subscriptions")
+}
+
+// ============================================================================
+// STAFF — Admin dashboard users
+// ============================================================================
+
+model Staff {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  passwordHash String
+  role        StaffRole   @default(viewer)
+  status      StaffStatus @default(active)
+  lastLoginAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([email])
+  @@index([role])
+  @@map("staff")
+}
+
+// ============================================================================
+// AUDIT LOG — Full history of every record change
+// ============================================================================
+
+model AuditLog {
+  id            String      @id @default(cuid())
+  tableName     String
+  recordId      String
+  action        AuditAction
+  changedFields Json?
+  previousData  Json?
+  newData       Json?
+  changedBy     String?
+  changedAt     DateTime    @default(now())
+
+  @@index([tableName, recordId])
+  @@index([changedAt])
+  @@index([changedBy])
+  @@map("audit_logs")
+}
