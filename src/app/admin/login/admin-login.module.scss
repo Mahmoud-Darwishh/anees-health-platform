@@ -1,0 +1,180 @@
+@use '../../../assets/scss/utils/variables' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $brand-dark-blue;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+
+  // Subtle decorative circles in the background
+  &::before {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    background: rgba($primary, 0.08);
+    pointer-events: none;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: -100px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba($primary, 0.05);
+    pointer-events: none;
+  }
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 420px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.cardAccent {
+  height: 5px;
+  background: linear-gradient(90deg, $primary 0%, #d4b16a 100%);
+}
+
+.cardBody {
+  padding: 2.25rem 2rem 2.5rem;
+}
+
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+
+  span {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9ca3af;
+  }
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 1.75rem;
+
+  h1 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: $brand-dark-blue;
+    margin: 0 0 0.3rem;
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $brand-dark-blue;
+    letter-spacing: 0.01em;
+  }
+
+  input {
+    padding: 0.72rem 0.9rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    color: #111827;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    width: 100%;
+
+    &::placeholder {
+      color: #adb5bd;
+    }
+
+    &:focus {
+      border-color: $primary;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba($primary, 0.12);
+    }
+  }
+}
+
+.error {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.875rem;
+  color: #b91c1c;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 0.85rem;
+  background: linear-gradient(90deg, $brand-dark-blue 0%, #1e4070 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+  margin-top: 0.25rem;
+  box-shadow: 0 3px 12px rgba($brand-dark-blue, 0.4);
+  letter-spacing: 0.01em;
+
+  &:hover:not(:disabled) {
+    opacity: 0.92;
+    box-shadow: 0 5px 18px rgba($brand-dark-blue, 0.5);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 3px;
+  }
+}

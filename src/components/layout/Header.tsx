@@ -1,19 +1,23 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
+import { useSession, signOut } from 'next-auth/react';
 
 const Header = () => {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
   const pathname = usePathname();
+  const { data: session, status } = useSession();
   const [searchField, setSearchField] = useState(false);
   const [homeSearchQuery, setHomeSearchQuery] = useState('');
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLLIElement>(null);
   const toggleSearch = () => {
     setSearchField(!searchField);
   };
@@ -79,9 +83,19 @@ const Header = () => {
     setOpenSubmenus({});
   };
   const onHandleLinkClick = () => {
-    // Close menu when any navigation link is clicked
     onHandleCloseMenu();
+    setUserMenuOpen(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Toggle submenu on mobile (click/touch) while preserving hover on desktop
   const handleSubmenuToggle = (
@@ -207,6 +221,31 @@ const Header = () => {
                         <span>{locale === 'en' ? 'العربية' : 'English'}</span>
                       </Link>
                     </li>
+                    {status !== 'loading' && session && (
+                      <>
+                        <li className="nav-item me-3 d-lg-none">
+                          <Link href={`/${locale}/portal`} className="nav-link" onClick={onHandleLinkClick}>
+                            <i className="feather-layout me-2" />{t('header.myPortal')}
+                          </Link>
+                        </li>
+                        <li className="nav-item me-3 d-lg-none">
+                          <button
+                            type="button"
+                            className="nav-link btn btn-link text-danger p-0 border-0 bg-transparent"
+                            onClick={() => { onHandleCloseMenu(); signOut({ callbackUrl: `/${locale}` }); }}
+                          >
+                            <i className="feather-log-out me-2" />{t('auth.signout')}
+                          </button>
+                        </li>
+                      </>
+                    )}
+                    {status !== 'loading' && !session && (
+                      <li className="nav-item me-3 d-lg-none">
+                        <Link href={`/${locale}/auth/login`} className="nav-link" onClick={onHandleLinkClick}>
+                          <i className="feather-user me-2" />{t('header.login')}
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </div>
                 <ul className="nav header-navbar-rht">
@@ -253,6 +292,66 @@ const Header = () => {
                       <span>{locale === 'en' ? 'العربية' : 'English'}</span>
                     </Link>
                   </li>
+
+                  {status !== 'loading' && (
+                    session ? (
+                      <li className="nav-item me-2 position-relative" ref={userMenuRef}>
+                        <button
+                          type="button"
+                          className="btn btn-md d-flex align-items-center rounded-pill"
+                          style={{ border: '1.5px solid #aa8642', color: '#aa8642', background: 'transparent', transition: 'all 0.18s', gap: '0.3rem' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#aa8642'; (e.currentTarget as HTMLElement).style.color = '#fff'; }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#aa8642'; }}
+                          onClick={() => setUserMenuOpen(v => !v)}
+                          aria-expanded={userMenuOpen}
+                        >
+                          <i className="feather-user" />
+                          <span className="d-none d-xl-inline">
+                            {session.user.name?.split(' ').slice(0, 2).join(' ') || t('header.myPortal')}
+                          </span>
+                          <i className="fas fa-chevron-down" style={{ fontSize: '0.65rem' }} />
+                        </button>
+                        {userMenuOpen && (
+                          <ul
+                            className="dropdown-menu show"
+                            style={{ right: 0, left: 'auto', minWidth: '170px', top: '110%' }}
+                          >
+                            <li>
+                              <Link
+                                className="dropdown-item"
+                                href={`/${locale}/portal`}
+                                onClick={() => { setUserMenuOpen(false); onHandleLinkClick(); }}
+                              >
+                                <i className="feather-layout me-2" />{t('header.myPortal')}
+                              </Link>
+                            </li>
+                            <li><hr className="dropdown-divider" /></li>
+                            <li>
+                              <button
+                                type="button"
+                                className="dropdown-item text-danger"
+                                onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: `/${locale}` }); }}
+                              >
+                                <i className="feather-log-out me-2" />{t('auth.signout')}
+                              </button>
+                            </li>
+                          </ul>
+                        )}
+                      </li>
+                    ) : (
+                      <li className="nav-item me-2">
+                        <Link
+                          href={`/${locale}/auth/login`}
+                          className="btn btn-md d-flex align-items-center rounded-pill"
+                          style={{ border: '1.5px solid #aa8642', color: '#aa8642', background: 'transparent', gap: '0.3rem' }}
+                          onClick={onHandleLinkClick}
+                        >
+                          <i className="feather-user" />
+                          <span>{t('header.login')}</span>
+                        </Link>
+                      </li>
+                    )
+                  )}
 
                   <li className="nav-item me-2">
                     <Link

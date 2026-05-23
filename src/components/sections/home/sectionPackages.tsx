@@ -153,7 +153,7 @@ const SectionPackages: React.FC = () => {
   }, []);
 
   return (
-    <section className="packages-section">
+    <section className="packages-section" id="packages">
       <div className="container">
         <div
           className="section-header sec-header-one text-center"

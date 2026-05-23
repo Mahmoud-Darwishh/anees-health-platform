@@ -1,0 +1,286 @@
+@use '../../../assets/scss/utils/variables' as *;
+@use '../../../assets/scss/utils/mixins' as *;
+
+// ── Page wrapper ─────────────────────────────────────────────────────────────
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, #f8f4ee 0%, #eee5d2 60%, #e2d5bc 100%);
+  padding: 1.5rem;
+}
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+.card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(19, 44, 77, 0.13);
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+
+  @include respond-above(custom767) {
+    max-width: 480px;
+  }
+}
+
+// ── Gold accent bar at top of card ───────────────────────────────────────────
+.cardAccent {
+  height: 5px;
+  background: linear-gradient(90deg, $primary 0%, #d4b16a 100%);
+}
+
+// ── Card body padding ─────────────────────────────────────────────────────────
+.cardBody {
+  padding: 2.25rem 2rem 2.5rem;
+
+  @include respond-above(custom767) {
+    padding: 2.5rem 2.5rem 3rem;
+  }
+}
+
+// ── Logo ─────────────────────────────────────────────────────────────────────
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+
+  img {
+    height: 44px;
+    width: auto;
+  }
+}
+
+// ── Heading ──────────────────────────────────────────────────────────────────
+.heading {
+  text-align: center;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $brand-dark-blue;
+    margin: 0 0 0.3rem;
+    line-height: 1.25;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+// ── Google button ─────────────────────────────────────────────────────────────
+.googleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #374151;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+}
+
+// ── Divider ───────────────────────────────────────────────────────────────────
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: #9ca3af;
+  font-size: 0.8125rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ── Field ─────────────────────────────────────────────────────────────────────
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $brand-dark-blue;
+    letter-spacing: 0.01em;
+  }
+
+  input {
+    padding: 0.72rem 0.9rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    color: #111827;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    width: 100%;
+
+    &::placeholder {
+      color: #adb5bd;
+    }
+
+    &:focus {
+      border-color: $primary;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba($primary, 0.12);
+    }
+
+    &.error {
+      border-color: $danger;
+      box-shadow: 0 0 0 3px rgba($danger, 0.1);
+    }
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    line-height: 1.4;
+  }
+}
+
+.fieldError {
+  font-size: 0.75rem;
+  color: $danger;
+  margin-top: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+// ── Forgot password row ────────────────────────────────────────────────────────
+.forgotRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.25rem;
+
+  a {
+    font-size: 0.8125rem;
+    color: $primary;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ── Submit button ─────────────────────────────────────────────────────────────
+.submitBtn {
+  width: 100%;
+  padding: 0.825rem;
+  background: linear-gradient(90deg, $primary 0%, #d4b16a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s, transform 0.1s;
+  margin-top: 0.5rem;
+  letter-spacing: 0.01em;
+  box-shadow: 0 3px 12px rgba($primary, 0.35);
+
+  &:hover:not(:disabled) {
+    opacity: 0.92;
+    box-shadow: 0 5px 18px rgba($primary, 0.45);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 3px;
+  }
+}
+
+// ── Footer link row ───────────────────────────────────────────────────────────
+.footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+
+  a {
+    color: $primary;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ── Alert: global error ────────────────────────────────────────────────────────
+.globalError {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.875rem;
+  color: #b91c1c;
+  line-height: 1.45;
+}
+
+// ── Alert: global success ──────────────────────────────────────────────────────
+.globalSuccess {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.875rem;
+  color: #166534;
+  line-height: 1.45;
+}

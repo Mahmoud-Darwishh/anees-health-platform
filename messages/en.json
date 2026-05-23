@@ -45,6 +45,7 @@
     "subtitle": "Trusted Home Healthcare Anytime, Anywhere",
     "login": "Login",
     "register": "Register",
+    "myPortal": "My Portal",
     "bookNow": "Book Now",
     "search_placeholder": "Search doctors, clinics, hospitals, diseases...",
     "home": "Home",
@@ -80,6 +81,10 @@
       "instant_booking": "Instant Booking",
       "geriatrics_hint": "Specialized care for our wise elders",
       "geriatrics_easter_egg": "Wisdom grows with age—just like our expertise in geriatric care",
+      "bookHomeVisit": "Book a Home Visit",
+      "viewPackages": "View Care Packages",
+      "quickAccess": "Quick access",
+      "featuredBadge": "Specialized",
       "stats": {
         "doctors": "Doctors",
         "patients": "Patients",
@@ -381,67 +386,122 @@
           "title": "Doctor Home Visits",
           "shortDesc": "Professional medical consultations at your doorstep",
           "description": "Get expert medical care without leaving home. Our certified doctors provide thorough consultations, examinations, and treatment plans tailored to your needs.",
-          "features": ["Board-certified physicians", "Same-day availability", "All medical specialties", "Comprehensive examinations"]
+          "features": [
+            "Board-certified physicians",
+            "Same-day availability",
+            "All medical specialties",
+            "Comprehensive examinations"
+          ]
         },
         "elderlyCare": {
           "title": "Elderly Care & Geriatrics",
           "shortDesc": "Specialized care for seniors and aging patients",
           "description": "Compassionate, specialized care for elderly patients including chronic disease management, mobility support, and comprehensive health monitoring for seniors.",
-          "features": ["Geriatric specialists", "Chronic disease management", "Mobility assistance", "Regular health monitoring"]
+          "features": [
+            "Geriatric specialists",
+            "Chronic disease management",
+            "Mobility assistance",
+            "Regular health monitoring"
+          ]
         },
         "telemedicine": {
           "title": "Telemedicine Consultations",
           "shortDesc": "Virtual healthcare consultations anytime, anywhere",
           "description": "Connect with licensed doctors through secure video calls. Get medical advice, prescriptions, and follow-ups without leaving your home.",
-          "features": ["Video consultations", "24/7 availability", "Digital prescriptions", "Secure platform"]
+          "features": [
+            "Video consultations",
+            "24/7 availability",
+            "Digital prescriptions",
+            "Secure platform"
+          ]
         },
         "nursingCare": {
           "title": "Home Nursing Care",
           "shortDesc": "Professional nursing services at home",
           "description": "Skilled nursing care including wound management, medication administration, vital signs monitoring, and post-operative care in your home.",
-          "features": ["Licensed nurses", "Wound care", "Medication management", "IV therapy"]
+          "features": [
+            "Licensed nurses",
+            "Wound care",
+            "Medication management",
+            "IV therapy"
+          ]
         },
         "physiotherapy": {
           "title": "Home Physiotherapy",
           "shortDesc": "Rehabilitation and physical therapy at home",
           "description": "Professional physiotherapy sessions for rehabilitation, pain management, and mobility improvement delivered in the comfort of your home.",
-          "features": ["Certified therapists", "Personalized plans", "Modern equipment", "Progress tracking"]
+          "features": [
+            "Certified therapists",
+            "Personalized plans",
+            "Modern equipment",
+            "Progress tracking"
+          ]
         },
         "labTests": {
           "title": "Labs & Scans at Home",
           "shortDesc": "Lab tests, imaging, and diagnostic scans at your doorstep",
           "description": "Convenient blood tests, diagnostic imaging, and scans with home sample collection and fast, accurate results delivered digitally.",
-          "features": ["Home sample collection", "Diagnostic scans", "Certified labs", "Digital reports"]
+          "features": [
+            "Home sample collection",
+            "Diagnostic scans",
+            "Certified labs",
+            "Digital reports"
+          ]
         },
         "medications": {
           "title": "Medication Delivery",
           "shortDesc": "Prescription delivery and medication management",
           "description": "Get your prescribed medications delivered to your door with medication reminders and pharmaceutical consultation services.",
-          "features": ["Fast delivery", "Medication reminders", "Pharmaceutical consultation", "Refill management"]
+          "features": [
+            "Fast delivery",
+            "Medication reminders",
+            "Pharmaceutical consultation",
+            "Refill management"
+          ]
         },
         "postOperative": {
           "title": "Post-Operative Care",
           "shortDesc": "Specialized care after surgical procedures",
           "description": "Comprehensive post-surgery care including wound management, pain control, and recovery monitoring to ensure optimal healing.",
-          "features": ["Wound care", "Pain management", "Recovery monitoring", "Complication prevention"]
+          "features": [
+            "Wound care",
+            "Pain management",
+            "Recovery monitoring",
+            "Complication prevention"
+          ]
         },
         "remoteMonitoring": {
           "title": "Remote Patient Monitoring",
           "shortDesc": "Continuous health tracking for chronic conditions",
           "description": "Advanced monitoring systems for tracking vital signs and managing chronic conditions with real-time alerts and professional oversight.",
-          "features": ["24/7 monitoring", "Real-time alerts", "Vital signs tracking", "Chronic disease management"]
+          "features": [
+            "24/7 monitoring",
+            "Real-time alerts",
+            "Vital signs tracking",
+            "Chronic disease management"
+          ]
         },
         "homeRadiology": {
           "title": "Home Radiology & Scans",
           "shortDesc": "Imaging services and diagnostic scans at home",
           "description": "Professional radiological imaging services including X-rays, ultrasounds, and other diagnostic scans performed at your home by certified technicians.",
-          "features": ["Portable imaging equipment", "Certified radiologists", "Quick results", "Home appointment convenience"]
+          "features": [
+            "Portable imaging equipment",
+            "Certified radiologists",
+            "Quick results",
+            "Home appointment convenience"
+          ]
         },
         "palliativeCare": {
           "title": "Palliative Care",
           "shortDesc": "Compassionate care focused on comfort and dignity",
           "description": "Specialized comfort-focused care designed to improve quality of life for patients with serious illnesses, including pain management, symptom relief, and emotional support.",
-          "features": ["Pain and symptom management", "Emotional and spiritual support", "Family counseling", "24/7 care coordination"]
+          "features": [
+            "Pain and symptom management",
+            "Emotional and spiritual support",
+            "Family counseling",
+            "24/7 care coordination"
+          ]
         }
       },
       "cta": {
@@ -548,21 +608,18 @@
     "intro_paragraph_2": "These Terms govern your use of our platform and services, including home nursing care, physician home visits, physiotherapy, laboratory services, telemedicine consultations, and medical equipment rental. Our services comply with Egyptian Ministry of Health and Population (MoHP) regulations, Law No. 198 of 2020 on Healthcare Services, and the Egyptian Medical Syndicate ethical guidelines.",
     "effective_label": "Effective Date:",
     "effective_date": "December 2025",
-
     "section_1_title": "1. Definitions",
     "section_1_item_1": "\"Platform\" refers to the Anees Healthcare website, mobile applications, and all related services",
     "section_1_item_2": "\"Services\" include home healthcare visits, telemedicine consultations, medical equipment rental, and related offerings",
     "section_1_item_3": "\"Healthcare Providers\" are licensed physicians, nurses, physiotherapists, and medical professionals on our platform",
     "section_1_item_4": "\"Patient\" or \"User\" refers to individuals using our platform to access healthcare services",
     "section_1_item_5": "\"Home Healthcare\" encompasses medical services delivered at the patient's residence",
-
     "section_2_title": "2. Eligibility & Account Registration",
     "section_2_item_1": "Age Requirement: You must be at least 18 years old to create an account. For minors, a parent or legal guardian must create and manage the account",
     "section_2_item_2": "Identity Verification: You must provide accurate personal information, including national ID or passport number, as required by Egyptian healthcare regulations",
     "section_2_item_3": "Account Security: You are responsible for maintaining the confidentiality of your login credentials",
     "section_2_item_4": "Prohibited Use: You may not use another person's account or provide false information",
     "section_2_item_5": "Account Termination: We reserve the right to suspend or terminate accounts that violate these Terms",
-
     "section_3_title": "3. Services Provided",
     "section_3_1_title": "3.1 Home Healthcare Services",
     "section_3_1_intro": "We facilitate the following home-based medical services:",
@@ -582,7 +639,6 @@
     "section_3_2_item_5": "Mental health counseling (by licensed psychiatrists/psychologists)",
     "note_label": "Note:",
     "section_3_2_note": "Telemedicine is NOT suitable for medical emergencies. Call 123 (Egyptian Emergency Services) for urgent care.",
-
     "section_4_title": "4. Booking & Appointments",
     "section_4_item_1": "Appointment Scheduling: Appointments are subject to healthcare provider availability and confirmed in real-time",
     "section_4_item_2": "Appointment Times: Home visits are scheduled within agreed time windows (2-4 hours). Late arrivals beyond 30 minutes qualify for service credits",
@@ -593,7 +649,6 @@
     "section_4_cancellation_item_3": "Full charge for cancellations less than 2 hours before appointment or no-shows",
     "section_4_item_5": "Rescheduling: Appointments can be rescheduled once without penalty (subject to availability)",
     "section_4_item_6": "Emergency Bookings: Same-day urgent visits may incur additional fees (20-30% surcharge)",
-
     "section_5_title": "5. Payment & Fees",
     "section_5_item_1": "Accepted Payment Methods: Credit/debit cards (Visa, Mastercard), mobile wallets (Vodafone Cash, Fawry), cash on delivery, and insurance (select providers)",
     "section_5_item_2": "Pricing: All fees are displayed in Egyptian Pounds (EGP) before booking confirmation. Prices include VAT (14%) as per Egyptian tax law",
@@ -605,7 +660,6 @@
     "section_5_additional_item_4": "Medical supplies and medications (billed separately at cost + 10%)",
     "section_5_item_5": "Insurance Claims: We assist with insurance documentation, but patients are responsible for pre-authorization and claim submissions",
     "section_5_item_6": "Refund Policy: Full refunds for canceled services by providers. No refunds for completed services unless severe quality issues are verified",
-
     "section_6_title": "6. Healthcare Provider Qualifications",
     "section_6_intro": "All healthcare providers on our platform are:",
     "section_6_item_1": "Licensed by the Egyptian Medical Syndicate, Nursing Syndicate, or relevant professional bodies",
@@ -614,7 +668,6 @@
     "section_6_item_4": "Required to maintain continuing medical education (CME) credits",
     "section_6_item_5": "Subject to patient reviews and quality monitoring",
     "section_6_provider_independence": "Provider Independence: Healthcare providers are independent contractors, not employees of Anees Healthcare Platform.",
-
     "section_7_title": "7. Medical Disclaimer & Limitations",
     "section_7_item_1": "Platform Role: Anees is a technology platform connecting patients with healthcare providers. We do NOT provide medical advice or treatment directly",
     "section_7_item_2": "No Guarantees: We do not guarantee specific medical outcomes or diagnoses. Healthcare providers are solely responsible for their clinical decisions",
@@ -622,7 +675,6 @@
     "section_7_item_4": "Telemedicine Limitations: Some conditions require in-person examination. Providers may refuse telemedicine consultations when physical examination is necessary",
     "section_7_item_5": "Prescription Validity: E-prescriptions issued via telemedicine are valid for 30 days and comply with Egyptian Pharmacists Syndicate regulations",
     "section_7_item_6": "Laboratory Results: Lab results are for informational purposes and should be interpreted by qualified physicians",
-
     "section_8_title": "8. Liability & Indemnification",
     "section_8_item_1": "Provider Liability: Healthcare providers are solely responsible for medical malpractice, negligence, or errors in treatment",
     "section_8_item_2": "Platform Liability: Anees is liable only for technical platform failures preventing service delivery (limited to service fee refund)",
@@ -633,7 +685,6 @@
     "section_8_indemn_item_3": "Misuse of platform or services",
     "section_8_indemn_item_4": "Damage to healthcare provider equipment or property",
     "section_8_item_5": "Force Majeure: We are not liable for service interruptions due to natural disasters, government restrictions, or events beyond our control",
-
     "section_9_title": "9. Patient Rights & Responsibilities",
     "section_9_1_title": "9.1 Patient Rights",
     "section_9_1_item_1": "Receive safe, competent, and respectful healthcare services",
@@ -650,13 +701,11 @@
     "section_9_2_item_4": "Respect healthcare providers and maintain appropriate conduct",
     "section_9_2_item_5": "Ensure payment for services rendered",
     "section_9_2_item_6": "Maintain a safe environment for home healthcare visits",
-
     "section_10_title": "10. Intellectual Property",
     "section_10_item_1": "All platform content, logos, trademarks, and software are owned by Anees Healthcare or licensed to us",
     "section_10_item_2": "You may not reproduce, distribute, or create derivative works without written permission",
     "section_10_item_3": "Patient reviews and feedback become our property upon submission",
     "section_10_item_4": "Medical records remain the property of patients, with platform having limited access for service delivery",
-
     "section_11_title": "11. Data Privacy & Security",
     "section_11_intro_1": "Your privacy is governed by our",
     "privacy_link_label": "Privacy Policy",
@@ -665,7 +714,6 @@
     "section_11_item_2": "Information is shared only with treating healthcare providers and authorized parties",
     "section_11_item_3": "You have rights to access, correct, and request deletion of your data (subject to legal retention requirements)",
     "section_11_item_4": "We never sell your medical information to third parties",
-
     "section_12_title": "12. Complaints & Dispute Resolution",
     "section_12_item_1": "Filing Complaints: Submit complaints via email to complaints@aneeshealthcare.eg or through the platform within 14 days of service",
     "section_12_item_2": "Resolution Process: We investigate complaints within 7 business days and provide written responses",
@@ -673,7 +721,6 @@
     "section_12_item_4": "Arbitration: Unresolved disputes shall be settled through arbitration in Cairo, Egypt, under Egyptian Arbitration Law No. 27/1994",
     "section_12_item_5": "Governing Law: These Terms are governed by the laws of the Arab Republic of Egypt",
     "section_12_item_6": "Jurisdiction: Egyptian courts in Cairo have exclusive jurisdiction for legal disputes",
-
     "section_13_title": "13. Prohibited Conduct",
     "section_13_intro": "You may NOT:",
     "section_13_item_1": "Use the platform for illegal purposes or fraudulent activities",
@@ -684,16 +731,13 @@
     "section_13_item_6": "Use services to obtain controlled substances without legitimate medical need",
     "section_13_item_7": "Resell or commercially exploit platform services",
     "section_13_warning": "Violation of these terms may result in account suspension, service termination, and legal action.",
-
     "section_14_title": "14. Modifications to Terms",
     "section_14_intro": "We reserve the right to modify these Terms at any time to reflect legal changes, service updates, or operational improvements. Material changes will be communicated via email and platform notifications 30 days before taking effect. Continued use of services after changes constitutes acceptance.",
-
     "section_15_title": "15. Service Availability",
     "section_15_item_1": "Geographic Coverage: Currently serving multiple regions and select cities across Egypt (expanding coverage continuously)",
     "section_15_item_2": "Operating Hours: Platform available 24/7; home services available 7am-10pm (emergency services available 24/7 in select areas)",
     "section_15_item_3": "Service Interruptions: We strive for 99.9% uptime but cannot guarantee uninterrupted service",
     "section_15_item_4": "Platform Updates: Periodic maintenance may temporarily affect availability (scheduled during off-peak hours)",
-
     "section_16_title": "16. Contact Information",
     "section_16_intro": "For questions, support, or concerns regarding these Terms:",
     "section_16_item_1_label": "Customer Support:",
@@ -708,7 +752,6 @@
     "section_16_item_5": "Anees Healthcare Platform, Office Address, Cairo, Egypt",
     "section_16_item_6_label": "Business Hours:",
     "section_16_item_6": "Sunday-Thursday, 9am-5pm (GMT+2)",
-
     "section_17_title": "17. Regulatory Compliance",
     "section_17_intro": "These Terms comply with:",
     "section_17_item_1": "Egyptian Healthcare Services Law No. 198 of 2020",
@@ -717,7 +760,6 @@
     "section_17_item_4": "Ministry of Health and Population Telemedicine Guidelines (2020)",
     "section_17_item_5": "Egyptian Data Protection Law No. 151/2019",
     "section_17_item_6": "Egyptian Consumer Protection Law No. 181/2018",
-
     "important_notice_label": "Important Notice:",
     "important_notice_text": "By clicking \"I Agree\" or using our services, you acknowledge that you have read, understood, and agree to be bound by these Terms & Conditions. These Terms are available in both English and Arabic. In case of discrepancy, the Arabic version shall prevail under Egyptian law.",
     "document_version_label": "Document Version:",
@@ -856,8 +898,7 @@
     "section_12_item_6": "GDPR Principles (where applicable for EU citizens)",
     "important_label": "Important:",
     "important_text": "This privacy policy is provided in both English and Arabic. In case of any discrepancy, the Arabic version shall prevail in accordance with Egyptian law."
-  }
-  ,
+  },
   "aboutPage": {
     "title": "About Anees Health",
     "meta_description": "Anees Health is a home healthcare platform in Egypt founded under medical leadership by Dr. Mahmoud Darwish and Dr. Ahmed Oraby.",
@@ -909,8 +950,7 @@
     "cta_text": "Book your first visit today. Same-day or next-morning appointments. No waiting rooms, no hassle.",
     "cta_primary": "Explore Services",
     "cta_secondary": "Get in Touch"
-  }
-  ,
+  },
   "contactPage": {
     "title": "Contact Us",
     "meta_description": "Get in touch with Anees Health for support, questions, or service inquiries.",
@@ -1254,5 +1294,68 @@
       "tryAgain": "Try Again",
       "contactSupport": "Contact Support"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Welcome back to Anees Health",
+      "google": "Continue with Google",
+      "orDivider": "or",
+      "identifierLabel": "Phone number or Case ID",
+      "identifierPlaceholder": "e.g. 01012345678 or AN-3216-0326",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "submitting": "Signing in...",
+      "noAccount": "New patient?",
+      "signupLink": "Create account",
+      "invalidCredentials": "Incorrect phone, Case ID, or password.",
+      "error": "Something went wrong. Please try again."
+    },
+    "signup": {
+      "title": "Create Account",
+      "subtitle": "Register to access your health records",
+      "nameLabel": "Full name",
+      "namePlaceholder": "Your full name",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "01012345678",
+      "caseIdLabel": "Case ID",
+      "caseIdPlaceholder": "e.g. AN-3216-0326",
+      "caseIdHint": "Your Case ID was given to you when you first registered with Anees Health.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "submit": "Create Account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "googleOption": "Or sign up with Google",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "success": "Account created! Please sign in.",
+      "error": "Could not create account. Please check your details."
+    },
+    "linkAccount": {
+      "title": "Link Your Patient Record",
+      "subtitle": "Enter your Case ID and phone number to connect your Google account to your medical records.",
+      "caseIdLabel": "Case ID",
+      "caseIdPlaceholder": "e.g. AN-3216-0326",
+      "phoneLabel": "Phone number on file",
+      "phonePlaceholder": "01012345678",
+      "submit": "Link Account",
+      "submitting": "Linking...",
+      "success": "Account linked! Redirecting...",
+      "error": "Case ID or phone number does not match our records.",
+      "skip": "Skip for now"
+    },
+    "error": {
+      "title": "Sign-in Error",
+      "subtitle": "Something went wrong during sign in.",
+      "tryAgain": "Try again",
+      "home": "Go to home"
+    },
+    "signout": "Sign Out"
   }
 }

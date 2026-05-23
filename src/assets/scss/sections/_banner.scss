@@ -1,6 +1,5 @@
 /* ========================================
    Banner Section Styles
-   Professional Medical Animations
    ======================================== */
 
 // Banner Content Entry Animation
@@ -8,7 +7,6 @@
   animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-// Reveal observer controls entry animation when data-reveal is used.
 .banner-animate-in[data-reveal],
 .animate-slide-up[data-reveal],
 .credential-animate[data-reveal] {
@@ -17,12 +15,12 @@
   transform: none;
 }
 
-// Slide Up Animation with Delay Support
+// Slide Up Animation
 .animate-slide-up {
   opacity: 0;
   transform: translateY(30px);
   animation: slideUpFade 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  
+
   &[data-delay="0.1"] { animation-delay: 0.1s; }
   &[data-delay="0.3"] { animation-delay: 0.3s; }
   &[data-delay="0.4"] { animation-delay: 0.4s; }
@@ -30,18 +28,18 @@
   &[data-delay="0.9"] { animation-delay: 0.9s; }
 }
 
-// Credential Item Staggered Animation
+// Credential Staggered Animation
 .credential-animate {
   opacity: 0;
   transform: translateX(-20px);
   animation: slideInFade 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  
+
   &[data-delay="0.6"] { animation-delay: 0.6s; }
   &[data-delay="0.7"] { animation-delay: 0.7s; }
   &[data-delay="0.8"] { animation-delay: 0.8s; }
 }
 
-// Medical Icon Pulse - Heartbeat Effect
+// Medical Icon Pulse
 .medical-icon-pulse {
   animation: medicalPulse 2.5s ease-in-out infinite;
   transform-origin: center;
@@ -52,16 +50,16 @@
   animation: scorePulse 3s ease-in-out infinite;
 }
 
-// Stat Number Animate
+// Stat Number Glow
 .stat-number-animate {
   display: inline-block;
   animation: numberGlow 3s ease-in-out infinite;
 }
 
-// Title Underline Animation
+// Title Underline
 .title-underline-animate {
   position: relative;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -75,103 +73,83 @@
   }
 }
 
-// Search Box Float Effect
-.search-box-float {
-  animation: floatUp 3s ease-in-out infinite;
-}
-
-// Banner Image Animation
+// Banner Image
 .banner-img-animate {
   position: relative;
   animation: fadeInScale 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
-  
+
   img {
     animation: breathe 4s ease-in-out infinite;
   }
 }
 
-// Medical Pulse Ring
-.medical-pulse-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  height: 80%;
-  border: 2px solid rgba(170, 134, 66, 0.3);
-  border-radius: 50%;
-  animation: pulseRing 3s ease-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-
-// Trust Badge
+// ── Trust Badge ───────────────────────────────────────────────────────────────
 .trust-badge {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  
+
   &__rating {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
-  
+
   .trust-stars {
     display: flex;
     gap: 0.25rem;
-    
+
     .star-icon {
       color: #ffc107;
       font-size: 1.25rem;
       line-height: 1;
       opacity: 0;
       animation: starFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-      
+
       &[data-delay="0.2"] { animation-delay: 0.2s; }
       &[data-delay="0.3"] { animation-delay: 0.3s; }
       &[data-delay="0.4"] { animation-delay: 0.4s; }
       &[data-delay="0.5"] { animation-delay: 0.5s; }
       &[data-delay="0.6"] { animation-delay: 0.6s; }
-      
+
       &:hover {
         transform: scale(1.2) rotate(15deg);
         filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.6));
       }
     }
   }
-  
+
   .trust-score {
     font-size: 1.125rem;
     font-weight: 700;
     color: #2c3e50;
   }
-  
+
   .trust-divider {
     color: #dee2e6;
     font-size: 0.9rem;
   }
-  
+
   .trust-stats {
     font-size: 0.9rem;
     color: #6c757d;
   }
 }
 
-// Banner Title
+// ── Banner Title ──────────────────────────────────────────────────────────────
 .banner-title {
   font-size: 3rem;
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 1rem;
-  
+
   &__highlight {
     color: #aa8642;
   }
 }
 
-// Banner Subtitle
+// ── Banner Subtitle ───────────────────────────────────────────────────────────
 .banner-subtitle {
   font-size: 1.1rem;
   line-height: 1.6;
@@ -179,29 +157,29 @@
   margin-bottom: 1.5rem;
 }
 
-// Credentials Row
+// ── Credentials Row ───────────────────────────────────────────────────────────
 .credentials-row {
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
   align-items: center;
   margin-bottom: 2rem;
-  
+
   .credential-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     transition: transform 0.2s ease;
-    
+
     &:hover {
       transform: translateY(-2px);
     }
-    
+
     i {
       color: #aa8642;
       font-size: 1.5rem;
     }
-    
+
     span {
       font-size: 0.9rem;
       color: #2c3e50;
@@ -209,272 +187,264 @@
   }
 }
 
-// Geriatrics Easter Egg
-.geriatrics-easter-egg {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  z-index: 1000;
+// ── Primary CTA Row ───────────────────────────────────────────────────────────
+.banner-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.btn-banner-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(90deg, #aa8642 0%, #d4b16a 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 4px 16px rgba(170, 134, 66, 0.38);
+  transition: box-shadow 0.2s, transform 0.15s, opacity 0.15s;
   white-space: nowrap;
-  animation: fadeInOut 4s ease-in-out;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid #667eea;
+
+  i {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    color: #fff;
+    opacity: 0.92;
+    box-shadow: 0 6px 22px rgba(170, 134, 66, 0.5);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
-// Keyframes for easter egg animation
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
+.btn-banner-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.825rem 1.65rem;
+  background: transparent;
+  color: #aa8642;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  border: 2px solid #aa8642;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.15s;
+  white-space: nowrap;
+
+  i {
+    font-size: 1.1rem;
   }
-  15% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+
+  &:hover {
+    background: #aa8642;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(170, 134, 66, 0.3);
+    transform: translateY(-2px);
   }
-  85% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
+
+  &:active {
+    transform: translateY(0);
   }
 }
 
-// ===== Professional Medical Animation Keyframes =====
+// ── Service Pills ─────────────────────────────────────────────────────────────
+.service-pills-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
 
-// Fade In Up - Entry Animation
+.service-pills-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.service-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.service-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 50px;
+  border: 1.5px solid #e8dcc8;
+  background: #f8f4ee;
+  color: #132c4d;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.18s;
+
+  i {
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: #aa8642;
+    color: #fff;
+    border-color: #aa8642;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(170, 134, 66, 0.28);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  // ── Featured pill (Geriatrics) ───────────────────────────────────────────
+  &--featured {
+    background: linear-gradient(90deg, #aa8642 0%, #c9a05a 100%);
+    color: #fff;
+    border-color: transparent;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(170, 134, 66, 0.32);
+
+    i {
+      animation: heartbeat 1.8s ease-in-out infinite;
+    }
+
+    &:hover {
+      background: linear-gradient(90deg, #8f6e36 0%, #aa8642 100%);
+      box-shadow: 0 5px 16px rgba(170, 134, 66, 0.45);
+    }
+  }
+}
+
+// Small badge inside the featured pill
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+// ── Keyframes ─────────────────────────────────────────────────────────────────
+
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-// Slide Up Fade - Staggered Elements
 @keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-// Slide In Fade - Credential Items
 @keyframes slideInFade {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
-// Medical Pulse - Heartbeat Effect for Icons
 @keyframes medicalPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  10% {
-    transform: scale(1.15);
-    opacity: 0.9;
-  }
-  20% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  30% {
-    transform: scale(1.15);
-    opacity: 0.9;
-  }
-  40%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0%, 40%, 100% { transform: scale(1); opacity: 1; }
+  10%, 30%      { transform: scale(1.15); opacity: 0.9; }
 }
 
-// Score Pulse - Trust Score Animation
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  14%       { transform: scale(1.2); }
+  28%       { transform: scale(1); }
+  42%       { transform: scale(1.15); }
+  70%       { transform: scale(1); }
+}
+
 @keyframes scorePulse {
-  0%, 100% {
-    transform: scale(1);
-    color: #2c3e50;
-  }
-  50% {
-    transform: scale(1.05);
-    color: #aa8642;
-  }
+  0%, 100% { transform: scale(1); color: #2c3e50; }
+  50%       { transform: scale(1.05); color: #aa8642; }
 }
 
-// Number Glow - Stat Numbers
 @keyframes numberGlow {
-  0%, 100% {
-    text-shadow: none;
-  }
-  50% {
-    text-shadow: 0 0 8px rgba(170, 134, 66, 0.4);
-  }
+  0%, 100% { text-shadow: none; }
+  50%       { text-shadow: 0 0 8px rgba(170, 134, 66, 0.4); }
 }
 
-// Underline Expand - Title Effect
 @keyframes underlineExpand {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
+  from { width: 0; }
+  to   { width: 100%; }
 }
 
-// Float Up - Subtle Float Effect
-@keyframes floatUp {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-// Fade In Scale - Banner Image
 @keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-// Breathe - Image Breathing Effect
 @keyframes breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.02); }
 }
 
-// Pulse Ring - Medical Pulse Ring
-@keyframes pulseRing {
-  0% {
-    transform: translate(-50%, -50%) scale(0.8);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.3;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0;
-  }
-}
-
-// Star Fade In - Individual Star Animation
 @keyframes starFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0) rotate(-180deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0);
-  }
+  from { opacity: 0; transform: scale(0) rotate(-180deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0); }
 }
 
-// RTL Support
-[dir='rtl'] {
-  .geriatrics-easter-egg {
-    left: auto;
-    right: 50%;
-    transform: translateX(50%);
-  }
-  
-  @keyframes fadeInOut {
-    0% {
-      opacity: 0;
-      transform: translateX(50%) translateY(10px);
-    }
-    15% {
-      opacity: 1;
-      transform: translateX(50%) translateY(0);
-    }
-    85% {
-      opacity: 1;
-      transform: translateX(50%) translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(50%) translateY(-10px);
-    }
-  }
-  
-  .geriatrics-easter-egg::before {
-    left: auto;
-    right: 50%;
-    transform: translateX(50%);
-  }
-}
+// ── Responsive ────────────────────────────────────────────────────────────────
 
-// Responsive Design
 @media (max-width: 991px) {
   .banner-section {
     padding: 50px 0 40px;
   }
-  
-  // Image appears first on tablet/mobile
+
   .banner-img {
     margin-bottom: 30px;
     order: -1;
-    
+
     img {
       max-width: 400px;
       margin: 0 auto;
       display: block;
     }
   }
-  
+
   .banner-content {
     text-align: center;
   }
-  
+
   .trust-badge {
     justify-content: center;
   }
-  
+
   .credentials-row {
+    justify-content: center;
+  }
+
+  .banner-cta-row {
+    justify-content: center;
+  }
+
+  .service-pills-section {
+    align-items: center;
+  }
+
+  .service-pills {
     justify-content: center;
   }
 }
@@ -483,18 +453,17 @@
   .banner-section {
     padding: 40px 0 30px;
   }
-  
+
   .banner-title {
     font-size: 2rem;
     margin-bottom: 1rem;
   }
-  
+
   .banner-subtitle {
     font-size: 1rem;
     margin-bottom: 1.5rem;
   }
-  
-  // Compact trust badge for mobile
+
   .trust-badge {
     flex-direction: column;
     align-items: center;
@@ -502,92 +471,53 @@
     padding: 1rem;
     background: #f8f9fa;
     border-radius: 12px;
-    
-    &__rating {
-      gap: 0.75rem;
-    }
-    
-    .trust-divider {
-      display: none;
-    }
-    
-    .trust-stars .star-icon {
-      font-size: 1.1rem;
-    }
-    
-    .trust-score {
-      font-size: 1.25rem;
-    }
-    
-    .trust-stats {
-      font-size: 0.85rem;
-      text-align: center;
-    }
+
+    &__rating { gap: 0.75rem; }
+    .trust-divider { display: none; }
+    .trust-stars .star-icon { font-size: 1.1rem; }
+    .trust-score { font-size: 1.25rem; }
+    .trust-stats { font-size: 0.85rem; text-align: center; }
   }
-  
-  // Compact credentials - Clean mobile design
+
   .credentials-row {
     gap: 1.5rem;
     margin-bottom: 1.5rem;
-    
+
     .credential-item {
       flex-direction: column;
       text-align: center;
       gap: 0.5rem;
-      padding: 0;
-      background: none;
-      border-radius: 0;
       flex: 1;
-      min-width: auto;
-      transition: transform 0.2s ease;
-      
-      &:active {
-        transform: scale(0.95);
-      }
-      
-      i {
-        font-size: 2.25rem;
-        margin-bottom: 0.375rem;
-        color: #aa8642;
-        filter: drop-shadow(0 2px 4px rgba(170, 134, 66, 0.2));
-      }
-      
-      span {
-        font-size: 0.8rem;
-        line-height: 1.4;
-        font-weight: 600;
-        color: #2c3e50;
-      }
+
+      i { font-size: 2.25rem; }
+      span { font-size: 0.8rem; font-weight: 600; }
     }
   }
-  
-  // Simplified search for mobile
-  .search-box-one {
-    form {
-      flex-direction: column;
-      gap: 0.75rem;
-      
-      .search-input {
-        width: 100%;
-      }
-      
-      .form-search-btn {
-        width: 100%;
-        
-        button {
-          width: 100%;
-          justify-content: center;
-          padding: 0.875rem;
-          font-size: 1rem;
-        }
-      }
+
+  .banner-cta-row {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .btn-banner-primary,
+    .btn-banner-secondary {
+      width: 100%;
+      justify-content: center;
+      padding: 0.9rem 1.5rem;
     }
   }
-  
-  // Banner image optimized for mobile
+
+  .service-pills {
+    gap: 0.4rem;
+  }
+
+  .service-pill {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.75rem;
+  }
+
   .banner-img {
     margin-bottom: 2rem;
-    
+
     img {
       max-width: 100%;
       border-radius: 16px;
@@ -595,91 +525,75 @@
   }
 }
 
-// Extra small devices
 @media (max-width: 575px) {
   .banner-title {
     font-size: 1.75rem;
   }
-  
+
   .banner-subtitle {
     font-size: 0.9rem;
   }
-  
-  // Stack credentials horizontally in a row on extra small screens
+
   .credentials-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
     gap: 1rem;
-    
+
     .credential-item {
-      flex-direction: column;
-      min-width: auto;
       flex: 0 0 auto;
-      
-      i {
-        font-size: 2rem;
-      }
-      
-      span {
-        font-size: 0.75rem;
-        max-width: 80px;
-      }
+      i { font-size: 2rem; }
+      span { font-size: 0.75rem; max-width: 80px; }
     }
   }
-  
-  // Compact trust badge
+
   .trust-badge {
     padding: 0.75rem;
-    
-    .trust-score {
-      font-size: 1.1rem;
-    }
-    
-    .trust-stats {
-      font-size: 0.8rem;
-    }
+    .trust-score { font-size: 1.1rem; }
+    .trust-stats { font-size: 0.8rem; }
   }
 }
 
-// Reduced Motion - Accessibility Support
+// ── RTL ───────────────────────────────────────────────────────────────────────
+
+[dir='rtl'] {
+  .title-underline-animate::after {
+    left: auto;
+    right: 0;
+    background: linear-gradient(270deg, #aa8642 0%, transparent 100%);
+  }
+
+  .credential-animate {
+    transform: translateX(20px);
+  }
+}
+
+// ── Accessibility ─────────────────────────────────────────────────────────────
+
 @media (prefers-reduced-motion: reduce) {
   .banner-animate-in,
   .animate-slide-up,
   .credential-animate,
   .banner-img-animate,
-  .star-icon,
-  .search-box-float {
+  .star-icon {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
-  
+
   .medical-icon-pulse,
   .trust-score-pulse,
-  .stat-number-animate {
+  .stat-number-animate,
+  .service-pill--featured i {
     animation: none !important;
   }
-  
-  .medical-pulse-ring {
-    display: none;
-  }
-  
+
   .banner-img-animate img {
     animation: none !important;
   }
-  
+
   .title-underline-animate::after {
     animation: none !important;
     width: 100%;
-  }
-  
-  .credential-item,
-  .star-icon {
-    transition: none !important;
-  }
-  
-  .geriatrics-easter-egg {
-    animation: none !important;
   }
 }

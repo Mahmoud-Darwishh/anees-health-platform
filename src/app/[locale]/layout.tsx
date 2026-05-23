@@ -14,6 +14,7 @@ import {
   generateLocalBusinessSchema,
   generateWebsiteSchema,
 } from '@/lib/utils/structured-data';
+import SessionProvider from '@/components/common/SessionProvider';
 import '@/styles/globals.scss';
 import '@/styles/legacy.scss';
 
@@ -54,6 +55,7 @@ export default async function LocaleLayout({
 
   return (
       <NextIntlClientProvider messages={messages} locale={locale} timeZone="Africa/Cairo">
+      <SessionProvider>
         <div dir={direction} lang={locale}>
         <a href="#main-content" className="skip-link">{t('skip_to_main_content')}</a>
         {/* Structured Data for SEO & GEO */}
@@ -81,6 +83,7 @@ export default async function LocaleLayout({
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         strategy="afterInteractive"
       />
+      </SessionProvider>
     </NextIntlClientProvider>
   );
 }

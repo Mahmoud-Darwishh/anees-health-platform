@@ -10,7 +10,8 @@
       "Bash(cd \"c:/Users/madyo/Desktop/Anees NXTJS/anees-health-platform\" && rm -rf \"src/app/[locale]/payment/mock\" scripts/smoke-mock-payment.mjs && echo \"Removed mock files\" && ls \"src/app/[locale]/payment/\")",
       "WebFetch(domain:aneeshealth.com)",
       "Bash(npx prisma *)",
-      "Bash(taskkill //F //IM node.exe)"
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(node -e \"const m = require\\('./messages/en.json'\\); console.log\\(JSON.stringify\\(m.auth?.signout, null, 2\\)\\); console.log\\(JSON.stringify\\(Object.keys\\(m.auth || {}\\), null, 2\\)\\)\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\madyo\\Desktop\\Anees NXTJS\\anees-health-platform\\src\\app\\[locale]\\payment\\mock"
