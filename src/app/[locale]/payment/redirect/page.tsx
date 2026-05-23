@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import crypto from 'crypto';
 import PaymentResult from '@/features/booking/components/payment-result';
+import { prisma } from '@/lib/db/prisma';
 
 interface PaymentRedirectPageProps {
   params: Promise<{ locale: string }>;
@@ -62,6 +63,7 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
   // Validate signature if present
   const apiKey = process.env.KASHIER_API_KEY;
 
+  let canPersistRedirectResult = false;
   if (searchParams.signature && apiKey) {
     const queryParams = Object.fromEntries(
       Object.entries(searchParams).map(([key, value]) => [key, String(value)])
@@ -75,6 +77,39 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
       // For now, we'll still show the result but log the error
     } else {
       console.log('✅ Payment signature validated');
+      canPersistRedirectResult = true;
+    }
+  }
+
+  if (canPersistRedirectResult) {
+    try {
+      const status = searchParams.paymentStatus;
+      const orderId = searchParams.merchantOrderId;
+      const transactionId = searchParams.transactionId;
+
+      if (status === 'SUCCESS') {
+        await prisma.onlineBooking.updateMany({
+          where: { bookingRef: orderId },
+          data: {
+            status: 'payment_completed',
+            ...(transactionId ? { kashierTransactionId: transactionId } : {}),
+            paymentCompletedAt: new Date(),
+          },
+        });
+      } else if (status === 'FAILED' || status === 'FAILURE') {
+        await prisma.$transaction([
+          prisma.onlineBooking.updateMany({
+            where: { bookingRef: orderId },
+            data: { status: 'payment_failed' },
+          }),
+          prisma.invoice.updateMany({
+            where: { code: `INV_${orderId}` },
+            data: { status: 'cancelled' },
+          }),
+        ]);
+      }
+    } catch (error) {
+      console.error('❌ Failed to persist redirect payment result', error);
     }
   }
 

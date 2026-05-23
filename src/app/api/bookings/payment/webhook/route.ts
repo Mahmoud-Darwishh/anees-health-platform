@@ -44,29 +44,136 @@ export async function POST(request: NextRequest) {
   try {
     switch (event) {
       case 'pay': {
+        const booking = await prisma.onlineBooking.findUnique({
+          where: { bookingRef: data.merchantOrderId },
+          select: {
+            bookingRef: true,
+            fullName: true,
+            countryCode: true,
+            phoneNumber: true,
+            amountEgp: true,
+            currency: true,
+          },
+        });
+
+        if (!booking) {
+          return NextResponse.json({ received: false, error: 'Booking not found' }, { status: 404 });
+        }
+
         if (data.status === 'SUCCESS') {
-          await prisma.onlineBooking.updateMany({
-            where: { bookingRef: data.merchantOrderId },
-            data: {
-              status: 'payment_completed',
-              kashierOrderId: data.kashierOrderId,
-              kashierTransactionId: data.transactionId,
-              paymentCompletedAt: new Date(),
-            },
+          const normalizedPhone = `${booking.countryCode}${booking.phoneNumber}`;
+          const invoiceCode = `INV_${booking.bookingRef}`;
+          const paymentCode = `PAY_${booking.bookingRef}`;
+
+          await prisma.$transaction(async (tx) => {
+            const patient = await tx.patient.findFirst({
+              where: { phone: normalizedPhone },
+              orderBy: { createdAt: 'desc' },
+            });
+
+            if (!patient) {
+              throw new Error(`Patient not found for booking ${booking.bookingRef}`);
+            }
+
+            const cardPaymentMethod = await tx.paymentMethod.findFirst({
+              where: { code: 'PM-04', isActive: true },
+              select: { id: true },
+            });
+            const fallbackPaymentMethod = !cardPaymentMethod
+              ? await tx.paymentMethod.findFirst({
+                  where: { isActive: true },
+                  select: { id: true },
+                })
+              : null;
+            const paymentMethodId = cardPaymentMethod?.id ?? fallbackPaymentMethod?.id;
+
+            if (!paymentMethodId) {
+              throw new Error('No active payment method configured');
+            }
+
+            const invoice = await tx.invoice.upsert({
+              where: { code: invoiceCode },
+              create: {
+                code: invoiceCode,
+                patientId: patient.id,
+                linkedType: 'visit',
+                grossAmountEgp: booking.amountEgp,
+                netAmountEgp: booking.amountEgp,
+                status: 'paid',
+                notes: `Paid via Kashier for booking ${booking.bookingRef}`,
+              },
+              update: {
+                patientId: patient.id,
+                grossAmountEgp: booking.amountEgp,
+                netAmountEgp: booking.amountEgp,
+                status: 'paid',
+                notes: `Paid via Kashier for booking ${booking.bookingRef}`,
+              },
+            });
+
+            await tx.payment.upsert({
+              where: { code: paymentCode },
+              create: {
+                code: paymentCode,
+                invoiceId: invoice.id,
+                patientId: patient.id,
+                amountEgp: booking.amountEgp,
+                paymentMethodId,
+                referenceNumber: data.transactionId || data.kashierOrderId || booking.bookingRef,
+                notes: `Kashier order ${data.kashierOrderId}; transaction ${data.transactionId}`,
+              },
+              update: {
+                invoiceId: invoice.id,
+                patientId: patient.id,
+                amountEgp: booking.amountEgp,
+                paymentMethodId,
+                referenceNumber: data.transactionId || data.kashierOrderId || booking.bookingRef,
+                notes: `Kashier order ${data.kashierOrderId}; transaction ${data.transactionId}`,
+              },
+            });
+
+            await tx.onlineBooking.update({
+              where: { bookingRef: booking.bookingRef },
+              data: {
+                status: 'payment_completed',
+                kashierOrderId: data.kashierOrderId,
+                kashierTransactionId: data.transactionId,
+                paymentCompletedAt: new Date(),
+              },
+            });
+
+            await tx.patient.update({
+              where: { id: patient.id },
+              data: { status: 'active' },
+            });
           });
         } else {
-          await prisma.onlineBooking.updateMany({
-            where: { bookingRef: data.merchantOrderId },
-            data: { status: 'payment_failed' },
+          await prisma.$transaction(async (tx) => {
+            await tx.onlineBooking.update({
+              where: { bookingRef: data.merchantOrderId },
+              data: { status: 'payment_failed' },
+            });
+
+            await tx.invoice.updateMany({
+              where: { code: `INV_${data.merchantOrderId}` },
+              data: { status: 'cancelled' },
+            });
           });
         }
         break;
       }
 
       case 'refund': {
-        await prisma.onlineBooking.updateMany({
-          where: { bookingRef: data.merchantOrderId },
-          data: { status: 'refunded' },
+        await prisma.$transaction(async (tx) => {
+          await tx.onlineBooking.update({
+            where: { bookingRef: data.merchantOrderId },
+            data: { status: 'refunded' },
+          });
+
+          await tx.invoice.updateMany({
+            where: { code: `INV_${data.merchantOrderId}` },
+            data: { status: 'cancelled' },
+          });
         });
         console.log('[Webhook] Refund recorded for order:', data.merchantOrderId);
         break;

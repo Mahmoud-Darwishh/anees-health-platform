@@ -18,29 +18,50 @@ export async function POST(request: NextRequest) {
     if (!allowed) return tooManyRequests();
 
     const body = await request.json();
-    const { bookingId, amount, currency, locale, customerName, customerPhone } = body as {
+    const { bookingId, locale, customerName, customerPhone } = body as {
       bookingId: string;
-      amount: number;
-      currency: string;
       locale: string;
       customerName?: string;
       customerPhone?: string;
     };
 
     // ── Validate request ──────────────────────────────────────────────
-    if (!bookingId || !amount || !currency) {
+    if (!bookingId) {
       return NextResponse.json(
-        { success: false, message: 'Missing required fields: bookingId, amount, currency' },
+        { success: false, message: 'Missing required field: bookingId' },
         { status: 400 },
       );
     }
 
-    if (amount <= 0) {
+    const booking = await prisma.onlineBooking.findUnique({
+      where: { bookingRef: bookingId },
+      select: {
+        bookingRef: true,
+        fullName: true,
+        countryCode: true,
+        phoneNumber: true,
+        amountEgp: true,
+        currency: true,
+        status: true,
+      },
+    });
+
+    if (!booking) {
       return NextResponse.json(
-        { success: false, message: 'Amount must be greater than zero' },
-        { status: 400 },
+        { success: false, message: 'Booking not found' },
+        { status: 404 },
       );
     }
+
+    if (booking.status === 'payment_completed') {
+      return NextResponse.json(
+        { success: false, message: 'Booking is already paid' },
+        { status: 409 },
+      );
+    }
+
+    const amount = Number(booking.amountEgp);
+    const currency = booking.currency || 'EGP';
 
     // ── Read Kashier credentials from env ─────────────────────────────
     const mode = (process.env.KASHIER_MODE || 'live').toLowerCase();
@@ -126,8 +147,8 @@ export async function POST(request: NextRequest) {
       },
       customer: {
         reference: bookingId,
-        ...(customerName && { name: customerName }),
-        ...(customerPhone && { phone: customerPhone }),
+        ...(customerName ? { name: customerName } : { name: booking.fullName }),
+        ...(customerPhone ? { phone: customerPhone } : { phone: `+${booking.countryCode}${booking.phoneNumber}` }),
       },
     };
 
@@ -174,10 +195,46 @@ export async function POST(request: NextRequest) {
 
     console.log('[Payment] Session created:', sessionId, '— URL:', sessionUrl);
 
-    // Persist the Kashier session ID so we can correlate before webhook fires
-    await prisma.onlineBooking.updateMany({
-      where: { bookingRef: bookingId },
-      data: { kashierSessionId: sessionId },
+    const normalizedPhone = `${booking.countryCode}${booking.phoneNumber}`;
+    const invoiceCode = `INV_${booking.bookingRef}`;
+
+    await prisma.$transaction(async (tx) => {
+      const patient = await tx.patient.findFirst({
+        where: { phone: normalizedPhone },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (!patient) {
+        throw new Error('Linked patient registration not found for booking');
+      }
+
+      await tx.invoice.upsert({
+        where: { code: invoiceCode },
+        create: {
+          code: invoiceCode,
+          patientId: patient.id,
+          linkedType: 'visit',
+          grossAmountEgp: amount,
+          netAmountEgp: amount,
+          status: 'issued',
+          notes: `Auto-created from online booking ${booking.bookingRef}`,
+        },
+        update: {
+          patientId: patient.id,
+          grossAmountEgp: amount,
+          netAmountEgp: amount,
+          status: 'issued',
+          notes: `Auto-created from online booking ${booking.bookingRef}`,
+        },
+      });
+
+      await tx.onlineBooking.update({
+        where: { bookingRef: booking.bookingRef },
+        data: {
+          kashierSessionId: sessionId,
+          status: 'payment_pending',
+        },
+      });
     });
 
     return NextResponse.json(

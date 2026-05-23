@@ -21,6 +21,11 @@ function clip(value: string | undefined | null, max: number): string | undefined
   return trimmed.slice(0, max);
 }
 
+function buildPatientCode(): string {
+  const randomId = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `PAT_${Date.now()}_${randomId}`;
+}
+
 export async function POST(request: NextRequest) {
   const cors = resolveCorsHeaders(request.headers.get('origin'));
 
@@ -93,29 +98,53 @@ export async function POST(request: NextRequest) {
 
     const userAgent = clip(request.headers.get('user-agent'), MAX.userAgent);
 
-    const booking = await prisma.onlineBooking.create({
-      data: {
-        bookingRef,
-        fullName,
-        countryCode,
-        phoneNumber,
-        visitType: body.visitType as 'homeVisit' | 'telemedicine' | 'package',
-        serviceType: body.serviceType as 'doctorVisit' | 'physiotherapy' | 'nursing' | undefined,
-        specialty: specialty || undefined,
-        packageType: body.packageType as 'haraka' | 'wai' | 'amal' | undefined,
-        preferredDate: body.preferredDate ? new Date(body.preferredDate) : undefined,
-        timePreference: body.timePreference,
-        sessionCount: body.sessionCount,
-        caseType: body.caseType,
-        nursingType: body.nursingType,
-        nursingHoursPerDay: body.nursingHoursPerDay,
-        nursingDuration: body.nursingDuration,
-        amountEgp: amount,
-        currency: 'EGP',
-        status: 'pending',
-        ipAddress: ip,
-        userAgent,
-      },
+    const normalizedPhone = `${countryCode}${phoneNumber}`;
+    const booking = await prisma.$transaction(async (tx) => {
+      const existingPatient = await tx.patient.findFirst({
+        where: { phone: normalizedPhone },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      if (existingPatient) {
+        await tx.patient.update({
+          where: { id: existingPatient.id },
+          data: { fullName, status: 'active' },
+        });
+      } else {
+        await tx.patient.create({
+          data: {
+            code: buildPatientCode(),
+            fullName,
+            phone: normalizedPhone,
+            status: 'new',
+          },
+        });
+      }
+
+      return tx.onlineBooking.create({
+        data: {
+          bookingRef,
+          fullName,
+          countryCode,
+          phoneNumber,
+          visitType: body.visitType as 'homeVisit' | 'telemedicine' | 'package',
+          serviceType: body.serviceType as 'doctorVisit' | 'physiotherapy' | 'nursing' | undefined,
+          specialty: specialty || undefined,
+          packageType: body.packageType as 'haraka' | 'wai' | 'amal' | undefined,
+          preferredDate: body.preferredDate ? new Date(body.preferredDate) : undefined,
+          timePreference: body.timePreference,
+          sessionCount: body.sessionCount,
+          caseType: body.caseType,
+          nursingType: body.nursingType,
+          nursingHoursPerDay: body.nursingHoursPerDay,
+          nursingDuration: body.nursingDuration,
+          amountEgp: amount,
+          currency: 'EGP',
+          status: 'pending',
+          ipAddress: ip,
+          userAgent,
+        },
+      });
     });
 
     return NextResponse.json(
