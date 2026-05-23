@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -354,6 +355,403 @@ async function main() {
       { code: 'palliativeCare',   iconClass: 'isax isax-heart',            landingSlug: null,                      sortOrder: 11 },
     ],
   });
+
+  // ── Demo Portal Data (patient profile + visits) ───────────────────────────
+  console.log('Seeding demo portal data...');
+
+  const demoArea = await prisma.area.findFirst({ where: { code: 'AR-005' } });
+  const demoService = await prisma.service.findFirst({ where: { code: 'SV-001' } });
+  const demoProviderRole = await prisma.providerRole.findFirst({ where: { code: 'RL-01' } });
+
+  if (demoArea && demoService && demoProviderRole) {
+    await prisma.provider.upsert({
+      where: { code: 'PRV-DEMO-001' },
+      update: {
+        fullName: 'Dr. Demo Care',
+        roleId: demoProviderRole.id,
+        joiningDate: new Date('2025-01-01'),
+        baseRateEgp: 1200,
+        paymentType: 'per_visit',
+        primaryAreaId: demoArea.id,
+        status: 'active',
+      },
+      create: {
+        code: 'PRV-DEMO-001',
+        fullName: 'Dr. Demo Care',
+        roleId: demoProviderRole.id,
+        joiningDate: new Date('2025-01-01'),
+        baseRateEgp: 1200,
+        paymentType: 'per_visit',
+        primaryAreaId: demoArea.id,
+        status: 'active',
+      },
+    });
+
+    const demoProvider = await prisma.provider.findUnique({ where: { code: 'PRV-DEMO-001' } });
+    if (!demoProvider) {
+      throw new Error('Failed to seed demo provider.');
+    }
+
+    const patientPasswordHash = await bcrypt.hash('Portal@123', 10);
+
+    await prisma.patient.upsert({
+      where: { code: 'PT-DEMO-001' },
+      update: {
+        fullName: 'Demo Patient One',
+        phone: '+201055500001',
+        areaId: demoArea.id,
+        addressDetail: 'Fifth Settlement, Cairo',
+        primaryCaregiver: 'Mahmoud Ali',
+        caregiverRelation: 'Son',
+        chiefComplaint: 'Follow-up for blood pressure and mobility',
+        status: 'active',
+      },
+      create: {
+        code: 'PT-DEMO-001',
+        fullName: 'Demo Patient One',
+        phone: '+201055500001',
+        areaId: demoArea.id,
+        addressDetail: 'Fifth Settlement, Cairo',
+        registrationDate: new Date('2026-01-10'),
+        primaryCaregiver: 'Mahmoud Ali',
+        caregiverRelation: 'Son',
+        chiefComplaint: 'Follow-up for blood pressure and mobility',
+        status: 'active',
+      },
+    });
+
+    await prisma.patient.upsert({
+      where: { code: 'PT-DEMO-002' },
+      update: {
+        fullName: 'Demo Patient Two',
+        phone: '+201055500002',
+        areaId: demoArea.id,
+        addressDetail: 'New Cairo, Cairo',
+        primaryCaregiver: 'Mona Hassan',
+        caregiverRelation: 'Daughter',
+        chiefComplaint: 'Post-operative home monitoring',
+        status: 'active',
+      },
+      create: {
+        code: 'PT-DEMO-002',
+        fullName: 'Demo Patient Two',
+        phone: '+201055500002',
+        areaId: demoArea.id,
+        addressDetail: 'New Cairo, Cairo',
+        registrationDate: new Date('2026-02-03'),
+        primaryCaregiver: 'Mona Hassan',
+        caregiverRelation: 'Daughter',
+        chiefComplaint: 'Post-operative home monitoring',
+        status: 'active',
+      },
+    });
+
+    const demoPatient1 = await prisma.patient.findUnique({ where: { code: 'PT-DEMO-001' } });
+    const demoPatient2 = await prisma.patient.findUnique({ where: { code: 'PT-DEMO-002' } });
+    if (!demoPatient1 || !demoPatient2) {
+      throw new Error('Failed to seed demo patients.');
+    }
+
+    await prisma.user.upsert({
+      where: { phone: '+201055500001' },
+      update: {
+        name: demoPatient1.fullName,
+        role: 'patient',
+        patientId: demoPatient1.id,
+        phone: demoPatient1.phone,
+        passwordHash: patientPasswordHash,
+      },
+      create: {
+        name: demoPatient1.fullName,
+        phone: demoPatient1.phone,
+        role: 'patient',
+        patientId: demoPatient1.id,
+        passwordHash: patientPasswordHash,
+      },
+    });
+
+    await prisma.user.upsert({
+      where: { phone: '+201055500002' },
+      update: {
+        name: demoPatient2.fullName,
+        role: 'patient',
+        patientId: demoPatient2.id,
+        phone: demoPatient2.phone,
+        passwordHash: patientPasswordHash,
+      },
+      create: {
+        name: demoPatient2.fullName,
+        phone: demoPatient2.phone,
+        role: 'patient',
+        patientId: demoPatient2.id,
+        passwordHash: patientPasswordHash,
+      },
+    });
+
+    const demoVisit1 = await prisma.visit.upsert({
+      where: { code: 'VIS-DEMO-001' },
+      update: {
+        patientId: demoPatient1.id,
+        providerId: demoProvider.id,
+        serviceId: demoService.id,
+        areaId: demoArea.id,
+        scheduledDate: new Date('2026-06-10'),
+        bookedDate: new Date('2026-06-08'),
+        status: 'scheduled',
+        visitType: 'in_home',
+        servicePriceEgp: 1500,
+        discountEgp: 0,
+        netPriceEgp: 1500,
+        providerPayoutEgp: 1200,
+        notes: 'Demo upcoming portal visit',
+      },
+      create: {
+        code: 'VIS-DEMO-001',
+        patientId: demoPatient1.id,
+        providerId: demoProvider.id,
+        serviceId: demoService.id,
+        areaId: demoArea.id,
+        scheduledDate: new Date('2026-06-10'),
+        bookedDate: new Date('2026-06-08'),
+        status: 'scheduled',
+        visitType: 'in_home',
+        servicePriceEgp: 1500,
+        discountEgp: 0,
+        netPriceEgp: 1500,
+        providerPayoutEgp: 1200,
+        notes: 'Demo upcoming portal visit',
+      },
+    });
+
+    const demoVisit2 = await prisma.visit.upsert({
+      where: { code: 'VIS-DEMO-002' },
+      update: {
+        patientId: demoPatient1.id,
+        providerId: demoProvider.id,
+        serviceId: demoService.id,
+        areaId: demoArea.id,
+        scheduledDate: new Date('2026-05-12'),
+        bookedDate: new Date('2026-05-10'),
+        status: 'completed',
+        visitType: 'telemedicine',
+        servicePriceEgp: 350,
+        discountEgp: 0,
+        netPriceEgp: 350,
+        providerPayoutEgp: 200,
+        notes: 'Demo completed portal visit',
+      },
+      create: {
+        code: 'VIS-DEMO-002',
+        patientId: demoPatient1.id,
+        providerId: demoProvider.id,
+        serviceId: demoService.id,
+        areaId: demoArea.id,
+        scheduledDate: new Date('2026-05-12'),
+        bookedDate: new Date('2026-05-10'),
+        status: 'completed',
+        visitType: 'telemedicine',
+        servicePriceEgp: 350,
+        discountEgp: 0,
+        netPriceEgp: 350,
+        providerPayoutEgp: 200,
+        notes: 'Demo completed portal visit',
+      },
+    });
+
+    const staffPasswordHash = await bcrypt.hash('Admin@123', 10);
+    await prisma.staff.upsert({
+      where: { email: 'admin@aneeshealth.local' },
+      update: {
+        name: 'Demo Admin',
+        role: 'superadmin',
+        status: 'active',
+        passwordHash: staffPasswordHash,
+      },
+      create: {
+        name: 'Demo Admin',
+        email: 'admin@aneeshealth.local',
+        role: 'superadmin',
+        status: 'active',
+        passwordHash: staffPasswordHash,
+      },
+    });
+
+    const demoStaff = await prisma.staff.findUnique({ where: { email: 'admin@aneeshealth.local' } });
+    if (!demoStaff) {
+      throw new Error('Failed to seed demo staff account.');
+    }
+
+    await prisma.user.upsert({
+      where: { email: demoStaff.email },
+      update: {
+        name: demoStaff.name,
+        role: 'staff',
+        staffId: demoStaff.id,
+      },
+      create: {
+        name: demoStaff.name,
+        email: demoStaff.email,
+        role: 'staff',
+        staffId: demoStaff.id,
+      },
+    });
+
+    const operatorPasswordHash = await bcrypt.hash('Operator@123', 10);
+    await prisma.staff.upsert({
+      where: { email: 'operator@aneeshealth.local' },
+      update: {
+        name: 'Demo Operator',
+        role: 'operator',
+        status: 'active',
+        passwordHash: operatorPasswordHash,
+      },
+      create: {
+        name: 'Demo Operator',
+        email: 'operator@aneeshealth.local',
+        role: 'operator',
+        status: 'active',
+        passwordHash: operatorPasswordHash,
+      },
+    });
+
+    const demoOperator = await prisma.staff.findUnique({ where: { email: 'operator@aneeshealth.local' } });
+    if (!demoOperator) {
+      throw new Error('Failed to seed demo operator account.');
+    }
+
+    await prisma.user.upsert({
+      where: { email: demoOperator.email },
+      update: {
+        name: demoOperator.name,
+        role: 'staff',
+        staffId: demoOperator.id,
+      },
+      create: {
+        name: demoOperator.name,
+        email: demoOperator.email,
+        role: 'staff',
+        staffId: demoOperator.id,
+      },
+    });
+
+    await prisma.staffPatientAssignment.upsert({
+      where: {
+        staffId_patientId: {
+          staffId: demoOperator.id,
+          patientId: demoPatient1.id,
+        },
+      },
+      update: {
+        isActive: true,
+        assignedAt: new Date(),
+        assignedBy: demoStaff.id,
+      },
+      create: {
+        staffId: demoOperator.id,
+        patientId: demoPatient1.id,
+        isActive: true,
+        assignedBy: demoStaff.id,
+      },
+    });
+
+    await prisma.staffPatientAssignment.upsert({
+      where: {
+        staffId_patientId: {
+          staffId: demoOperator.id,
+          patientId: demoPatient2.id,
+        },
+      },
+      update: {
+        isActive: false,
+        assignedBy: demoStaff.id,
+      },
+      create: {
+        staffId: demoOperator.id,
+        patientId: demoPatient2.id,
+        isActive: false,
+        assignedBy: demoStaff.id,
+      },
+    });
+
+    const existingAllergy = await prisma.allergy.findFirst({
+      where: { patientId: demoPatient1.id, allergen: 'Penicillin', deletedAt: null },
+    });
+    if (!existingAllergy) {
+      await prisma.allergy.create({
+        data: {
+          patientId: demoPatient1.id,
+          allergen: 'Penicillin',
+          reaction: 'Skin rash and itching',
+          severity: 'moderate',
+          notes: 'Avoid beta-lactam antibiotics when possible',
+          enteredByStaffId: demoStaff.id,
+        },
+      });
+    }
+
+    const existingMedication = await prisma.medication.findFirst({
+      where: { patientId: demoPatient1.id, medicationName: 'Amlodipine', deletedAt: null },
+    });
+    if (!existingMedication) {
+      await prisma.medication.create({
+        data: {
+          patientId: demoPatient1.id,
+          medicationName: 'Amlodipine',
+          dose: '5 mg',
+          frequency: 'Once daily',
+          route: 'oral',
+          startDate: new Date('2026-03-01'),
+          notes: 'Monitor blood pressure weekly',
+          enteredByStaffId: demoStaff.id,
+        },
+      });
+    }
+
+    const existingProgressNote = await prisma.progressNote.findFirst({
+      where: { patientId: demoPatient1.id, noteBody: { contains: 'Blood pressure stable' }, deletedAt: null },
+    });
+    if (!existingProgressNote) {
+      await prisma.progressNote.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit2.id,
+          noteBody:
+            'Blood pressure stable on current regimen. Continue same medication and repeat vitals in 2 weeks.',
+          enteredByStaffId: demoStaff.id,
+          signedOffByStaffId: demoStaff.id,
+          signedOffAt: new Date('2026-05-12T10:00:00.000Z'),
+        },
+      });
+    }
+
+    const existingDocument = await prisma.document.findFirst({
+      where: { patientId: demoPatient1.id, title: 'CBC Lab Result - Apr 2026', deletedAt: null },
+    });
+    if (!existingDocument) {
+      await prisma.document.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit1.id,
+          title: 'CBC Lab Result - Apr 2026',
+          category: 'lab_result',
+          storagePath: 'demo/cbc-apr-2026.pdf',
+          mimeType: 'application/pdf',
+          fileSizeBytes: 135000,
+          uploadedByStaffId: demoStaff.id,
+        },
+      });
+    }
+
+    console.log('Demo patient seed ready:');
+    console.log('  - Identifier (phone): +201055500001');
+    console.log('  - Identifier (case id): PT-DEMO-001');
+    console.log('  - Password: Portal@123');
+    console.log('Demo staff seed ready:');
+    console.log('  - Email: admin@aneeshealth.local');
+    console.log('  - Password: Admin@123');
+    console.log('  - Email: operator@aneeshealth.local');
+    console.log('  - Password: Operator@123');
+  }
 
   console.log('Seed complete.');
 }

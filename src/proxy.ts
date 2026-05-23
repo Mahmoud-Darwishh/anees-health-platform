@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextAuthRequest } from 'next-auth';
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales } from '@/i18n/request';
+import { canAccessAdminPath } from '@/lib/auth/permissions';
 
 const DEFAULT_LOCALE = 'en';
 
@@ -29,6 +30,10 @@ export default auth((req: NextAuthRequest) => {
       const loginUrl = new URL('/admin/login', req.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    if (!canAccessAdminPath(session.user.staffRole, pathname)) {
+      return NextResponse.redirect(new URL('/admin/patients?forbidden=1', req.url));
     }
 
     return NextResponse.next();

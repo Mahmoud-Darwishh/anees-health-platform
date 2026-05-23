@@ -1,0 +1,114 @@
+@use '../../../assets/scss/utils/variables' as *;
+
+.page {
+  min-height: 100vh;
+  background: #f4f7fb;
+  padding: 1.25rem;
+}
+
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    color: $brand-dark-blue;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: #5f748d;
+    font-size: 0.92rem;
+  }
+}
+
+.auditLink {
+  border-radius: 10px;
+  border: 1px solid #bfd4e8;
+  background: #fff;
+  color: #1f4f7b;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0.55rem 0.8rem;
+}
+
+.errorBanner {
+  margin: 0;
+  border-radius: 10px;
+  border: 1px solid #f8c8cf;
+  background: #fff1f3;
+  color: #a32134;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.searchRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+
+  input {
+    border: 1px solid #d4dfeb;
+    border-radius: 10px;
+    padding: 0.65rem 0.8rem;
+    background: #fff;
+  }
+
+  button {
+    border: 1px solid #1f4f7b;
+    background: #1f4f7b;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 0.62rem 0.9rem;
+  }
+}
+
+.tableWrap {
+  border: 1px solid #d7e2ee;
+  border-radius: 12px;
+  background: #fff;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+
+  th,
+  td {
+    border-bottom: 1px solid #e7eef6;
+    text-align: left;
+    padding: 0.72rem 0.6rem;
+  }
+
+  th {
+    font-size: 0.77rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #5d7690;
+  }
+
+  td {
+    color: #183f66;
+    font-size: 0.88rem;
+  }
+}
+
+.openLink {
+  color: #1f4f7b;
+  font-weight: 700;
+  text-decoration: none;
+}

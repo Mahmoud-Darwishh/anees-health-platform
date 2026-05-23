@@ -59,6 +59,104 @@
     "english": "English",
     "arabic": "Arabic"
   },
+  "portal": {
+    "metaTitle": "My Medical Profile | Anees Health",
+    "kicker": "Patient Portal",
+    "title": "My Medical Profile",
+    "subtitle": "A simple view of your case details, care status, and latest visits.",
+    "summaryLabel": "Patient summary cards",
+    "none": "Not available",
+    "notLinkedTitle": "Your account is not linked to a medical profile yet",
+    "notLinkedText": "Please link your portal account to your patient record to view your health profile.",
+    "linkAccountCta": "Link My Account",
+    "notFoundTitle": "Patient profile not found",
+    "notFoundText": "We could not find a patient profile for this account. Please contact support.",
+    "goHomeCta": "Go to Home",
+    "summary": {
+      "totalVisits": "Total Visits",
+      "upcomingVisits": "Upcoming Visits",
+      "activeCarePlans": "Active Care Plans",
+      "lastVisit": "Last Visit"
+    },
+    "profile": {
+      "title": "Patient Information",
+      "editable": "Editable",
+      "updateTitle": "Update contact details",
+      "saveChanges": "Save Changes",
+      "caseId": "Case ID",
+      "fullName": "Full Name",
+      "phone": "Phone",
+      "gender": "Gender",
+      "dateOfBirth": "Date of Birth",
+      "registrationDate": "Registration Date",
+      "area": "Area",
+      "address": "Address",
+      "caregiver": "Primary Caregiver",
+      "caregiverRelation": "Caregiver Relation"
+    },
+    "clinical": {
+      "title": "Clinical Notes",
+      "chiefComplaint": "Chief Complaint",
+      "notes": "Additional Notes",
+      "disclaimer": "This portal summary is informational and does not replace clinical diagnosis or emergency care."
+    },
+    "visits": {
+      "title": "Recent Visits",
+      "empty": "No visits are recorded yet.",
+      "date": "Date",
+      "service": "Service",
+      "provider": "Provider",
+      "type": "Visit Type",
+      "status": "Status"
+    },
+    "requests": {
+      "title": "Appointment Requests",
+      "empty": "No upcoming visits available for action.",
+      "confirm": "Confirm Appointment",
+      "reschedule": "Request Reschedule",
+      "cancel": "Request Cancellation",
+      "preferredDate": "Preferred New Date",
+      "notes": "Notes",
+      "reschedulePlaceholder": "Add preferred time or reason",
+      "cancelPlaceholder": "Reason for cancellation"
+    },
+    "documents": {
+      "title": "My Documents",
+      "subtitle": "Simple placeholder files shown for now. Secure uploads and downloads can be added next.",
+      "items": {
+        "1": {
+          "title": "CBC Lab Result",
+          "type": "Lab Report",
+          "status": "Ready",
+          "date": "Updated Apr 14, 2026"
+        },
+        "2": {
+          "title": "Physiotherapy Progress Note",
+          "type": "Clinical Note",
+          "status": "Reviewed",
+          "date": "Updated May 02, 2026"
+        }
+      }
+    },
+    "messages": {
+      "updated": "Your portal request has been saved successfully.",
+      "error": "Something went wrong while saving your request. Please try again."
+    },
+    "status": {
+      "new": "New",
+      "active": "Active",
+      "lapsed": "Lapsed",
+      "inactive": "Inactive"
+    },
+    "visitStatus": {
+      "scheduled": "Scheduled",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "no_show": "No Show",
+      "rescheduled": "Rescheduled"
+    }
+  },
   "home": {
     "banner": {
       "title": "The Leading Platform for Telemedicine & Home Healthcare",

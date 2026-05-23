@@ -141,6 +141,12 @@ enum UserRole {
   staff
 }
 
+enum ClinicalSensitivity {
+  normal
+  sensitive
+  highly_sensitive
+}
+
 // ============================================================================
 // LOOKUP TABLES
 // ============================================================================
@@ -277,6 +283,7 @@ model Patient {
   referralSourceId String?
   status           PatientStatus @default(new)
   notes            String?
+  deletedAt        DateTime?
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
@@ -287,6 +294,14 @@ model Patient {
   carePlans      CarePlan[]
   invoices       Invoice[]
   payments       Payment[]
+  medicalHistories MedicalHistory[]
+  allergies       Allergy[]
+  medications     Medication[]
+  diagnoses       Diagnosis[]
+  vitalSigns      VitalSigns[]
+  progressNotes   ProgressNote[]
+  documents       Document[]
+  staffAssignments StaffPatientAssignment[]
   userAccount    User?
 
   @@index([familyId])
@@ -383,6 +398,10 @@ model Visit {
   invoices      Invoice[]
   expenses      Expense[]
   onlineBooking OnlineBooking?
+  diagnoses     Diagnosis[]
+  vitalSigns    VitalSigns[]
+  progressNotes ProgressNote[]
+  documents     Document[]
 
   @@index([patientId])
   @@index([providerId])
@@ -605,11 +624,222 @@ model Staff {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  userAccount User?
+  userAccount            User?
+  medicalHistories       MedicalHistory[]
+  allergies              Allergy[]
+  medications            Medication[]
+  diagnoses              Diagnosis[]
+  vitalSigns             VitalSigns[]
+  progressNotes          ProgressNote[]
+  progressNoteAddendums  ProgressNoteAddendum[]
+  uploadedDocuments      Document[]
+  patientAssignments     StaffPatientAssignment[]
 
   @@index([email])
   @@index([role])
   @@map("staff")
+}
+
+model StaffPatientAssignment {
+  id         String   @id @default(cuid())
+  staffId    String
+  patientId  String
+  isActive   Boolean  @default(true)
+  assignedAt DateTime @default(now())
+  assignedBy String?
+
+  staff   Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, patientId])
+  @@index([patientId, isActive])
+  @@index([staffId, isActive])
+  @@map("staff_patient_assignments")
+}
+
+model MedicalHistory {
+  id               String              @id @default(cuid())
+  patientId        String
+  conditionName    String
+  onsetDate        DateTime?           @db.Date
+  status           String?
+  notes            String?
+  sensitivity      ClinicalSensitivity @default(normal)
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, deletedAt])
+  @@index([sensitivity])
+  @@map("medical_histories")
+}
+
+model Allergy {
+  id               String              @id @default(cuid())
+  patientId        String
+  allergen         String
+  reaction         String?
+  severity         String?
+  notes            String?
+  sensitivity      ClinicalSensitivity @default(sensitive)
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, deletedAt])
+  @@index([sensitivity])
+  @@map("allergies")
+}
+
+model Medication {
+  id               String              @id @default(cuid())
+  patientId        String
+  medicationName   String
+  dose             String?
+  frequency        String?
+  route            String?
+  startDate        DateTime?           @db.Date
+  endDate          DateTime?           @db.Date
+  isActive         Boolean             @default(true)
+  notes            String?
+  sensitivity      ClinicalSensitivity @default(sensitive)
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, isActive, deletedAt])
+  @@index([sensitivity])
+  @@map("medications")
+}
+
+model Diagnosis {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  icd10Code        String?
+  diagnosisName    String
+  diagnosedOn      DateTime?           @db.Date
+  status           String?
+  notes            String?
+  sensitivity      ClinicalSensitivity @default(sensitive)
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  visit         Visit?  @relation(fields: [visitId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, deletedAt])
+  @@index([visitId])
+  @@index([sensitivity])
+  @@map("diagnoses")
+}
+
+model VitalSigns {
+  id                String              @id @default(cuid())
+  patientId         String
+  visitId           String?
+  measuredAt        DateTime            @default(now())
+  systolicBp        Int?
+  diastolicBp       Int?
+  heartRate         Int?
+  respiratoryRate   Int?
+  oxygenSaturation  Int?
+  temperatureC      Decimal?            @db.Decimal(4, 1)
+  weightKg          Decimal?            @db.Decimal(5, 2)
+  notes             String?
+  sensitivity       ClinicalSensitivity @default(normal)
+  enteredByStaffId  String?
+  deletedAt         DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  visit         Visit?  @relation(fields: [visitId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, measuredAt, deletedAt])
+  @@index([visitId])
+  @@index([sensitivity])
+  @@map("vital_signs")
+}
+
+model ProgressNote {
+  id                  String              @id @default(cuid())
+  patientId           String
+  visitId             String?
+  noteBody            String
+  signedOffAt         DateTime?
+  signedOffByStaffId  String?
+  sensitivity         ClinicalSensitivity @default(sensitive)
+  enteredByStaffId    String?
+  deletedAt           DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  patient        Patient                @relation(fields: [patientId], references: [id])
+  visit          Visit?                 @relation(fields: [visitId], references: [id])
+  enteredByStaff Staff?                 @relation(fields: [enteredByStaffId], references: [id])
+  addendums      ProgressNoteAddendum[]
+
+  @@index([patientId, createdAt, deletedAt])
+  @@index([visitId])
+  @@index([signedOffAt])
+  @@index([sensitivity])
+  @@map("progress_notes")
+}
+
+model ProgressNoteAddendum {
+  id               String   @id @default(cuid())
+  progressNoteId   String
+  addendumBody     String
+  enteredByStaffId String?
+  createdAt        DateTime @default(now())
+
+  progressNote   ProgressNote @relation(fields: [progressNoteId], references: [id], onDelete: Cascade)
+  enteredByStaff Staff?       @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([progressNoteId, createdAt])
+  @@map("progress_note_addendums")
+}
+
+model Document {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  title            String
+  category         String
+  storagePath      String?
+  mimeType         String?
+  fileSizeBytes    Int?
+  uploadedByStaffId String?
+  sensitivity      ClinicalSensitivity @default(sensitive)
+  deletedAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient         Patient @relation(fields: [patientId], references: [id])
+  visit           Visit?  @relation(fields: [visitId], references: [id])
+  uploadedByStaff Staff?  @relation(fields: [uploadedByStaffId], references: [id])
+
+  @@index([patientId, category, deletedAt])
+  @@index([visitId])
+  @@index([sensitivity])
+  @@map("documents")
 }
 
 // ============================================================================
