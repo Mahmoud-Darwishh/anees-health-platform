@@ -43,7 +43,11 @@ export async function POST(request: NextRequest) {
       }
 
       case 'refund': {
-        console.log('[Webhook] Refund event:', data.merchantOrderId);
+        await prisma.onlineBooking.updateMany({
+          where: { bookingRef: data.merchantOrderId },
+          data: { status: 'refunded' },
+        });
+        console.log('[Webhook] Refund recorded for order:', data.merchantOrderId);
         break;
       }
 

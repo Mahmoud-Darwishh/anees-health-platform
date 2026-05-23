@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db/prisma';
 
 /**
  * POST /api/bookings/payment/initiate
@@ -55,6 +56,14 @@ export async function POST(request: NextRequest) {
     const merchantRedirect = `${siteUrl}/${displayLocale}/payment/redirect`;
     const serverWebhook =
       process.env.KASHIER_WEBHOOK || `${siteUrl}/api/bookings/payment/webhook`;
+
+    if (!process.env.KASHIER_WEBHOOK) {
+      console.warn(
+        '[Payment] KASHIER_WEBHOOK env var is not set — falling back to',
+        serverWebhook,
+        '. Set KASHIER_WEBHOOK in Vercel to your production webhook URL.',
+      );
+    }
 
     // Kashier (both live and test) rejects http/localhost URLs.
     // Fail fast with a clear message so this isn't misdiagnosed as a credentials problem.
@@ -158,6 +167,12 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[Payment] Session created:', sessionId, '— URL:', sessionUrl);
+
+    // Persist the Kashier session ID so we can correlate before webhook fires
+    await prisma.onlineBooking.updateMany({
+      where: { bookingRef: bookingId },
+      data: { kashierSessionId: sessionId },
+    });
 
     return NextResponse.json(
       {

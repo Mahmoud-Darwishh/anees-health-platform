@@ -87,6 +87,7 @@ enum OnlineBookingStatus {
   payment_pending
   payment_completed
   payment_failed
+  refunded
   confirmed
   cancelled
   converted
@@ -683,4 +684,24 @@ model AuditLog {
   @@index([changedAt])
   @@index([changedBy])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// COVERAGE CHECK — Every map/form coverage query for analytics
+// ============================================================================
+
+model CoverageCheck {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  latitude  Float
+  longitude Float
+  covered   Boolean
+  areaName  String?
+  ipHash    String?  // SHA-256 prefix of visitor IP — no PII stored
+  userAgent String?
+
+  @@index([createdAt])
+  @@index([covered])
+  @@index([areaName])
+  @@map("coverage_checks")
 }
