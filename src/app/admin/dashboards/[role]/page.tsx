@@ -1,5 +1,8 @@
 import { requireStaffPermission } from '@/lib/auth';
+import AdminDashboardShell from '@/components/admin/AdminDashboardShell';
+import { DistributionCard, RingProgressCard, SparklineCard } from '@/components/admin/EhrCharts';
 import { prisma } from '@/lib/db/prisma';
+import { buildDailySeries, type DailySeriesPoint } from '@/lib/ehr/dashboard-metrics';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import styles from '../dashboard.module.scss';
@@ -46,23 +49,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function RoleDashboardPage({ params }: Props) {
-  await requireStaffPermission('patients.read');
+  const session = await requireStaffPermission('patients.read');
   const { role } = await params;
   const meta = ROLE_META[role];
 
   if (!meta) {
     return (
-      <main className={styles.page}>
-        <section className={styles.shell}>
+      <AdminDashboardShell
+        title="Clinical Dashboard"
+        subtitle="Unknown dashboard role"
+        staffName={session.user.name ?? 'Anees Staff'}
+        roleLabel={session.user.staffRole}
+        quickLinks={[
+          { href: '/admin/patients', label: 'Patient Registry' },
+          { href: '/admin/queues', label: 'Work Queues' },
+          { href: '/admin/dashboards', label: 'Dashboard Hub', tone: 'primary' },
+        ]}
+      >
+        <section className={styles.stack}>
           <header className={styles.headerRow}>
             <div>
-              <h1>Clinical Dashboard</h1>
+              <h2>Clinical Dashboard</h2>
               <p>Unknown dashboard role.</p>
             </div>
             <Link href="/admin/dashboards" className={styles.backLink}>Back to dashboards</Link>
           </header>
         </section>
-      </main>
+      </AdminDashboardShell>
     );
   }
 
@@ -162,12 +175,162 @@ export default async function RoleDashboardPage({ params }: Props) {
     { href: '/admin/dashboards/medical-ops', label: 'Medical Ops' },
   ];
 
+  const openQueueCount = role === 'doctor'
+    ? unsignedNotes.length + activeCarePlans.length
+    : role === 'physio'
+      ? physioPlans.length
+      : role === 'nurse'
+        ? nurseEscalations.length
+        : careFollowUps.length + openAssignments.length;
+
+  const totalItems = unsignedNotes.length
+    + activeCarePlans.length
+    + physioPlans.length
+    + nurseEscalations.length
+    + careFollowUps.length
+    + openAssignments.length;
+
+  const coverageCount = new Set([
+    ...unsignedNotes.map((item) => item.patient.id),
+    ...activeCarePlans.map((item) => item.patient.id),
+    ...physioPlans.map((item) => item.patient.id),
+    ...nurseEscalations.map((item) => item.patient.id),
+    ...careFollowUps.map((item) => item.patient.id),
+    ...openAssignments.map((item) => item.patient.id),
+  ]).size;
+
+  const doctorCount = unsignedNotes.length + activeCarePlans.length;
+  const physioCount = physioPlans.length;
+  const nurseCount = nurseEscalations.length;
+  const medicalOpsCount = careFollowUps.length + openAssignments.length;
+  const referenceNow = new Date(session.expires);
+  const physioCutoff = new Date(referenceNow.getTime() + 1000 * 60 * 60 * 72);
+  const opsCutoff = new Date(referenceNow.getTime() + 1000 * 60 * 60 * 24);
+
+  const roleTrend: DailySeriesPoint[] = await buildDailySeries(async (start, end) => {
+    if (role === 'doctor') {
+      const [noteCount, carePlanUpdates] = await Promise.all([
+        prisma.progressNote.count({ where: { deletedAt: null, signedOffAt: null, createdAt: { gte: start, lt: end } } }),
+        prisma.carePlan.count({ where: { status: 'active', updatedAt: { gte: start, lt: end } } }),
+      ]);
+      return noteCount + carePlanUpdates;
+    }
+
+    if (role === 'physio') {
+      return prisma.physioSessionReport.count({
+        where: {
+          deletedAt: null,
+          nextSessionDate: { not: null },
+          sessionDate: { gte: start, lt: end },
+        },
+      });
+    }
+
+    if (role === 'nurse') {
+      return prisma.nurseDailyReport.count({
+        where: {
+          deletedAt: null,
+          escalationFlag: true,
+          reportDate: { gte: start, lt: end },
+        },
+      });
+    }
+
+    const [messageLoad, assignmentLoad] = await Promise.all([
+      prisma.careTeamMessage.count({ where: { requiresFollowUp: true, createdAt: { gte: start, lt: end } } }),
+      prisma.staffPatientAssignment.count({ where: { isActive: true, assignedAt: { gte: start, lt: end } } }),
+    ]);
+    return messageLoad + assignmentLoad;
+  }, 7);
+
+  const totalPatientsTouched = coverageCount;
+  const physioDueSoon = physioPlans.filter((item) => {
+    if (!item.nextSessionDate) return false;
+    return item.nextSessionDate >= referenceNow && item.nextSessionDate <= physioCutoff;
+  }).length;
+  const nurseReasonedEscalations = nurseEscalations.filter((item) => Boolean(item.escalationReason?.trim())).length;
+  const opsDueIn24h = careFollowUps.filter((item) => {
+    if (!item.followUpDueAt) return false;
+    return item.followUpDueAt >= referenceNow && item.followUpDueAt <= opsCutoff;
+  }).length;
+
+  const roleDistribution = role === 'doctor'
+    ? [
+        { label: 'Unsigned Notes', value: unsignedNotes.length, tone: 'navy' as const },
+        { label: 'Active Care Plans', value: activeCarePlans.length, tone: 'gold' as const },
+        { label: 'Patient Coverage', value: totalPatientsTouched, tone: 'slate' as const },
+      ]
+    : role === 'physio'
+      ? [
+          { label: 'Follow-up Sessions', value: physioPlans.length, tone: 'teal' as const },
+          { label: 'Due in 72h', value: physioDueSoon, tone: 'gold' as const },
+          { label: 'Patient Coverage', value: totalPatientsTouched, tone: 'slate' as const },
+        ]
+      : role === 'nurse'
+        ? [
+            { label: 'Escalations', value: nurseEscalations.length, tone: 'gold' as const },
+            { label: 'Reason Documented', value: nurseReasonedEscalations, tone: 'navy' as const },
+            { label: 'Patient Coverage', value: totalPatientsTouched, tone: 'slate' as const },
+          ]
+        : [
+            { label: 'Follow-up Messages', value: careFollowUps.length, tone: 'navy' as const },
+            { label: 'Assignments', value: openAssignments.length, tone: 'teal' as const },
+            { label: 'Due in 24h', value: opsDueIn24h, tone: 'gold' as const },
+          ];
+
+  const ringValue = role === 'doctor'
+    ? unsignedNotes.length
+    : role === 'physio'
+      ? physioDueSoon
+      : role === 'nurse'
+        ? nurseReasonedEscalations
+        : opsDueIn24h;
+
+  const ringTotal = role === 'doctor'
+    ? Math.max(doctorCount, 1)
+    : role === 'physio'
+      ? Math.max(physioPlans.length, 1)
+      : role === 'nurse'
+        ? Math.max(nurseEscalations.length, 1)
+        : Math.max(careFollowUps.length, 1);
+
+  const ringDetail = role === 'doctor'
+    ? 'Unsigned in queue'
+    : role === 'physio'
+      ? 'Due in 72 hours'
+      : role === 'nurse'
+        ? 'With documented reason'
+        : 'Follow-ups due in 24h';
+
   return (
-    <main className={styles.page}>
-      <section className={styles.shell}>
+    <AdminDashboardShell
+      title={meta.title}
+      subtitle={meta.summary}
+      staffName={session.user.name ?? 'Anees Staff'}
+      roleLabel={session.user.staffRole}
+      navBadges={{
+        '/admin/dashboards/doctor': doctorCount,
+        '/admin/dashboards/physio': physioCount,
+        '/admin/dashboards/nurse': nurseCount,
+        '/admin/dashboards/medical-ops': medicalOpsCount,
+        '/admin/queues': doctorCount + physioCount + nurseCount + medicalOpsCount,
+      }}
+      metrics={[
+        { label: 'Open Queue', value: openQueueCount, hint: 'Needs review', tone: 'sky' },
+        { label: 'Role Focus', value: role === 'medical-ops' ? 'Tasks' : role === 'doctor' ? 'Charts' : role === 'physio' ? 'Plans' : 'Escalations', hint: 'Current workspace', tone: 'mint' },
+        { label: 'Board Items', value: totalItems, hint: 'Visible records', tone: 'amber' },
+        { label: 'Patient Coverage', value: coverageCount, hint: 'Unique patients', tone: 'violet' },
+      ]}
+      quickLinks={[
+        { href: '/admin/patients', label: 'Patient Registry' },
+        { href: '/admin/queues', label: 'Work Queues' },
+        { href: '/admin/dashboards', label: 'All Dashboards', tone: 'primary' },
+      ]}
+    >
+      <section className={styles.stack}>
         <header className={styles.headerRow}>
           <div>
-            <h1>{meta.title}</h1>
+            <h2>{meta.title}</h2>
             <p>{meta.summary}</p>
           </div>
           <Link href="/admin/dashboards" className={styles.backLink}>All dashboards</Link>
@@ -183,22 +346,48 @@ export default async function RoleDashboardPage({ params }: Props) {
 
         <p className={styles.subhead}>{meta.subtitle}</p>
 
+        <section className={styles.visualGrid}>
+          <div className={styles.visualSpanTwo}>
+            <SparklineCard
+              title="7-Day Workload Trend"
+              subtitle="Daily operational activity for this role"
+              points={roleTrend}
+              tone={role === 'doctor' || role === 'medical-ops' ? 'navy' : 'gold'}
+            />
+          </div>
+
+          <DistributionCard
+            title="Role Distribution"
+            subtitle="How today’s load is distributed"
+            items={roleDistribution}
+          />
+
+          <RingProgressCard
+            title="Priority Focus"
+            subtitle="Critical share for immediate tracking"
+            value={ringValue}
+            total={ringTotal}
+            detail={ringDetail}
+            tone={role === 'nurse' || role === 'physio' ? 'gold' : 'navy'}
+          />
+        </section>
+
         <section className={styles.summaryGrid}>
           <article className={styles.summaryTile}>
             <p>Open queue</p>
-            <strong>{role === 'doctor' ? unsignedNotes.length + activeCarePlans.length : role === 'physio' ? physioPlans.length : role === 'nurse' ? nurseEscalations.length : careFollowUps.length}</strong>
+            <strong>{openQueueCount}</strong>
           </article>
           <article className={styles.summaryTile}>
             <p>Focus</p>
             <strong>{role === 'doctor' ? 'Charts' : role === 'physio' ? 'Plans' : role === 'nurse' ? 'Escalations' : 'Tasks'}</strong>
           </article>
           <article className={styles.summaryTile}>
-            <p>Review window</p>
-            <strong>Today</strong>
+            <p>Patient coverage</p>
+            <strong>{coverageCount}</strong>
           </article>
           <article className={styles.summaryTile}>
-            <p>Status</p>
-            <strong>Live</strong>
+            <p>Total board items</p>
+            <strong>{totalItems}</strong>
           </article>
         </section>
 
@@ -332,6 +521,6 @@ export default async function RoleDashboardPage({ params }: Props) {
           )}
         </section>
       </section>
-    </main>
+    </AdminDashboardShell>
   );
 }

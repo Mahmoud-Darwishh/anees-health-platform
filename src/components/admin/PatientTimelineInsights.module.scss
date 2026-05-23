@@ -1,0 +1,212 @@
+@use '../../assets/scss/utils/mixins' as *;
+
+.panel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.controlsRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.windowGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  border: 1px solid #d8e3ef;
+  border-radius: 11px;
+  padding: 0.25rem;
+  background: #f8fbff;
+}
+
+.windowBtn,
+.windowBtnActive {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.32rem 0.62rem;
+}
+
+.windowBtn {
+  color: #406383;
+  background: transparent;
+}
+
+.windowBtnActive {
+  color: #2f2414;
+  border-color: #dfc185;
+  background: linear-gradient(130deg, #f6e5c2 0%, #dfc184 100%);
+}
+
+.typeSelectWrap {
+  display: grid;
+  gap: 0.2rem;
+
+  span {
+    color: #5c7690;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  select {
+    border: 1px solid #d6e1ec;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #1c4c78;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.42rem 0.6rem;
+    min-width: 160px;
+  }
+}
+
+.chartGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.spanTwo {
+  grid-column: span 2;
+}
+
+.vitalsRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.vitalCard {
+  border: 1px solid #d8e3ef;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #ffffff 0%, #f7fbff 100%);
+  padding: 0.62rem;
+  display: grid;
+  gap: 0.4rem;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+
+  h4 {
+    margin: 0;
+    color: #143e65;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  span {
+    color: #5c7690;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+}
+
+.eventsSection {
+  border: 1px solid #d8e3ef;
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 0.72rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.eventsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+
+  h3 {
+    margin: 0;
+    color: #153f66;
+    font-size: 0.92rem;
+  }
+
+  span {
+    color: #5f7890;
+    font-size: 0.77rem;
+    font-weight: 600;
+  }
+}
+
+.eventsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.eventsList li {
+  border: 1px solid #e1eaf4;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.5rem 0.55rem;
+  display: grid;
+  gap: 0.16rem;
+
+  strong {
+    color: #173f67;
+    font-size: 0.84rem;
+  }
+
+  p,
+  time {
+    margin: 0;
+    color: #5f7890;
+    font-size: 0.76rem;
+  }
+}
+
+.eventType {
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid #d5e4f3;
+  background: #eef6ff;
+  color: #2c5883;
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.12rem 0.42rem;
+}
+
+.emptyText {
+  margin: 0;
+  color: #5f7890;
+  font-size: 0.84rem;
+}
+
+@include respond-below(custom991) {
+  .chartGrid,
+  .vitalsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .spanTwo {
+    grid-column: span 1;
+  }
+}
+
+@include respond-below(custom479) {
+  .typeSelectWrap {
+    width: 100%;
+
+    select {
+      width: 100%;
+    }
+  }
+}

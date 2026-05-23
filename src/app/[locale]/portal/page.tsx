@@ -1,5 +1,7 @@
 import { auth } from '@/auth';
+import { DistributionCard, MiniSparkline, RingProgressCard, SparklineCard } from '@/components/admin/EhrCharts';
 import { prisma } from '@/lib/db/prisma';
+import { buildDailySeries } from '@/lib/ehr/dashboard-metrics';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -43,6 +45,82 @@ function formatDecimalLike(value: unknown): string {
     return value.toString();
   }
   return '-';
+}
+
+function portalLocale(locale: string): string {
+  return locale === 'ar' ? 'ar-EG' : 'en-GB';
+}
+
+function StatIcon({ kind }: { kind: 'visits' | 'calendar' | 'plan' | 'medication' | 'diagnosis' | 'document' | 'vitals' | 'last' }) {
+  if (kind === 'calendar') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <rect x="4" y="6" width="16" height="14" rx="2" />
+        <path d="M8 4v4M16 4v4M4 10h16" />
+      </svg>
+    );
+  }
+
+  if (kind === 'plan') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M5 13l4 4L19 7" />
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+      </svg>
+    );
+  }
+
+  if (kind === 'medication') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 7l10 10" />
+        <rect x="4" y="10" width="8" height="5" rx="2" />
+        <rect x="12" y="9" width="8" height="6" rx="2" />
+      </svg>
+    );
+  }
+
+  if (kind === 'diagnosis') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="11" cy="11" r="6" />
+        <path d="M16 16l4 4" />
+      </svg>
+    );
+  }
+
+  if (kind === 'document') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 3h7l5 5v13H7z" />
+        <path d="M14 3v6h6" />
+      </svg>
+    );
+  }
+
+  if (kind === 'vitals') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3 13h4l2-4 3 8 2-4h7" />
+      </svg>
+    );
+  }
+
+  if (kind === 'last') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 8v5l3 2" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 8v8M8 12h8" />
+    </svg>
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -275,14 +353,95 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const totalVisits = await prisma.visit.count({ where: { patientId: patient.id } });
-  const upcomingVisits = await prisma.visit.count({
-    where: {
-      patientId: patient.id,
-      scheduledDate: { gte: today },
-      status: { in: ['scheduled', 'rescheduled', 'in_progress'] },
-    },
-  });
+  const [
+    totalVisits,
+    upcomingVisits,
+    completedVisits,
+    visitTrend,
+    avgHeartRateTrend,
+    avgSpo2Trend,
+    documentTrend,
+  ] = await Promise.all([
+    prisma.visit.count({ where: { patientId: patient.id } }),
+    prisma.visit.count({
+      where: {
+        patientId: patient.id,
+        scheduledDate: { gte: today },
+        status: { in: ['scheduled', 'rescheduled', 'in_progress'] },
+      },
+    }),
+    prisma.visit.count({
+      where: {
+        patientId: patient.id,
+        status: 'completed',
+      },
+    }),
+    buildDailySeries(
+      (start, end) => prisma.visit.count({
+        where: {
+          patientId: patient.id,
+          scheduledDate: { gte: start, lt: end },
+        },
+      }),
+      7,
+      portalLocale(locale),
+    ),
+    buildDailySeries(
+      async (start, end) => {
+        const vitals = await prisma.vitalSigns.findMany({
+          where: {
+            patientId: patient.id,
+            deletedAt: null,
+            measuredAt: { gte: start, lt: end },
+          },
+          select: { heartRate: true },
+        });
+
+        const rates = vitals
+          .map((item) => item.heartRate)
+          .filter((value): value is number => typeof value === 'number');
+
+        if (rates.length === 0) return 0;
+
+        return Math.round(rates.reduce((sum, value) => sum + value, 0) / rates.length);
+      },
+      7,
+      portalLocale(locale),
+    ),
+    buildDailySeries(
+      async (start, end) => {
+        const vitals = await prisma.vitalSigns.findMany({
+          where: {
+            patientId: patient.id,
+            deletedAt: null,
+            measuredAt: { gte: start, lt: end },
+          },
+          select: { oxygenSaturation: true },
+        });
+
+        const values = vitals
+          .map((item) => item.oxygenSaturation)
+          .filter((value): value is number => typeof value === 'number');
+
+        if (values.length === 0) return 0;
+
+        return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+      },
+      7,
+      portalLocale(locale),
+    ),
+    buildDailySeries(
+      (start, end) => prisma.document.count({
+        where: {
+          patientId: patient.id,
+          deletedAt: null,
+          createdAt: { gte: start, lt: end },
+        },
+      }),
+      7,
+      portalLocale(locale),
+    ),
+  ]);
 
   const recentVisits = patient.visits;
   const actionableUpcomingVisits = recentVisits.filter((visit) =>
@@ -295,6 +454,36 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
   const scanDocuments = patient.documents.filter((doc) => classifyDocumentCategory(doc.category) === 'scan');
   const otherDocuments = patient.documents.filter((doc) => classifyDocumentCategory(doc.category) === 'other');
   const latestVitals = patient.vitalSigns[0] ?? null;
+  const readyDocuments = patient.documents.filter((doc) => Boolean(doc.storagePath)).length;
+  const pendingDocuments = Math.max(patient.documents.length - readyDocuments, 0);
+  const nextScheduledVisit = actionableUpcomingVisits[0] ?? null;
+  const completionRate = totalVisits > 0 ? Math.round((completedVisits / totalVisits) * 100) : 0;
+  const latestSpo2 = latestVitals?.oxygenSaturation ?? null;
+
+  const visitMiniTrend = visitTrend.map((point) => ({ value: point.value }));
+  const heartRateMiniTrend = avgHeartRateTrend.map((point) => ({ value: point.value }));
+  const spo2MiniTrend = avgSpo2Trend.map((point) => ({ value: point.value }));
+  const documentMiniTrend = documentTrend.map((point) => ({ value: point.value }));
+
+  const recordMix = [
+    { label: t('summary.activeMedications'), value: activeMedications.length, tone: 'navy' as const },
+    { label: t('summary.totalDiagnoses'), value: patient.diagnoses.length, tone: 'gold' as const },
+    { label: t('allergies.title'), value: patient.allergies.length, tone: 'teal' as const },
+    { label: t('doctorNotes.title'), value: patient.progressNotes.length, tone: 'slate' as const },
+  ];
+
+  const visitStatusMix = [
+    { label: t('visitStatus.completed'), value: recentVisits.filter((visit) => visit.status === 'completed').length, tone: 'navy' as const },
+    { label: t('visitStatus.scheduled'), value: recentVisits.filter((visit) => visit.status === 'scheduled').length, tone: 'gold' as const },
+    { label: t('visitStatus.in_progress'), value: recentVisits.filter((visit) => visit.status === 'in_progress').length, tone: 'teal' as const },
+    { label: t('visitStatus.rescheduled'), value: recentVisits.filter((visit) => visit.status === 'rescheduled').length, tone: 'slate' as const },
+  ];
+
+  const documentMix = [
+    { label: t('documents.labs'), value: labDocuments.length, tone: 'gold' as const },
+    { label: t('documents.scans'), value: scanDocuments.length, tone: 'navy' as const },
+    { label: t('documents.other'), value: otherDocuments.length, tone: 'slate' as const },
+  ];
 
   return (
     <main className={styles.page}>
@@ -302,57 +491,257 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
         {query.updated && <p className={styles.noticeSuccess}>{t('messages.updated')}</p>}
         {query.error && <p className={styles.noticeError}>{t('messages.error')}</p>}
 
-        <header className={styles.headerCard}>
-          <div>
+        <header className={`${styles.headerCard} ${styles.dashboardHero}`}>
+          <div className={styles.dashboardIntro}>
             <p className={styles.kicker}>{t('kicker')}</p>
             <h1>{t('title')}</h1>
-            <p>{t('subtitle')}</p>
+            <p className={styles.dashboardSubtitle}>{t('subtitle')}</p>
+
+            <div className={styles.heroPills}>
+              <span className={styles.statusPill}>{t(`status.${patient.status}`)}</span>
+              <span className={styles.heroPill}>
+                <StatIcon kind="document" />
+                <strong>{readyDocuments}/{patient.documents.length}</strong>
+                <em>{t('documents.ready')}</em>
+              </span>
+              <span className={styles.heroPill}>
+                <StatIcon kind="calendar" />
+                <strong>{nextScheduledVisit ? formatDate(nextScheduledVisit.scheduledDate, locale) : t('none')}</strong>
+                <em>{t('summary.upcomingVisits')}</em>
+              </span>
+              <span className={styles.heroPill}>
+                <StatIcon kind="plan" />
+                <strong>{completionRate}%</strong>
+                <em>{t('visitStatus.completed')}</em>
+              </span>
+            </div>
           </div>
-          <div className={styles.headerActions}>
-            <span className={styles.statusPill}>{t(`status.${patient.status}`)}</span>
+
+          <div className={styles.heroActions}>
             <Link href={`/${locale}/portal/summary`} className={styles.headerActionBtn}>
               {t('portableSummary.cta')}
+            </Link>
+            <Link href="#requests-panel" className={styles.headerActionBtn}>
+              {t('requests.title')}
             </Link>
           </div>
         </header>
 
         <section className={styles.statsGrid} aria-label={t('summaryLabel')}>
           <article className={styles.statCard}>
-            <p>{t('summary.totalVisits')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="visits" /></span>
+              <p>{t('summary.totalVisits')}</p>
+            </div>
             <strong>{totalVisits}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.upcomingVisits')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="calendar" /></span>
+              <p>{t('summary.upcomingVisits')}</p>
+            </div>
             <strong>{upcomingVisits}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.activeCarePlans')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="plan" /></span>
+              <p>{t('summary.activeCarePlans')}</p>
+            </div>
             <strong>{patient.carePlans.length}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.lastVisit')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="last" /></span>
+              <p>{t('summary.lastVisit')}</p>
+            </div>
             <strong>{lastVisit ? formatDate(lastVisit.scheduledDate, locale) : t('none')}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.activeMedications')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="medication" /></span>
+              <p>{t('summary.activeMedications')}</p>
+            </div>
             <strong>{activeMedications.length}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.totalDiagnoses')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="diagnosis" /></span>
+              <p>{t('summary.totalDiagnoses')}</p>
+            </div>
             <strong>{patient.diagnoses.length}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.labReports')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="document" /></span>
+              <p>{t('summary.labReports')}</p>
+            </div>
             <strong>{labDocuments.length}</strong>
           </article>
           <article className={styles.statCard}>
-            <p>{t('summary.latestBp')}</p>
+            <div className={styles.statHead}>
+              <span className={styles.statIcon} aria-hidden="true"><StatIcon kind="vitals" /></span>
+              <p>{t('summary.latestBp')}</p>
+            </div>
             <strong>
               {latestVitals && latestVitals.systolicBp && latestVitals.diastolicBp
                 ? `${latestVitals.systolicBp}/${latestVitals.diastolicBp}`
                 : t('none')}
             </strong>
           </article>
+        </section>
+
+        <nav className={styles.quickNav} aria-label={t('summaryLabel')}>
+          <Link href="#profile-panel" className={styles.quickNavItem}>
+            <StatIcon kind="diagnosis" />
+            {t('profile.title')}
+          </Link>
+          <Link href="#clinical-panel" className={styles.quickNavItem}>
+            <StatIcon kind="vitals" />
+            {t('clinical.title')}
+          </Link>
+          <Link href="#requests-panel" className={styles.quickNavItem}>
+            <StatIcon kind="calendar" />
+            {t('requests.title')}
+          </Link>
+          <Link href="#documents-panel" className={styles.quickNavItem}>
+            <StatIcon kind="document" />
+            {t('documents.title')}
+          </Link>
+          <Link href="#visits-panel" className={styles.quickNavItem}>
+            <StatIcon kind="visits" />
+            {t('visits.title')}
+          </Link>
+        </nav>
+
+        <section className={styles.eliteBand} aria-label={t('summaryLabel')}>
+          <article className={styles.eliteCard}>
+            <div className={styles.eliteCardHead}>
+              <span className={styles.eliteIcon}><StatIcon kind="visits" /></span>
+              <p>{t('summary.totalVisits')}</p>
+            </div>
+            <strong className={styles.eliteValue}>{totalVisits}</strong>
+            <p className={styles.eliteMeta}>{t('requests.title')}: {actionableUpcomingVisits.length}</p>
+            <MiniSparkline points={visitMiniTrend} tone="navy" ariaLabel={t('summary.totalVisits')} />
+          </article>
+
+          <article className={styles.eliteCard}>
+            <div className={styles.eliteCardHead}>
+              <span className={styles.eliteIcon}><StatIcon kind="vitals" /></span>
+              <p>{t('vitals.hr')}</p>
+            </div>
+            <strong className={styles.eliteValue}>{avgHeartRateTrend.at(-1)?.value ?? 0}</strong>
+            <p className={styles.eliteMeta}>{t('summary.latestBp')}: {latestVitals && latestVitals.systolicBp && latestVitals.diastolicBp ? `${latestVitals.systolicBp}/${latestVitals.diastolicBp}` : t('none')}</p>
+            <MiniSparkline points={heartRateMiniTrend} tone="gold" ariaLabel={t('vitals.hr')} />
+          </article>
+
+          <article className={styles.eliteCard}>
+            <div className={styles.eliteCardHead}>
+              <span className={styles.eliteIcon}><StatIcon kind="vitals" /></span>
+              <p>{t('vitals.spo2')}</p>
+            </div>
+            <strong className={styles.eliteValue}>{latestSpo2 ?? 0}</strong>
+            <p className={styles.eliteMeta}>{t('summary.upcomingVisits')}: {upcomingVisits}</p>
+            <MiniSparkline points={spo2MiniTrend} tone="navy" ariaLabel={t('vitals.spo2')} />
+          </article>
+
+          <article className={styles.eliteCard}>
+            <div className={styles.eliteCardHead}>
+              <span className={styles.eliteIcon}><StatIcon kind="document" /></span>
+              <p>{t('documents.title')}</p>
+            </div>
+            <strong className={styles.eliteValue}>{readyDocuments}/{patient.documents.length}</strong>
+            <p className={styles.eliteMeta}>{t('documents.pending')}: {pendingDocuments}</p>
+            <MiniSparkline points={documentMiniTrend} tone="gold" ariaLabel={t('documents.title')} />
+          </article>
+        </section>
+
+        <section className={styles.visualGrid}>
+          <div className={styles.visualSpanTwo}>
+            <SparklineCard
+              title={t('visits.title')}
+              subtitle={t('summary.upcomingVisits')}
+              points={visitTrend}
+              tone="navy"
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <SparklineCard
+              title={t('vitals.title')}
+              subtitle={t('vitals.hr')}
+              points={avgHeartRateTrend}
+              tone="gold"
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <SparklineCard
+              title={t('vitals.spo2')}
+              subtitle={t('vitals.measuredAt')}
+              points={avgSpo2Trend}
+              tone="navy"
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <DistributionCard
+              title={t('clinical.title')}
+              subtitle={t('summary.totalDiagnoses')}
+              items={recordMix}
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <DistributionCard
+              title={t('visits.title')}
+              subtitle={t('visitStatus.in_progress')}
+              items={visitStatusMix}
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <DistributionCard
+              title={t('documents.title')}
+              subtitle={t('documents.subtitle')}
+              items={documentMix}
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <RingProgressCard
+              title={t('documents.title')}
+              subtitle={t('documents.subtitle')}
+              value={readyDocuments}
+              total={Math.max(patient.documents.length, 1)}
+              detail={`${readyDocuments}/${patient.documents.length}`}
+              tone="gold"
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <RingProgressCard
+              title={t('requests.title')}
+              subtitle={t('summary.totalVisits')}
+              value={completedVisits}
+              total={Math.max(totalVisits, 1)}
+              detail={`${completedVisits}/${totalVisits}`}
+              tone="navy"
+            />
+          </div>
+
+          <div className={styles.visualCard}>
+            <article className={styles.visualInfoCard}>
+              <h3>{t('portableSummary.title')}</h3>
+              <p>{t('portableSummary.description')}</p>
+              <ul>
+                <li>{t('summary.totalVisits')}: {totalVisits}</li>
+                <li>{t('requests.title')}: {actionableUpcomingVisits.length}</li>
+                <li>{t('summary.activeMedications')}: {activeMedications.length}</li>
+                <li>{t('summary.totalDiagnoses')}: {patient.diagnoses.length}</li>
+                <li>{t('documents.pending')}: {pendingDocuments}</li>
+              </ul>
+            </article>
+          </div>
         </section>
 
         <article className={`${styles.card} ${styles.highlightCard}`}>
@@ -369,7 +758,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
         </article>
 
         <section className={styles.grid}>
-          <article className={styles.card}>
+          <article className={styles.card} id="profile-panel">
             <div className={styles.cardHeaderRow}>
               <h2>{t('profile.title')}</h2>
               <span className={styles.editBadge}>{t('profile.editable')}</span>
@@ -445,7 +834,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
             </form>
           </article>
 
-          <article className={styles.card}>
+          <article className={styles.card} id="clinical-panel">
             <h2>{t('clinical.title')}</h2>
             <div className={styles.textBlock}>
               <h3>{t('clinical.chiefComplaint')}</h3>
@@ -685,7 +1074,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
           </article>
         </section>
 
-        <article className={styles.card}>
+        <article className={styles.card} id="requests-panel">
           <h2>{t('requests.title')}</h2>
           {actionableUpcomingVisits.length === 0 ? (
             <p className={styles.emptyText}>{t('requests.empty')}</p>
@@ -738,7 +1127,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
           )}
         </article>
 
-        <article className={styles.card}>
+        <article className={styles.card} id="documents-panel">
           <h2>{t('documents.title')}</h2>
           <p className={styles.documentsIntro}>{t('documents.subtitle')}</p>
 
@@ -791,7 +1180,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
           )}
         </article>
 
-        <article className={styles.card}>
+        <article className={styles.card} id="visits-panel">
           <h2>{t('visits.title')}</h2>
           {recentVisits.length === 0 ? (
             <p className={styles.emptyText}>{t('visits.empty')}</p>

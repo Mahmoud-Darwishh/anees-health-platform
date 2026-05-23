@@ -1,4 +1,5 @@
 import { auth } from '@/auth';
+import { DistributionCard, RingProgressCard, SparklineCard } from '@/components/admin/EhrCharts';
 import { prisma } from '@/lib/db/prisma';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -26,6 +27,57 @@ function formatVisitType(value: string): string {
   return value === 'telemedicine' ? 'Telemedicine' : 'In-home';
 }
 
+function classifyDocumentCategory(category: string): 'lab' | 'scan' | 'other' {
+  const normalized = category.toLowerCase();
+  if (normalized.includes('lab') || normalized.includes('pathology') || normalized.includes('result')) return 'lab';
+  if (normalized.includes('scan') || normalized.includes('radiology') || normalized.includes('xray') || normalized.includes('mri') || normalized.includes('ct')) return 'scan';
+  return 'other';
+}
+
+function formatShortDate(value: Date | null, locale: string): string {
+  if (!value) return '-';
+  return new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'Africa/Cairo',
+  }).format(value);
+}
+
+function SummaryIcon({ kind }: { kind: 'patient' | 'clinical' | 'docs' | 'visits' }) {
+  if (kind === 'patient') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c1.8-3.6 4.6-5.4 8-5.4s6.2 1.8 8 5.4" />
+      </svg>
+    );
+  }
+
+  if (kind === 'docs') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M7 3h7l5 5v13H7z" />
+        <path d="M14 3v6h6" />
+      </svg>
+    );
+  }
+
+  if (kind === 'visits') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <rect x="4" y="6" width="16" height="14" rx="2" />
+        <path d="M8 4v4M16 4v4M4 10h16" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 13h4l2-4 3 8 2-4h7" />
+    </svg>
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'portal.shareProfile' });
@@ -38,6 +90,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PatientPortableSummaryPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'portal.shareProfile' });
+  const portalT = await getTranslations({ locale, namespace: 'portal' });
   const session = await auth();
 
   if (!session || session.user.role !== 'patient' || !session.user.patientId) {
@@ -114,7 +167,7 @@ export default async function PatientPortableSummaryPage({ params }: Props) {
         where: { deletedAt: null },
         orderBy: { createdAt: 'desc' },
         take: 12,
-        select: { id: true, title: true, category: true, createdAt: true },
+        select: { id: true, title: true, category: true, createdAt: true, storagePath: true },
       },
       visits: {
         orderBy: { scheduledDate: 'desc' },
@@ -129,12 +182,63 @@ export default async function PatientPortableSummaryPage({ params }: Props) {
           provider: { select: { fullName: true } },
         },
       },
+      vitalSigns: {
+        where: { deletedAt: null },
+        orderBy: { measuredAt: 'desc' },
+        take: 8,
+        select: {
+          id: true,
+          measuredAt: true,
+          heartRate: true,
+          oxygenSaturation: true,
+        },
+      },
     },
   });
 
   if (!patient) {
     redirect(`/${locale}/portal`);
   }
+
+  const labDocuments = patient.documents.filter((doc) => classifyDocumentCategory(doc.category) === 'lab');
+  const scanDocuments = patient.documents.filter((doc) => classifyDocumentCategory(doc.category) === 'scan');
+  const otherDocuments = patient.documents.filter((doc) => classifyDocumentCategory(doc.category) === 'other');
+  const readyDocuments = patient.documents.filter((doc) => Boolean(doc.storagePath)).length;
+
+  const visitStatusMix = [
+    { label: portalT('visitStatus.completed'), value: patient.visits.filter((visit) => visit.status === 'completed').length, tone: 'navy' as const },
+    { label: portalT('visitStatus.scheduled'), value: patient.visits.filter((visit) => visit.status === 'scheduled').length, tone: 'gold' as const },
+    { label: portalT('visitStatus.in_progress'), value: patient.visits.filter((visit) => visit.status === 'in_progress').length, tone: 'teal' as const },
+    { label: portalT('visitStatus.rescheduled'), value: patient.visits.filter((visit) => visit.status === 'rescheduled').length, tone: 'slate' as const },
+  ];
+
+  const documentMix = [
+    { label: portalT('documents.labs'), value: labDocuments.length, tone: 'gold' as const },
+    { label: portalT('documents.scans'), value: scanDocuments.length, tone: 'navy' as const },
+    { label: portalT('documents.other'), value: otherDocuments.length, tone: 'slate' as const },
+  ];
+
+  const readinessSignals = [
+    patient.diagnoses.length > 0,
+    patient.medications.length > 0,
+    patient.allergies.length > 0,
+    patient.progressNotes.length > 0,
+    patient.documents.length > 0,
+    patient.visits.length > 0,
+  ];
+
+  const readinessValue = readinessSignals.filter(Boolean).length;
+  const heartRateSeries = patient.vitalSigns
+    .slice()
+    .reverse()
+    .map((item) => ({
+      label: formatShortDate(item.measuredAt, locale),
+      value: item.heartRate ?? 0,
+    }));
+
+  const safeHeartRateSeries = heartRateSeries.length > 0
+    ? heartRateSeries
+    : [{ label: '-', value: 0 }];
 
   return (
     <main className={styles.page}>
@@ -147,7 +251,7 @@ export default async function PatientPortableSummaryPage({ params }: Props) {
         </div>
 
         <article className={styles.sheet}>
-          <header className={styles.header}>
+          <header className={`${styles.header} ${styles.dashboardHero}`}>
             <div className={styles.brandRow}>
               <Image src="/assets/img/footer-logo.png" alt="Anees Health" width={132} height={42} priority />
               <span>{t('brandTagline')}</span>
@@ -158,7 +262,79 @@ export default async function PatientPortableSummaryPage({ params }: Props) {
               <span className={styles.badge}>{t('generatedAt')}: {formatDate(new Date(), locale)}</span>
               <span className={styles.badge}>{t('caseId')}: {patient.code}</span>
             </div>
+
+            <section className={styles.heroStats} aria-label={t('clinicalSummary')}>
+              <article className={styles.heroStatCard}>
+                <div className={styles.heroStatHead}>
+                  <span className={styles.heroIcon}><SummaryIcon kind="patient" /></span>
+                  <p>{t('patientInfo')}</p>
+                </div>
+                <strong>{patient.fullName}</strong>
+              </article>
+
+              <article className={styles.heroStatCard}>
+                <div className={styles.heroStatHead}>
+                  <span className={styles.heroIcon}><SummaryIcon kind="clinical" /></span>
+                  <p>{t('clinicalSummary')}</p>
+                </div>
+                <strong>{patient.diagnoses.length + patient.medications.length + patient.allergies.length}</strong>
+              </article>
+
+              <article className={styles.heroStatCard}>
+                <div className={styles.heroStatHead}>
+                  <span className={styles.heroIcon}><SummaryIcon kind="docs" /></span>
+                  <p>{t('labsScans')}</p>
+                </div>
+                <strong>{readyDocuments}/{patient.documents.length}</strong>
+              </article>
+
+              <article className={styles.heroStatCard}>
+                <div className={styles.heroStatHead}>
+                  <span className={styles.heroIcon}><SummaryIcon kind="visits" /></span>
+                  <p>{t('recentVisits')}</p>
+                </div>
+                <strong>{patient.visits.length}</strong>
+              </article>
+            </section>
           </header>
+
+          <section className={styles.visualGrid}>
+            <div className={styles.visualCard}>
+              <SparklineCard
+                title={portalT('vitals.hr')}
+                subtitle={portalT('vitals.measuredAt')}
+                points={safeHeartRateSeries}
+                tone="gold"
+              />
+            </div>
+
+            <div className={styles.visualCard}>
+              <DistributionCard
+                title={t('recentVisits')}
+                subtitle={portalT('summary.totalVisits')}
+                items={visitStatusMix}
+              />
+            </div>
+
+            <div className={styles.visualCard}>
+              <DistributionCard
+                title={t('labsScans')}
+                subtitle={portalT('documents.subtitle')}
+                items={documentMix}
+              />
+            </div>
+
+            <div className={styles.visualCard}>
+              <RingProgressCard
+                title={t('clinicalSummary')}
+                subtitle={portalT('portableSummary.tip')}
+                value={readinessValue}
+                total={readinessSignals.length}
+                detail={`${readinessValue}/${readinessSignals.length}`}
+                tone="navy"
+              />
+            </div>
+          </section>
 
           <section className={styles.grid}>
             <article className={styles.card}>

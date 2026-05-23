@@ -1,0 +1,264 @@
+@use '../../assets/scss/utils/mixins' as *;
+
+.card {
+  border: 1px solid #d7e3ef;
+  border-radius: 16px;
+  background: linear-gradient(165deg, #ffffff 0%, #f7fbff 100%);
+  padding: 0.85rem;
+  box-shadow: 0 10px 24px rgba(17, 50, 83, 0.06);
+}
+
+.sparkCard {
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  h3 {
+    margin: 0;
+    color: #143d65;
+    font-size: 0.98rem;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    color: #5a748e;
+    font-size: 0.8rem;
+  }
+}
+
+.sparkline {
+  width: 100%;
+  height: auto;
+  margin-top: 0.55rem;
+}
+
+.miniSparkline {
+  width: 100%;
+  max-width: 156px;
+  height: 36px;
+}
+
+.sparkNavy {
+  .linePath {
+    stroke: #1e4f7a;
+  }
+
+  .areaPath {
+    fill: rgba(30, 79, 122, 0.16);
+  }
+
+  .dotOuter {
+    fill: #1e4f7a;
+  }
+
+  .dotInner {
+    fill: #ffffff;
+  }
+}
+
+.sparkGold {
+  .linePath {
+    stroke: #c69b3d;
+  }
+
+  .areaPath {
+    fill: rgba(198, 155, 61, 0.2);
+  }
+
+  .dotOuter {
+    fill: #c69b3d;
+  }
+
+  .dotInner {
+    fill: #ffffff;
+  }
+}
+
+.miniNavy {
+  .linePath {
+    stroke: #1e4f7a;
+    stroke-width: 2.1;
+  }
+
+  .areaPath {
+    fill: rgba(30, 79, 122, 0.18);
+  }
+}
+
+.miniGold {
+  .linePath {
+    stroke: #c69b3d;
+    stroke-width: 2.1;
+  }
+
+  .areaPath {
+    fill: rgba(198, 155, 61, 0.2);
+  }
+}
+
+.linePath {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.areaPath {
+  stroke: none;
+}
+
+.sparkLabels {
+  margin-top: 0.2rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.2rem;
+
+  span {
+    text-align: center;
+    color: #5e788f;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+}
+
+.distributionList {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.distributionItem {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  strong {
+    color: #16466f;
+    font-size: 0.82rem;
+  }
+
+  span {
+    color: #5b7490;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+}
+
+.track {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: #e7eef6;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.fillNavy {
+  background: linear-gradient(90deg, #1b4c78 0%, #3d7fb3 100%);
+}
+
+.fillGold {
+  background: linear-gradient(90deg, #c09332 0%, #dfbf7d 100%);
+}
+
+.fillTeal {
+  background: linear-gradient(90deg, #1f7d82 0%, #46ac9b 100%);
+}
+
+.fillSlate {
+  background: linear-gradient(90deg, #4d6276 0%, #8799a8 100%);
+}
+
+.ringWrap {
+  margin-top: 0.72rem;
+  position: relative;
+  width: 128px;
+  height: 128px;
+}
+
+.ringChart {
+  width: 128px;
+  height: 128px;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: #e5edf5;
+  stroke-width: 10;
+}
+
+.ringFill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.ringNavy {
+  .ringFill {
+    stroke: #1e4f7a;
+  }
+}
+
+.ringGold {
+  .ringFill {
+    stroke: #c79a3b;
+  }
+}
+
+.ringCenter {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+
+  strong {
+    color: #133f67;
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+
+  span {
+    margin-top: 0.25rem;
+    color: #57728d;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+}
+
+@include respond-below(custom767) {
+  .sparkLabels {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@include respond-below(custom479) {
+  .card {
+    padding: 0.72rem;
+  }
+
+  .ringWrap,
+  .ringChart {
+    width: 112px;
+    height: 112px;
+  }
+}

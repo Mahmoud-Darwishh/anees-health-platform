@@ -3,6 +3,7 @@ import { requireStaffPermission } from '@/lib/auth';
 import { canBypassPatientAssignment, canAccessPatientRecord } from '@/lib/auth/record-access';
 import { buildChartTimeline } from '@/lib/ehr/chart';
 import { getPatientEhrSnapshot } from '@/lib/ehr/patient-snapshot';
+import PatientTimelineInsights from '@/components/admin/PatientTimelineInsights';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -118,21 +119,22 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
           <article className={styles.card}>
             <h2>Chart Timeline</h2>
             <p className={styles.metaLine}>Merged chronology of encounters, notes, vitals, meds, documents, messages, and task events.</p>
-            {chartTimeline.length === 0 ? (
-              <p className={styles.emptyText}>No timeline events yet.</p>
-            ) : (
-              <ul className={styles.timelineList}>
-                {chartTimeline.slice(0, 18).map((event) => (
-                  <li key={event.id}>
-                    <span className={styles.timelineType}>{event.type.replace(/-/g, ' ')}</span>
-                    <strong>{formatDate(event.timestamp)}</strong>
-                    <p className={styles.timelineTitle}>{event.title}</p>
-                    <p className={styles.timelineSubtitle}>{event.subtitle}</p>
-                    {event.detail && <p dir="auto">{event.detail}</p>}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <PatientTimelineInsights
+              events={chartTimeline.map((event) => ({
+                id: event.id,
+                type: event.type,
+                timestamp: event.timestamp.toISOString(),
+                title: event.title,
+                subtitle: event.subtitle,
+                detail: event.detail,
+              }))}
+              vitals={patient.vitalSigns.map((item) => ({
+                measuredAt: item.measuredAt.toISOString(),
+                systolicBp: item.systolicBp,
+                heartRate: item.heartRate,
+                oxygenSaturation: item.oxygenSaturation,
+              }))}
+            />
           </article>
 
           <article className={styles.card}>
