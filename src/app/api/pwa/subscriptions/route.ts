@@ -5,6 +5,7 @@ import {
   removeSubscription,
   upsertSubscription,
 } from '@/lib/pwa/subscription-store';
+import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
 
 type PushSubscriptionPayload = {
   endpoint: string;
@@ -35,6 +36,10 @@ function isValidSubscription(subscription: PushSubscriptionPayload) {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const allowed = await checkRateLimit(`pwa-subscribe:${ip}`, 10, 60_000);
+    if (!allowed) return tooManyRequests();
+
     const body = (await request.json()) as SubscribeRequest;
 
     if (!isValidSubscription(body.subscription)) {
@@ -81,6 +86,10 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    const allowed = await checkRateLimit(`pwa-unsubscribe:${ip}`, 10, 60_000);
+    if (!allowed) return tooManyRequests();
+
     const body = (await request.json()) as UnsubscribeRequest;
 
     if (!body.endpoint) {

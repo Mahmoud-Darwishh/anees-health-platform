@@ -193,13 +193,13 @@ const HomeBanner: React.FC = () => {
                                 <div className="banner-patient">
                                     <div className="avatar-list-stacked avatar-group-sm">
                                         <span className="avatar avatar-rounded">
-                                            <img src="assets/img/patients/patient19.jpg" alt="img" />
+                                            <img src="/assets/img/patients/patient19.jpg" alt="img" />
                                         </span>
                                         <span className="avatar avatar-rounded">
-                                            <img src="assets/img/patients/patient16.jpg" alt="img" />
+                                            <img src="/assets/img/patients/patient16.jpg" alt="img" />
                                         </span>
                                         <span className="avatar avatar-rounded">
-                                            <img src="assets/img/patients/patient18.jpg" alt="img" />
+                                            <img src="/assets/img/patients/patient18.jpg" alt="img" />
                                         </span>
                                     </div>
                                     <p>15K+</p>
@@ -213,32 +213,32 @@ const HomeBanner: React.FC = () => {
                 {/*
                 <div className="banner-bg">
                     <img
-                        src="assets/img/bg/banner-bg-02.png"
+                        src="/assets/img/bg/banner-bg-02.png"
                         alt="img"
                         className="banner-bg-01"
                     />
                     <img
-                        src="assets/img/bg/banner-bg-03.png"
+                        src="/assets/img/bg/banner-bg-03.png"
                         alt="img"
                         className="banner-bg-02"
                     />
                     <img
-                        src="assets/img/bg/banner-bg-04.png"
+                        src="/assets/img/bg/banner-bg-04.png"
                         alt="img"
                         className="banner-bg-03"
                     />
                     <img
-                        src="assets/img/bg/banner-bg-05.png"
+                        src="/assets/img/bg/banner-bg-05.png"
                         alt="img"
                         className="banner-bg-04"
                     />
                     <img
-                        src="assets/img/bg/banner-icon-01.svg"
+                        src="/assets/img/bg/banner-icon-01.svg"
                         alt="img"
                         className="banner-bg-05"
                     />
                     <img
-                        src="assets/img/bg/banner-icon-01.svg"
+                        src="/assets/img/bg/banner-icon-01.svg"
                         alt="img"
                         className="banner-bg-06"
                     />

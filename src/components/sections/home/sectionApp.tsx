@@ -27,17 +27,17 @@ const SectionApp: React.FC = () => {
                   <div className="app-scan">
                     <p>{t('home.app.scan_text')}</p>
                     <img
-                      src="assets/img/scan-img.png"
+                      src="/assets/img/scan-img.png"
                       alt="scan-image"
                     />
                   </div>
                   <div className={styles.storeButtons} aria-label={t('home.app.coming_soon_note')}>
                     <img
-                      src="assets/img/icons/google-play-icon.svg"
+                      src="/assets/img/icons/google-play-icon.svg"
                       alt="Google Play – Coming Soon"
                     />
                     <img
-                      src="assets/img/icons/app-store-icon.svg"
+                      src="/assets/img/icons/app-store-icon.svg"
                       alt="App Store – Coming Soon"
                     />
                   </div>

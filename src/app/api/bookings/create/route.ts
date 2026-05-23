@@ -1,27 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateBookingForm, CreateBookingIntentRequest, calculateBookingPrice } from '@/lib/models/booking.types';
+import { validateBookingForm, CreateBookingIntentRequest, calculateBookingPrice, type Specialty } from '@/lib/models/booking.types';
 import { getBookingPrices } from '@/lib/api/pricing';
 import { prisma } from '@/lib/db/prisma';
+import { resolveCorsHeaders } from '@/lib/utils/cors';
+import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
+
+/** Hard server-side limits to prevent abuse via oversized payloads. */
+const MAX = {
+  fullName: 100,
+  phoneNumber: 20,
+  countryCode: 5,
+  specialty: 50,
+  userAgent: 500,
+} as const;
+
+function clip(value: string | undefined | null, max: number): string | undefined {
+  if (value == null) return undefined;
+  const trimmed = String(value).trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, max);
+}
 
 export async function POST(request: NextRequest) {
+  const cors = resolveCorsHeaders(request.headers.get('origin'));
+
   try {
+    // Rate limit: 10 bookings per minute per IP
+    const ip = getClientIp(request);
+    const allowed = await checkRateLimit(`booking-create:${ip}`, 10, 60_000);
+    if (!allowed) return tooManyRequests(cors);
+
     const body: CreateBookingIntentRequest = await request.json();
 
     if (!body.fullName || !body.countryCode || !body.phoneNumber || !body.visitType) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields: fullName, countryCode, phoneNumber, visitType' },
-        { status: 400 }
+        { status: 400, headers: cors },
+      );
+    }
+
+    // Clip + sanitise oversized strings before they ever touch the DB
+    const fullName = clip(body.fullName, MAX.fullName);
+    const phoneNumber = clip(body.phoneNumber, MAX.phoneNumber);
+    const countryCode = clip(body.countryCode, MAX.countryCode);
+    const specialty = clip(body.specialty, MAX.specialty);
+
+    if (!fullName || !phoneNumber || !countryCode) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid input' },
+        { status: 400, headers: cors },
       );
     }
 
     const formState = {
-      fullName: body.fullName,
-      countryCode: body.countryCode,
-      phoneNumber: body.phoneNumber,
+      fullName,
+      countryCode,
+      phoneNumber,
       visitType: body.visitType,
       packageType: body.packageType || null,
       serviceType: body.serviceType || null,
-      specialty: body.specialty || null,
+      specialty: (specialty as Specialty) || null,
       preferredDate: body.preferredDate || '',
       timePreference: body.timePreference || null,
       sessionCount: body.sessionCount || null,
@@ -35,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (validationErrors.length > 0) {
       return NextResponse.json(
         { success: false, message: 'Validation failed', errors: validationErrors },
-        { status: 400 }
+        { status: 400, headers: cors },
       );
     }
 
@@ -45,7 +83,7 @@ export async function POST(request: NextRequest) {
     if (amount <= 0) {
       return NextResponse.json(
         { success: false, message: 'Invalid booking configuration: could not calculate price' },
-        { status: 400 }
+        { status: 400, headers: cors },
       );
     }
 
@@ -53,19 +91,17 @@ export async function POST(request: NextRequest) {
     const randomId = Math.random().toString(36).substring(2, 9).toUpperCase();
     const bookingRef = `BOOKING_${timestamp}_${randomId}`;
 
-    const ipHeader = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip');
-    const ip = ipHeader ? ipHeader.split(',')[0].trim() : undefined;
-    const userAgent = request.headers.get('user-agent') || undefined;
+    const userAgent = clip(request.headers.get('user-agent'), MAX.userAgent);
 
     const booking = await prisma.onlineBooking.create({
       data: {
         bookingRef,
-        fullName: body.fullName,
-        countryCode: body.countryCode,
-        phoneNumber: body.phoneNumber,
+        fullName,
+        countryCode,
+        phoneNumber,
         visitType: body.visitType as 'homeVisit' | 'telemedicine' | 'package',
         serviceType: body.serviceType as 'doctorVisit' | 'physiotherapy' | 'nursing' | undefined,
-        specialty: body.specialty,
+        specialty: specialty || undefined,
         packageType: body.packageType as 'haraka' | 'wai' | 'amal' | undefined,
         preferredDate: body.preferredDate ? new Date(body.preferredDate) : undefined,
         timePreference: body.timePreference,
@@ -84,24 +120,26 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { success: true, bookingId: booking.bookingRef, amount, currency: 'EGP' as const },
-      { status: 201 }
+      { status: 201, headers: cors },
     );
   } catch (error) {
     console.error('[Booking API Error]', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create booking intent' },
-      { status: 500 }
+      { status: 500, headers: cors },
     );
   }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+  const cors = resolveCorsHeaders(request.headers.get('origin'));
   return new NextResponse(null, {
-    status: 200,
+    status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      ...cors,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '600',
     },
   });
 }

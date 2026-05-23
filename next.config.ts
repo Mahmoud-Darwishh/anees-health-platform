@@ -87,10 +87,33 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://chatling.ai https://*.chatling.ai https://payments.kashier.io",
               "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
               "img-src 'self' data: blob: https:",
-              "connect-src 'self' https://*.vercel-scripts.com https://vercel.live https://chatling.ai https://*.chatling.ai https://www.clarity.ms https://y.clarity.ms https://e.clarity.ms https://connect.facebook.net https://api.ipify.org https://www.cloudflare.com https://api.kashier.io https://test-api.kashier.io https://payments.kashier.io",
+              "connect-src 'self' https://*.vercel-scripts.com https://vercel.live https://chatling.ai https://*.chatling.ai https://*.clarity.ms https://connect.facebook.net https://api.ipify.org https://www.cloudflare.com https://api.kashier.io https://test-api.kashier.io https://payments.kashier.io",
               "frame-src 'self' https://chatling.ai https://*.chatling.ai https://payments.kashier.io https://*.kashier.io",
+              "frame-ancestors 'none'",
+              "form-action 'self' https://payments.kashier.io https://*.kashier.io",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "upgrade-insecure-requests",
             ].join('; '),
           },
+          // HSTS: force HTTPS for 2 years, include subdomains, preload-eligible
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          // Block MIME-type sniffing
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          // Belt-and-braces clickjacking protection (also covered by CSP frame-ancestors)
+          { key: 'X-Frame-Options', value: 'DENY' },
+          // Limit referrer leakage to cross-origin sites
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // Deny browser features the site does not use — locks down ambient APIs
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self), payment=(self), interest-cohort=(), browsing-topics=()',
+          },
+          // Opt-in cross-origin isolation primitives — safe defaults
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
       },
     ];

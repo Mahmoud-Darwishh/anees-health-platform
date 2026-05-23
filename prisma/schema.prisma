@@ -733,6 +733,21 @@ model ContentService {
 }
 
 // ============================================================================
+// RATE LIMIT — Fixed-window counters backing the rate-limit helper
+// ============================================================================
+
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. "booking-create:1.2.3.4"
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([expiresAt])
+  @@map("rate_limits")
+}
+
+// ============================================================================
 // COVERAGE CHECK — Every map/form coverage query for analytics
 // ============================================================================
 

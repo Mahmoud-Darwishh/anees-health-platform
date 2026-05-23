@@ -132,7 +132,7 @@ const SectionBook: React.FC = () => {
                                         </p>
                                     </div>
                                     <div className="way-icon">
-                                        <img src="assets/img/icons/way-iconv2.svg" alt="img" />
+                                        <img src="/assets/img/icons/way-iconv2.svg" alt="img" />
                                     </div>
                                 </div>
                             </div>
@@ -148,7 +148,7 @@ const SectionBook: React.FC = () => {
                                         </p>
                                     </div>
                                     <div className="way-icon">
-                                        <img src="assets/img/icons/way-iconv2.svg" alt="img" />
+                                        <img src="/assets/img/icons/way-iconv2.svg" alt="img" />
                                     </div>
                                 </div>
                             </div>
@@ -164,7 +164,7 @@ const SectionBook: React.FC = () => {
                                         </p>
                                     </div>
                                     <div className="way-icon">
-                                        <img src="assets/img/icons/way-iconv2.svg" alt="img" />
+                                        <img src="/assets/img/icons/way-iconv2.svg" alt="img" />
                                     </div>
                                 </div>
                             </div>

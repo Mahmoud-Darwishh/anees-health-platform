@@ -9,6 +9,7 @@ import {
 } from '@/lib/utils/coverage';
 import { logCoverageCheck } from '@/lib/utils/logger';
 import { logger } from '@/lib/utils/app-logger';
+import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
 
 /**
  * Coverage check API endpoint
@@ -16,6 +17,11 @@ import { logger } from '@/lib/utils/app-logger';
  */
 export async function GET(request: NextRequest) {
   try {
+    // 30 coverage requests per minute per IP — generous but blocks scraping
+    const ip = getClientIp(request);
+    const allowed = await checkRateLimit(`coverage:${ip}`, 30, 60_000);
+    if (!allowed) return tooManyRequests();
+
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
 

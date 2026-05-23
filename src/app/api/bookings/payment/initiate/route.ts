@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
 
 /**
  * POST /api/bookings/payment/initiate
@@ -11,6 +12,11 @@ import { prisma } from '@/lib/db/prisma';
  */
 export async function POST(request: NextRequest) {
   try {
+    // 20 payment session creations per minute per IP
+    const ip = getClientIp(request);
+    const allowed = await checkRateLimit(`payment-initiate:${ip}`, 20, 60_000);
+    if (!allowed) return tooManyRequests();
+
     const body = await request.json();
     const { bookingId, amount, currency, locale, customerName, customerPhone } = body as {
       bookingId: string;

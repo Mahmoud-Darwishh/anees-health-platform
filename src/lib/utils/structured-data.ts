@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Structured Data (JSON-LD) Utilities
  *
  * Generates schema.org structured data for:
@@ -31,7 +31,7 @@ export interface StructuredDataProps {
 export function generateOrganizationSchema(locale: string = 'en') {
 	const founderStatement =
 		locale === 'ar'
-			? 'تأسست أنيس هيلث في مصر بقيادة الدكتور محمود درويش والدكتور أحمد عرابي.'
+			? 'ØªØ£Ø³Ø³Øª Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø« ÙÙŠ Ù…ØµØ± Ø¨Ù‚ÙŠØ§Ø¯Ø© Ø§Ù„Ø¯ÙƒØªÙˆØ± Ù…Ø­Ù…ÙˆØ¯ Ø¯Ø±ÙˆÙŠØ´ ÙˆØ§Ù„Ø¯ÙƒØªÙˆØ± Ø£Ø­Ù…Ø¯ Ø¹Ø±Ø§Ø¨ÙŠ.'
 			: 'Anees Health was founded in Egypt by Dr. Mahmoud Darwish and Dr. Ahmed Oraby.';
 
 	return {
@@ -39,11 +39,11 @@ export function generateOrganizationSchema(locale: string = 'en') {
 		'@type': 'MedicalOrganization',
 		'@id': `${config.api.baseUrl}#organization`,
 		name: 'Anees Health',
-		alternateName: locale === 'ar' ? 'أنيس هيلث' : 'Anees Health',
+		alternateName: locale === 'ar' ? 'Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø«' : 'Anees Health',
 		description:
 			locale === 'ar'
-				? 'منصة رائدة في مصر للرعاية الصحية المنزلية والتطبيب عن بعد للمسنين ومرضى الأمراض المزمنة—زيارات طبيب منزلي، تمريض ماهر، علاج طبيعي، معامل منزلية، مراقبة عن بعد، إدارة الأدوية، ودعم طبي على مدار الساعة في مختلف المناطق'
-				: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Egypt",
+				? 'Ù…Ù†ØµØ© Ø±Ø§Ø¦Ø¯Ø© ÙÙŠ Ù…ØµØ± Ù„Ù„Ø±Ø¹Ø§ÙŠØ© Ø§Ù„ØµØ­ÙŠØ© Ø§Ù„Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ§Ù„ØªØ·Ø¨ÙŠØ¨ Ø¹Ù† Ø¨Ø¹Ø¯ Ù„Ù„Ù…Ø³Ù†ÙŠÙ† ÙˆÙ…Ø±Ø¶Ù‰ Ø§Ù„Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù…Ø²Ù…Ù†Ø©â€”Ø²ÙŠØ§Ø±Ø§Øª Ø·Ø¨ÙŠØ¨ Ù…Ù†Ø²Ù„ÙŠØŒ ØªÙ…Ø±ÙŠØ¶ Ù…Ø§Ù‡Ø±ØŒ Ø¹Ù„Ø§Ø¬ Ø·Ø¨ÙŠØ¹ÙŠØŒ Ù…Ø¹Ø§Ù…Ù„ Ù…Ù†Ø²Ù„ÙŠØ©ØŒ Ù…Ø±Ø§Ù‚Ø¨Ø© Ø¹Ù† Ø¨Ø¹Ø¯ØŒ Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø£Ø¯ÙˆÙŠØ©ØŒ ÙˆØ¯Ø¹Ù… Ø·Ø¨ÙŠ Ø¹Ù„Ù‰ Ù…Ø¯Ø§Ø± Ø§Ù„Ø³Ø§Ø¹Ø© ÙÙŠ Ù…Ø®ØªÙ„Ù Ø§Ù„Ù…Ù†Ø§Ø·Ù‚'
+				: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patientsâ€”doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Egypt",
 		url: config.api.baseUrl,
 		logo: `${config.api.baseUrl}/logos/anees-health-logo.png`,
 		image: `${config.api.baseUrl}/assets/img/banner/anees-health-og.jpg`,
@@ -65,7 +65,7 @@ export function generateOrganizationSchema(locale: string = 'en') {
 		areaServed: [
 			{
 				'@type': 'Country',
-				name: locale === 'ar' ? 'مصر' : 'Egypt',
+				name: locale === 'ar' ? 'Ù…ØµØ±' : 'Egypt',
 			},
 		],
 		sameAs: [
@@ -82,10 +82,10 @@ export function generateOrganizationSchema(locale: string = 'en') {
 			{
 				'@type': 'Person',
 				'@id': `${config.api.baseUrl}/en/doctors/dr-mahmoud-darwish#person`,
-				name: locale === 'ar' ? 'الدكتور محمود درويش' : 'Dr. Mahmoud Darwish',
+				name: locale === 'ar' ? 'Ø§Ù„Ø¯ÙƒØªÙˆØ± Ù…Ø­Ù…ÙˆØ¯ Ø¯Ø±ÙˆÙŠØ´' : 'Dr. Mahmoud Darwish',
 				url: `${config.api.baseUrl}/en/doctors/dr-mahmoud-darwish`,
 				description: founderStatement,
-				jobTitle: locale === 'ar' ? 'مؤسس مشارك' : 'Co-Founder',
+				jobTitle: locale === 'ar' ? 'Ù…Ø¤Ø³Ø³ Ù…Ø´Ø§Ø±Ùƒ' : 'Co-Founder',
 				worksFor: {
 					'@id': `${config.api.baseUrl}#organization`,
 				},
@@ -93,10 +93,10 @@ export function generateOrganizationSchema(locale: string = 'en') {
 			{
 				'@type': 'Person',
 				'@id': `${config.api.baseUrl}/en/doctors/dr-ahmed-oraby#person`,
-				name: locale === 'ar' ? 'الدكتور أحمد عرابي' : 'Dr. Ahmed Oraby',
+				name: locale === 'ar' ? 'Ø§Ù„Ø¯ÙƒØªÙˆØ± Ø£Ø­Ù…Ø¯ Ø¹Ø±Ø§Ø¨ÙŠ' : 'Dr. Ahmed Oraby',
 				url: `${config.api.baseUrl}/en/doctors/dr-ahmed-oraby`,
 				description: founderStatement,
-				jobTitle: locale === 'ar' ? 'مؤسس مشارك' : 'Co-Founder',
+				jobTitle: locale === 'ar' ? 'Ù…Ø¤Ø³Ø³ Ù…Ø´Ø§Ø±Ùƒ' : 'Co-Founder',
 				worksFor: {
 					'@id': `${config.api.baseUrl}#organization`,
 				},
@@ -262,10 +262,10 @@ export function generatePhysicianSchema(
 		medicalSpecialty: doctor.speciality,
 		availableService: {
 			'@type': 'MedicalProcedure',
-			name: locale === 'ar' ? 'استشارة طبية' : 'Medical Consultation',
+			name: locale === 'ar' ? 'Ø§Ø³ØªØ´Ø§Ø±Ø© Ø·Ø¨ÙŠØ©' : 'Medical Consultation',
 			description:
 				locale === 'ar'
-					? `استشارة طبية مع ${doctor.doctorName}`
+					? `Ø§Ø³ØªØ´Ø§Ø±Ø© Ø·Ø¨ÙŠØ© Ù…Ø¹ ${doctor.doctorName}`
 					: `Medical consultation with ${doctor.doctorName}`,
 			availableChannel: doctor.channels?.map((channel: string) => ({
 				'@type': 'ServiceChannel',
@@ -326,10 +326,10 @@ export function generateDoctorsCollectionSchema(
 	return {
 		'@context': 'https://schema.org',
 		'@type': 'ItemList',
-		name: locale === 'ar' ? 'أطباء أنيس هيلث' : 'Anees Health Doctors',
+		name: locale === 'ar' ? 'Ø£Ø·Ø¨Ø§Ø¡ Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø«' : 'Anees Health Doctors',
 		description:
 			locale === 'ar'
-				? 'قائمة الأطباء المتاحين للزيارات المنزلية والاستشارات الطبية عن بعد'
+				? 'Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø£Ø·Ø¨Ø§Ø¡ Ø§Ù„Ù…ØªØ§Ø­ÙŠÙ† Ù„Ù„Ø²ÙŠØ§Ø±Ø§Øª Ø§Ù„Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ§Ù„Ø§Ø³ØªØ´Ø§Ø±Ø§Øª Ø§Ù„Ø·Ø¨ÙŠØ© Ø¹Ù† Ø¨Ø¹Ø¯'
 				: 'List of doctors available for home visits and telemedicine consultations',
 		url: `${baseUrl}/${locale}/doctors`,
 		numberOfItems: doctors.length,
@@ -411,7 +411,7 @@ export function generateWebsiteSchema(locale: string = 'en') {
 		name: 'Anees Health',
 		description:
 			locale === 'ar'
-				? 'منصة رائدة في مصر للرعاية الصحية المنزلية والتطبيب عن بعد'
+				? 'Ù…Ù†ØµØ© Ø±Ø§Ø¦Ø¯Ø© ÙÙŠ Ù…ØµØ± Ù„Ù„Ø±Ø¹Ø§ÙŠØ© Ø§Ù„ØµØ­ÙŠØ© Ø§Ù„Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ§Ù„ØªØ·Ø¨ÙŠØ¨ Ø¹Ù† Ø¨Ø¹Ø¯'
 				: "Egypt's leading home healthcare and telemedicine platform",
 		potentialAction: {
 			'@type': 'SearchAction',
@@ -426,11 +426,19 @@ export function generateWebsiteSchema(locale: string = 'en') {
 }
 
 /**
- * Helper to serialize JSON-LD as string
- * For server-side rendering
+ * Helper to serialize JSON-LD as string for server-side rendering.
+ *
+ * Escapes characters that would let DB content break out of a <script> tag.
+ * Without this, a doctor bio containing `</script>` or `<!--` becomes XSS
+ * when inlined via dangerouslySetInnerHTML.
+ *
+ * See: https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
  */
 export function renderJsonLd(schema: object): string {
-	return JSON.stringify(schema, null, 0);
+	return JSON.stringify(schema, null, 0)
+		.replace(/</g, '\\u003c')
+		.replace(/>/g, '\\u003e')
+		.replace(/&/g, '\\u0026');
 }
 
 /**
@@ -452,10 +460,10 @@ export function generateContactPageSchema(locale: string = 'en') {
 		'@type': 'ContactPage',
 		'@id': `${baseUrl}/${locale}/contact-us`,
 		url: `${baseUrl}/${locale}/contact-us`,
-		name: locale === 'ar' ? 'اتصل بنا' : 'Contact Us',
+		name: locale === 'ar' ? 'Ø§ØªØµÙ„ Ø¨Ù†Ø§' : 'Contact Us',
 		description:
 			locale === 'ar'
-				? 'تواصل مع فريق أنيس هيلث'
+				? 'ØªÙˆØ§ØµÙ„ Ù…Ø¹ ÙØ±ÙŠÙ‚ Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø«'
 				: 'Get in touch with Anees Health team',
 		mainEntity: {
 			'@type': 'Organization',

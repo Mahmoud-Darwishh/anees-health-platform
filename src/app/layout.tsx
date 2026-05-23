@@ -7,6 +7,7 @@ import { config } from '@/lib/config';
 const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
+  preload: false,
   display: 'swap',
   variable: '--font-inter',
 });

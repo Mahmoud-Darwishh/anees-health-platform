@@ -3,24 +3,45 @@ import crypto from 'crypto';
 import { prisma } from '@/lib/db/prisma';
 
 export async function POST(request: NextRequest) {
+  // ── Parse body ─────────────────────────────────────────────────────────────
+  let body: { event: string; data: KashierWebhookData };
   try {
-    const body = await request.json();
-    const { event, data } = body as { event: string; data: KashierWebhookData };
+    body = (await request.json()) as { event: string; data: KashierWebhookData };
+  } catch {
+    return NextResponse.json({ received: false, error: 'Invalid JSON' }, { status: 400 });
+  }
 
-    if (!event || !data) {
-      return NextResponse.json({ received: false }, { status: 400 });
-    }
+  const { event, data } = body;
+  if (!event || !data) {
+    return NextResponse.json({ received: false, error: 'Missing event/data' }, { status: 400 });
+  }
 
-    const apiKey = process.env.KASHIER_API_KEY;
-    const kashierSignature = request.headers.get('x-kashier-signature');
+  // ── Verify signature (BLOCKING — fail closed) ──────────────────────────────
+  const apiKey = process.env.KASHIER_API_KEY;
+  if (!apiKey) {
+    console.error('[Webhook] KASHIER_API_KEY not set — refusing all webhooks');
+    return NextResponse.json({ received: false, error: 'Webhook not configured' }, { status: 503 });
+  }
 
-    if (apiKey && kashierSignature && data.signatureKeys) {
-      const isValid = verifyWebhookSignature(data, apiKey, kashierSignature);
-      if (!isValid) {
-        console.error('[Webhook] Invalid signature for order:', data.merchantOrderId);
-      }
-    }
+  const kashierSignature = request.headers.get('x-kashier-signature');
+  if (!kashierSignature) {
+    console.error('[Webhook] Missing x-kashier-signature header for order:', data.merchantOrderId);
+    return NextResponse.json({ received: false, error: 'Missing signature' }, { status: 401 });
+  }
 
+  if (!Array.isArray(data.signatureKeys) || data.signatureKeys.length === 0) {
+    console.error('[Webhook] Missing signatureKeys array in payload for order:', data.merchantOrderId);
+    return NextResponse.json({ received: false, error: 'Missing signatureKeys' }, { status: 401 });
+  }
+
+  if (!verifyWebhookSignature(data, apiKey, kashierSignature)) {
+    console.error('[Webhook] Invalid signature for order:', data.merchantOrderId);
+    return NextResponse.json({ received: false, error: 'Invalid signature' }, { status: 401 });
+  }
+
+  // ── Process event ──────────────────────────────────────────────────────────
+  // Wrapped in try/catch so DB failures return 500 — Kashier will then retry.
+  try {
     switch (event) {
       case 'pay': {
         if (data.status === 'SUCCESS') {
@@ -58,20 +79,37 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (error) {
-    console.error('[Webhook] Error:', error);
-    return NextResponse.json({ received: true }, { status: 200 });
+    // DB or other infra failure — return 500 so Kashier retries the webhook
+    console.error('[Webhook] Processing error for order:', data.merchantOrderId, error);
+    return NextResponse.json({ received: false, error: 'Processing failed' }, { status: 500 });
   }
 }
 
-function verifyWebhookSignature(data: KashierWebhookData, apiKey: string, receivedSignature: string): boolean {
+/**
+ * Verify Kashier HMAC-SHA256 signature using constant-time comparison.
+ */
+function verifyWebhookSignature(
+  data: KashierWebhookData,
+  apiKey: string,
+  receivedSignature: string,
+): boolean {
   try {
     const sortedKeys = [...data.signatureKeys].sort();
     const pairs = sortedKeys.map((key) => {
       const value = data[key as keyof KashierWebhookData];
       return `${key}=${encodeURIComponent(String(value ?? ''))}`;
     });
-    const computed = crypto.createHmac('sha256', apiKey).update(pairs.join('&')).digest('hex');
-    return computed === receivedSignature;
+    const computed = crypto
+      .createHmac('sha256', apiKey)
+      .update(pairs.join('&'))
+      .digest('hex');
+
+    // Constant-time comparison to prevent timing attacks. Both buffers must
+    // be the same length or timingSafeEqual throws.
+    const computedBuf = Buffer.from(computed, 'hex');
+    const receivedBuf = Buffer.from(receivedSignature, 'hex');
+    if (computedBuf.length !== receivedBuf.length) return false;
+    return crypto.timingSafeEqual(computedBuf, receivedBuf);
   } catch {
     return false;
   }
