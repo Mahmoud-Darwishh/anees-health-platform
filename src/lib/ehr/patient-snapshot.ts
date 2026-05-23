@@ -44,6 +44,7 @@ const patientEhrSelect = {
       dose: true,
       frequency: true,
       isActive: true,
+      createdAt: true,
       startDate: true,
     },
   },
