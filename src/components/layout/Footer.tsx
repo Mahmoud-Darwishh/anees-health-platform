@@ -94,8 +94,8 @@ const Home3Footer = () => {
                     <div className="d-flex align-items-start gap-3 mb-2">
                       <i className="fa-solid fa-mobile-screen-button mt-1" aria-hidden="true" />
                       <div className="d-flex flex-column">
-                        <a className="mb-1 text-white text-decoration-none" href="tel:+201096185922">+201096185922</a>
-                        <a className="mb-0 text-white text-decoration-none" href="tel:+201270558620">+201270558620</a>
+                        <a className="mb-1 text-white text-decoration-none" href="tel:+201270558620">+201270558620</a>
+                        <a className="mb-0 text-white text-decoration-none" href="tel:+201096169459">+201096169459</a>
                       </div>
                     </div> 
                     <p className="mb-3">

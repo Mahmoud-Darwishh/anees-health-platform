@@ -24,11 +24,11 @@ const GeneralHomeOne: React.FC<GeneralHomeOneProps> = ({ doctors }) => {
       <Header />
       <main id="main-content" tabIndex={-1}>
         <HomeBanner />
+        <SectionLogos />
         <SectionOurServices />
-        <SectionDoctor doctors={doctors} />
         <SectionBook />
         <SectionPackages />
-        <SectionLogos />
+        <SectionDoctor doctors={doctors} />
         <SectionFaq />
         <SectionApp />
       </main>

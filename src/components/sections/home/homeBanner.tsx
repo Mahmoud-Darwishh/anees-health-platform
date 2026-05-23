@@ -60,48 +60,48 @@ const HomeBanner: React.FC = () => {
                             <div className="banner-content banner-animate-in">
 
                                 {/* Trust Score Badge */}
-                                <div className="trust-badge mb-3 animate-slide-up">
-                                    <div className="trust-badge__rating">
-                                        <div className="trust-stars" aria-label={`${t('home.banner.trust_score')}: 4.8 ${t('home.banner.out_of')} 5`}>
-                                            {[1, 2, 3, 4, 5].map((star, index) => (
-                                                <span key={star} className="star-icon" data-delay={`${0.2 + index * 0.1}`}>
-                                                    {star <= 4 ? '★' : '☆'}
-                                                </span>
-                                            ))}
+                                <div className="trust-block animate-slide-up" data-delay="0.1">
+                                    <div className="trust-badge mb-2">
+                                        <div className="trust-badge__rating">
+                                            <div className="trust-stars" aria-label={`${t('home.banner.trust_score')}: 4.8 ${t('home.banner.out_of')} 5`}>
+                                                {[1, 2, 3, 4, 5].map((star, index) => (
+                                                    <span key={star} className="star-icon" data-delay={`${0.2 + index * 0.1}`}>
+                                                        {star <= 4 ? '★' : '☆'}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <span className="trust-score trust-score-pulse">4.8</span>
                                         </div>
-                                        <span className="trust-score trust-score-pulse">4.8</span>
+                                        <span className="trust-divider">|</span>
+                                        <span className="trust-stats">
+                                            {t('home.banner.trusted_by')} <strong className="stat-number-animate">1,000+</strong> {t('home.banner.patients')}
+                                        </span>
                                     </div>
-                                    <span className="trust-divider">|</span>
-                                    <span className="trust-stats">
-                                        {t('home.banner.trusted_by')} <strong className="stat-number-animate">1,500+</strong> {t('home.banner.patients')}
-                                    </span>
+                                    <div className="credentials-chips">
+                                        <span className="credential-chip credential-animate" data-delay="0.6">
+                                            <i className="isax isax-shield-tick" aria-hidden="true" />
+                                            {t('home.banner.licensed_verified')}
+                                        </span>
+                                        <span className="credential-chip credential-animate" data-delay="0.7">
+                                            <i className="isax isax-clock" aria-hidden="true" />
+                                            {t('home.banner.available_24_7')}
+                                        </span>
+                                        <span className="credential-chip credential-animate" data-delay="0.8">
+                                            <i className="isax isax-call-calling" aria-hidden="true" />
+                                            {t('home.banner.instant_booking')}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <h1 className="banner-title animate-slide-up">
+                                <h1 className="banner-title animate-slide-up" data-delay="0.3">
                                     <span className="banner-title__highlight title-underline-animate">{t('home.banner.title_highlight')}</span>
                                     <span>{t('home.banner.title_rest')}</span>
                                 </h1>
 
                                 {/* Professional Subtitle */}
-                                <p className="banner-subtitle animate-slide-up">
+                                <p className="banner-subtitle animate-slide-up" data-delay="0.4">
                                     {t('home.banner.professional_subtitle')}
                                 </p>
-
-                                {/* Business Credentials */}
-                                <div className="credentials-row animate-slide-up">
-                                    <div className="credential-item credential-animate" data-delay="0.6">
-                                        <i className="isax isax-shield-tick medical-icon-pulse" aria-hidden="true" />
-                                        <span>{t('home.banner.licensed_verified')}</span>
-                                    </div>
-                                    <div className="credential-item credential-animate" data-delay="0.7">
-                                        <i className="isax isax-clock medical-icon-pulse" aria-hidden="true" />
-                                        <span>{t('home.banner.available_24_7')}</span>
-                                    </div>
-                                    <div className="credential-item credential-animate" data-delay="0.8">
-                                        <i className="isax isax-call-calling medical-icon-pulse" aria-hidden="true" />
-                                        <span>{t('home.banner.instant_booking')}</span>
-                                    </div>
-                                </div>
 
                                 {/* Primary CTAs */}
                                 <div className="banner-cta-row animate-slide-up">
@@ -116,8 +116,8 @@ const HomeBanner: React.FC = () => {
                                 </div>
 
                                 {/* Quick Service Pills */}
-                                <div className="service-pills-section animate-slide-up">
-                                    <p className="service-pills-label">{t('home.banner.quickAccess')}</p>
+                                <div className="service-pills-section animate-slide-up" data-delay="0.9">
+                                    <p className="service-pills-label">{t('home.banner.bookByService')}</p>
                                     <div className="service-pills" role="list">
                                         {services.map((service) => (
                                             <Link

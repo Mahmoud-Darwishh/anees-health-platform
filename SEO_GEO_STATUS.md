@@ -325,7 +325,7 @@
 - **Domain**: aneeshealth.com
 - **Service Areas**: Cairo, Giza, Alexandria (Egypt)
 - **Contact Email**: info@aneeshealth.com
-- **Phone**: +201096185922, +201270558620
+- **Phone**: +201270558620, +201096169459
 - **Languages**: English (en), Arabic (ar)
 
 ---
