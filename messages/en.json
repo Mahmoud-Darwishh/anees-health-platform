@@ -1553,6 +1553,34 @@
       "invalidCredentials": "Incorrect phone, Case ID, or password.",
       "error": "Something went wrong. Please try again."
     },
+    "whatsappOtpTest": {
+      "metaTitle": "WhatsApp OTP Test | Anees Health",
+      "title": "WhatsApp OTP Test",
+      "subtitle": "Send and verify one-time codes through your WhatsApp API instance.",
+      "instructions": "Use a WhatsApp number that can receive messages from your connected instance.",
+      "phoneLabel": "WhatsApp number",
+      "phonePlaceholder": "e.g. 201055164595 or +201055164595",
+      "purposeLabel": "Purpose (optional)",
+      "purposePlaceholder": "site-test",
+      "codeLabel": "OTP code",
+      "codePlaceholder": "6-digit code",
+      "sendButton": "Send OTP",
+      "sendSubmitting": "Sending OTP...",
+      "verifyButton": "Verify OTP",
+      "verifySubmitting": "Verifying...",
+      "verifyHint": "Send an OTP first, then enter the same code from WhatsApp.",
+      "backToLogin": "Back to login",
+      "messages": {
+        "otpSent": "OTP sent to {recipient}. It expires in {expiresInSeconds} seconds.",
+        "otpVerified": "OTP verified successfully."
+      },
+      "errors": {
+        "phoneRequired": "Please enter a WhatsApp phone number.",
+        "codeRequired": "Please enter the 6-digit OTP code.",
+        "sendFailed": "Failed to send OTP. Please try again.",
+        "verifyFailed": "OTP verification failed. Please try again."
+      }
+    },
     "signup": {
       "title": "Create Account",
       "subtitle": "Register to access your health records",

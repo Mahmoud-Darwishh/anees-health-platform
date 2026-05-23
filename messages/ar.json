@@ -1555,6 +1555,34 @@
       "invalidCredentials": "رقم الهاتف أو رقم الحالة أو كلمة المرور غير صحيحة.",
       "error": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
     },
+    "whatsappOtpTest": {
+      "metaTitle": "اختبار OTP واتساب | أنيس هيلث",
+      "title": "اختبار OTP عبر واتساب",
+      "subtitle": "إرسال والتحقق من رموز التحقق لمرة واحدة عبر مثيل WhatsApp API الخاص بك.",
+      "instructions": "استخدم رقم واتساب يمكنه استقبال الرسائل من المثيل المتصل لديك.",
+      "phoneLabel": "رقم واتساب",
+      "phonePlaceholder": "مثال: 201055164595 أو +201055164595",
+      "purposeLabel": "الغرض (اختياري)",
+      "purposePlaceholder": "site-test",
+      "codeLabel": "رمز OTP",
+      "codePlaceholder": "رمز مكون من 6 أرقام",
+      "sendButton": "إرسال OTP",
+      "sendSubmitting": "جارٍ إرسال OTP...",
+      "verifyButton": "التحقق من OTP",
+      "verifySubmitting": "جارٍ التحقق...",
+      "verifyHint": "أرسل OTP أولاً، ثم أدخل نفس الرمز الذي وصلك على واتساب.",
+      "backToLogin": "العودة لتسجيل الدخول",
+      "messages": {
+        "otpSent": "تم إرسال OTP إلى {recipient}. تنتهي صلاحيته خلال {expiresInSeconds} ثانية.",
+        "otpVerified": "تم التحقق من OTP بنجاح."
+      },
+      "errors": {
+        "phoneRequired": "يرجى إدخال رقم واتساب.",
+        "codeRequired": "يرجى إدخال رمز OTP المكون من 6 أرقام.",
+        "sendFailed": "تعذر إرسال OTP. حاول مرة أخرى.",
+        "verifyFailed": "فشل التحقق من OTP. حاول مرة أخرى."
+      }
+    },
     "signup": {
       "title": "إنشاء حساب",
       "subtitle": "سجّل للوصول إلى سجلاتك الصحية",
