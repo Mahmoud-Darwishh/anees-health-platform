@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Script from 'next/script';
 import { config } from '@/lib/config';
 import { generateBreadcrumbSchema, renderJsonLd } from '@/lib/utils/structured-data';
+import { getBookingPrices } from '@/lib/api/pricing';
+import { getSpecialties } from '@/lib/api/specialties';
 import BookingPageContent from './page-content';
 
 export async function generateMetadata({
@@ -36,6 +38,11 @@ export default async function BookingPage({
   const { locale } = await params;
   const baseUrl = config.api.baseUrl;
 
+  const [prices, specialties] = await Promise.all([
+    getBookingPrices(),
+    getSpecialties(),
+  ]);
+
   // Breadcrumb schema (not indexed, so minimal schema)
   const breadcrumbs = [
     {
@@ -58,7 +65,7 @@ export default async function BookingPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
       />
-      <BookingPageContent locale={locale} />
+      <BookingPageContent locale={locale} prices={prices} specialties={specialties} />
     </>
   );
 }

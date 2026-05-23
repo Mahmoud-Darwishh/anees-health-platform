@@ -687,6 +687,52 @@ model AuditLog {
 }
 
 // ============================================================================
+// BOOKING PRICES — All service prices editable from DB (no code deploy needed)
+// ============================================================================
+
+model BookingPrice {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "telemedicine", "homeVisit:doctorVisit"
+  label     String           // Human-readable for admin display
+  priceEgp  Int
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@map("booking_prices")
+}
+
+// ============================================================================
+// SPECIALTIES — Medical specialties with bilingual names
+// ============================================================================
+
+model Specialty {
+  id        String   @id @default(cuid())
+  code      String   @unique // e.g. "geriatrics", "cardiology"
+  nameEn    String
+  nameAr    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+
+  @@index([isActive, sortOrder])
+  @@map("specialties")
+}
+
+// ============================================================================
+// CONTENT SERVICES — Services shown on the /services marketing page
+// ============================================================================
+
+model ContentService {
+  id          String   @id @default(cuid())
+  code        String   @unique // matches translation key, e.g. "doctorVisits"
+  iconClass   String           // e.g. "isax isax-health"
+  landingSlug String?          // e.g. "doctor-at-home" — null if no landing page
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  @@map("content_services")
+}
+
+// ============================================================================
 // COVERAGE CHECK — Every map/form coverage query for analytics
 // ============================================================================
 

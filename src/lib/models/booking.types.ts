@@ -6,6 +6,35 @@
 import { BOOKING_PRICING } from '@/lib/config/booking-pricing';
 
 // ============================================================================
+// PRICING MAP — shape returned by getBookingPrices() and accepted by
+//               calculateBookingPrice(). Keys match booking_prices.key in DB.
+// ============================================================================
+export interface BookingPriceMap {
+  telemedicine: number;
+  'homeVisit:doctorVisit': number;
+  'homeVisit:physiotherapy:single': number;
+  'homeVisit:physiotherapy:twelve': number;
+  'homeVisit:nursing:nurse': number;
+  'homeVisit:nursing:nurseAssistant': number;
+  'package:haraka': number;
+  'package:wai': number;
+  'package:amal': number;
+}
+
+/** Default prices derived from the hardcoded config — used as client-side fallback */
+const DEFAULT_PRICES: BookingPriceMap = {
+  telemedicine: BOOKING_PRICING.telemedicine,
+  'homeVisit:doctorVisit': BOOKING_PRICING.homeVisit.doctorVisit,
+  'homeVisit:physiotherapy:single': BOOKING_PRICING.homeVisit.physiotherapy.single,
+  'homeVisit:physiotherapy:twelve': BOOKING_PRICING.homeVisit.physiotherapy.twelve,
+  'homeVisit:nursing:nurse': BOOKING_PRICING.homeVisit.nursing.nurse,
+  'homeVisit:nursing:nurseAssistant': BOOKING_PRICING.homeVisit.nursing.nurseAssistant,
+  'package:haraka': 5000,
+  'package:wai': 8000,
+  'package:amal': 6000,
+};
+
+// ============================================================================
 // BOOKING TYPES
 // ============================================================================
 
@@ -148,70 +177,56 @@ export const NURSING_DURATIONS = [
 // ============================================================================
 
 /**
- * Calculate total booking price based on selections
+ * Calculate total booking price based on selections.
+ *
+ * @param state   - Current booking form state
+ * @param prices  - Price map fetched from DB (server) or omitted (client fallback)
+ *
+ * On the server (booking create route) always pass DB prices — they are authoritative.
+ * On the client (live preview) pass the prices received as props from the server page.
+ * If omitted, falls back to the hardcoded BOOKING_PRICING constants.
  */
-export function calculateBookingPrice(state: BookingFormState): number {
+export function calculateBookingPrice(state: BookingFormState, prices?: BookingPriceMap): number {
+  const p = prices ?? DEFAULT_PRICES;
+
   if (!state.visitType) return 0;
 
-  // Package pricing
   if (state.visitType === 'package') {
     if (!state.packageType) return 0;
-    
-    const packagePrices = {
-      haraka: 5000, // Joint & Arthritis Care - 3-6 months
-      wai: 8000,    // Cognitive & Dementia Care - 6-12 months
-      amal: 6000,   // Stroke Recovery - 3-6 months
-    };
-    
-    return packagePrices[state.packageType] || 0;
+    return p[`package:${state.packageType}` as keyof BookingPriceMap] as number || 0;
   }
 
   if (state.visitType === 'telemedicine') {
-    return BOOKING_PRICING.telemedicine;
+    return p.telemedicine;
   }
 
-  // Home Visit pricing
   if (!state.serviceType) return 0;
 
   if (state.serviceType === 'doctorVisit') {
-    return BOOKING_PRICING.homeVisit.doctorVisit;
+    return p['homeVisit:doctorVisit'];
   }
 
   if (state.serviceType === 'physiotherapy') {
     if (!state.sessionCount) return 0;
     return state.sessionCount === '1'
-      ? BOOKING_PRICING.homeVisit.physiotherapy.single
-      : BOOKING_PRICING.homeVisit.physiotherapy.twelve;
+      ? p['homeVisit:physiotherapy:single']
+      : p['homeVisit:physiotherapy:twelve'];
   }
 
   if (state.serviceType === 'nursing') {
     if (!state.nursingType || !state.nursingHoursPerDay || !state.nursingDuration) return 0;
 
-    // Get base price (hourly rate) based on nursing type
     const basePrice = state.nursingType === 'nurse'
-      ? BOOKING_PRICING.homeVisit.nursing.nurse
-      : BOOKING_PRICING.homeVisit.nursing.nurseAssistant;
+      ? p['homeVisit:nursing:nurse']
+      : p['homeVisit:nursing:nurseAssistant'];
 
-    const hourMultiplier =
-      BOOKING_PRICING.homeVisit.nursing.hourMultipliers[state.nursingHoursPerDay];
-    const durationMultiplier =
-      BOOKING_PRICING.homeVisit.nursing.durationMultipliers[state.nursingDuration];
-
-    // Calculate days in the duration
+    // Hour multipliers and duration discounts stay in code — they are fixed ratios, not prices
+    const hourMultiplier = BOOKING_PRICING.homeVisit.nursing.hourMultipliers[state.nursingHoursPerDay];
+    const durationMultiplier = BOOKING_PRICING.homeVisit.nursing.durationMultipliers[state.nursingDuration];
     const daysMap = { '1week': 7, '2weeks': 14, '1month': 30 };
     const days = daysMap[state.nursingDuration];
 
-    // Calculate step by step:
-    // 1. Daily rate = basePrice * hourMultiplier (e.g., 110 * 1.0 = 110 per day)
-    const dailyRate = basePrice * hourMultiplier;
-    
-    // 2. Period total = dailyRate * days (e.g., 110 * 7 = 770 for 1 week)
-    const periodTotal = dailyRate * days;
-    
-    // 3. Final price = periodTotal * durationMultiplier (apply discount, e.g., 770 * 0.95 = 731.50 for 2 weeks)
-    const finalPrice = periodTotal * durationMultiplier;
-
-    return Math.round(finalPrice);
+    return Math.round(basePrice * hourMultiplier * days * durationMultiplier);
   }
 
   return 0;

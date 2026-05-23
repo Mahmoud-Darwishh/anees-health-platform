@@ -7,14 +7,17 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import BookingForm from '@/features/booking/components/booking-form';
-import { BookingFormState, PackageType } from '@/lib/models/booking.types';
+import { BookingFormState, BookingPriceMap, PackageType } from '@/lib/models/booking.types';
+import type { SpecialtyOption } from '@/lib/api/specialties';
 import styles from './page.module.scss';
 
 interface PageContentProps {
   locale: string;
+  prices: BookingPriceMap;
+  specialties: SpecialtyOption[];
 }
 
-export default function BookingPage({ locale }: PageContentProps) {
+export default function BookingPage({ locale, prices, specialties }: PageContentProps) {
   const t = useTranslations('booking');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -78,6 +81,8 @@ export default function BookingPage({ locale }: PageContentProps) {
         <BookingForm
           onSubmit={handleBookingSubmit}
           preSelectedPackage={preSelectedPackage}
+          prices={prices}
+          specialties={specialties}
         />
       </main>
 

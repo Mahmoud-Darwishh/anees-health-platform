@@ -1,6 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import BookingPage from './page-content';
+import { getBookingPrices } from '@/lib/api/pricing';
+import { getSpecialties } from '@/lib/api/specialties';
 
 interface BookingLayoutProps {
   params: Promise<{ locale: string }>;
@@ -26,5 +28,10 @@ export async function generateMetadata({
 export default async function BookingPageLayout({ params }: BookingLayoutProps) {
   const { locale } = await params;
 
-  return <BookingPage locale={locale} />;
+  const [prices, specialties] = await Promise.all([
+    getBookingPrices(),
+    getSpecialties(),
+  ]);
+
+  return <BookingPage locale={locale} prices={prices} specialties={specialties} />;
 }

@@ -5,15 +5,16 @@ import { useLocale } from 'next-intl';
 import { useState } from 'react';
 import {
   BookingFormState,
+  BookingPriceMap,
   calculateBookingPrice,
   validateBookingForm,
-  SPECIALTIES,
   PHYSIOTHERAPY_CASE_TYPES,
   NURSING_TYPES,
   NURSING_HOURS,
   NURSING_DURATIONS,
   PackageType,
 } from '@/lib/models/booking.types';
+import type { SpecialtyOption } from '@/lib/api/specialties';
 import BookingSummary from './booking-summary';
 import styles from '@/assets/scss/components/booking-form.module.scss';
 
@@ -37,6 +38,8 @@ const INITIAL_FORM_STATE: BookingFormState = {
 interface BookingFormProps {
   onSubmit?: (formData: BookingFormState) => void | Promise<void>;
   preSelectedPackage?: PackageType | null;
+  prices: BookingPriceMap;
+  specialties: SpecialtyOption[];
 }
 
 function createInitialFormState(preSelectedPackage?: PackageType | null): BookingFormState {
@@ -51,7 +54,7 @@ function createInitialFormState(preSelectedPackage?: PackageType | null): Bookin
   };
 }
 
-export default function BookingForm({ onSubmit, preSelectedPackage }: BookingFormProps) {
+export default function BookingForm({ onSubmit, preSelectedPackage, prices, specialties }: BookingFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
@@ -131,7 +134,7 @@ export default function BookingForm({ onSubmit, preSelectedPackage }: BookingFor
     // This is kept for backward compatibility
   };
 
-  const totalPrice = calculateBookingPrice(formState);
+  const totalPrice = calculateBookingPrice(formState, prices);
 
   return (
     <div className={styles.bookingContainer} dir={dir}>
@@ -514,9 +517,9 @@ export default function BookingForm({ onSubmit, preSelectedPackage }: BookingFor
                       <option value="">
                         {t('booking.form.specialtySelect')}
                       </option>
-                      {SPECIALTIES.map((spec) => (
+                      {specialties.map((spec) => (
                         <option key={spec.value} value={spec.value}>
-                          {t(`booking.form.${spec.label}`)}
+                          {locale === 'ar' ? spec.nameAr : spec.nameEn}
                         </option>
                       ))}
                     </select>
@@ -892,6 +895,7 @@ export default function BookingForm({ onSubmit, preSelectedPackage }: BookingFor
             formState={formState}
             totalPrice={totalPrice}
             isSubmitting={isSubmitting}
+            specialties={specialties}
           />
         </aside>
       </div>

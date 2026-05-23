@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateBookingForm, CreateBookingIntentRequest, calculateBookingPrice } from '@/lib/models/booking.types';
+import { getBookingPrices } from '@/lib/api/pricing';
 import { prisma } from '@/lib/db/prisma';
 
 export async function POST(request: NextRequest) {
@@ -38,7 +39,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const amount = calculateBookingPrice(formState);
+    // Fetch authoritative prices from DB — never trust the client-side calculation
+    const prices = await getBookingPrices();
+    const amount = calculateBookingPrice(formState, prices);
     if (amount <= 0) {
       return NextResponse.json(
         { success: false, message: 'Invalid booking configuration: could not calculate price' },

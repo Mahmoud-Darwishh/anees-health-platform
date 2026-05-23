@@ -222,69 +222,139 @@ async function main() {
   }
 
   // ── Doctors ──────────────────────────────────────────────────────────────────
-  console.log('Seeding doctors...');
+  // JSON source files were removed after data was migrated to PostgreSQL.
+  // This block is kept for reference and skips gracefully if files are absent.
+  let doctorCount = 0;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const enDoctors: any[] = loadJson('doctors.en.json');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const arDoctors: any[] = loadJson('doctors.ar.json');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const arById = new Map<number, any>(arDoctors.map((d) => [d.id, d]));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const enDoctors: any[] = loadJson('doctors.en.json');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const arDoctors: any[] = loadJson('doctors.ar.json');
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const arById = new Map<number, any>(arDoctors.map((d) => [d.id, d]));
-
-  for (const en of enDoctors) {
-    const ar = arById.get(en.id) || en; // fallback to EN if AR missing
-
-    await prisma.doctor.upsert({
-      where: { id: en.id },
-      update: {},
-      create: {
-        id: en.id,
-        slug: generateSlug(en.doctorName),
-        image: en.image,
-        rating: en.rating,
-        gender: en.gender,
-        location: en.location,
-        experienceYears: en.experienceYears,
-        successRate: en.successRate,
-        avgWaitTime: en.avgWaitTime,
-        totalPatients: en.totalPatients,
-        availabilityStatus: en.availabilityStatus,
-        availabilityBadgeClass: en.availabilityBadgeClass,
-        specialityColorClass: en.specialityColorClass,
-        specialityTextClass: en.specialityTextClass,
-        duration: en.duration,
-        consultationFee: en.consultationFee,
-        maxConsultationFee: en.maxConsultationFee,
-        channels: en.channels,
-        languages: en.languages,
-        clinics: en.clinics,
-        areaCoverage: en.areaCoverage,
-        clinicDetails: en.clinicDetails,
-        testimonials: en.testimonials || [],
-        workHistory: en.workHistory || null,
-        priceTelemedicine: en.pricing?.telemedicine || 'N/A',
-        priceHomeVisit: en.pricing?.homeVisit || 'N/A',
-        priceClinicVisit: en.pricing?.clinicVisit || 'N/A',
-        // English
-        nameEn: en.doctorName,
-        specialityEn: en.speciality,
-        professionalTitleEn: en.professionalTitle,
-        bioEn: en.bio || null,
-        certificationsEn: en.certifications || [],
-        educationEn: en.education || [],
-        // Arabic
-        nameAr: ar.doctorName,
-        specialityAr: ar.speciality,
-        professionalTitleAr: ar.professionalTitle,
-        bioAr: ar.bio || null,
-        certificationsAr: ar.certifications || [],
-        educationAr: ar.education || [],
-      },
-    });
+    for (const en of enDoctors) {
+      const ar = arById.get(en.id) || en;
+      await prisma.doctor.upsert({
+        where: { id: en.id },
+        update: {},
+        create: {
+          id: en.id,
+          slug: generateSlug(en.doctorName),
+          image: en.image,
+          rating: en.rating,
+          gender: en.gender,
+          location: en.location,
+          experienceYears: en.experienceYears,
+          successRate: en.successRate,
+          avgWaitTime: en.avgWaitTime,
+          totalPatients: en.totalPatients,
+          availabilityStatus: en.availabilityStatus,
+          availabilityBadgeClass: en.availabilityBadgeClass,
+          specialityColorClass: en.specialityColorClass,
+          specialityTextClass: en.specialityTextClass,
+          duration: en.duration,
+          consultationFee: en.consultationFee,
+          maxConsultationFee: en.maxConsultationFee,
+          channels: en.channels,
+          languages: en.languages,
+          clinics: en.clinics,
+          areaCoverage: en.areaCoverage,
+          clinicDetails: en.clinicDetails,
+          testimonials: en.testimonials || [],
+          workHistory: en.workHistory || null,
+          priceTelemedicine: en.pricing?.telemedicine || 'N/A',
+          priceHomeVisit: en.pricing?.homeVisit || 'N/A',
+          priceClinicVisit: en.pricing?.clinicVisit || 'N/A',
+          nameEn: en.doctorName,
+          specialityEn: en.speciality,
+          professionalTitleEn: en.professionalTitle,
+          bioEn: en.bio || null,
+          certificationsEn: en.certifications || [],
+          educationEn: en.education || [],
+          nameAr: ar.doctorName,
+          specialityAr: ar.speciality,
+          professionalTitleAr: ar.professionalTitle,
+          bioAr: ar.bio || null,
+          certificationsAr: ar.certifications || [],
+          educationAr: ar.education || [],
+        },
+      });
+      doctorCount++;
+    }
+    console.log(`Seeded ${doctorCount} doctors.`);
+  } catch (e: unknown) {
+    if (e && typeof e === 'object' && 'code' in e && (e as NodeJS.ErrnoException).code === 'ENOENT') {
+      console.log('Doctor JSON files not found — skipping (already migrated to DB).');
+    } else {
+      throw e;
+    }
   }
 
-  console.log(`Seeded ${enDoctors.length} doctors.`);
+  // ── Booking Prices ────────────────────────────────────────────────────────
+  console.log('Seeding booking prices...');
+  await prisma.bookingPrice.createMany({
+    skipDuplicates: true,
+    data: [
+      { key: 'telemedicine',                      label: 'Telemedicine Consultation',              priceEgp: 250  },
+      { key: 'homeVisit:doctorVisit',              label: 'Home Doctor Visit',                      priceEgp: 1500 },
+      { key: 'homeVisit:physiotherapy:single',     label: 'Physiotherapy — Single Session',         priceEgp: 900  },
+      { key: 'homeVisit:physiotherapy:twelve',     label: 'Physiotherapy — 12-Session Package',     priceEgp: 9500 },
+      { key: 'homeVisit:nursing:nurse',            label: 'Nursing Care (Registered Nurse) per hr', priceEgp: 150  },
+      { key: 'homeVisit:nursing:nurseAssistant',   label: 'Nursing Care (Assistant) per hr',        priceEgp: 100  },
+      { key: 'package:haraka',                     label: 'Haraka — Joint & Arthritis Care',        priceEgp: 5000 },
+      { key: 'package:wai',                        label: 'Wai — Cognitive & Dementia Care',        priceEgp: 8000 },
+      { key: 'package:amal',                       label: 'Amal — Stroke Recovery',                priceEgp: 6000 },
+    ],
+  });
+
+  // ── Specialties ───────────────────────────────────────────────────────────
+  console.log('Seeding specialties...');
+  await prisma.specialty.createMany({
+    skipDuplicates: true,
+    data: [
+      { code: 'geriatrics',       nameEn: 'Geriatrics',              nameAr: 'طب الشيخوخة',                sortOrder: 1  },
+      { code: 'orthopedics',      nameEn: 'Orthopedics',             nameAr: 'جراحة العظام',               sortOrder: 2  },
+      { code: 'neurology',        nameEn: 'Neurology',               nameAr: 'طب الأعصاب',                 sortOrder: 3  },
+      { code: 'cardiology',       nameEn: 'Cardiology',              nameAr: 'أمراض القلب',                sortOrder: 4  },
+      { code: 'generalMedicine',  nameEn: 'General Medicine',        nameAr: 'الطب العام',                 sortOrder: 5  },
+      { code: 'pediatrics',       nameEn: 'Pediatrics',              nameAr: 'طب الأطفال',                 sortOrder: 6  },
+      { code: 'dermatology',      nameEn: 'Dermatology',             nameAr: 'الأمراض الجلدية',            sortOrder: 7  },
+      { code: 'gynecology',       nameEn: 'Gynecology',              nameAr: 'أمراض النساء والتوليد',      sortOrder: 8  },
+      { code: 'ophthalmology',    nameEn: 'Ophthalmology',           nameAr: 'طب العيون',                  sortOrder: 9  },
+      { code: 'otolaryngology',   nameEn: 'Ear, Nose & Throat',      nameAr: 'أنف وأذن وحنجرة',            sortOrder: 10 },
+      { code: 'psychiatry',       nameEn: 'Psychiatry',              nameAr: 'الطب النفسي',                sortOrder: 11 },
+      { code: 'urology',          nameEn: 'Urology',                 nameAr: 'طب المسالك البولية',         sortOrder: 12 },
+      { code: 'gastroenterology', nameEn: 'Gastroenterology',        nameAr: 'أمراض الجهاز الهضمي',       sortOrder: 13 },
+      { code: 'pulmonology',      nameEn: 'Pulmonology',             nameAr: 'أمراض الصدر والتنفس',        sortOrder: 14 },
+      { code: 'rheumatology',     nameEn: 'Rheumatology',            nameAr: 'أمراض الروماتيزم',           sortOrder: 15 },
+      { code: 'endocrinology',    nameEn: 'Endocrinology & Diabetes',nameAr: 'الغدد الصماء والسكري',       sortOrder: 16 },
+      { code: 'nephrology',       nameEn: 'Nephrology',              nameAr: 'أمراض الكلى',                sortOrder: 17 },
+      { code: 'oncology',         nameEn: 'Oncology',                nameAr: 'علاج الأورام',               sortOrder: 18 },
+      { code: 'hematology',       nameEn: 'Hematology',              nameAr: 'أمراض الدم',                 sortOrder: 19 },
+      { code: 'immunology',       nameEn: 'Allergy & Immunology',    nameAr: 'الحساسية والمناعة',           sortOrder: 20 },
+    ],
+  });
+
+  // ── Content Services (marketing /services page) ───────────────────────────
+  console.log('Seeding content services...');
+  await prisma.contentService.createMany({
+    skipDuplicates: true,
+    data: [
+      { code: 'doctorVisits',     iconClass: 'isax isax-health',          landingSlug: 'doctor-at-home',          sortOrder: 1  },
+      { code: 'elderlyCare',      iconClass: 'isax isax-heart-add',        landingSlug: 'elderly-care-at-home',    sortOrder: 2  },
+      { code: 'telemedicine',     iconClass: 'isax isax-video',            landingSlug: null,                      sortOrder: 3  },
+      { code: 'nursingCare',      iconClass: 'isax isax-hospital',         landingSlug: null,                      sortOrder: 4  },
+      { code: 'physiotherapy',    iconClass: 'isax isax-activity',         landingSlug: 'physiotherapy-at-home',   sortOrder: 5  },
+      { code: 'labTests',         iconClass: 'isax isax-clipboard-text',   landingSlug: null,                      sortOrder: 6  },
+      { code: 'medications',      iconClass: 'isax isax-box-time',         landingSlug: null,                      sortOrder: 7  },
+      { code: 'postOperative',    iconClass: 'isax isax-security-user',    landingSlug: null,                      sortOrder: 8  },
+      { code: 'remoteMonitoring', iconClass: 'isax isax-monitor',          landingSlug: null,                      sortOrder: 9  },
+      { code: 'homeRadiology',    iconClass: 'isax isax-scan',             landingSlug: null,                      sortOrder: 10 },
+      { code: 'palliativeCare',   iconClass: 'isax isax-heart',            landingSlug: null,                      sortOrder: 11 },
+    ],
+  });
+
   console.log('Seed complete.');
 }
 

@@ -4,12 +4,12 @@ import { useTranslations, useLocale } from 'next-intl';
 import { useState } from 'react';
 import {
   BookingFormState,
-  SPECIALTIES,
   PHYSIOTHERAPY_CASE_TYPES,
   NURSING_TYPES,
   NURSING_HOURS,
   NURSING_DURATIONS,
 } from '@/lib/models/booking.types';
+import type { SpecialtyOption } from '@/lib/api/specialties';
 import { generateBookingMessage } from '@/lib/utils/booking-utils';
 import styles from '@/assets/scss/components/booking-summary.module.scss';
 
@@ -17,12 +17,14 @@ interface BookingSummaryProps {
   formState: BookingFormState;
   totalPrice: number;
   isSubmitting: boolean;
+  specialties: SpecialtyOption[];
 }
 
 export default function BookingSummary({
   formState,
   totalPrice,
   isSubmitting,
+  specialties,
 }: BookingSummaryProps) {
   const t = useTranslations('booking');
   const locale = useLocale();
@@ -47,8 +49,9 @@ export default function BookingSummary({
 
   const getSpecialtyLabel = () => {
     if (!formState.specialty) return '';
-    const spec = SPECIALTIES.find((s) => s.value === formState.specialty);
-    return spec ? t(`form.${spec.label}`) : '';
+    const spec = specialties.find((s) => s.value === formState.specialty);
+    if (!spec) return formState.specialty;
+    return locale === 'ar' ? spec.nameAr : spec.nameEn;
   };
 
   const getTimePreferenceLabel = () => {
