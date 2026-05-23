@@ -2,7 +2,7 @@
 
 .stack {
   display: grid;
-  gap: 0.95rem;
+  gap: 1rem;
 }
 
 .headerRow {
@@ -15,13 +15,15 @@
   h2 {
     margin: 0;
     color: #12395f;
-    font-size: 1.2rem;
+    font-size: 1.16rem;
+    font-weight: 600;
   }
 
   p {
-    margin: 0.26rem 0 0;
+    margin: 0.34rem 0 0;
     color: #56708a;
-    font-size: 0.89rem;
+    font-size: 0.9rem;
+    font-weight: 400;
   }
 }
 
@@ -31,14 +33,15 @@
   color: #184a78;
   border-radius: 10px;
   text-decoration: none;
-  font-weight: 700;
-  padding: 0.52rem 0.78rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.5rem 0.76rem;
 }
 
 .visualGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.82rem;
+  gap: 0.92rem;
 }
 
 .visualSpanTwo {
@@ -48,122 +51,114 @@
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 0.76rem;
 }
 
 .summaryTile {
   border-radius: 12px;
   border: 1px solid #d7e3ef;
-  background: linear-gradient(135deg, #f8fbff 0%, #eff4fb 100%);
-  padding: 0.75rem 0.8rem;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.54);
+  background: #f8fbff;
+  padding: 0.74rem 0.82rem;
 
   p {
     margin: 0;
     color: #5f748d;
-    font-size: 0.74rem;
-    font-weight: 800;
+    font-size: 0.7rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   strong {
     display: block;
-    margin-top: 0.28rem;
+    margin-top: 0.22rem;
     color: #173f67;
-    font-size: 1.18rem;
+    font-size: 1.1rem;
+    font-weight: 600;
   }
 }
 
 .boardGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 0.88rem;
 }
 
 .boardCard {
   border: 1px solid #d4e2ef;
-  border-radius: 15px;
+  border-radius: 14px;
   background: #ffffff;
-  padding: 0.96rem;
-  box-shadow: 0 12px 26px rgba(16, 52, 84, 0.055);
-
-  &::before {
-    content: '';
-    display: block;
-    width: 46px;
-    height: 4px;
-    border-radius: 999px;
-    margin-bottom: 0.65rem;
-    background: linear-gradient(90deg, #1f4f7b 0%, #c89a3b 100%);
-  }
+  padding: 0.9rem;
+  box-shadow: 0 8px 18px rgba(16, 52, 84, 0.05);
 
   h2 {
     margin: 0;
     color: #153f66;
-    font-size: 1.02rem;
+    font-size: 1rem;
+    font-weight: 600;
   }
 }
 
 .boardSubhead {
-  margin: 0.3rem 0 0.8rem;
+  margin: 0.26rem 0 0.68rem;
   color: #55708b;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
 }
 
-.itemList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.55rem;
+.tableWrap {
+  border: 1px solid #d8e4ef;
+  border-radius: 14px;
+  background: #ffffff;
+  overflow-x: auto;
 }
 
-.itemCard {
-  border: 1px solid #deebf5;
-  border-radius: 12px;
-  background: linear-gradient(160deg, #f8fcff 0%, #f4f9ff 100%);
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 560px;
+
+  th,
+  td {
+    border-bottom: 1px solid #e4edf6;
+    text-align: left;
+    padding: 0.78rem 0.86rem;
+    color: #1b4269;
+    font-size: 0.87rem;
+  }
+
+  th {
+    color: #5e7891;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #f7fbff;
+  }
+
+  tbody tr:hover {
+    background: #f8fbff;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
 }
 
-.itemLink {
-  display: grid;
-  gap: 0.18rem;
-  padding: 0.65rem 0.7rem;
+.openLink {
+  border: 1px solid #c2d7eb;
+  background: #eef7ff;
+  color: #1a4c78;
+  border-radius: 10px;
   text-decoration: none;
-
-  strong {
-    color: #173f67;
-    font-size: 0.9rem;
-  }
-
-  span,
-  p {
-    margin: 0;
-    color: #5b7187;
-    font-size: 0.8rem;
-    line-height: 1.45;
-  }
-}
-
-.itemTrendRow {
-  margin-top: 0.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem;
-
-  small {
-    color: #5b7187;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-  }
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.42rem 0.62rem;
 }
 
 .emptyText {
   margin: 0;
   color: #5f748d;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
 }
 
 @include respond-below(custom991) {
@@ -184,7 +179,7 @@
 @include respond-below(custom479) {
   .headerRow {
     h2 {
-      font-size: 1.02rem;
+      font-size: 1rem;
     }
 
     p {

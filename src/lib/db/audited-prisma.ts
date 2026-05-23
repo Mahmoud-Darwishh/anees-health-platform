@@ -13,10 +13,21 @@ const AUDITED_MODELS = new Set([
   'ProgressNoteAddendum',
   'Document',
   'PhysioSessionReport',
+  'PhysioAttendanceProof',
   'NurseDailyReport',
   'CareTeamMessage',
   'CareCallRoutingTicket',
   'AiTriageCase',
+  'PatientCaregiver',
+  'PatientSocialHistory',
+  'VaccinationRecord',
+  'PatientRiskFlag',
+  'CareTask',
+  'LabOrder',
+  'ImagingOrder',
+  'NursingOrder',
+  'PhysioOrder',
+  'MedicationOrder',
 ]);
 
 function safeJson(value: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {

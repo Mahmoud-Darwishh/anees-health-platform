@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextAuthRequest } from 'next-auth';
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales } from '@/i18n/request';
-import { canAccessAdminPath } from '@/lib/auth/permissions';
+import { canAccessAdminPath, getAdminHomePath } from '@/lib/auth/permissions';
 
 const DEFAULT_LOCALE = 'en';
 
@@ -21,7 +21,7 @@ export default auth((req: NextAuthRequest) => {
   if (pathname.startsWith('/admin')) {
     if (pathname === '/admin/login') {
       if (session?.user?.role === 'staff') {
-        return NextResponse.redirect(new URL('/admin/patients', req.url));
+        return NextResponse.redirect(new URL(getAdminHomePath(session.user.staffRole), req.url));
       }
       return NextResponse.next();
     }
@@ -33,7 +33,9 @@ export default auth((req: NextAuthRequest) => {
     }
 
     if (!canAccessAdminPath(session.user.staffRole, pathname)) {
-      return NextResponse.redirect(new URL('/admin/patients?forbidden=1', req.url));
+      const fallbackUrl = new URL(getAdminHomePath(session.user.staffRole), req.url);
+      fallbackUrl.searchParams.set('forbidden', '1');
+      return NextResponse.redirect(fallbackUrl);
     }
 
     return NextResponse.next();

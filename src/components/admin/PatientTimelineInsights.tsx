@@ -244,16 +244,28 @@ export default function PatientTimelineInsights({ events, vitals }: Props) {
         {filteredEvents.length === 0 ? (
           <p className={styles.emptyText}>No events in this filter range.</p>
         ) : (
-          <ul className={styles.eventsList}>
-            {filteredEvents.slice(0, 10).map((event) => (
-              <li key={event.id}>
-                <span className={styles.eventType}>{typeLabel(event.type)}</span>
-                <strong>{event.title}</strong>
-                <p>{event.subtitle}</p>
-                <time>{formatDateTime(event.timestamp)}</time>
-              </li>
-            ))}
-          </ul>
+          <div className={styles.tableWrap}>
+            <table className={styles.eventsTable}>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Title</th>
+                  <th>Summary</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEvents.slice(0, 10).map((event) => (
+                  <tr key={event.id}>
+                    <td>{formatDateTime(event.timestamp)}</td>
+                    <td>{typeLabel(event.type)}</td>
+                    <td>{event.title}</td>
+                    <td>{event.subtitle}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </section>

@@ -1,0 +1,401 @@
+@use '@/assets/scss/utils/mixins' as *;
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.bannerSuccess,
+.bannerWarning {
+  margin: 0;
+  border: 1px solid #d7e2f1;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  background: #f7fbff;
+  color: #14324d;
+  font-size: 0.92rem;
+}
+
+.bannerWarning {
+  border-color: #f2d7a8;
+  background: #fff9ef;
+  color: #6e4a11;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summaryCard {
+  border: 1px solid #d7e2f1;
+  border-radius: 18px;
+  padding: 1rem;
+  background: #fff;
+
+  p {
+    margin: 0;
+    color: #587287;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  strong {
+    display: block;
+    margin-top: 0.45rem;
+    font-size: 1.3rem;
+    color: #103152;
+  }
+
+  span {
+    display: block;
+    margin-top: 0.35rem;
+    color: #527086;
+    font-size: 0.82rem;
+  }
+}
+
+.sectionCard {
+  border: 1px solid #d7e2f1;
+  border-radius: 18px;
+  padding: 1.05rem;
+  background: #fff;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #103152;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: #587287;
+    font-size: 0.9rem;
+  }
+}
+
+.linkButton {
+  align-self: flex-start;
+  border: 1px solid #9ab6d1;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  color: #174267;
+  text-decoration: none;
+  font-size: 0.85rem;
+  background: #f8fbff;
+}
+
+.tableWrap {
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 780px;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.7rem 0.65rem;
+    border-bottom: 1px solid #e5edf5;
+    color: #19374f;
+    font-size: 0.88rem;
+    vertical-align: top;
+  }
+
+  th {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #557388;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+.inlineLink {
+  color: #1f5f9a;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.rowSubline {
+  display: block;
+  margin-top: 0.28rem;
+  color: #628299;
+  font-size: 0.78rem;
+}
+
+.emptyState {
+  margin: 0;
+  border: 1px dashed #d5e4f2;
+  border-radius: 14px;
+  padding: 0.9rem;
+  color: #55758c;
+  font-size: 0.88rem;
+}
+
+.inlineForm {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  select,
+  input,
+  button {
+    border-radius: 10px;
+    border: 1px solid #c8dae9;
+    background: #fff;
+    color: #14324d;
+    min-height: 34px;
+    font-size: 0.82rem;
+  }
+
+  select,
+  input {
+    padding: 0 0.5rem;
+  }
+
+  input {
+    width: 120px;
+  }
+
+  input[name='signedAuditBundle'] {
+    width: 220px;
+  }
+
+  button {
+    padding: 0 0.8rem;
+    cursor: pointer;
+    background: #ecf4fd;
+    border-color: #a7c3dd;
+  }
+}
+
+.dualGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.45fr 1fr;
+}
+
+.reportGrid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+
+    span {
+      color: #4f6d83;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid #c8dae9;
+      border-radius: 12px;
+      background: #fff;
+      padding: 0.55rem 0.7rem;
+      color: #173a56;
+      font-size: 0.88rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formActions {
+  grid-column: 1 / -1;
+
+  button {
+    border: 1px solid #9ab6d1;
+    background: #ecf4fd;
+    color: #14324d;
+    border-radius: 12px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+
+  li {
+    border: 1px solid #d8e6f2;
+    border-radius: 14px;
+    padding: 0.7rem;
+    background: #f9fcff;
+
+    p {
+      margin: 0;
+      color: #16364f;
+      font-size: 0.87rem;
+    }
+
+    p + p {
+      margin-top: 0.28rem;
+    }
+
+    span {
+      display: block;
+      margin-top: 0.35rem;
+      color: #607f95;
+      font-size: 0.78rem;
+    }
+  }
+}
+
+.futureCard {
+  margin-top: 0.95rem;
+  border: 1px solid #d7e2f1;
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: #f9fcff;
+
+  h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #12324d;
+  }
+
+  p {
+    margin: 0.4rem 0 0;
+    color: #55748b;
+    font-size: 0.84rem;
+  }
+
+  button {
+    margin-top: 0.7rem;
+    width: 100%;
+    border: 1px dashed #b8cde0;
+    border-radius: 12px;
+    background: #fff;
+    color: #6b869a;
+    padding: 0.55rem;
+    font-size: 0.82rem;
+  }
+}
+
+.futureList {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+
+  span {
+    border: 1px solid #dce9f4;
+    border-radius: 999px;
+    padding: 0.35rem 0.6rem;
+    color: #4e6c82;
+    font-size: 0.79rem;
+    background: #fff;
+    width: fit-content;
+  }
+}
+
+.financeGrid {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+
+  article {
+    border: 1px solid #d7e2f1;
+    border-radius: 16px;
+    padding: 0.85rem;
+    background: #fff;
+
+    p {
+      margin: 0;
+      color: #587287;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    strong {
+      display: block;
+      margin-top: 0.45rem;
+      color: #13324d;
+      font-size: 1.12rem;
+    }
+
+    span {
+      display: block;
+      margin-top: 0.35rem;
+      color: #5f7d92;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+@include respond-below(custom1199) {
+  .summaryGrid,
+  .financeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dualGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include respond-below(custom767) {
+  .sectionCard {
+    padding: 0.85rem;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reportGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fullWidth,
+  .formActions {
+    grid-column: auto;
+  }
+
+  .summaryGrid,
+  .financeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .inlineForm {
+    flex-wrap: wrap;
+
+    input {
+      width: 100%;
+    }
+  }
+}

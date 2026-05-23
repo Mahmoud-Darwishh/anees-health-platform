@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db/prisma';
 import { requireStaffPermission } from '@/lib/auth';
+import AdminDashboardShell from '@/components/admin/AdminDashboardShell';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import type { Prisma } from '@prisma/client';
@@ -52,7 +53,7 @@ function getFieldDiffs(log: {
 }
 
 export default async function AdminAuditLogsPage({ searchParams }: Props) {
-  await requireStaffPermission('audit.read');
+  const session = await requireStaffPermission('audit.read');
   const query = await searchParams;
   const table = query.table?.trim() ?? '';
   const actor = query.actor?.trim() ?? '';
@@ -66,13 +67,37 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
     take: 200,
   });
 
+  const createCount = logs.filter((item) => item.action === 'create').length;
+  const updateCount = logs.filter((item) => item.action === 'update').length;
+  const deleteCount = logs.filter((item) => item.action === 'delete').length;
+  const uniqueTables = new Set(logs.map((item) => item.tableName)).size;
+
   return (
-    <main className={styles.page}>
-      <section className={styles.shell}>
+    <AdminDashboardShell
+      title="Audit Logs"
+      subtitle="Compact, queryable trail of clinical and patient record changes."
+      staffName={session.user.name ?? 'Anees Staff'}
+      roleLabel={session.user.staffRole}
+      navBadges={{
+        '/admin/audit-logs': logs.length,
+      }}
+      metrics={[
+        { label: 'Rows', value: logs.length, hint: 'Current filter', tone: 'sky' },
+        { label: 'Create', value: createCount, hint: 'Insert actions', tone: 'mint' },
+        { label: 'Update', value: updateCount, hint: 'Mutation actions', tone: 'amber' },
+        { label: 'Tables', value: uniqueTables, hint: 'Touched models', tone: 'violet' },
+      ]}
+      quickLinks={[
+        { href: '/admin/patients', label: 'Patient Registry' },
+        { href: '/admin/queues', label: 'Work Queues' },
+        { href: '/admin/audit-logs', label: 'Audit Logs', tone: 'primary' },
+      ]}
+    >
+      <section className={styles.stack}>
         <header className={styles.headerRow}>
           <div>
-            <h1>Audit Logs</h1>
-            <p>Immutable trail of clinical and patient record changes.</p>
+            <h2>Audit Trail</h2>
+            <p>Filter by model and actor, then inspect field-level change snapshots.</p>
           </div>
           <Link href="/admin/patients" className={styles.navLink}>Back to patients</Link>
         </header>
@@ -132,7 +157,34 @@ export default async function AdminAuditLogsPage({ searchParams }: Props) {
             </tbody>
           </table>
         </section>
+
+        <section className={styles.mobileCards} aria-label="Audit log cards">
+          {logs.map((log) => (
+            <article className={styles.mobileCard} key={`card-${log.id}`}>
+              <p className={styles.mobileKicker}>{new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Cairo' }).format(log.changedAt)}</p>
+              <h3>{log.tableName} • {log.action}</h3>
+              <p>{log.recordId}</p>
+              <p>{log.changedBy ?? '-'}</p>
+              <details className={styles.diffDetails}>
+                <summary>View diff</summary>
+                <div className={styles.diffList}>
+                  {getFieldDiffs(log).map((item) => (
+                    <section key={`mobile-${log.id}-${item.field}`} className={styles.diffItem}>
+                      <p className={styles.diffField}>{item.field}</p>
+                      <p>
+                        <strong>Before:</strong> {item.before}
+                      </p>
+                      <p>
+                        <strong>After:</strong> {item.after}
+                      </p>
+                    </section>
+                  ))}
+                </div>
+              </details>
+            </article>
+          ))}
+        </section>
       </section>
-    </main>
+    </AdminDashboardShell>
   );
 }

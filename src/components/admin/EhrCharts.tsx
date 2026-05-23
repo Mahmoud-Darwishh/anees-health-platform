@@ -116,6 +116,13 @@ function miniToneClass(tone: SparklineCardProps['tone']): string {
   return styles.miniNavy;
 }
 
+function formatChartValue(value: number): string {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: value >= 100 ? 0 : 1,
+  }).format(value);
+}
+
 export function SparklineCard({ title, subtitle, points, tone = 'navy' }: SparklineCardProps) {
   const chartPoints = toChartCoordinates(points);
   const linePath = buildLinePath(chartPoints);
@@ -170,7 +177,7 @@ export function DistributionCard({ title, subtitle, items }: DistributionCardPro
             <li key={item.label} className={styles.distributionItem}>
               <div className={styles.itemRow}>
                 <strong>{item.label}</strong>
-                <span>{item.value}</span>
+                <span>{formatChartValue(item.value)}</span>
               </div>
               <div className={styles.track}>
                 <span className={`${styles.fill} ${barToneClass(item.tone)}`} style={{ width }} />

@@ -1,5 +1,5 @@
 @use "sass:map";
-@use "variables";
+@use "@/assets/scss/utils/variables";
 
 $breakpoints: (
   xs: 0,

@@ -9,7 +9,7 @@ import styles from './admin-login.module.scss';
 export default function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/admin/patients';
+  const callbackUrl = searchParams.get('callbackUrl') || '/admin/login';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

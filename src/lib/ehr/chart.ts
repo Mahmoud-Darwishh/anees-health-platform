@@ -13,7 +13,14 @@ export type ChartEventType =
   | 'triage'
   | 'physio-report'
   | 'nurse-report'
-  | 'care-plan';
+  | 'care-plan'
+  | 'risk-flag'
+  | 'care-task'
+  | 'lab-order'
+  | 'imaging-order'
+  | 'nursing-order'
+  | 'physio-order'
+  | 'medication-order';
 
 export type ChartEvent = {
   id: string;
@@ -173,6 +180,88 @@ export function buildChartTimeline(patient: PatientEhrSnapshot): ChartEvent[] {
       title: carePlan.planName,
       subtitle: safeJoin([carePlan.code, carePlan.status, `${carePlan.totalVisitsPlanned} visits`], ' • '),
       detail: carePlan.notes ?? undefined,
+    });
+  });
+
+  patient.riskFlags.forEach((riskFlag) => {
+    events.push({
+      id: `risk-flag-${riskFlag.id}`,
+      type: 'risk-flag',
+      timestamp: riskFlag.isActive ? riskFlag.flaggedAt : (riskFlag.resolvedAt ?? riskFlag.flaggedAt),
+      title: riskFlag.isActive ? 'Risk flag activated' : 'Risk flag resolved',
+      subtitle: safeJoin([riskFlag.label, riskFlag.severity, riskFlag.isActive ? 'active' : 'resolved'], ' • '),
+      detail: riskFlag.notes ?? undefined,
+    });
+  });
+
+  patient.careTasks.forEach((task) => {
+    events.push({
+      id: `care-task-${task.id}`,
+      type: 'care-task',
+      timestamp: task.completedAt ?? task.dueAt ?? task.createdAt,
+      title: task.title,
+      subtitle: safeJoin([
+        task.taskType,
+        task.priority,
+        task.status,
+        task.assignedToStaff?.name ?? null,
+      ], ' • '),
+      detail: task.description ?? undefined,
+    });
+  });
+
+  patient.labOrders.forEach((order) => {
+    events.push({
+      id: `lab-order-${order.id}`,
+      type: 'lab-order',
+      timestamp: order.orderedAt,
+      title: `Lab order: ${order.testName}`,
+      subtitle: safeJoin([order.priority, order.status, order.orderedByStaff?.name ?? null], ' • '),
+      detail: order.clinicalReason ?? order.notes ?? undefined,
+    });
+  });
+
+  patient.imagingOrders.forEach((order) => {
+    events.push({
+      id: `imaging-order-${order.id}`,
+      type: 'imaging-order',
+      timestamp: order.orderedAt,
+      title: `Imaging order: ${order.studyName}`,
+      subtitle: safeJoin([order.modality ?? null, order.priority, order.status], ' • '),
+      detail: order.clinicalReason ?? order.resultSummary ?? undefined,
+    });
+  });
+
+  patient.nursingOrders.forEach((order) => {
+    events.push({
+      id: `nursing-order-${order.id}`,
+      type: 'nursing-order',
+      timestamp: order.orderedAt,
+      title: `Nursing order: ${order.orderTitle}`,
+      subtitle: safeJoin([order.frequency ?? null, order.priority, order.status], ' • '),
+      detail: order.instructions ?? undefined,
+    });
+  });
+
+  patient.physioOrders.forEach((order) => {
+    events.push({
+      id: `physio-order-${order.id}`,
+      type: 'physio-order',
+      timestamp: order.orderedAt,
+      title: `Physio order: ${order.orderTitle}`,
+      subtitle: safeJoin([order.frequency ?? null, order.priority, order.status], ' • '),
+      detail: order.goals ?? order.protocol ?? undefined,
+    });
+  });
+
+  patient.medicationOrders.forEach((order) => {
+    events.push({
+      id: `medication-order-${order.id}`,
+      type: 'medication-order',
+      timestamp: order.orderedAt,
+      title: `Medication order: ${order.medicationName}`,
+      subtitle: safeJoin([order.dose ?? null, order.frequency ?? null, order.status], ' • '),
+      detail: order.instructions ?? undefined,
     });
   });
 

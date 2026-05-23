@@ -11,32 +11,33 @@ type Props = {
   params: Promise<{ role: string }>;
 };
 
-const ROLE_META: Record<string, { title: string; summary: string; subtitle: string }> = {
+const ROLE_META: Record<string, { title: string; summary: string }> = {
   doctor: {
     title: 'Doctor Dashboard',
     summary: 'Signed-note review, triage, and active problem management.',
-    subtitle: 'This view emphasizes note locking, diagnosis review, and the chart timeline.',
   },
   physio: {
     title: 'Physio Dashboard',
     summary: 'Session plans, exercise continuity, and upcoming follow-up dates.',
-    subtitle: 'Use this view for rehabilitation scheduling and patient progress follow-through.',
   },
   nurse: {
     title: 'Nurse Dashboard',
     summary: 'Escalations, vitals, shift handoff, and bedside follow-up.',
-    subtitle: 'Use this view for rounding, escalation closure, and timely documentation.',
   },
   'medical-ops': {
     title: 'Medical Ops Dashboard',
     summary: 'Follow-up tasks, call routing, assignments, and coordination work.',
-    subtitle: 'Use this view for operational triage and closing the loop on patient tasks.',
   },
 };
 
 function formatDate(value: Date | null): string {
   if (!value) return '-';
   return new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Cairo' }).format(value);
+}
+
+function preview(value: string, max = 100): string {
+  if (value.length <= max) return value;
+  return `${value.slice(0, max).trim()}...`;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -322,6 +323,7 @@ export default async function RoleDashboardPage({ params }: Props) {
         { label: 'Patient Coverage', value: coverageCount, hint: 'Unique patients', tone: 'violet' },
       ]}
       quickLinks={[
+        { href: '/admin/dashboards?calendar=future', label: 'Calendar Integration (Soon)' },
         { href: '/admin/patients', label: 'Patient Registry' },
         { href: '/admin/queues', label: 'Work Queues' },
         { href: '/admin/dashboards', label: 'All Dashboards', tone: 'primary' },
@@ -343,8 +345,6 @@ export default async function RoleDashboardPage({ params }: Props) {
             </Link>
           ))}
         </div>
-
-        <p className={styles.subhead}>{meta.subtitle}</p>
 
         <section className={styles.visualGrid}>
           <div className={styles.visualSpanTwo}>
@@ -372,64 +372,74 @@ export default async function RoleDashboardPage({ params }: Props) {
           />
         </section>
 
-        <section className={styles.summaryGrid}>
-          <article className={styles.summaryTile}>
-            <p>Open queue</p>
-            <strong>{openQueueCount}</strong>
-          </article>
-          <article className={styles.summaryTile}>
-            <p>Focus</p>
-            <strong>{role === 'doctor' ? 'Charts' : role === 'physio' ? 'Plans' : role === 'nurse' ? 'Escalations' : 'Tasks'}</strong>
-          </article>
-          <article className={styles.summaryTile}>
-            <p>Patient coverage</p>
-            <strong>{coverageCount}</strong>
-          </article>
-          <article className={styles.summaryTile}>
-            <p>Total board items</p>
-            <strong>{totalItems}</strong>
-          </article>
-        </section>
-
         <section className={styles.boardGrid}>
           {role === 'doctor' && (
             <>
               <article className={styles.card}>
                 <h2>Unsigned Notes</h2>
-                <p className={styles.subhead}>Notes waiting for sign-off or addenda review.</p>
                 {unsignedNotes.length === 0 ? (
                   <p className={styles.emptyText}>No unsigned notes.</p>
                 ) : (
-                  <ul className={styles.list}>
-                    {unsignedNotes.map((item) => (
-                      <li key={item.id} className={styles.item}>
-                        <Link href={`/admin/patients/${item.patient.id}`} className={styles.link}>
-                          <strong>{item.patient.fullName}</strong>
-                          <span>{item.patient.code} • {formatDate(item.createdAt)}</span>
-                          <p dir="auto">{item.noteBody}</p>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className={styles.tableWrap}>
+                    <table className={styles.dataTable}>
+                      <thead>
+                        <tr>
+                          <th>Patient</th>
+                          <th>Case</th>
+                          <th>Updated</th>
+                          <th>Note</th>
+                          <th>Open</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {unsignedNotes.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.patient.fullName}</td>
+                            <td>{item.patient.code}</td>
+                            <td>{formatDate(item.createdAt)}</td>
+                            <td dir="auto">{preview(item.noteBody)}</td>
+                            <td>
+                              <Link href={`/admin/patients/${item.patient.id}`} className={styles.openLink}>Open</Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </article>
 
               <article className={styles.card}>
                 <h2>Active Care Plans</h2>
-                <p className={styles.subhead}>Ongoing plans and visit targets.</p>
                 {activeCarePlans.length === 0 ? (
                   <p className={styles.emptyText}>No active care plans.</p>
                 ) : (
-                  <ul className={styles.list}>
-                    {activeCarePlans.map((item) => (
-                      <li key={item.id} className={styles.item}>
-                        <Link href={`/admin/patients/${item.patient.id}`} className={styles.link}>
-                          <strong>{item.planName}</strong>
-                          <span>{item.patient.fullName} • {item.code} • {formatDate(item.startDate)} → {formatDate(item.endDate)}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className={styles.tableWrap}>
+                    <table className={styles.dataTable}>
+                      <thead>
+                        <tr>
+                          <th>Plan</th>
+                          <th>Patient</th>
+                          <th>Start</th>
+                          <th>End</th>
+                          <th>Open</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeCarePlans.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.planName}</td>
+                            <td>{item.patient.fullName}</td>
+                            <td>{formatDate(item.startDate)}</td>
+                            <td>{formatDate(item.endDate)}</td>
+                            <td>
+                              <Link href={`/admin/patients/${item.patient.id}`} className={styles.openLink}>Open</Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </article>
             </>
@@ -438,21 +448,35 @@ export default async function RoleDashboardPage({ params }: Props) {
           {role === 'physio' && (
             <article className={styles.card}>
               <h2>Physio Follow-ups</h2>
-              <p className={styles.subhead}>Rehabilitation sessions that need continuity.</p>
               {physioPlans.length === 0 ? (
                 <p className={styles.emptyText}>No physio follow-ups.</p>
               ) : (
-                <ul className={styles.list}>
-                  {physioPlans.map((item) => (
-                    <li key={item.id} className={styles.item}>
-                      <Link href={`/admin/patients/${item.patient.id}`} className={styles.link}>
-                        <strong>{item.patient.fullName}</strong>
-                        <span>{item.patient.code} • session #{item.sessionNumber} • next {formatDate(item.nextSessionDate)}</span>
-                        <p dir="auto">{item.interventions}</p>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.tableWrap}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Patient</th>
+                        <th>Case</th>
+                        <th>Session</th>
+                        <th>Next Date</th>
+                        <th>Open</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {physioPlans.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.patient.fullName}</td>
+                          <td>{item.patient.code}</td>
+                          <td>#{item.sessionNumber}</td>
+                          <td>{formatDate(item.nextSessionDate)}</td>
+                          <td>
+                            <Link href={`/admin/patients/${item.patient.id}`} className={styles.openLink}>Open</Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </article>
           )}
@@ -460,21 +484,35 @@ export default async function RoleDashboardPage({ params }: Props) {
           {role === 'nurse' && (
             <article className={styles.card}>
               <h2>Shift Escalations</h2>
-              <p className={styles.subhead}>Bedside follow-up and handoff items.</p>
               {nurseEscalations.length === 0 ? (
                 <p className={styles.emptyText}>No escalations.</p>
               ) : (
-                <ul className={styles.list}>
-                  {nurseEscalations.map((item) => (
-                    <li key={item.id} className={styles.item}>
-                      <Link href={`/admin/patients/${item.patient.id}`} className={styles.link}>
-                        <strong>{item.patient.fullName}</strong>
-                        <span>{item.patient.code} • {formatDate(item.reportDate)}</span>
-                        <p dir="auto">{item.escalationReason ?? item.nursingNotes}</p>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.tableWrap}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Patient</th>
+                        <th>Case</th>
+                        <th>Reported</th>
+                        <th>Reason</th>
+                        <th>Open</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nurseEscalations.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.patient.fullName}</td>
+                          <td>{item.patient.code}</td>
+                          <td>{formatDate(item.reportDate)}</td>
+                          <td dir="auto">{preview(item.escalationReason ?? item.nursingNotes)}</td>
+                          <td>
+                            <Link href={`/admin/patients/${item.patient.id}`} className={styles.openLink}>Open</Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </article>
           )}
@@ -483,38 +521,67 @@ export default async function RoleDashboardPage({ params }: Props) {
             <>
               <article className={styles.card}>
                 <h2>Follow-up Tasks</h2>
-                <p className={styles.subhead}>Messages requiring follow-up or closure.</p>
                 {careFollowUps.length === 0 ? (
                   <p className={styles.emptyText}>No open follow-up messages.</p>
                 ) : (
-                  <ul className={styles.list}>
-                    {careFollowUps.map((item) => (
-                      <li key={item.id} className={styles.item}>
-                        <Link href={`/admin/patients/${item.patient.id}`} className={styles.link}>
-                          <strong>{item.patient.fullName}</strong>
-                          <span>{item.patient.code} • due {formatDate(item.followUpDueAt)} • {item.channelType}</span>
-                          <p dir="auto">{item.messageBody}</p>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className={styles.tableWrap}>
+                    <table className={styles.dataTable}>
+                      <thead>
+                        <tr>
+                          <th>Patient</th>
+                          <th>Case</th>
+                          <th>Due</th>
+                          <th>Channel</th>
+                          <th>Open</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {careFollowUps.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.patient.fullName}</td>
+                            <td>{item.patient.code}</td>
+                            <td>{formatDate(item.followUpDueAt)}</td>
+                            <td>{item.channelType}</td>
+                            <td>
+                              <Link href={`/admin/patients/${item.patient.id}`} className={styles.openLink}>Open</Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </article>
 
               <article className={styles.card}>
                 <h2>Active Assignments</h2>
-                <p className={styles.subhead}>Current staff-to-patient responsibilities.</p>
                 {openAssignments.length === 0 ? (
                   <p className={styles.emptyText}>No active assignments.</p>
                 ) : (
-                  <ul className={styles.list}>
-                    {openAssignments.map((item) => (
-                      <li key={item.id} className={styles.item}>
-                        <strong>{item.patient.fullName}</strong>
-                        <span>{item.patient.code} • {item.staff.name} ({item.staff.role}) • {formatDate(item.assignedAt)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className={styles.tableWrap}>
+                    <table className={styles.dataTable}>
+                      <thead>
+                        <tr>
+                          <th>Patient</th>
+                          <th>Case</th>
+                          <th>Staff</th>
+                          <th>Role</th>
+                          <th>Assigned</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {openAssignments.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.patient.fullName}</td>
+                            <td>{item.patient.code}</td>
+                            <td>{item.staff.name}</td>
+                            <td>{item.staff.role}</td>
+                            <td>{formatDate(item.assignedAt)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </article>
             </>

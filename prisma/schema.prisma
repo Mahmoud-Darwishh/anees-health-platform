@@ -128,6 +128,11 @@ enum StaffStatus {
   suspended
 }
 
+enum PhysioAttendanceEvent {
+  check_in
+  check_out
+}
+
 enum Locale {
   en
   ar
@@ -148,6 +153,116 @@ enum ClinicalSensitivity {
   normal
   sensitive
   highly_sensitive
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+  UNKNOWN
+}
+
+enum MaritalStatus {
+  single
+  married
+  divorced
+  widowed
+  separated
+  other
+}
+
+enum DnrStatus {
+  full_code
+  dnr
+  unknown
+}
+
+enum SmokingStatus {
+  never
+  former
+  current
+  unknown
+}
+
+enum AlcoholUseStatus {
+  none
+  occasional
+  regular
+  unknown
+}
+
+enum MobilityStatus {
+  independent
+  assisted
+  wheelchair
+  bedridden
+  unknown
+}
+
+enum IndependenceLevel {
+  independent
+  partial_assistance
+  full_assistance
+  dependent
+  unknown
+}
+
+enum RiskFlagCode {
+  fall_risk
+  bedridden
+  dementia
+  stroke_history
+  aggressive_behavior
+  oxygen_dependent
+  infection_risk
+  pressure_ulcer_risk
+  diabetic_foot_risk
+  custom
+}
+
+enum RiskFlagSeverity {
+  low
+  medium
+  high
+  critical
+}
+
+enum CareTaskType {
+  nurse_check
+  lab_followup
+  imaging_followup
+  medication_reminder
+  physio_exercise
+  doctor_review
+  referral
+  coordination
+  custom
+}
+
+enum CareTaskPriority {
+  routine
+  high
+  urgent
+  critical
+}
+
+enum CareTaskStatus {
+  open
+  in_progress
+  completed
+  cancelled
+}
+
+enum ClinicalOrderStatus {
+  draft
+  active
+  completed
+  cancelled
 }
 
 // ============================================================================
@@ -274,13 +389,36 @@ model Patient {
   code             String        @unique
   familyId         String?
   fullName         String
+  arabicName       String?
   phone            String
   gender           PatientGender?
   dateOfBirth      DateTime?     @db.Date
+  nationalId       String?
+  passportNumber   String?
+  bloodGroup       BloodGroup?
+  maritalStatus    MaritalStatus?
+  preferredLanguage Locale?
+  religion         String?
+  occupation       String?
+  insuranceProvider String?
+  insuranceMemberId String?
+  insurancePolicyNumber String?
+  insuranceExpiry  DateTime?     @db.Date
+  dnrStatus        DnrStatus?
   areaId           String?
   addressDetail    String?
+  landmark         String?
+  gpsLatitude      Decimal?      @db.Decimal(10, 7)
+  gpsLongitude     Decimal?      @db.Decimal(10, 7)
+  addressMapUrl    String?
+  emergencyContactName String?
+  emergencyContactPhone String?
+  emergencyContactRelation String?
   registrationDate DateTime      @db.Date @default(now())
   primaryCaregiver String?
+  primaryCaregiverPhone String?
+  primaryCaregiverWhatsapp String?
+  primaryCaregiverEmail String?
   caregiverRelation String?
   chiefComplaint   String?
   referralSourceId String?
@@ -306,10 +444,21 @@ model Patient {
   documents       Document[]
   staffAssignments StaffPatientAssignment[]
   physioSessionReports PhysioSessionReport[]
+  physioAttendanceProofs PhysioAttendanceProof[]
   nurseDailyReports    NurseDailyReport[]
   careTeamMessages     CareTeamMessage[]
   callRoutingTickets   CareCallRoutingTicket[]
   aiTriageCases        AiTriageCase[]
+  caregivers           PatientCaregiver[]
+  socialHistories      PatientSocialHistory[]
+  vaccinationRecords   VaccinationRecord[]
+  riskFlags            PatientRiskFlag[]
+  careTasks            CareTask[]
+  labOrders            LabOrder[]
+  imagingOrders        ImagingOrder[]
+  nursingOrders        NursingOrder[]
+  physioOrders         PhysioOrder[]
+  medicationOrders     MedicationOrder[]
   userAccount    User?
 
   @@index([familyId])
@@ -317,6 +466,8 @@ model Patient {
   @@index([status])
   @@index([referralSourceId])
   @@index([phone])
+  @@index([nationalId])
+  @@index([passportNumber])
   @@map("patients")
 }
 
@@ -340,6 +491,7 @@ model Provider {
 
   role            ProviderRole     @relation(fields: [roleId], references: [id])
   primaryArea     Area?            @relation(fields: [primaryAreaId], references: [id])
+  linkedStaff     Staff?           @relation("StaffProviderLink")
   visits          Visit[]
   providerPayouts ProviderPayout[]
   expenses        Expense[]
@@ -411,8 +563,15 @@ model Visit {
   progressNotes ProgressNote[]
   documents     Document[]
   physioSessionReports PhysioSessionReport[]
+  physioAttendanceProofs PhysioAttendanceProof[]
   nurseDailyReports    NurseDailyReport[]
   careTeamMessages     CareTeamMessage[]
+  careTasks            CareTask[]
+  labOrders            LabOrder[]
+  imagingOrders        ImagingOrder[]
+  nursingOrders        NursingOrder[]
+  physioOrders         PhysioOrder[]
+  medicationOrders     MedicationOrder[]
 
   @@index([patientId])
   @@index([providerId])
@@ -629,12 +788,14 @@ model Staff {
   name        String
   email       String      @unique
   passwordHash String
+  providerId  String?     @unique
   role        StaffRole   @default(viewer)
   status      StaffStatus @default(active)
   lastLoginAt DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  provider               Provider? @relation("StaffProviderLink", fields: [providerId], references: [id])
   userAccount            User?
   medicalHistories       MedicalHistory[]
   allergies              Allergy[]
@@ -646,13 +807,28 @@ model Staff {
   uploadedDocuments      Document[]
   patientAssignments     StaffPatientAssignment[]
   enteredPhysioSessions  PhysioSessionReport[]
+  physioAttendanceProofs PhysioAttendanceProof[]
   enteredNurseReports    NurseDailyReport[]
   authoredCareMessages   CareTeamMessage[] @relation("CareMessageAuthor")
   assignedCallRouting    CareCallRoutingTicket[] @relation("CareCallAssignee")
   submittedAiTriage      AiTriageCase[] @relation("AiTriageSubmittedBy")
+  enteredCaregivers      PatientCaregiver[] @relation("PatientCaregiverEnteredBy")
+  enteredSocialHistories PatientSocialHistory[] @relation("PatientSocialHistoryEnteredBy")
+  enteredVaccinations    VaccinationRecord[] @relation("VaccinationRecordEnteredBy")
+  flaggedRiskFlags       PatientRiskFlag[] @relation("RiskFlaggedBy")
+  resolvedRiskFlags      PatientRiskFlag[] @relation("RiskResolvedBy")
+  assignedCareTasks      CareTask[] @relation("CareTaskAssignedTo")
+  createdCareTasks       CareTask[] @relation("CareTaskCreatedBy")
+  closedCareTasks        CareTask[] @relation("CareTaskClosedBy")
+  orderedLabOrders       LabOrder[] @relation("LabOrderOrderedBy")
+  orderedImagingOrders   ImagingOrder[] @relation("ImagingOrderOrderedBy")
+  orderedNursingOrders   NursingOrder[] @relation("NursingOrderOrderedBy")
+  orderedPhysioOrders    PhysioOrder[] @relation("PhysioOrderOrderedBy")
+  orderedMedicationOrders MedicationOrder[] @relation("MedicationOrderOrderedBy")
 
   @@index([email])
   @@index([role])
+  @@index([providerId])
   @@map("staff")
 }
 
@@ -886,6 +1062,35 @@ model PhysioSessionReport {
   @@map("physio_session_reports")
 }
 
+model PhysioAttendanceProof {
+  id                    String                 @id @default(cuid())
+  patientId             String
+  visitId               String?
+  staffId               String
+  attendanceEvent       PhysioAttendanceEvent
+  attendedAt            DateTime               @default(now())
+  gpsLatitude           Decimal?               @db.Decimal(10, 7)
+  gpsLongitude          Decimal?               @db.Decimal(10, 7)
+  gpsAccuracyMeters     Decimal?               @db.Decimal(8, 2)
+  selfieEvidenceHash    String?
+  faceIdEvidenceHash    String?
+  faceIdConfidenceScore Decimal?               @db.Decimal(5, 2)
+  signedAuditBundle     String?
+  verificationNotes     String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  visit   Visit?  @relation(fields: [visitId], references: [id])
+  staff   Staff   @relation(fields: [staffId], references: [id])
+
+  @@index([patientId, attendedAt])
+  @@index([visitId])
+  @@index([staffId, attendedAt])
+  @@index([attendanceEvent, attendedAt])
+  @@map("physio_attendance_proofs")
+}
+
 model NurseDailyReport {
   id                   String    @id @default(cuid())
   patientId            String
@@ -982,6 +1187,259 @@ model AiTriageCase {
   @@index([patientId, createdAt])
   @@index([status])
   @@map("ai_triage_cases")
+}
+
+model PatientCaregiver {
+  id               String   @id @default(cuid())
+  patientId        String
+  fullName         String
+  relationship     String?
+  phoneNumber      String?
+  whatsappNumber   String?
+  email            String?
+  isPrimary        Boolean  @default(false)
+  isAuthorized     Boolean  @default(true)
+  notes            String?
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  enteredByStaff Staff?  @relation("PatientCaregiverEnteredBy", fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, deletedAt])
+  @@map("patient_caregivers")
+}
+
+model PatientSocialHistory {
+  id                     String            @id @default(cuid())
+  patientId              String
+  smokingStatus          SmokingStatus?
+  alcoholUse             AlcoholUseStatus?
+  mobility               MobilityStatus?
+  livingConditions       String?
+  caregiverSupport       String?
+  functionalIndependence IndependenceLevel?
+  notes                  String?
+  recordedAt             DateTime          @default(now())
+  enteredByStaffId       String?
+  deletedAt              DateTime?
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  enteredByStaff Staff?  @relation("PatientSocialHistoryEnteredBy", fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, recordedAt, deletedAt])
+  @@map("patient_social_histories")
+}
+
+model VaccinationRecord {
+  id               String   @id @default(cuid())
+  patientId        String
+  vaccineName      String
+  doseNumber       String?
+  administeredOn   DateTime? @db.Date
+  facilityName     String?
+  nextDueDate      DateTime? @db.Date
+  notes            String?
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  enteredByStaff Staff?  @relation("VaccinationRecordEnteredBy", fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, administeredOn, deletedAt])
+  @@map("vaccination_records")
+}
+
+model PatientRiskFlag {
+  id                String           @id @default(cuid())
+  patientId         String
+  code              RiskFlagCode
+  label             String
+  severity          RiskFlagSeverity @default(high)
+  isActive          Boolean          @default(true)
+  flaggedAt         DateTime         @default(now())
+  resolvedAt        DateTime?
+  notes             String?
+  source            String?
+  flaggedByStaffId  String?
+  resolvedByStaffId String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  patient         Patient @relation(fields: [patientId], references: [id])
+  flaggedByStaff  Staff?  @relation("RiskFlaggedBy", fields: [flaggedByStaffId], references: [id])
+  resolvedByStaff Staff?  @relation("RiskResolvedBy", fields: [resolvedByStaffId], references: [id])
+
+  @@index([patientId, isActive, severity])
+  @@index([code, isActive])
+  @@map("patient_risk_flags")
+}
+
+model CareTask {
+  id                String           @id @default(cuid())
+  patientId         String
+  visitId           String?
+  taskType          CareTaskType
+  title             String
+  description       String?
+  priority          CareTaskPriority @default(routine)
+  status            CareTaskStatus   @default(open)
+  dueAt             DateTime?
+  completedAt       DateTime?
+  sourceModule      String?
+  assignedToStaffId String?
+  createdByStaffId  String?
+  closedByStaffId   String?
+  deletedAt         DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  visit          Visit?  @relation(fields: [visitId], references: [id])
+  assignedToStaff Staff? @relation("CareTaskAssignedTo", fields: [assignedToStaffId], references: [id])
+  createdByStaff  Staff? @relation("CareTaskCreatedBy", fields: [createdByStaffId], references: [id])
+  closedByStaff   Staff? @relation("CareTaskClosedBy", fields: [closedByStaffId], references: [id])
+
+  @@index([patientId, status, priority, dueAt])
+  @@index([assignedToStaffId, status])
+  @@index([visitId])
+  @@map("care_tasks")
+}
+
+model LabOrder {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  testName         String
+  clinicalReason   String?
+  priority         CareTaskPriority    @default(routine)
+  status           ClinicalOrderStatus @default(active)
+  orderedByStaffId String?
+  orderedAt        DateTime            @default(now())
+  targetDate       DateTime?
+  resultSummary    String?
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  visit          Visit?  @relation(fields: [visitId], references: [id])
+  orderedByStaff Staff?  @relation("LabOrderOrderedBy", fields: [orderedByStaffId], references: [id])
+
+  @@index([patientId, status, orderedAt])
+  @@index([visitId])
+  @@map("lab_orders")
+}
+
+model ImagingOrder {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  studyName        String
+  modality         String?
+  bodyPart         String?
+  clinicalReason   String?
+  priority         CareTaskPriority    @default(routine)
+  status           ClinicalOrderStatus @default(active)
+  orderedByStaffId String?
+  orderedAt        DateTime            @default(now())
+  targetDate       DateTime?
+  resultSummary    String?
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  visit          Visit?  @relation(fields: [visitId], references: [id])
+  orderedByStaff Staff?  @relation("ImagingOrderOrderedBy", fields: [orderedByStaffId], references: [id])
+
+  @@index([patientId, status, orderedAt])
+  @@index([visitId])
+  @@map("imaging_orders")
+}
+
+model NursingOrder {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  orderTitle       String
+  instructions     String?
+  frequency        String?
+  startDate        DateTime?           @db.Date
+  endDate          DateTime?           @db.Date
+  priority         CareTaskPriority    @default(routine)
+  status           ClinicalOrderStatus @default(active)
+  orderedByStaffId String?
+  orderedAt        DateTime            @default(now())
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  visit          Visit?  @relation(fields: [visitId], references: [id])
+  orderedByStaff Staff?  @relation("NursingOrderOrderedBy", fields: [orderedByStaffId], references: [id])
+
+  @@index([patientId, status, orderedAt])
+  @@index([visitId])
+  @@map("nursing_orders")
+}
+
+model PhysioOrder {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  orderTitle       String
+  protocol         String?
+  frequency        String?
+  sessionCount     Int?
+  goals            String?
+  priority         CareTaskPriority    @default(routine)
+  status           ClinicalOrderStatus @default(active)
+  orderedByStaffId String?
+  orderedAt        DateTime            @default(now())
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  visit          Visit?  @relation(fields: [visitId], references: [id])
+  orderedByStaff Staff?  @relation("PhysioOrderOrderedBy", fields: [orderedByStaffId], references: [id])
+
+  @@index([patientId, status, orderedAt])
+  @@index([visitId])
+  @@map("physio_orders")
+}
+
+model MedicationOrder {
+  id               String              @id @default(cuid())
+  patientId        String
+  visitId          String?
+  medicationName   String
+  dose             String?
+  frequency        String?
+  route            String?
+  isPrn            Boolean             @default(false)
+  startDate        DateTime?           @db.Date
+  endDate          DateTime?           @db.Date
+  instructions     String?
+  priority         CareTaskPriority    @default(routine)
+  status           ClinicalOrderStatus @default(active)
+  orderedByStaffId String?
+  orderedAt        DateTime            @default(now())
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  visit          Visit?  @relation(fields: [visitId], references: [id])
+  orderedByStaff Staff?  @relation("MedicationOrderOrderedBy", fields: [orderedByStaffId], references: [id])
+
+  @@index([patientId, status, orderedAt])
+  @@index([visitId])
+  @@map("medication_orders")
 }
 
 // ============================================================================

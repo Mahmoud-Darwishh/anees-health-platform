@@ -1,19 +1,11 @@
 import { requireStaffPermission } from '@/lib/auth';
 import AdminDashboardShell from '@/components/admin/AdminDashboardShell';
-import { DistributionCard, MiniSparkline, RingProgressCard, SparklineCard } from '@/components/admin/EhrCharts';
+import { DistributionCard, RingProgressCard, SparklineCard } from '@/components/admin/EhrCharts';
 import { prisma } from '@/lib/db/prisma';
 import { buildDailySeries } from '@/lib/ehr/dashboard-metrics';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import styles from './queues.module.scss';
-
-type PatientQueueProfile = {
-  notes: number;
-  triage: number;
-  nurse: number;
-  physio: number;
-  care: number;
-};
 
 export const metadata: Metadata = {
   title: 'Work Queues | Anees Admin',
@@ -128,50 +120,6 @@ export default async function AdminQueuesPage() {
     return doctorNotes + triageCases + nurseCases + physioCases + opsCases;
   }, 7);
 
-  const patientQueueProfiles = new Map<string, PatientQueueProfile>();
-
-  const ensureProfile = (patientId: string): PatientQueueProfile => {
-    const existing = patientQueueProfiles.get(patientId);
-    if (existing) return existing;
-
-    const created: PatientQueueProfile = {
-      notes: 0,
-      triage: 0,
-      nurse: 0,
-      physio: 0,
-      care: 0,
-    };
-    patientQueueProfiles.set(patientId, created);
-    return created;
-  };
-
-  unsignedNotes.forEach((item) => {
-    ensureProfile(item.patient.id).notes += 1;
-  });
-  triageDrafts.forEach((item) => {
-    ensureProfile(item.patient.id).triage += 1;
-  });
-  nurseEscalations.forEach((item) => {
-    ensureProfile(item.patient.id).nurse += 1;
-  });
-  physioPlans.forEach((item) => {
-    ensureProfile(item.patient.id).physio += 1;
-  });
-  careFollowUps.forEach((item) => {
-    ensureProfile(item.patient.id).care += 1;
-  });
-
-  const profileFor = (patientId: string): PatientQueueProfile => (
-    patientQueueProfiles.get(patientId)
-    ?? {
-      notes: 0,
-      triage: 0,
-      nurse: 0,
-      physio: 0,
-      care: 0,
-    }
-  );
-
   return (
     <AdminDashboardShell
       title="Work Queues"
@@ -260,46 +208,46 @@ export default async function AdminQueuesPage() {
           {canDoctorBoard && (
             <article className={styles.boardCard}>
               <h2>Doctor Queue</h2>
-              <p className={styles.boardSubhead}>Unsigned notes and AI triage drafts that need physician review.</p>
+              <p className={styles.boardSubhead}>Unsigned notes and AI triage drafts.</p>
               {unsignedNotes.length === 0 && triageDrafts.length === 0 ? (
                 <p className={styles.emptyText}>No doctor queue items right now.</p>
               ) : (
-                <ul className={styles.itemList}>
-                  {unsignedNotes.map((note) => (
-                    <li key={note.id} className={styles.itemCard}>
-                      <Link href={`/admin/patients/${note.patient.id}`} className={styles.itemLink}>
-                        <strong>{note.patient.fullName}</strong>
-                        <span>{note.patient.code} • unsigned note • {formatDate(note.createdAt)}</span>
-                        <p dir="auto">{note.noteBody}</p>
-                        <div className={styles.itemTrendRow}>
-                          <MiniSparkline
-                            points={Object.values(profileFor(note.patient.id)).map((value) => ({ value }))}
-                            tone="navy"
-                            ariaLabel={`Queue profile for ${note.patient.fullName}`}
-                          />
-                          <small>Profile N/T/NR/P/C</small>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                  {triageDrafts.map((caseItem) => (
-                    <li key={caseItem.id} className={styles.itemCard}>
-                      <Link href={`/admin/patients/${caseItem.patient.id}`} className={styles.itemLink}>
-                        <strong>{caseItem.patient.fullName}</strong>
-                        <span>{caseItem.patient.code} • triage {caseItem.urgencyLevel ?? '-'} • score {caseItem.riskScore?.toString() ?? '-'}</span>
-                        <p dir="auto">{caseItem.symptomSummary}</p>
-                        <div className={styles.itemTrendRow}>
-                          <MiniSparkline
-                            points={Object.values(profileFor(caseItem.patient.id)).map((value) => ({ value }))}
-                            tone="gold"
-                            ariaLabel={`Queue profile for ${caseItem.patient.fullName}`}
-                          />
-                          <small>Profile N/T/NR/P/C</small>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.tableWrap}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Patient</th>
+                        <th>Case</th>
+                        <th>Type</th>
+                        <th>Priority</th>
+                        <th>Updated</th>
+                        <th>Open</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {unsignedNotes.map((note) => (
+                        <tr key={note.id}>
+                          <td>{note.patient.fullName}</td>
+                          <td>{note.patient.code}</td>
+                          <td>Unsigned note</td>
+                          <td>-</td>
+                          <td>{formatDate(note.createdAt)}</td>
+                          <td><Link href={`/admin/patients/${note.patient.id}`} className={styles.openLink}>Open</Link></td>
+                        </tr>
+                      ))}
+                      {triageDrafts.map((caseItem) => (
+                        <tr key={caseItem.id}>
+                          <td>{caseItem.patient.fullName}</td>
+                          <td>{caseItem.patient.code}</td>
+                          <td>AI triage</td>
+                          <td>{caseItem.urgencyLevel ?? '-'}</td>
+                          <td>{formatDate(caseItem.createdAt)}</td>
+                          <td><Link href={`/admin/patients/${caseItem.patient.id}`} className={styles.openLink}>Open</Link></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </article>
           )}
@@ -307,29 +255,34 @@ export default async function AdminQueuesPage() {
           {canNurseBoard && (
             <article className={styles.boardCard}>
               <h2>Nurse Shift Board</h2>
-              <p className={styles.boardSubhead}>Escalations that need bedside follow-up or shift handoff.</p>
+              <p className={styles.boardSubhead}>Escalations requiring bedside follow-up.</p>
               {nurseEscalations.length === 0 ? (
                 <p className={styles.emptyText}>No escalations in the current queue.</p>
               ) : (
-                <ul className={styles.itemList}>
-                  {nurseEscalations.map((report) => (
-                    <li key={report.id} className={styles.itemCard}>
-                      <Link href={`/admin/patients/${report.patient.id}`} className={styles.itemLink}>
-                        <strong>{report.patient.fullName}</strong>
-                        <span>{report.patient.code} • {formatDate(report.reportDate)}</span>
-                        <p dir="auto">{report.escalationReason ?? report.nursingNotes}</p>
-                        <div className={styles.itemTrendRow}>
-                          <MiniSparkline
-                            points={Object.values(profileFor(report.patient.id)).map((value) => ({ value }))}
-                            tone="gold"
-                            ariaLabel={`Queue profile for ${report.patient.fullName}`}
-                          />
-                          <small>Profile N/T/NR/P/C</small>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.tableWrap}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Patient</th>
+                        <th>Case</th>
+                        <th>Reported</th>
+                        <th>Escalation</th>
+                        <th>Open</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nurseEscalations.map((report) => (
+                        <tr key={report.id}>
+                          <td>{report.patient.fullName}</td>
+                          <td>{report.patient.code}</td>
+                          <td>{formatDate(report.reportDate)}</td>
+                          <td dir="auto">{(report.escalationReason ?? report.nursingNotes).slice(0, 80)}</td>
+                          <td><Link href={`/admin/patients/${report.patient.id}`} className={styles.openLink}>Open</Link></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </article>
           )}
@@ -337,29 +290,34 @@ export default async function AdminQueuesPage() {
           {canPhysioBoard && (
             <article className={styles.boardCard}>
               <h2>Physio Plan Board</h2>
-              <p className={styles.boardSubhead}>Upcoming plan dates and follow-up sessions for rehabilitation continuity.</p>
+              <p className={styles.boardSubhead}>Upcoming sessions and follow-ups.</p>
               {physioPlans.length === 0 ? (
                 <p className={styles.emptyText}>No physio plans waiting on follow-up.</p>
               ) : (
-                <ul className={styles.itemList}>
-                  {physioPlans.map((report) => (
-                    <li key={report.id} className={styles.itemCard}>
-                      <Link href={`/admin/patients/${report.patient.id}`} className={styles.itemLink}>
-                        <strong>{report.patient.fullName}</strong>
-                        <span>{report.patient.code} • next {formatDate(report.nextSessionDate)} • session #{report.sessionNumber}</span>
-                        <p dir="auto">{report.interventions}</p>
-                        <div className={styles.itemTrendRow}>
-                          <MiniSparkline
-                            points={Object.values(profileFor(report.patient.id)).map((value) => ({ value }))}
-                            tone="navy"
-                            ariaLabel={`Queue profile for ${report.patient.fullName}`}
-                          />
-                          <small>Profile N/T/NR/P/C</small>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.tableWrap}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Patient</th>
+                        <th>Case</th>
+                        <th>Session</th>
+                        <th>Next Date</th>
+                        <th>Open</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {physioPlans.map((report) => (
+                        <tr key={report.id}>
+                          <td>{report.patient.fullName}</td>
+                          <td>{report.patient.code}</td>
+                          <td>#{report.sessionNumber}</td>
+                          <td>{formatDate(report.nextSessionDate)}</td>
+                          <td><Link href={`/admin/patients/${report.patient.id}`} className={styles.openLink}>Open</Link></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </article>
           )}
@@ -367,29 +325,34 @@ export default async function AdminQueuesPage() {
           {canCareBoard && (
             <article className={styles.boardCard}>
               <h2>Care Coordination Board</h2>
-              <p className={styles.boardSubhead}>Messages that require follow-up, assignment, or call-routing escalation.</p>
+              <p className={styles.boardSubhead}>Follow-up messages and due callbacks.</p>
               {careFollowUps.length === 0 ? (
                 <p className={styles.emptyText}>No active care follow-ups.</p>
               ) : (
-                <ul className={styles.itemList}>
-                  {careFollowUps.map((message) => (
-                    <li key={message.id} className={styles.itemCard}>
-                      <Link href={`/admin/patients/${message.patient.id}`} className={styles.itemLink}>
-                        <strong>{message.patient.fullName}</strong>
-                        <span>{message.patient.code} • {message.channelType} • due {formatDate(message.followUpDueAt)}</span>
-                        <p dir="auto">{message.messageBody}</p>
-                        <div className={styles.itemTrendRow}>
-                          <MiniSparkline
-                            points={Object.values(profileFor(message.patient.id)).map((value) => ({ value }))}
-                            tone="navy"
-                            ariaLabel={`Queue profile for ${message.patient.fullName}`}
-                          />
-                          <small>Profile N/T/NR/P/C</small>
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.tableWrap}>
+                  <table className={styles.dataTable}>
+                    <thead>
+                      <tr>
+                        <th>Patient</th>
+                        <th>Case</th>
+                        <th>Channel</th>
+                        <th>Due</th>
+                        <th>Open</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {careFollowUps.map((message) => (
+                        <tr key={message.id}>
+                          <td>{message.patient.fullName}</td>
+                          <td>{message.patient.code}</td>
+                          <td>{message.channelType}</td>
+                          <td>{formatDate(message.followUpDueAt)}</td>
+                          <td><Link href={`/admin/patients/${message.patient.id}`} className={styles.openLink}>Open</Link></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </article>
           )}

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMemo, useState, type ReactNode } from 'react';
@@ -30,6 +31,8 @@ type NavSection = {
   title: string;
   items: NavItem[];
 };
+
+const HOME_HREF = '/en';
 
 type AdminDashboardShellProps = {
   title: string;
@@ -73,6 +76,25 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
+const PHYSIO_UTILITY_ITEMS: NavItem[] = [
+  { href: '/admin/physio', label: 'Physio Workspace', shortLabel: 'PW' },
+  { href: '/admin/patients', label: 'My Cases', shortLabel: 'PT' },
+];
+
+const PHYSIO_NAV_SECTIONS: NavSection[] = [
+  {
+    title: 'Workspace',
+    items: [
+      { href: '/admin/physio', label: 'Physio Workspace', shortLabel: 'PW' },
+      { href: '/admin/patients', label: 'My Cases', shortLabel: 'PT' },
+    ],
+  },
+  {
+    title: 'Clinical Work',
+    items: [{ href: '/admin/patients', label: 'Session Reporting & EHR', shortLabel: 'EH' }],
+  },
+];
+
 function formatRoleLabel(role: string | null | undefined): string {
   if (!role) return 'Clinical Staff';
   return role.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
@@ -97,6 +119,35 @@ function metricToneClass(tone: ShellMetricTone | undefined): string {
   }
 }
 
+function parseMetricNumber(value: string | number): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value !== 'string') return null;
+
+  const compact = value.replace(/,/g, '');
+  const matched = compact.match(/-?\d+(?:\.\d+)?/);
+  if (!matched) return null;
+
+  const parsed = Number(matched[0]);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function computeGreetingHourLabel(hour: number): 'morning' | 'afternoon' | 'evening' {
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'evening';
+}
+
+function resolvePersonalName(staffName: string | undefined, roleLabel: string | null | undefined): string {
+  const fallback = 'Clinician';
+  const raw = staffName?.trim();
+  if (!raw) return fallback;
+
+  if (/^dr\.?\s+/i.test(raw)) return raw;
+  const firstToken = raw.split(/\s+/)[0] ?? raw;
+  const isDoctor = (roleLabel ?? '').toLowerCase().includes('doctor');
+  return isDoctor ? `Dr. ${firstToken}` : firstToken;
+}
+
 export default function AdminDashboardShell({
   title,
   subtitle,
@@ -110,34 +161,100 @@ export default function AdminDashboardShell({
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [navQuery, setNavQuery] = useState('');
+  const isPhysiotherapist = (roleLabel ?? '').toLowerCase() === 'physiotherapist';
+
+  const roleAwareUtilityItems = useMemo<NavItem[]>(
+    () => (isPhysiotherapist ? PHYSIO_UTILITY_ITEMS : UTILITY_ITEMS),
+    [isPhysiotherapist],
+  );
+
+  const roleAwareSections = useMemo<NavSection[]>(
+    () => (isPhysiotherapist ? PHYSIO_NAV_SECTIONS : NAV_SECTIONS),
+    [isPhysiotherapist],
+  );
 
   const resolvedQuickLinks = useMemo<ShellQuickLink[]>(() => {
-    if (quickLinks && quickLinks.length > 0) return quickLinks;
+    const defaults: ShellQuickLink[] = isPhysiotherapist
+      ? [
+          { href: '/admin/physio', label: 'Physio Workspace', tone: 'primary' },
+          { href: '/admin/patients', label: 'My Cases' },
+        ]
+      : [
+          { href: '/admin/patients', label: 'Patient Registry' },
+          { href: '/admin/queues', label: 'Open Queues' },
+          { href: '/admin/dashboards', label: 'Dashboard Hub', tone: 'primary' },
+        ];
 
-    return [
-      { href: '/admin/patients', label: 'Patient Registry' },
-      { href: '/admin/queues', label: 'Open Queues' },
-      { href: '/admin/dashboards', label: 'Dashboard Hub', tone: 'primary' },
-    ];
-  }, [quickLinks]);
+    const base = quickLinks && quickLinks.length > 0 ? quickLinks : defaults;
+    const hasHome = base.some((item) => item.href === '/' || item.href === '/en' || item.href === '/ar');
+
+    return hasHome ? base : [{ href: HOME_HREF, label: 'Back to Home' }, ...base];
+  }, [isPhysiotherapist, quickLinks]);
 
   const filteredSections = useMemo<NavSection[]>(() => {
     const term = navQuery.trim().toLowerCase();
-    if (!term) return NAV_SECTIONS;
+    if (!term) return roleAwareSections;
 
-    return NAV_SECTIONS
+    return roleAwareSections
       .map((section) => ({
         ...section,
         items: section.items.filter((item) => item.label.toLowerCase().includes(term)),
       }))
       .filter((section) => section.items.length > 0);
-  }, [navQuery]);
+  }, [navQuery, roleAwareSections]);
 
   const shiftLabel = new Intl.DateTimeFormat('en-GB', {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'Africa/Cairo',
   }).format(new Date());
+
+  const greetingSummary = useMemo(() => {
+    const now = new Date();
+    const cairoHour = Number(
+      new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit',
+        hour12: false,
+        timeZone: 'Africa/Cairo',
+      }).format(now),
+    );
+
+    const hour = Number.isFinite(cairoHour) ? cairoHour : now.getHours();
+    const greetingPeriod = computeGreetingHourLabel(hour);
+    const greeting = `Good ${greetingPeriod}`;
+    const professionalName = resolvePersonalName(staffName, roleLabel);
+
+    const numericMetrics = metrics
+      .map((metric) => ({
+        ...metric,
+        numericValue: parseMetricNumber(metric.value),
+      }))
+      .filter((metric): metric is ShellMetric & { numericValue: number } => metric.numericValue !== null);
+
+    const totalLoad = numericMetrics.reduce((sum, metric) => sum + metric.numericValue, 0);
+    const highestPressure = numericMetrics.reduce<(ShellMetric & { numericValue: number }) | null>(
+      (max, metric) => {
+        if (!max || metric.numericValue > max.numericValue) return metric;
+        return max;
+      },
+      null,
+    );
+    const activeLanes = numericMetrics.filter((metric) => metric.numericValue > 0).length;
+
+    const insights = [
+      `${activeLanes}/${Math.max(numericMetrics.length, 1)} tracked lanes active now`,
+      highestPressure
+        ? `Highest pressure: ${highestPressure.label} (${highestPressure.numericValue})`
+        : 'Highest pressure: no numeric load yet',
+      `Operational load: ${totalLoad} items currently on radar`,
+    ];
+
+    return {
+      greeting,
+      professionalName,
+      insights,
+    };
+  }, [metrics, roleLabel, staffName]);
 
   return (
     <div className={styles.frame}>
@@ -148,10 +265,12 @@ export default function AdminDashboardShell({
       />
 
       <aside className={styles.utilityRail}>
-        <div className={styles.brandPill}>AH</div>
+        <Link href={HOME_HREF} className={styles.brandMark} aria-label="Anees home">
+          <Image src="/assets/img/anees-logo.png" alt="Anees" width={34} height={34} />
+        </Link>
 
         <nav className={styles.utilityList}>
-          {UTILITY_ITEMS.map((item) => (
+          {roleAwareUtilityItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -166,7 +285,10 @@ export default function AdminDashboardShell({
 
       <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarTopRow}>
-          <p className={styles.sidebarTitle}>Clinical Navigation</p>
+          <Link href={HOME_HREF} className={styles.sidebarBrand}>
+            <Image src="/assets/img/footer-logo.png" alt="Anees" width={94} height={30} />
+            <span>Admin</span>
+          </Link>
           <button
             type="button"
             className={styles.closeSidebarButton}
@@ -194,7 +316,7 @@ export default function AdminDashboardShell({
             type="search"
             value={navQuery}
             onChange={(event) => setNavQuery(event.target.value)}
-            placeholder="Type doctor, queues, audit..."
+            placeholder={isPhysiotherapist ? 'Type workspace, cases...' : 'Type doctor, queues, audit...'}
             aria-label="Search navigation"
           />
         </label>
@@ -236,9 +358,21 @@ export default function AdminDashboardShell({
             >
               Menu
             </button>
+            <div className={styles.brandRow}>
+              <Link href={HOME_HREF} className={styles.inlineBrand}>
+                <Image src="/assets/img/anees-logo.png" alt="Anees" width={26} height={26} />
+                <span>Anees Admin</span>
+              </Link>
+              <Link href={HOME_HREF} className={styles.homeLink}>
+                Back to Home
+              </Link>
+            </div>
             <div>
               <h1>{title}</h1>
               <p>{subtitle}</p>
+              <p className={styles.welcomeLine}>
+                {greetingSummary.greeting}, {greetingSummary.professionalName}.
+              </p>
               <div className={styles.topMetaRow}>
                 <span className={styles.metaChip}>EHR Active Shift</span>
                 <span className={styles.metaText}>{shiftLabel}</span>
@@ -261,15 +395,25 @@ export default function AdminDashboardShell({
         </header>
 
         {metrics.length > 0 && (
-          <section className={styles.metricStrip}>
-            {metrics.map((metric) => (
-              <article key={`${metric.label}-${metric.value}`} className={`${styles.metricCard} ${metricToneClass(metric.tone)}`}>
-                <p>{metric.label}</p>
-                <strong>{metric.value}</strong>
-                {metric.hint ? <span>{metric.hint}</span> : null}
-              </article>
-            ))}
-          </section>
+          <>
+            <section className={styles.metricStrip}>
+              {metrics.map((metric) => (
+                <article key={`${metric.label}-${metric.value}`} className={`${styles.metricCard} ${metricToneClass(metric.tone)}`}>
+                  <p>{metric.label}</p>
+                  <strong>{metric.value}</strong>
+                  {metric.hint ? <span>{metric.hint}</span> : null}
+                </article>
+              ))}
+            </section>
+
+            <section className={styles.insightStrip} aria-label="Operational insights">
+              {greetingSummary.insights.map((insight) => (
+                <article key={insight} className={styles.insightCard}>
+                  <p>{insight}</p>
+                </article>
+              ))}
+            </section>
+          </>
         )}
 
         <section className={styles.contentCard}>{children}</section>
