@@ -1,11 +1,10 @@
 /**
- * Logging utilities for coverage checks and analytics
- * Privacy-compliant logging with no PII storage
+ * Coverage-check analytics stored in PostgreSQL via Prisma.
+ * No PII — IP addresses are hashed before storage.
  */
 
-import { promises as fs } from 'fs';
-import path from 'path';
 import crypto from 'crypto';
+import { prisma } from '@/lib/db/prisma';
 
 export interface CoverageCheckLog {
   id: string;
@@ -14,19 +13,21 @@ export interface CoverageCheckLog {
   longitude: number;
   covered: boolean;
   areaName?: string;
-  ipHash?: string; // Anonymized IP (hashed)
+  ipHash?: string;
   userAgent?: string;
 }
 
-/**
- * Hash IP address for privacy compliance
- */
+/** SHA-256 prefix of the raw IP — 16 hex chars, no reversible PII */
 function hashIP(ip: string): string {
-  return crypto.createHash('sha256').update(ip + process.env.HASH_SALT || 'anees-health').digest('hex').substring(0, 16);
+  return crypto
+    .createHash('sha256')
+    .update(ip + (process.env.HASH_SALT || 'anees-health'))
+    .digest('hex')
+    .substring(0, 16);
 }
 
 /**
- * Log a coverage check attempt
+ * Persist a coverage check to the database (non-blocking — caller should .catch())
  */
 export async function logCoverageCheck(data: {
   latitude: number;
@@ -36,34 +37,20 @@ export async function logCoverageCheck(data: {
   ip?: string;
   userAgent?: string;
 }): Promise<void> {
-  try {
-    const logDir = path.join(process.cwd(), 'data', 'logs');
-    const logFile = path.join(logDir, 'coverage-checks.jsonl');
-
-    // Ensure directory exists
-    await fs.mkdir(logDir, { recursive: true });
-
-    const logEntry: CoverageCheckLog = {
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
+  await prisma.coverageCheck.create({
+    data: {
       latitude: data.latitude,
       longitude: data.longitude,
       covered: data.covered,
-      areaName: data.areaName,
-      ipHash: data.ip ? hashIP(data.ip) : undefined,
-      userAgent: data.userAgent,
-    };
-
-    // Append to JSONL file (one JSON object per line)
-    await fs.appendFile(logFile, JSON.stringify(logEntry) + '\n', 'utf-8');
-  } catch (error) {
-    console.error('Failed to log coverage check:', error);
-    // Don't throw - logging failure shouldn't break the API
-  }
+      areaName: data.areaName ?? null,
+      ipHash: data.ip ? hashIP(data.ip) : null,
+      userAgent: data.userAgent ?? null,
+    },
+  });
 }
 
 /**
- * Get coverage check statistics
+ * Aggregate coverage-check statistics from the database
  */
 export async function getCoverageStats(): Promise<{
   totalChecks: number;
@@ -71,32 +58,30 @@ export async function getCoverageStats(): Promise<{
   uncoveredChecks: number;
   recentChecks: CoverageCheckLog[];
 }> {
-  try {
-    const logFile = path.join(process.cwd(), 'data', 'logs', 'coverage-checks.jsonl');
-    const content = await fs.readFile(logFile, 'utf-8');
-    const lines = content.trim().split('\n').filter(Boolean);
-    
-    const logs: CoverageCheckLog[] = lines.map(line => JSON.parse(line));
-    
-    const coveredChecks = logs.filter(log => log.covered).length;
-    const uncoveredChecks = logs.filter(log => !log.covered).length;
-    
-    // Get last 100 checks
-    const recentChecks = logs.slice(-100).reverse();
-    
-    return {
-      totalChecks: logs.length,
-      coveredChecks,
-      uncoveredChecks,
-      recentChecks,
-    };
-  } catch (error) {
-    // File doesn't exist yet or is empty
-    return {
-      totalChecks: 0,
-      coveredChecks: 0,
-      uncoveredChecks: 0,
-      recentChecks: [],
-    };
-  }
+  const [totalChecks, coveredChecks, recent] = await Promise.all([
+    prisma.coverageCheck.count(),
+    prisma.coverageCheck.count({ where: { covered: true } }),
+    prisma.coverageCheck.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    }),
+  ]);
+
+  const recentChecks: CoverageCheckLog[] = recent.map((r) => ({
+    id: r.id,
+    timestamp: r.createdAt.toISOString(),
+    latitude: r.latitude,
+    longitude: r.longitude,
+    covered: r.covered,
+    areaName: r.areaName ?? undefined,
+    ipHash: r.ipHash ?? undefined,
+    userAgent: r.userAgent ?? undefined,
+  }));
+
+  return {
+    totalChecks,
+    coveredChecks,
+    uncoveredChecks: totalChecks - coveredChecks,
+    recentChecks,
+  };
 }

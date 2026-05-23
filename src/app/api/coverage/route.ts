@@ -10,27 +10,6 @@ import {
 import { logCoverageCheck } from '@/lib/utils/logger';
 import { logger } from '@/lib/utils/app-logger';
 
-function getCairoTimestamp(): string {
-  const now = new Date();
-  const cairo = new Date(
-    now.toLocaleString('en-US', { timeZone: 'Africa/Cairo' })
-  );
-  const offsetMinutes = Math.round((cairo.getTime() - now.getTime()) / 60000);
-  const sign = offsetMinutes >= 0 ? '+' : '-';
-  const absOffset = Math.abs(offsetMinutes);
-  const offH = String(Math.floor(absOffset / 60)).padStart(2, '0');
-  const offM = String(absOffset % 60).padStart(2, '0');
-
-  const yyyy = cairo.getFullYear();
-  const mm = String(cairo.getMonth() + 1).padStart(2, '0');
-  const dd = String(cairo.getDate()).padStart(2, '0');
-  const hh = String(cairo.getHours()).padStart(2, '0');
-  const mi = String(cairo.getMinutes()).padStart(2, '0');
-  const ss = String(cairo.getSeconds()).padStart(2, '0');
-
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}${sign}${offH}:${offM}`;
-}
-
 /**
  * Coverage check API endpoint
  * Supports checking by coordinates or zone name
@@ -118,6 +97,7 @@ export async function GET(request: NextRequest) {
       const ip = ipHeader ? ipHeader.split(',')[0].trim() : 'unknown';
       const userAgent = request.headers.get('user-agent') || undefined;
       
+      // Persist to PostgreSQL — fire-and-forget, never blocks the response
       logCoverageCheck({
         latitude,
         longitude,
@@ -125,45 +105,9 @@ export async function GET(request: NextRequest) {
         areaName: result.area?.name,
         ip,
         userAgent,
-      }).catch(err => logger.error('Coverage check log error', err instanceof Error ? err.message : String(err)));
-
-      // Push anonymized check data to SheetDB (fire-and-forget)
-      // SheetDB logging (requires sheet header row: latitude, longitude, covered, areaName, timestamp)
-      try {
-        const timestamp = getCairoTimestamp();
-        const sheetPayload = {
-          data: [
-            {
-              latitude,
-              longitude,
-              covered: result.covered,
-              areaName: result.area?.name ?? '',
-              timestamp,
-            },
-          ],
-        };
-
-        void (async () => {
-          try {
-            const res = await fetch('https://sheetdb.io/api/v1/jp7px2gsifv8j', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(sheetPayload),
-            });
-
-            if (!res.ok) {
-              const body = await res.text();
-              logger.error('SheetDB logging error', { status: res.status, body });
-            }
-          } catch (err) {
-            logger.error('SheetDB logging error', err instanceof Error ? err.message : String(err));
-          }
-        })();
-      } catch (err) {
-        logger.error('SheetDB logging setup error', err instanceof Error ? err.message : String(err));
-      }
+      }).catch(err =>
+        logger.error('Coverage check log error', err instanceof Error ? err.message : String(err))
+      );
 
       return NextResponse.json({
         success: true,
