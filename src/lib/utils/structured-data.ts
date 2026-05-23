@@ -213,7 +213,7 @@ export function generateDoctorSchema(
 		'@type': 'Physician',
 		name: doctor.name,
 		description: doctor.bio,
-		image: doctor.image || `${config.api.baseUrl}/assets/img/doctors/default.jpg`,
+		image: doctor.image || `${config.api.baseUrl}/assets/img/fav.png`,
 		url: `${config.api.baseUrl}/${locale}/doctors/${doctor.slug}`,
 		medicalSpecialty: doctor.specialty,
 		worksFor: {

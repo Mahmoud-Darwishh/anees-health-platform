@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/assets/img/fav.png',
-    apple: '/logos/anees-health-logo.png',
+    apple: '/assets/img/footer-logo.png',
   },
   openGraph: {
     title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     alternateLocale: ['ar_EG'],
     images: [
       {
-        url: '/assets/img/banner/anees-health-og.jpg',
+        url: '/assets/img/about-img1.png',
         width: 1200,
         height: 630,
         alt: 'Anees Health - Home Healthcare Services',
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     description: 'Home healthcare and telemedicine in Egypt: doctor home visits, nursing, physiotherapy, lab at home, chronic care, and 24/7 support for seniors and families.',
     creator: '@aneeshealth',
     site: '@aneeshealth',
-    images: ['/assets/img/banner/anees-health-og.jpg'],
+    images: ['/assets/img/about-img1.png'],
   },
   alternates: {
     canonical: `${siteUrl}/`,
@@ -163,8 +163,8 @@ export default function RootLayout({
             alternateName: ['Anees', 'أنيس هيلث', 'أنيس'],
             description: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patients",
             url: 'https://aneeshealth.com',
-            logo: 'https://aneeshealth.com/logos/anees-health-logo.png',
-            image: 'https://aneeshealth.com/assets/img/banner/anees-health-og.jpg',
+            logo: 'https://aneeshealth.com/assets/img/footer-logo.png',
+            image: 'https://aneeshealth.com/assets/img/about-img1.png',
             telephone: '+20-1270558620',
             email: 'info@aneeshealth.com',
             founder: [
