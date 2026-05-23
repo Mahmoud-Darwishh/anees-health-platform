@@ -35,6 +35,13 @@
 .auditLink {
   border-radius: 10px;
   border: 1px solid #bfd4e8;
+
+  .headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
   background: #fff;
   color: #1f4f7b;
   text-decoration: none;
@@ -68,6 +75,16 @@
   button {
     border: 1px solid #1f4f7b;
     background: #1f4f7b;
+
+  .queueLink {
+    border-radius: 10px;
+    border: 1px solid #d5e5d8;
+    background: #f4fbf6;
+    color: #1f6a41;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 0.55rem 0.8rem;
+  }
     color: #fff;
     font-weight: 700;
     border-radius: 10px;
@@ -78,6 +95,16 @@
 .tableWrap {
   border: 1px solid #d7e2ee;
   border-radius: 12px;
+
+    .headerActions {
+      width: 100%;
+    }
+
+    .auditLink,
+    .queueLink {
+      width: 100%;
+      text-align: center;
+    }
   background: #fff;
   overflow: auto;
 }

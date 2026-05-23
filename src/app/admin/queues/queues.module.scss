@@ -1,0 +1,148 @@
+@use '../../../assets/scss/utils/variables' as *;
+
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 7% 7%, rgba(31, 79, 123, 0.14), transparent 28%),
+    radial-gradient(circle at 92% 6%, rgba(31, 106, 65, 0.11), transparent 22%),
+    #f4f7fb;
+  padding: 1.2rem;
+}
+
+.shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 0;
+    color: $brand-dark-blue;
+    font-size: 1.45rem;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: #5f748d;
+    font-size: 0.92rem;
+  }
+}
+
+.backLink {
+  border: 1px solid #bfd4e8;
+  background: #fff;
+  color: #1f4f7b;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0.52rem 0.78rem;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.summaryTile {
+  border-radius: 12px;
+  border: 1px solid #d8e5f1;
+  background: linear-gradient(135deg, #f7fbff 0%, #eef8f1 100%);
+  padding: 0.75rem 0.8rem;
+
+  p {
+    margin: 0;
+    color: #5f748d;
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  strong {
+    display: block;
+    margin-top: 0.28rem;
+    color: #173f67;
+    font-size: 1.18rem;
+  }
+}
+
+.boardGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.boardCard {
+  border: 1px solid #d7e2ee;
+  border-radius: 14px;
+  background: #fff;
+  padding: 0.95rem;
+
+  h2 {
+    margin: 0;
+    color: #173f67;
+    font-size: 1rem;
+  }
+}
+
+.boardSubhead {
+  margin: 0.25rem 0 0.7rem;
+  color: #5f748d;
+  font-size: 0.85rem;
+}
+
+.itemList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.itemCard {
+  border: 1px solid #e4edf6;
+  border-radius: 12px;
+  background: #f9fbfe;
+}
+
+.itemLink {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.65rem 0.7rem;
+  text-decoration: none;
+
+  strong {
+    color: #173f67;
+    font-size: 0.9rem;
+  }
+
+  span,
+  p {
+    margin: 0;
+    color: #5f748d;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+}
+
+.emptyText {
+  margin: 0;
+  color: #5f748d;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 991px) {
+  .summaryGrid,
+  .boardGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,259 @@
+@use '../../../../assets/scss/utils/variables' as *;
+@use '../../../../assets/scss/utils/mixins' as *;
+
+.page {
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(180deg, #f4f8fc 0%, #eef4f8 100%);
+  padding: 1.25rem 1rem 2rem;
+}
+
+.shell {
+  max-width: 920px;
+  margin: 0 auto;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.backLink,
+.printBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0.52rem 0.78rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.backLink {
+  border: 1px solid #c7d9ea;
+  color: #1f4f79;
+  background: #f0f6fc;
+}
+
+.printBtn {
+  border: 1px solid #1e4d77;
+  color: #fff;
+  background: linear-gradient(90deg, #154068 0%, #245b88 100%);
+}
+
+.sheet {
+  background: #fff;
+  border: 1px solid #d6e2ee;
+  border-radius: 16px;
+  padding: 1.1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.header {
+  border-bottom: 1px dashed #d4e2ef;
+  padding-bottom: 0.75rem;
+
+  h1 {
+    margin: 0;
+    color: #163e64;
+    font-size: 1.3rem;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: #55718d;
+    font-size: 0.9rem;
+  }
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.55rem;
+
+  span {
+    border: 1px solid #c9dcef;
+    border-radius: 999px;
+    background: #f0f7ff;
+    color: #2b5b83;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.55rem;
+    font-weight: 700;
+    text-align: right;
+  }
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge {
+  border-radius: 999px;
+  border: 1px solid #cbddef;
+  background: #f1f7fd;
+  color: #2a587f;
+  font-size: 0.76rem;
+  padding: 0.25rem 0.58rem;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.card {
+  border: 1px solid #d8e4f0;
+  border-radius: 12px;
+  background: #fbfdff;
+  padding: 0.82rem;
+
+  h2 {
+    margin: 0 0 0.55rem;
+    color: #173f66;
+    font-size: 0.94rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  p,
+  li {
+    margin: 0;
+    color: #486783;
+    line-height: 1.5;
+    font-size: 0.87rem;
+  }
+}
+
+.list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.33rem;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border-bottom: 1px solid #e4ecf4;
+    padding: 0.55rem 0.45rem;
+    text-align: left;
+    font-size: 0.84rem;
+  }
+
+  th {
+    color: #5a7490;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.74rem;
+  }
+
+  td {
+    color: #224866;
+  }
+}
+
+.empty {
+  color: #607a94;
+  font-size: 0.87rem;
+  margin: 0;
+}
+
+.footerNote {
+  border-top: 1px dashed #d4e2ef;
+  padding-top: 0.7rem;
+  color: #607a94;
+  font-size: 0.82rem;
+}
+
+@include respond-below(custom767) {
+  .page {
+    padding: 0.85rem 0.7rem 1.25rem;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table {
+    min-width: 0;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      border: 1px solid #d9e6f2;
+      border-radius: 12px;
+      margin-bottom: 0.55rem;
+      padding: 0.3rem 0.5rem;
+      background: #fcfdff;
+    }
+
+    td {
+      border: none;
+      padding: 0.36rem 0;
+    }
+
+    td::before {
+      content: attr(data-label);
+      display: block;
+      color: #5a7490;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 0.71rem;
+      margin-bottom: 0.15rem;
+      font-weight: 700;
+    }
+  }
+}
+
+@media print {
+  .page {
+    background: #fff;
+    padding: 0;
+  }
+
+  .toolbar {
+    display: none;
+  }
+
+  .sheet {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+}

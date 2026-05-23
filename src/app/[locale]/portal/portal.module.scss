@@ -1,13 +1,17 @@
 @use '../../../assets/scss/utils/variables' as *;
+@use '../../../assets/scss/utils/mixins' as *;
 
 .page {
   min-height: calc(100vh - 120px);
-  background: linear-gradient(180deg, #f4f7fb 0%, #edf2f7 100%);
+  background:
+    radial-gradient(circle at 15% 10%, rgba(23, 97, 166, 0.14), transparent 34%),
+    radial-gradient(circle at 80% 5%, rgba(47, 140, 108, 0.14), transparent 30%),
+    linear-gradient(180deg, #f7fafd 0%, #eef3f8 100%);
   padding: 1.5rem 1rem 2rem;
 }
 
 .shell {
-  max-width: 1100px;
+  max-width: 1160px;
   margin: 0 auto;
   display: grid;
   gap: 1rem;
@@ -47,16 +51,38 @@
   h1 {
     margin: 0 0 0.25rem;
     color: $brand-dark-blue;
-    font-size: 1.45rem;
+    font-size: 1.5rem;
     font-weight: 700;
   }
 
   p {
     margin: 0;
-    color: #5c7189;
+    color: #4f6a85;
     font-size: 0.95rem;
-    line-height: 1.5;
+    line-height: 1.55;
+    max-width: 66ch;
   }
+}
+
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+.headerActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #c8dbef;
+  background: #edf4fb;
+  color: #1d4a74;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.52rem 0.72rem;
+  text-decoration: none;
 }
 
 .kicker {
@@ -124,6 +150,26 @@
     font-size: 1.06rem;
     font-weight: 700;
   }
+}
+
+.highlightCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  border-color: #bfd5ec;
+  background: linear-gradient(135deg, #f8fcff 0%, #eef7ff 100%);
+
+  p {
+    margin: 0;
+    color: #557392;
+  }
+}
+
+.highlightActions {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: end;
 }
 
 .cardHeaderRow {
@@ -233,9 +279,57 @@
 }
 
 .disclaimer {
-  margin: 0.9rem 0 0;
+  margin: 0;
   color: #6a7f96;
   font-size: 0.78rem;
+}
+
+.blockTitle {
+  margin: 0.95rem 0 0.65rem;
+  color: #426380;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.recordList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+
+  li {
+    border: 1px solid #d9e6f2;
+    border-radius: 12px;
+    background: #fcfdff;
+    padding: 0.75rem;
+    display: grid;
+    gap: 0.28rem;
+  }
+
+  p,
+  small {
+    margin: 0;
+    color: #4e6a86;
+    line-height: 1.5;
+  }
+
+  strong {
+    color: #173d63;
+  }
+}
+
+.recordHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+
+  span {
+    color: #5f7b95;
+    font-size: 0.8rem;
+  }
 }
 
 .tableWrap {
@@ -449,7 +543,7 @@
   font-weight: 700;
 }
 
-@media (max-width: 991px) {
+@include respond-below(custom991) {
   .statsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -461,9 +555,17 @@
   .docsGrid {
     grid-template-columns: 1fr;
   }
+
+  .highlightCard {
+    flex-direction: column;
+  }
+
+  .highlightActions {
+    justify-items: start;
+  }
 }
 
-@media (max-width: 767px) {
+@include respond-below(custom767) {
   .page {
     padding: 1rem 0.75rem 1.5rem;
   }
@@ -472,11 +574,61 @@
     flex-direction: column;
   }
 
+  .headerActions {
+    width: 100%;
+    align-items: flex-start;
+  }
+
   .metaList {
     grid-template-columns: 1fr;
   }
 
   .statsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .table {
+    min-width: 0;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      border: 1px solid #d9e6f2;
+      border-radius: 12px;
+      margin-bottom: 0.65rem;
+      padding: 0.35rem 0.55rem;
+      background: #fcfdff;
+    }
+
+    td {
+      border: none;
+      padding: 0.42rem 0;
+      font-size: 0.85rem;
+    }
+
+    td::before {
+      content: attr(data-label);
+      display: block;
+      color: #5f7891;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.18rem;
+    }
+  }
+
+  .recordHead {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

@@ -634,6 +634,83 @@ async function main() {
       },
     });
 
+    const doctorPasswordHash = await bcrypt.hash('Doctor@123', 10);
+    await prisma.staff.upsert({
+      where: { email: 'doctor@aneeshealth.local' },
+      update: {
+        name: 'Demo Doctor',
+        role: 'doctor',
+        status: 'active',
+        passwordHash: doctorPasswordHash,
+      },
+      create: {
+        name: 'Demo Doctor',
+        email: 'doctor@aneeshealth.local',
+        role: 'doctor',
+        status: 'active',
+        passwordHash: doctorPasswordHash,
+      },
+    });
+
+    const physioPasswordHash = await bcrypt.hash('Physio@123', 10);
+    await prisma.staff.upsert({
+      where: { email: 'physio@aneeshealth.local' },
+      update: {
+        name: 'Demo Physio',
+        role: 'physiotherapist',
+        status: 'active',
+        passwordHash: physioPasswordHash,
+      },
+      create: {
+        name: 'Demo Physio',
+        email: 'physio@aneeshealth.local',
+        role: 'physiotherapist',
+        status: 'active',
+        passwordHash: physioPasswordHash,
+      },
+    });
+
+    const nursePasswordHash = await bcrypt.hash('Nurse@123', 10);
+    await prisma.staff.upsert({
+      where: { email: 'nurse@aneeshealth.local' },
+      update: {
+        name: 'Demo Nurse',
+        role: 'nurse',
+        status: 'active',
+        passwordHash: nursePasswordHash,
+      },
+      create: {
+        name: 'Demo Nurse',
+        email: 'nurse@aneeshealth.local',
+        role: 'nurse',
+        status: 'active',
+        passwordHash: nursePasswordHash,
+      },
+    });
+
+    const demoDoctor = await prisma.staff.findUnique({ where: { email: 'doctor@aneeshealth.local' } });
+    const demoPhysio = await prisma.staff.findUnique({ where: { email: 'physio@aneeshealth.local' } });
+    const demoNurse = await prisma.staff.findUnique({ where: { email: 'nurse@aneeshealth.local' } });
+    if (!demoDoctor || !demoPhysio || !demoNurse) {
+      throw new Error('Failed to seed doctor/physio/nurse accounts.');
+    }
+
+    await prisma.user.upsert({
+      where: { email: demoDoctor.email },
+      update: { name: demoDoctor.name, role: 'staff', staffId: demoDoctor.id },
+      create: { name: demoDoctor.name, email: demoDoctor.email, role: 'staff', staffId: demoDoctor.id },
+    });
+    await prisma.user.upsert({
+      where: { email: demoPhysio.email },
+      update: { name: demoPhysio.name, role: 'staff', staffId: demoPhysio.id },
+      create: { name: demoPhysio.name, email: demoPhysio.email, role: 'staff', staffId: demoPhysio.id },
+    });
+    await prisma.user.upsert({
+      where: { email: demoNurse.email },
+      update: { name: demoNurse.name, role: 'staff', staffId: demoNurse.id },
+      create: { name: demoNurse.name, email: demoNurse.email, role: 'staff', staffId: demoNurse.id },
+    });
+
     await prisma.staffPatientAssignment.upsert({
       where: {
         staffId_patientId: {
@@ -653,6 +730,28 @@ async function main() {
         assignedBy: demoStaff.id,
       },
     });
+
+    for (const member of [demoDoctor, demoPhysio, demoNurse]) {
+      await prisma.staffPatientAssignment.upsert({
+        where: {
+          staffId_patientId: {
+            staffId: member.id,
+            patientId: demoPatient1.id,
+          },
+        },
+        update: {
+          isActive: true,
+          assignedAt: new Date(),
+          assignedBy: demoStaff.id,
+        },
+        create: {
+          staffId: member.id,
+          patientId: demoPatient1.id,
+          isActive: true,
+          assignedBy: demoStaff.id,
+        },
+      });
+    }
 
     await prisma.staffPatientAssignment.upsert({
       where: {
@@ -742,6 +841,147 @@ async function main() {
       });
     }
 
+    const existingDiagnosis = await prisma.diagnosis.findFirst({
+      where: { patientId: demoPatient1.id, diagnosisName: 'Essential Hypertension', deletedAt: null },
+    });
+    if (!existingDiagnosis) {
+      await prisma.diagnosis.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit2.id,
+          diagnosisName: 'Essential Hypertension',
+          icd10Code: 'I10',
+          diagnosedOn: new Date('2026-05-12'),
+          status: 'active',
+          notes: 'Controlled with amlodipine and periodic monitoring.',
+          enteredByStaffId: demoDoctor.id,
+        },
+      });
+    }
+
+    const existingVitals = await prisma.vitalSigns.findFirst({
+      where: { patientId: demoPatient1.id, measuredAt: new Date('2026-05-12T09:10:00.000Z'), deletedAt: null },
+    });
+    if (!existingVitals) {
+      await prisma.vitalSigns.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit2.id,
+          measuredAt: new Date('2026-05-12T09:10:00.000Z'),
+          systolicBp: 132,
+          diastolicBp: 84,
+          heartRate: 78,
+          oxygenSaturation: 97,
+          temperatureC: 36.8,
+          weightKg: 78.4,
+          notes: 'Pre-round vitals stable.',
+          enteredByStaffId: demoNurse.id,
+        },
+      });
+    }
+
+    const existingPhysioReport = await prisma.physioSessionReport.findFirst({
+      where: { patientId: demoPatient1.id, sessionNumber: 3, deletedAt: null },
+    });
+    if (!existingPhysioReport) {
+      await prisma.physioSessionReport.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit2.id,
+          sessionDate: new Date('2026-05-13'),
+          sessionNumber: 3,
+          treatmentPlan: 'Lower-limb strengthening and gait stabilization',
+          interventions: 'Active-assisted ROM, resisted knee extension, gait training with support.',
+          response: 'Improved standing tolerance and step symmetry.',
+          painScoreBefore: 6,
+          painScoreAfter: 4,
+          mobilityNote: 'Ambulates 20 meters with minimal support.',
+          homeExercisePlan: 'Twice daily sit-to-stand x10 and ankle pumps x20.',
+          nextSessionDate: new Date('2026-05-16'),
+          enteredByStaffId: demoPhysio.id,
+        },
+      });
+    }
+
+    const existingNurseReport = await prisma.nurseDailyReport.findFirst({
+      where: { patientId: demoPatient1.id, reportDate: new Date('2026-05-13'), deletedAt: null },
+    });
+    if (!existingNurseReport) {
+      await prisma.nurseDailyReport.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit2.id,
+          reportDate: new Date('2026-05-13'),
+          shiftType: 'day',
+          generalCondition: 'Stable and cooperative',
+          intakeOutput: 'Oral intake good, urine output normal.',
+          medicationGiven: 'Amlodipine 5mg given at 9:00 AM.',
+          woundCare: 'N/A',
+          fallsRisk: 'medium',
+          escalationFlag: false,
+          nursingNotes: 'No acute distress. Continue routine monitoring.',
+          followUpInstructions: 'Recheck BP in evening shift.',
+          enteredByStaffId: demoNurse.id,
+        },
+      });
+    }
+
+    const existingCareMessage = await prisma.careTeamMessage.findFirst({
+      where: { patientId: demoPatient1.id, messageBody: { contains: 'family counseling' } },
+    });
+    if (!existingCareMessage) {
+      await prisma.careTeamMessage.create({
+        data: {
+          patientId: demoPatient1.id,
+          authorStaffId: demoDoctor.id,
+          channelType: 'in_app',
+          visibilityScope: 'care_team',
+          messageBody: 'Please align next follow-up with family counseling on medication adherence.',
+          requiresFollowUp: true,
+          followUpDueAt: new Date('2026-05-16T11:00:00.000Z'),
+          relatedVisitId: demoVisit2.id,
+        },
+      });
+    }
+
+    const existingRoutingTicket = await prisma.careCallRoutingTicket.findFirst({
+      where: { patientId: demoPatient1.id, reasonCategory: 'post-visit follow-up' },
+    });
+    if (!existingRoutingTicket) {
+      await prisma.careCallRoutingTicket.create({
+        data: {
+          patientId: demoPatient1.id,
+          sourceChannel: 'phone',
+          reasonCategory: 'post-visit follow-up',
+          triagePriority: 'routine',
+          status: 'open',
+          assignedStaffId: demoOperator.id,
+          summary: 'Family requested clarification on home exercise schedule.',
+          targetCallbackAt: new Date('2026-05-14T15:30:00.000Z'),
+        },
+      });
+    }
+
+    const existingAiTriage = await prisma.aiTriageCase.findFirst({
+      where: { patientId: demoPatient1.id, symptomSummary: { contains: 'intermittent dizziness' } },
+    });
+    if (!existingAiTriage) {
+      await prisma.aiTriageCase.create({
+        data: {
+          patientId: demoPatient1.id,
+          submittedByStaffId: demoDoctor.id,
+          symptomSummary: 'Patient reports intermittent dizziness with morning standing.',
+          riskScore: 42.5,
+          urgencyLevel: 'medium',
+          recommendedDisposition: 'same-day doctor call review',
+          recommendedSpecialty: 'internal-medicine',
+          reasoning: 'No red flag neuro deficits reported, but orthostatic check advised.',
+          modelVersion: 'triage-v0-scaffold',
+          status: 'draft',
+        },
+      });
+    }
+
     console.log('Demo patient seed ready:');
     console.log('  - Identifier (phone): +201055500001');
     console.log('  - Identifier (case id): PT-DEMO-001');
@@ -751,6 +991,12 @@ async function main() {
     console.log('  - Password: Admin@123');
     console.log('  - Email: operator@aneeshealth.local');
     console.log('  - Password: Operator@123');
+    console.log('  - Email: doctor@aneeshealth.local');
+    console.log('  - Password: Doctor@123');
+    console.log('  - Email: physio@aneeshealth.local');
+    console.log('  - Password: Physio@123');
+    console.log('  - Email: nurse@aneeshealth.local');
+    console.log('  - Password: Nurse@123');
   }
 
   console.log('Seed complete.');

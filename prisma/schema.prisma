@@ -115,6 +115,9 @@ enum StaffRole {
   superadmin
   admin
   operator
+  doctor
+  physiotherapist
+  nurse
   finance
   viewer
 }
@@ -302,6 +305,11 @@ model Patient {
   progressNotes   ProgressNote[]
   documents       Document[]
   staffAssignments StaffPatientAssignment[]
+  physioSessionReports PhysioSessionReport[]
+  nurseDailyReports    NurseDailyReport[]
+  careTeamMessages     CareTeamMessage[]
+  callRoutingTickets   CareCallRoutingTicket[]
+  aiTriageCases        AiTriageCase[]
   userAccount    User?
 
   @@index([familyId])
@@ -402,6 +410,9 @@ model Visit {
   vitalSigns    VitalSigns[]
   progressNotes ProgressNote[]
   documents     Document[]
+  physioSessionReports PhysioSessionReport[]
+  nurseDailyReports    NurseDailyReport[]
+  careTeamMessages     CareTeamMessage[]
 
   @@index([patientId])
   @@index([providerId])
@@ -634,6 +645,11 @@ model Staff {
   progressNoteAddendums  ProgressNoteAddendum[]
   uploadedDocuments      Document[]
   patientAssignments     StaffPatientAssignment[]
+  enteredPhysioSessions  PhysioSessionReport[]
+  enteredNurseReports    NurseDailyReport[]
+  authoredCareMessages   CareTeamMessage[] @relation("CareMessageAuthor")
+  assignedCallRouting    CareCallRoutingTicket[] @relation("CareCallAssignee")
+  submittedAiTriage      AiTriageCase[] @relation("AiTriageSubmittedBy")
 
   @@index([email])
   @@index([role])
@@ -840,6 +856,132 @@ model Document {
   @@index([visitId])
   @@index([sensitivity])
   @@map("documents")
+}
+
+model PhysioSessionReport {
+  id               String    @id @default(cuid())
+  patientId        String
+  visitId          String?
+  sessionDate      DateTime  @db.Date
+  sessionNumber    Int
+  treatmentPlan    String?
+  interventions    String
+  response         String?
+  painScoreBefore  Int?
+  painScoreAfter   Int?
+  mobilityNote     String?
+  homeExercisePlan String?
+  nextSessionDate  DateTime? @db.Date
+  enteredByStaffId String?
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  visit         Visit?  @relation(fields: [visitId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, sessionDate, deletedAt])
+  @@index([visitId])
+  @@map("physio_session_reports")
+}
+
+model NurseDailyReport {
+  id                   String    @id @default(cuid())
+  patientId            String
+  visitId              String?
+  reportDate           DateTime  @db.Date
+  shiftType            String?
+  generalCondition     String?
+  intakeOutput         String?
+  medicationGiven      String?
+  woundCare            String?
+  fallsRisk            String?
+  escalationFlag       Boolean   @default(false)
+  escalationReason     String?
+  nursingNotes         String
+  followUpInstructions String?
+  enteredByStaffId     String?
+  deletedAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  patient       Patient @relation(fields: [patientId], references: [id])
+  visit         Visit?  @relation(fields: [visitId], references: [id])
+  enteredByStaff Staff?  @relation(fields: [enteredByStaffId], references: [id])
+
+  @@index([patientId, reportDate, deletedAt])
+  @@index([visitId])
+  @@map("nurse_daily_reports")
+}
+
+model CareTeamMessage {
+  id                 String   @id @default(cuid())
+  patientId          String
+  authorStaffId      String
+  channelType        String   @default("in_app")
+  messageBody        String
+  visibilityScope    String   @default("care_team")
+  requiresFollowUp   Boolean  @default(false)
+  followUpDueAt      DateTime?
+  relatedVisitId     String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  patient         Patient @relation(fields: [patientId], references: [id])
+  authorStaff     Staff   @relation("CareMessageAuthor", fields: [authorStaffId], references: [id])
+  relatedVisit    Visit?  @relation(fields: [relatedVisitId], references: [id])
+
+  @@index([patientId, createdAt])
+  @@index([authorStaffId])
+  @@index([relatedVisitId])
+  @@map("care_team_messages")
+}
+
+model CareCallRoutingTicket {
+  id                    String   @id @default(cuid())
+  patientId             String
+  sourceChannel         String
+  reasonCategory        String
+  triagePriority        String   @default("routine")
+  status                String   @default("open")
+  assignedStaffId       String?
+  summary               String?
+  resolutionNote        String?
+  targetCallbackAt      DateTime?
+  closedAt              DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  patient           Patient @relation(fields: [patientId], references: [id])
+  assignedStaff     Staff?  @relation("CareCallAssignee", fields: [assignedStaffId], references: [id])
+
+  @@index([patientId, status])
+  @@index([assignedStaffId, status])
+  @@map("care_call_routing_tickets")
+}
+
+model AiTriageCase {
+  id                    String   @id @default(cuid())
+  patientId             String
+  submittedByStaffId    String?
+  symptomSummary        String
+  riskScore             Decimal? @db.Decimal(5, 2)
+  urgencyLevel          String?  // low | medium | high | critical
+  recommendedDisposition String?
+  recommendedSpecialty  String?
+  reasoning             String?
+  modelVersion          String?
+  status                String   @default("draft")
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  patient            Patient @relation(fields: [patientId], references: [id])
+  submittedByStaff   Staff?  @relation("AiTriageSubmittedBy", fields: [submittedByStaffId], references: [id])
+
+  @@index([patientId, createdAt])
+  @@index([status])
+  @@map("ai_triage_cases")
 }
 
 // ============================================================================

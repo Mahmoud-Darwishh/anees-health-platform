@@ -76,7 +76,18 @@
       "totalVisits": "Total Visits",
       "upcomingVisits": "Upcoming Visits",
       "activeCarePlans": "Active Care Plans",
-      "lastVisit": "Last Visit"
+      "lastVisit": "Last Visit",
+      "activeMedications": "Active Medications",
+      "totalDiagnoses": "Diagnoses",
+      "labReports": "Lab Reports",
+      "latestBp": "Latest BP"
+    },
+    "portableSummary": {
+      "title": "Portable Clinical Snapshot",
+      "description": "Open a concise, hospital-friendly summary of diagnoses, medications, allergies, notes, and recent visits.",
+      "cta": "Open Portable Summary",
+      "openButton": "View Full Snapshot",
+      "tip": "Show this page at any clinic or hospital visit for faster triage and safer continuity of care."
     },
     "profile": {
       "title": "Patient Information",
@@ -100,6 +111,70 @@
       "notes": "Additional Notes",
       "disclaimer": "This portal summary is informational and does not replace clinical diagnosis or emergency care."
     },
+    "medicalHistory": {
+      "title": "Medical History",
+      "empty": "No medical history records are available yet.",
+      "onset": "Onset"
+    },
+    "diagnoses": {
+      "title": "Diagnoses",
+      "empty": "No diagnosis records available.",
+      "icd10": "ICD-10",
+      "date": "Diagnosed",
+      "visit": "Visit",
+      "by": "Entered by"
+    },
+    "medications": {
+      "title": "Current & Historical Medications",
+      "empty": "No medication records available.",
+      "name": "Medication",
+      "dose": "Dose",
+      "frequency": "Frequency",
+      "route": "Route",
+      "period": "Start → End",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "allergies": {
+      "title": "Allergies",
+      "empty": "No allergy records available."
+    },
+    "doctorNotes": {
+      "title": "Doctor Notes",
+      "empty": "No progress notes available.",
+      "signed": "Signed",
+      "draft": "Draft",
+      "by": "Author",
+      "visit": "Visit"
+    },
+    "physio": {
+      "title": "Physiotherapy Sessions",
+      "empty": "No physiotherapy session reports yet.",
+      "session": "Session",
+      "pain": "Pain",
+      "by": "Physio",
+      "homePlan": "Home Plan"
+    },
+    "nursing": {
+      "title": "Nursing Daily Reports",
+      "empty": "No nursing reports available yet.",
+      "condition": "Condition",
+      "escalation": "Escalation",
+      "followUp": "Follow-up",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "vitals": {
+      "title": "Recent Vitals",
+      "empty": "No recent vitals available.",
+      "measuredAt": "Measured",
+      "bp": "BP",
+      "hr": "Heart Rate",
+      "spo2": "SpO2",
+      "temp": "Temp",
+      "weight": "Weight"
+    },
     "visits": {
       "title": "Recent Visits",
       "empty": "No visits are recorded yet.",
@@ -122,7 +197,14 @@
     },
     "documents": {
       "title": "My Documents",
-      "subtitle": "Simple placeholder files shown for now. Secure uploads and downloads can be added next.",
+      "subtitle": "Your lab reports, scans, and shared records are organized below.",
+      "labs": "Labs & Pathology",
+      "scans": "Scans & Radiology",
+      "other": "Other Records",
+      "emptyLabs": "No lab reports yet.",
+      "emptyScans": "No scans or radiology files yet.",
+      "ready": "Available",
+      "pending": "Pending file upload",
       "items": {
         "1": {
           "title": "CBC Lab Result",
@@ -137,6 +219,39 @@
           "date": "Updated May 02, 2026"
         }
       }
+    },
+    "shareProfile": {
+      "metaTitle": "Portable Clinical Summary | Anees Health",
+      "title": "Portable Clinical Summary",
+      "subtitle": "Share this summary with any external clinic or hospital team during urgent or routine care.",
+      "brandTagline": "Integrated Care Snapshot",
+      "backToPortal": "Back to Portal",
+      "print": "Print / Save as PDF",
+      "generatedAt": "Generated",
+      "caseId": "Case ID",
+      "patientInfo": "Patient Information",
+      "fullName": "Full Name",
+      "phone": "Phone",
+      "gender": "Gender",
+      "dob": "Date of Birth",
+      "caregiver": "Primary Caregiver",
+      "clinicalSummary": "Clinical Summary",
+      "chiefComplaint": "Chief Complaint",
+      "notes": "Clinical Notes",
+      "allergies": "Allergies",
+      "medications": "Active Medications",
+      "diagnoses": "Diagnoses",
+      "diagName": "Diagnosis",
+      "diagCode": "ICD-10",
+      "diagDate": "Diagnosed",
+      "diagStatus": "Status",
+      "doctorNotes": "Recent Doctor Notes",
+      "physioSessions": "Physiotherapy Sessions",
+      "nurseReports": "Nurse Daily Reports",
+      "labsScans": "Labs, Scans & Documents",
+      "recentVisits": "Recent Visits",
+      "none": "No data available",
+      "footerNote": "This summary is auto-generated from your Anees profile. For emergencies, always follow the treating physician's immediate clinical judgment."
     },
     "messages": {
       "updated": "Your portal request has been saved successfully.",

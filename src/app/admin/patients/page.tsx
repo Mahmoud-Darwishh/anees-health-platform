@@ -57,11 +57,19 @@ export default async function AdminPatientsPage({ searchParams }: Props) {
             <h1>Patient Registry</h1>
             <p>Operational dashboard for patient profiles and EHR updates.</p>
           </div>
-          {canViewAudit && (
-            <Link href="/admin/audit-logs" className={styles.auditLink}>
-              View Audit Logs
+          <div className={styles.headerActions}>
+            <Link href="/admin/dashboards" className={styles.queueLink}>
+              Clinical Dashboards
             </Link>
-          )}
+            <Link href="/admin/queues" className={styles.queueLink}>
+              Work Queues
+            </Link>
+            {canViewAudit && (
+              <Link href="/admin/audit-logs" className={styles.auditLink}>
+                View Audit Logs
+              </Link>
+            )}
+          </div>
         </header>
 
         {query.forbidden && (

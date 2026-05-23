@@ -1,14 +1,25 @@
 import { prisma } from '@/lib/db/prisma';
 import { requireStaffPermission } from '@/lib/auth';
 import { canBypassPatientAssignment, canAccessPatientRecord } from '@/lib/auth/record-access';
+import { buildChartTimeline } from '@/lib/ehr/chart';
+import { getPatientEhrSnapshot } from '@/lib/ehr/patient-snapshot';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   addAllergyAction,
+  addAiTriageCaseAction,
+  addCareTeamMessageAction,
+  addDiagnosisAction,
+  addProgressNoteAddendumAction,
+  addNurseDailyReportAction,
+  addPhysioSessionReportAction,
   assignStaffToPatientAction,
+  createCallRoutingTicketAction,
+  signProgressNoteAction,
   removeStaffAssignmentAction,
   addMedicationAction,
   addProgressNoteAction,
+  addVitalSignsAction,
   updatePatientCoreAction,
 } from './actions';
 import styles from './patient-detail.module.scss';
@@ -49,95 +60,13 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
   }
 
   const canManageAssignments = canBypassPatientAssignment(session);
+  const currentStaffRole = session.user.staffRole ?? 'viewer';
+  const canDoctorWrite = ['superadmin', 'admin', 'doctor'].includes(currentStaffRole);
+  const canPhysioWrite = ['superadmin', 'admin', 'physiotherapist'].includes(currentStaffRole);
+  const canNurseWrite = ['superadmin', 'admin', 'nurse'].includes(currentStaffRole);
+  const canOpsWrite = ['superadmin', 'admin', 'operator'].includes(currentStaffRole);
 
-  const patient = await prisma.patient.findFirst({
-    where: { id, deletedAt: null },
-    select: {
-      id: true,
-      code: true,
-      fullName: true,
-      phone: true,
-      status: true,
-      dateOfBirth: true,
-      registrationDate: true,
-      chiefComplaint: true,
-      notes: true,
-      visits: {
-        orderBy: { scheduledDate: 'desc' },
-        take: 10,
-        select: {
-          id: true,
-          code: true,
-          scheduledDate: true,
-          status: true,
-          service: { select: { name: true } },
-        },
-      },
-      allergies: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: 'desc' },
-        take: 12,
-        select: {
-          id: true,
-          allergen: true,
-          severity: true,
-          reaction: true,
-          createdAt: true,
-        },
-      },
-      medications: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: 'desc' },
-        take: 12,
-        select: {
-          id: true,
-          medicationName: true,
-          dose: true,
-          frequency: true,
-          isActive: true,
-          startDate: true,
-        },
-      },
-      progressNotes: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        select: {
-          id: true,
-          noteBody: true,
-          createdAt: true,
-          signedOffAt: true,
-        },
-      },
-      documents: {
-        where: { deletedAt: null },
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        select: {
-          id: true,
-          title: true,
-          category: true,
-          createdAt: true,
-        },
-      },
-      staffAssignments: {
-        where: { isActive: true },
-        orderBy: { assignedAt: 'desc' },
-        select: {
-          id: true,
-          assignedAt: true,
-          staff: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-        },
-      },
-    },
-  });
+  const patient = await getPatientEhrSnapshot(id);
 
   const assignableStaff = canManageAssignments
     ? await prisma.staff.findMany({
@@ -161,6 +90,11 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
     );
   }
 
+  const chartTimeline = buildChartTimeline(patient);
+  const activeDiagnoses = patient.diagnoses.filter((item) => !item.status || /active|chronic/i.test(item.status));
+  const activeCarePlans = patient.carePlans.filter((item) => item.status === 'active');
+  const activeMedications = patient.medications.filter((item) => item.isActive);
+
   return (
     <main className={styles.page}>
       <section className={styles.shell}>
@@ -172,10 +106,105 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
               {patient.code} • {patient.phone}
             </p>
           </div>
-          <Link href="/admin/patients" className={styles.navLink}>Back to patients</Link>
+          <div className={styles.headerActions}>
+            <Link href={`/admin/patients/${patient.id}/export`} className={styles.navLink}>Export PDF</Link>
+            <Link href="/admin/patients" className={styles.navLink}>Back to patients</Link>
+          </div>
         </header>
 
         {query.updated && <p className={styles.successBanner}>Saved successfully.</p>}
+
+        <section className={styles.timelineGrid}>
+          <article className={styles.card}>
+            <h2>Chart Timeline</h2>
+            <p className={styles.metaLine}>Merged chronology of encounters, notes, vitals, meds, documents, messages, and task events.</p>
+            {chartTimeline.length === 0 ? (
+              <p className={styles.emptyText}>No timeline events yet.</p>
+            ) : (
+              <ul className={styles.timelineList}>
+                {chartTimeline.slice(0, 18).map((event) => (
+                  <li key={event.id}>
+                    <span className={styles.timelineType}>{event.type.replace(/-/g, ' ')}</span>
+                    <strong>{formatDate(event.timestamp)}</strong>
+                    <p className={styles.timelineTitle}>{event.title}</p>
+                    <p className={styles.timelineSubtitle}>{event.subtitle}</p>
+                    {event.detail && <p dir="auto">{event.detail}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Structured Snapshot</h2>
+            <p className={styles.metaLine}>Active problem, medication, allergy, and care-plan surfaces for quick chart review.</p>
+            <div className={styles.snapshotGrid}>
+              <section>
+                <h3>Problem List</h3>
+                {activeDiagnoses.length === 0 ? (
+                  <p className={styles.emptyText}>No active problems captured.</p>
+                ) : (
+                  <ul className={styles.compactList}>
+                    {activeDiagnoses.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.diagnosisName}</strong>
+                        <span>{item.icd10Code ?? '-'} • {item.status ?? 'active'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section>
+                <h3>Medications</h3>
+                {activeMedications.length === 0 ? (
+                  <p className={styles.emptyText}>No active medications.</p>
+                ) : (
+                  <ul className={styles.compactList}>
+                    {activeMedications.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.medicationName}</strong>
+                        <span>{item.dose ?? '-'} • {item.frequency ?? '-'} • {formatDate(item.startDate)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section>
+                <h3>Allergies</h3>
+                {patient.allergies.length === 0 ? (
+                  <p className={styles.emptyText}>No allergies recorded.</p>
+                ) : (
+                  <ul className={styles.compactList}>
+                    {patient.allergies.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.allergen}</strong>
+                        <span>{item.severity ?? '-'} • {item.reaction ?? '-'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section>
+                <h3>Active Care Plans</h3>
+                {activeCarePlans.length === 0 ? (
+                  <p className={styles.emptyText}>No active care plans.</p>
+                ) : (
+                  <ul className={styles.compactList}>
+                    {activeCarePlans.map((item) => (
+                      <li key={item.id}>
+                        <strong>{item.planName}</strong>
+                        <span>{item.code} • {formatDate(item.startDate)} → {formatDate(item.endDate)} • {item.totalVisitsPlanned} visits</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          </article>
+        </section>
 
         {canManageAssignments && (
           <article className={styles.card}>
@@ -323,6 +352,356 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
               <button type="submit" className={styles.primaryBtn}>Add progress note</button>
             </form>
           </article>
+
+          {canDoctorWrite && (
+            <article className={styles.card}>
+              <h2>Doctor: Add Diagnosis</h2>
+              <form action={addDiagnosisAction} className={styles.formGrid}>
+                <input type="hidden" name="patientId" value={patient.id} />
+                <label>
+                  Related visit (optional)
+                  <select name="visitId" defaultValue="">
+                    <option value="">No linked visit</option>
+                    {patient.visits.map((visit) => (
+                      <option value={visit.id} key={visit.id}>
+                        {visit.code} - {formatDate(visit.scheduledDate)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Diagnosis name
+                  <input name="diagnosisName" required />
+                </label>
+                <label>
+                  ICD-10 code
+                  <input name="icd10Code" placeholder="e.g. I10" />
+                </label>
+                <label>
+                  Status
+                  <input name="status" placeholder="active / resolved / chronic" />
+                </label>
+                <label>
+                  Diagnosed on
+                  <input type="date" name="diagnosedOn" />
+                </label>
+                <label>
+                  Notes
+                  <textarea name="notes" rows={3} dir="auto" />
+                </label>
+                <button type="submit" className={styles.primaryBtn}>Add diagnosis</button>
+              </form>
+            </article>
+          )}
+
+          {canPhysioWrite && (
+            <article className={styles.card}>
+              <h2>Physio: Session Report</h2>
+              <form action={addPhysioSessionReportAction} className={styles.formGrid}>
+                <input type="hidden" name="patientId" value={patient.id} />
+                <label>
+                  Related visit (optional)
+                  <select name="visitId" defaultValue="">
+                    <option value="">No linked visit</option>
+                    {patient.visits.map((visit) => (
+                      <option value={visit.id} key={visit.id}>
+                        {visit.code} - {formatDate(visit.scheduledDate)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Session date
+                  <input type="date" name="sessionDate" required />
+                </label>
+                <label>
+                  Session number
+                  <input type="number" min={1} name="sessionNumber" required />
+                </label>
+                <label>
+                  Treatment plan
+                  <textarea name="treatmentPlan" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Interventions performed
+                  <textarea name="interventions" rows={3} required dir="auto" />
+                </label>
+                <label>
+                  Patient response
+                  <textarea name="response" rows={2} dir="auto" />
+                </label>
+                <div className={styles.twoCol}>
+                  <label>
+                    Pain before (0-10)
+                    <input type="number" min={0} max={10} name="painScoreBefore" />
+                  </label>
+                  <label>
+                    Pain after (0-10)
+                    <input type="number" min={0} max={10} name="painScoreAfter" />
+                  </label>
+                </div>
+                <label>
+                  Mobility note
+                  <textarea name="mobilityNote" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Home exercise plan
+                  <textarea name="homeExercisePlan" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Next session date
+                  <input type="date" name="nextSessionDate" />
+                </label>
+                <button type="submit" className={styles.primaryBtn}>Save physio session</button>
+              </form>
+            </article>
+          )}
+
+          {canNurseWrite && (
+            <article className={styles.card}>
+              <h2>Nurse: Daily Report</h2>
+              <form action={addNurseDailyReportAction} className={styles.formGrid}>
+                <input type="hidden" name="patientId" value={patient.id} />
+                <label>
+                  Related visit (optional)
+                  <select name="visitId" defaultValue="">
+                    <option value="">No linked visit</option>
+                    {patient.visits.map((visit) => (
+                      <option value={visit.id} key={visit.id}>
+                        {visit.code} - {formatDate(visit.scheduledDate)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className={styles.twoCol}>
+                  <label>
+                    Report date
+                    <input type="date" name="reportDate" required />
+                  </label>
+                  <label>
+                    Shift
+                    <select name="shiftType" defaultValue="day">
+                      <option value="day">day</option>
+                      <option value="evening">evening</option>
+                      <option value="night">night</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  General condition
+                  <input name="generalCondition" placeholder="stable / needs review" />
+                </label>
+                <label>
+                  Intake/output
+                  <textarea name="intakeOutput" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Medication given
+                  <textarea name="medicationGiven" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Wound care
+                  <textarea name="woundCare" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Falls risk
+                  <input name="fallsRisk" placeholder="low / medium / high" />
+                </label>
+                <label className={styles.inlineCheck}>
+                  <input type="checkbox" name="escalationFlag" />
+                  Escalation required
+                </label>
+                <label>
+                  Escalation reason
+                  <textarea name="escalationReason" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Nursing notes
+                  <textarea name="nursingNotes" rows={3} required dir="auto" />
+                </label>
+                <label>
+                  Follow-up instructions
+                  <textarea name="followUpInstructions" rows={2} dir="auto" />
+                </label>
+                <button type="submit" className={styles.primaryBtn}>Save nurse report</button>
+              </form>
+            </article>
+          )}
+
+          {canNurseWrite && (
+            <article className={styles.card}>
+              <h2>Nurse: Quick Vitals</h2>
+              <form action={addVitalSignsAction} className={styles.formGrid}>
+                <input type="hidden" name="patientId" value={patient.id} />
+                <label>
+                  Related visit (optional)
+                  <select name="visitId" defaultValue="">
+                    <option value="">No linked visit</option>
+                    {patient.visits.map((visit) => (
+                      <option value={visit.id} key={visit.id}>
+                        {visit.code} - {formatDate(visit.scheduledDate)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Measured at
+                  <input type="datetime-local" name="measuredAt" />
+                </label>
+                <div className={styles.twoCol}>
+                  <label>
+                    Systolic
+                    <input type="number" name="systolicBp" />
+                  </label>
+                  <label>
+                    Diastolic
+                    <input type="number" name="diastolicBp" />
+                  </label>
+                </div>
+                <div className={styles.twoCol}>
+                  <label>
+                    Heart rate
+                    <input type="number" name="heartRate" />
+                  </label>
+                  <label>
+                    SpO2
+                    <input type="number" name="oxygenSaturation" />
+                  </label>
+                </div>
+                <div className={styles.twoCol}>
+                  <label>
+                    Temperature C
+                    <input type="number" step="0.1" name="temperatureC" />
+                  </label>
+                  <label>
+                    Weight kg
+                    <input type="number" step="0.1" name="weightKg" />
+                  </label>
+                </div>
+                <label>
+                  Notes
+                  <textarea name="notes" rows={2} dir="auto" />
+                </label>
+                <button type="submit" className={styles.primaryBtn}>Save vitals</button>
+              </form>
+            </article>
+          )}
+
+          {(canOpsWrite || canDoctorWrite || canManageAssignments) && (
+            <article className={styles.card}>
+              <h2>Care Ops: Messaging, Routing, AI Scaffold</h2>
+              <form action={addCareTeamMessageAction} className={styles.formGrid}>
+                <input type="hidden" name="patientId" value={patient.id} />
+                <label>
+                  Channel
+                  <select name="channelType" defaultValue="in_app">
+                    <option value="in_app">in_app</option>
+                    <option value="phone">phone</option>
+                    <option value="whatsapp">whatsapp</option>
+                  </select>
+                </label>
+                <label>
+                  Visibility
+                  <select name="visibilityScope" defaultValue="care_team">
+                    <option value="care_team">care_team</option>
+                    <option value="doctor_only">doctor_only</option>
+                    <option value="patient_safe">patient_safe</option>
+                  </select>
+                </label>
+                <label>
+                  Message
+                  <textarea name="messageBody" rows={3} required dir="auto" />
+                </label>
+                <label className={styles.inlineCheck}>
+                  <input type="checkbox" name="requiresFollowUp" />
+                  Requires follow-up
+                </label>
+                <label>
+                  Follow-up due
+                  <input type="datetime-local" name="followUpDueAt" />
+                </label>
+                <button type="submit" className={styles.primaryBtn}>Post care message</button>
+              </form>
+
+              <form action={createCallRoutingTicketAction} className={styles.formGrid}>
+                <input type="hidden" name="patientId" value={patient.id} />
+                <h3 className={styles.subHead}>Call Routing Ticket</h3>
+                <label>
+                  Source channel
+                  <select name="sourceChannel" defaultValue="phone" required>
+                    <option value="phone">phone</option>
+                    <option value="whatsapp">whatsapp</option>
+                    <option value="website">website</option>
+                    <option value="external-hospital">external-hospital</option>
+                  </select>
+                </label>
+                <label>
+                  Reason category
+                  <input name="reasonCategory" required placeholder="symptom-update / medication / urgent" />
+                </label>
+                <label>
+                  Priority
+                  <select name="triagePriority" defaultValue="routine">
+                    <option value="routine">routine</option>
+                    <option value="high">high</option>
+                    <option value="critical">critical</option>
+                  </select>
+                </label>
+                <label>
+                  Summary
+                  <textarea name="summary" rows={2} dir="auto" />
+                </label>
+                <label>
+                  Callback target
+                  <input type="datetime-local" name="targetCallbackAt" />
+                </label>
+                <button type="submit" className={styles.primaryBtn}>Create routing ticket</button>
+              </form>
+
+              {canDoctorWrite && (
+                <form action={addAiTriageCaseAction} className={styles.formGrid}>
+                  <input type="hidden" name="patientId" value={patient.id} />
+                  <h3 className={styles.subHead}>AI Triage Candidate</h3>
+                  <label>
+                    Symptom summary
+                    <textarea name="symptomSummary" rows={3} required dir="auto" />
+                  </label>
+                  <div className={styles.twoCol}>
+                    <label>
+                      Risk score (0-100)
+                      <input type="number" step="0.1" min={0} max={100} name="riskScore" />
+                    </label>
+                    <label>
+                      Urgency level
+                      <select name="urgencyLevel" defaultValue="medium">
+                        <option value="low">low</option>
+                        <option value="medium">medium</option>
+                        <option value="high">high</option>
+                        <option value="critical">critical</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label>
+                    Suggested disposition
+                    <input name="recommendedDisposition" placeholder="home monitoring / ER now" />
+                  </label>
+                  <label>
+                    Suggested specialty
+                    <input name="recommendedSpecialty" placeholder="cardiology / neurology" />
+                  </label>
+                  <label>
+                    Reasoning
+                    <textarea name="reasoning" rows={3} dir="auto" />
+                  </label>
+                  <label>
+                    Model version
+                    <input name="modelVersion" placeholder="triage-v0-scaffold" />
+                  </label>
+                  <button type="submit" className={styles.primaryBtn}>Save triage candidate</button>
+                </form>
+              )}
+            </article>
+          )}
         </section>
 
         <section className={styles.grid}>
@@ -361,6 +740,25 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
           </article>
 
           <article className={styles.card}>
+            <h2>Diagnoses</h2>
+            {patient.diagnoses.length === 0 ? (
+              <p className={styles.emptyText}>No diagnoses recorded.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.diagnoses.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.diagnosisName}</strong>
+                    <span>
+                      {item.icd10Code ?? '-'} • {item.status ?? '-'} • {formatDate(item.diagnosedOn)} • {item.enteredByStaff?.name ?? '-'}
+                    </span>
+                    {item.notes && <p dir="auto">{item.notes}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
             <h2>Progress Notes</h2>
             {patient.progressNotes.length === 0 ? (
               <p className={styles.emptyText}>No progress notes recorded.</p>
@@ -368,9 +766,162 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
               <ul className={styles.list}>
                 {patient.progressNotes.map((note) => (
                   <li key={note.id}>
-                    <strong>{formatDate(note.createdAt)}</strong>
-                    <span>{note.signedOffAt ? 'Signed' : 'Draft'}</span>
+                    <div className={styles.noteMetaRow}>
+                      <strong>{formatDate(note.createdAt)}</strong>
+                      <span className={note.signedOffAt ? styles.lockedBadge : styles.draftBadge}>
+                        {note.signedOffAt ? 'Signed and locked' : 'Draft'}
+                      </span>
+                    </div>
                     <p dir="auto">{note.noteBody}</p>
+                    {note.addendums.length > 0 && (
+                      <div className={styles.noteAddendums}>
+                        <p className={styles.noteSubhead}>Addenda</p>
+                        <ul className={styles.inlineList}>
+                          {note.addendums.map((addendum) => (
+                            <li key={addendum.id}>
+                              <strong>{formatDate(addendum.createdAt)}</strong>
+                              <span>{addendum.enteredByStaff?.name ?? 'Staff addendum'}</span>
+                              <p dir="auto">{addendum.addendumBody}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {note.signedOffAt ? (
+                      <form action={addProgressNoteAddendumAction} className={styles.inlineNoteForm}>
+                        <input type="hidden" name="patientId" value={patient.id} />
+                        <input type="hidden" name="progressNoteId" value={note.id} />
+                        <label>
+                          Addendum
+                          <textarea name="addendumBody" rows={2} required dir="auto" placeholder="Correction, clarification, or follow-up..." />
+                        </label>
+                        <button type="submit" className={styles.secondaryBtn}>Add addendum</button>
+                      </form>
+                    ) : (
+                      <form action={signProgressNoteAction} className={styles.inlineNoteForm}>
+                        <input type="hidden" name="patientId" value={patient.id} />
+                        <input type="hidden" name="progressNoteId" value={note.id} />
+                        <button type="submit" className={styles.secondaryBtn}>Sign and lock note</button>
+                      </form>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Vitals Timeline</h2>
+            {patient.vitalSigns.length === 0 ? (
+              <p className={styles.emptyText}>No vitals recorded.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.vitalSigns.map((vital) => (
+                  <li key={vital.id}>
+                    <strong>{formatDate(vital.measuredAt)}</strong>
+                    <span>
+                      BP {vital.systolicBp ?? '-'} / {vital.diastolicBp ?? '-'} • HR {vital.heartRate ?? '-'} • SpO2 {vital.oxygenSaturation ?? '-'}
+                    </span>
+                    <p>
+                      Temp {vital.temperatureC?.toString() ?? '-'} C • Weight {vital.weightKg?.toString() ?? '-'} kg
+                    </p>
+                    {vital.notes && <p dir="auto">{vital.notes}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Physio Session Reports</h2>
+            {patient.physioSessionReports.length === 0 ? (
+              <p className={styles.emptyText}>No physiotherapy sessions reported.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.physioSessionReports.map((report) => (
+                  <li key={report.id}>
+                    <strong>Session #{report.sessionNumber} • {formatDate(report.sessionDate)}</strong>
+                    <span>
+                      Pain {report.painScoreBefore ?? '-'} {'->'} {report.painScoreAfter ?? '-'} • Next {formatDate(report.nextSessionDate)} • {report.enteredByStaff?.name ?? '-'}
+                    </span>
+                    <p dir="auto">{report.interventions}</p>
+                    {report.response && <p dir="auto">Response: {report.response}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Nurse Daily Reports</h2>
+            {patient.nurseDailyReports.length === 0 ? (
+              <p className={styles.emptyText}>No nurse reports recorded.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.nurseDailyReports.map((report) => (
+                  <li key={report.id}>
+                    <strong>{formatDate(report.reportDate)} • {report.shiftType ?? '-'}</strong>
+                    <span>
+                      Condition: {report.generalCondition ?? '-'} • Escalation: {report.escalationFlag ? 'Yes' : 'No'} • {report.enteredByStaff?.name ?? '-'}
+                    </span>
+                    <p dir="auto">{report.nursingNotes}</p>
+                    {report.escalationReason && <p dir="auto">Escalation reason: {report.escalationReason}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Care Team Messages</h2>
+            {patient.careTeamMessages.length === 0 ? (
+              <p className={styles.emptyText}>No care messages yet.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.careTeamMessages.map((message) => (
+                  <li key={message.id}>
+                    <strong>{formatDate(message.createdAt)} • {message.authorStaff?.name ?? '-'}</strong>
+                    <span>
+                      {message.channelType} • {message.visibilityScope} • {message.requiresFollowUp ? 'Follow-up required' : 'No follow-up'}
+                    </span>
+                    <p dir="auto">{message.messageBody}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Call Routing Tickets</h2>
+            {patient.callRoutingTickets.length === 0 ? (
+              <p className={styles.emptyText}>No routing tickets yet.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.callRoutingTickets.map((ticket) => (
+                  <li key={ticket.id}>
+                    <strong>{ticket.reasonCategory}</strong>
+                    <span>
+                      {ticket.sourceChannel} • {ticket.triagePriority} • {ticket.status} • Callback {formatDate(ticket.targetCallbackAt)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>AI Triage Drafts</h2>
+            {patient.aiTriageCases.length === 0 ? (
+              <p className={styles.emptyText}>No AI triage drafts yet.</p>
+            ) : (
+              <ul className={styles.list}>
+                {patient.aiTriageCases.map((item) => (
+                  <li key={item.id}>
+                    <strong>{item.urgencyLevel ?? '-'} • score {item.riskScore?.toString() ?? '-'}</strong>
+                    <span>
+                      {item.recommendedSpecialty ?? '-'} • {item.recommendedDisposition ?? '-'} • {item.status}
+                    </span>
+                    <p dir="auto">{item.symptomSummary}</p>
                   </li>
                 ))}
               </ul>
@@ -391,6 +942,15 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
                 ))}
               </ul>
             )}
+          </article>
+
+          <article className={styles.card}>
+            <h2>Export Verification</h2>
+            <p className={styles.metaLine}>Printable export with tamper-evident hash and QR verification link.</p>
+            <div className={styles.exportCtaRow}>
+              <Link href={`/admin/patients/${patient.id}/export`} className={styles.primaryLinkBtn}>Open export template</Link>
+              <Link href={`/admin/patients/${patient.id}/export/verify`} className={styles.secondaryLinkBtn}>Open verification page</Link>
+            </div>
           </article>
         </section>
       </section>

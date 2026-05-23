@@ -1,0 +1,225 @@
+import { prisma } from '@/lib/db/prisma';
+import type { Prisma } from '@prisma/client';
+
+const patientEhrSelect = {
+  id: true,
+  code: true,
+  fullName: true,
+  phone: true,
+  status: true,
+  dateOfBirth: true,
+  registrationDate: true,
+  chiefComplaint: true,
+  notes: true,
+  visits: {
+    orderBy: { scheduledDate: 'desc' },
+    take: 10,
+    select: {
+      id: true,
+      code: true,
+      scheduledDate: true,
+      status: true,
+      service: { select: { name: true } },
+    },
+  },
+  allergies: {
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'desc' },
+    take: 12,
+    select: {
+      id: true,
+      allergen: true,
+      severity: true,
+      reaction: true,
+      createdAt: true,
+    },
+  },
+  medications: {
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'desc' },
+    take: 12,
+    select: {
+      id: true,
+      medicationName: true,
+      dose: true,
+      frequency: true,
+      isActive: true,
+      startDate: true,
+    },
+  },
+  progressNotes: {
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: {
+      id: true,
+      noteBody: true,
+      createdAt: true,
+      signedOffAt: true,
+      signedOffByStaffId: true,
+      addendums: {
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          addendumBody: true,
+          createdAt: true,
+          enteredByStaff: { select: { name: true } },
+        },
+      },
+    },
+  },
+  carePlans: {
+    orderBy: { updatedAt: 'desc' },
+    take: 6,
+    select: {
+      id: true,
+      code: true,
+      planName: true,
+      startDate: true,
+      endDate: true,
+      totalVisitsPlanned: true,
+      status: true,
+      notes: true,
+      updatedAt: true,
+    },
+  },
+  diagnoses: {
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'desc' },
+    take: 12,
+    select: {
+      id: true,
+      diagnosisName: true,
+      icd10Code: true,
+      diagnosedOn: true,
+      status: true,
+      notes: true,
+      enteredByStaff: { select: { name: true } },
+    },
+  },
+  vitalSigns: {
+    where: { deletedAt: null },
+    orderBy: { measuredAt: 'desc' },
+    take: 12,
+    select: {
+      id: true,
+      measuredAt: true,
+      systolicBp: true,
+      diastolicBp: true,
+      heartRate: true,
+      oxygenSaturation: true,
+      temperatureC: true,
+      weightKg: true,
+      notes: true,
+    },
+  },
+  physioSessionReports: {
+    where: { deletedAt: null },
+    orderBy: { sessionDate: 'desc' },
+    take: 16,
+    select: {
+      id: true,
+      sessionDate: true,
+      sessionNumber: true,
+      interventions: true,
+      response: true,
+      painScoreBefore: true,
+      painScoreAfter: true,
+      nextSessionDate: true,
+      enteredByStaff: { select: { name: true } },
+    },
+  },
+  nurseDailyReports: {
+    where: { deletedAt: null },
+    orderBy: { reportDate: 'desc' },
+    take: 16,
+    select: {
+      id: true,
+      reportDate: true,
+      shiftType: true,
+      generalCondition: true,
+      nursingNotes: true,
+      escalationFlag: true,
+      escalationReason: true,
+      enteredByStaff: { select: { name: true } },
+    },
+  },
+  careTeamMessages: {
+    orderBy: { createdAt: 'desc' },
+    take: 16,
+    select: {
+      id: true,
+      channelType: true,
+      visibilityScope: true,
+      messageBody: true,
+      requiresFollowUp: true,
+      followUpDueAt: true,
+      createdAt: true,
+      authorStaff: { select: { name: true, role: true } },
+    },
+  },
+  callRoutingTickets: {
+    orderBy: { createdAt: 'desc' },
+    take: 12,
+    select: {
+      id: true,
+      sourceChannel: true,
+      reasonCategory: true,
+      triagePriority: true,
+      status: true,
+      targetCallbackAt: true,
+      createdAt: true,
+    },
+  },
+  aiTriageCases: {
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: {
+      id: true,
+      symptomSummary: true,
+      urgencyLevel: true,
+      recommendedDisposition: true,
+      recommendedSpecialty: true,
+      riskScore: true,
+      status: true,
+      createdAt: true,
+      submittedByStaff: { select: { name: true } },
+    },
+  },
+  documents: {
+    where: { deletedAt: null },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    select: {
+      id: true,
+      title: true,
+      category: true,
+      createdAt: true,
+    },
+  },
+  staffAssignments: {
+    where: { isActive: true },
+    orderBy: { assignedAt: 'desc' },
+    select: {
+      id: true,
+      assignedAt: true,
+      staff: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.PatientSelect;
+
+export async function getPatientEhrSnapshot(patientId: string) {
+  return prisma.patient.findFirst({
+    where: { id: patientId, deletedAt: null },
+    select: patientEhrSelect,
+  });
+}
+
+export type PatientEhrSnapshot = NonNullable<Awaited<ReturnType<typeof getPatientEhrSnapshot>>>;
