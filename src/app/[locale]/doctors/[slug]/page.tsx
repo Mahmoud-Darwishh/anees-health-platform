@@ -10,12 +10,14 @@ import { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getDoctorBySlug, getAllDoctorSlugs, getDoctorCanonicalSlugById } from '@/lib/api/doctors';
 import {
-  generatePhysicianSchema,
-  generateBreadcrumbSchema,
-  generateFAQSchema,
+  physicianSchema as physicianJsonLd,
+  breadcrumbSchema,
+  faqPageSchema,
   renderJsonLd,
-} from '@/lib/utils/structured-data';
-import { generateDoctorProfileMetadata } from '@/lib/utils/metadata';
+} from '@/lib/seo/jsonld';
+import { buildDoctorProfileMetadata } from '@/lib/seo/metadata';
+import { doctorFaqs } from '@/lib/seo/faqs';
+import { site, type SupportedLocale } from '@/lib/seo/site';
 import { config } from '@/lib/config';
 import DoctorProfileContent from '@/features/doctors/components/profile/DoctorProfileContent';
 import Header from '@/components/layout/Header';
@@ -63,7 +65,14 @@ export async function generateMetadata({
   }
 
   const canonicalSlug = await getDoctorCanonicalSlugById(Number(doctor.id));
-  return generateDoctorProfileMetadata(doctor, locale, canonicalSlug || slug);
+  return buildDoctorProfileMetadata({
+    locale,
+    slug: canonicalSlug || slug,
+    name: doctor.doctorName,
+    speciality: doctor.speciality,
+    bio: doctor.bio,
+    image: doctor.image,
+  });
 }
 
 export default async function DoctorProfilePage({
@@ -82,8 +91,10 @@ export default async function DoctorProfilePage({
   }
 
   const baseUrl = config.api.baseUrl;
-  const canonicalUrl = `${baseUrl}/${locale}/doctors/${canonicalSlug || slug}`;
+  const finalSlug = canonicalSlug || slug;
+  const canonicalUrl = `${baseUrl}/${locale}/doctors/${finalSlug}`;
   const dir = locale === 'ar' ? 'rtl' : 'ltr';
+  const seoLocale: SupportedLocale = locale === 'ar' ? 'ar' : 'en';
 
   // Breadcrumb items for navigation
   const breadcrumbItems = [
@@ -102,63 +113,29 @@ export default async function DoctorProfilePage({
   ];
 
   // Structured data schemas
-  const physicianSchema = generatePhysicianSchema(doctor, locale as 'en' | 'ar', canonicalUrl);
-  
-  const breadcrumbSchema = generateBreadcrumbSchema(
-    [
-      { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
-      { name: locale === 'ar' ? 'الأطباء' : 'Doctors', url: `${baseUrl}/${locale}/doctors` },
-      { name: doctor.doctorName, url: canonicalUrl },
-    ]
-  );
-
-  const faqSchema = generateFAQSchema(
-    locale === 'ar'
-      ? [
-          {
-            question: `هل يقدم ${doctor.doctorName} زيارات منزلية عبر أنيس؟`,
-            answer: `نعم، تعرض صفحة الطبيب على أنيس خدمات ${doctor.doctorName} وخيارات الحجز المتاحة بما في ذلك الزيارات المنزلية عند توفرها.`,
-          },
-          {
-            question: `ما تخصص ${doctor.doctorName}؟`,
-            answer: `${doctor.doctorName} متخصص في ${doctor.speciality} ويقدم خدماته الطبية عبر أنيس.`,
-          },
-          {
-            question: `كيف يمكنني حجز ${doctor.doctorName} على أنيس؟`,
-            answer: `يمكنك الدخول إلى رحلة الحجز من هذه الصفحة واختيار الخدمة المناسبة مع أنيس.`,
-          },
-        ]
-      : [
-          {
-            question: `Does ${doctor.doctorName} offer home visits on Anees?`,
-            answer: `Yes. The doctor page on Anees lists ${doctor.doctorName}'s available services and booking options, including home visits when offered.`,
-          },
-          {
-            question: `What specialty does ${doctor.doctorName} provide?`,
-            answer: `${doctor.doctorName} specializes in ${doctor.speciality} and is available through Anees.`,
-          },
-          {
-            question: `How can I book ${doctor.doctorName} on Anees?`,
-            answer: `You can use the booking flow linked from this page to request the most suitable appointment or home visit.`,
-          },
-        ]
+  const physicianLd = physicianJsonLd(seoLocale, doctor, finalSlug);
+  const crumbsLd = breadcrumbSchema([
+    { name: site.labels.home[seoLocale], url: `${baseUrl}/${locale}` },
+    { name: site.labels.doctors[seoLocale], url: `${baseUrl}/${locale}/doctors` },
+    { name: doctor.doctorName, url: canonicalUrl },
+  ]);
+  const faqLd = faqPageSchema(
+    doctorFaqs(seoLocale, { name: doctor.doctorName, speciality: doctor.speciality })
   );
 
   return (
     <>
-      {/* Structured Data - Physician Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(physicianSchema) }}
-      />
-      {/* Structured Data - Breadcrumb Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(physicianLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(faqLd) }}
       />
       
       <Header />

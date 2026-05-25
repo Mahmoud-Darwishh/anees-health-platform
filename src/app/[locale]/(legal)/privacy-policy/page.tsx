@@ -3,24 +3,28 @@ import Script from 'next/script';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { generatePrivacyMetadata } from '@/lib/utils/metadata';
+import { buildLegalMetadata } from '@/lib/seo/metadata';
 import {
-  generateBreadcrumbSchema,
-  generateArticleSchema,
+  breadcrumbSchema,
+  articleSchema,
   renderJsonLd,
-} from '@/lib/utils/structured-data';
-import { config } from '@/lib/config';
+} from '@/lib/seo/jsonld';
+import { site, type SupportedLocale } from '@/lib/seo/site';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  return generatePrivacyMetadata(locale);
+  return buildLegalMetadata({
+    locale: (locale === 'ar' ? 'ar' : 'en') as SupportedLocale,
+    kind: 'privacy',
+  });
 }
 
 export default function PrivacyPolicyPage() {
   const t = useTranslations('privacy');
   const common = useTranslations('common');
   const locale = useLocale();
-  const baseUrl = config.api.baseUrl;
+  const loc = (locale === 'ar' ? 'ar' : 'en') as SupportedLocale;
+  const baseUrl = site.baseUrl;
 
   const breadcrumbItems = [
     { label: common('home'), href: `/${locale}` },
@@ -28,20 +32,20 @@ export default function PrivacyPolicyPage() {
   ];
 
   // Structured data
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
+  const crumbsLd = breadcrumbSchema([
+    { name: site.labels.home[loc], url: `${baseUrl}/${locale}` },
     { name: t('title'), url: `${baseUrl}/${locale}/privacy-policy` },
   ]);
 
-  const articleSchema = generateArticleSchema(
+  const articleLd = articleSchema(
     {
       title: t('title'),
       description: locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy',
       datePublished: '2024-01-01',
       dateModified: new Date().toISOString(),
-      author: 'Anees Health',
+      author: site.name,
     },
-    locale,
+    loc,
     `${baseUrl}/${locale}/privacy-policy`
   );
 
@@ -51,12 +55,12 @@ export default function PrivacyPolicyPage() {
       <Script
         id="privacy-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
       />
       <Script
         id="privacy-article-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(articleLd) }}
       />
 
       <Header />

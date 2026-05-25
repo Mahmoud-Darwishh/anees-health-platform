@@ -7,8 +7,14 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import { config } from '@/lib/config';
-import { generatePageMetadata } from '@/lib/utils/metadata';
-import { generateBreadcrumbSchema, generateDoctorsCollectionSchema, renderJsonLd } from '@/lib/utils/structured-data';
+import { buildServiceLandingMetadata } from '@/lib/seo/metadata';
+import {
+  breadcrumbSchema,
+  physiciansItemListSchema,
+  medicalProcedureSchema,
+  renderJsonLd,
+} from '@/lib/seo/jsonld';
+import { site } from '@/lib/seo/site';
 import { getAllServiceLandingSlugs, getServiceLanding, getServiceLandingDoctors } from '@/lib/seo/search-discovery';
 import styles from '../../seo-landing.module.scss';
 
@@ -30,12 +36,11 @@ export async function generateMetadata({ params }: ServiceLandingPageProps): Pro
     return { robots: { index: false, follow: true }, title: 'Not Found' };
   }
 
-  return generatePageMetadata({
+  return buildServiceLandingMetadata({
     locale,
-    path: `/${locale}/services/${slug}`,
+    slug,
     title: content.title,
     description: content.description,
-    keywords: content.keywords,
   });
 }
 
@@ -56,25 +61,37 @@ export default async function ServiceLandingPage({ params }: ServiceLandingPageP
     { label: content.headline, active: true },
   ];
 
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
-    { name: locale === 'ar' ? 'الخدمات' : 'Services', url: `${baseUrl}/${locale}/services` },
+  const breadcrumbLd = breadcrumbSchema([
+    { name: site.labels.home[locale], url: `${baseUrl}/${locale}` },
+    { name: site.labels.services[locale], url: `${baseUrl}/${locale}/services` },
     { name: content.headline, url: `${baseUrl}/${locale}/services/${slug}` },
   ]);
 
-  const doctorsSchema = generateDoctorsCollectionSchema(doctors, locale, 1);
+  const procedureLd = medicalProcedureSchema({
+    locale,
+    slug,
+    name: content.headline,
+    description: content.description,
+  });
+
+  const doctorsLd = physiciansItemListSchema(locale, doctors, (d) => d.slug);
 
   return (
     <>
       <Script
         id="service-landing-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbLd) }}
+      />
+      <Script
+        id="service-landing-procedure-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(procedureLd) }}
       />
       <Script
         id="service-landing-doctors-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(doctorsSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(doctorsLd) }}
       />
       <Header />
       <Breadcrumb items={breadcrumbItems} title={content.headline} />

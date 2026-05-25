@@ -97,6 +97,23 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close the mobile drawer on Escape + on route change (pathname/locale).
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onHandleCloseMenu();
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, []);
+
+  useEffect(() => {
+    onHandleCloseMenu();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, locale]);
+
   // Toggle submenu on mobile (click/touch) while preserving hover on desktop
   const handleSubmenuToggle = (
     e: React.MouseEvent | React.KeyboardEvent | React.TouchEvent,
@@ -246,6 +263,26 @@ const Header = () => {
                         </Link>
                       </li>
                     )}
+
+                    {/* Mobile-only CTA row pinned at the bottom of the drawer */}
+                    <li className="nav-item mobile-cta-row d-lg-none">
+                      <Link
+                        href={`/${locale}/booking`}
+                        className="btn-primary-gradient"
+                        onClick={onHandleLinkClick}
+                      >
+                        <i className="isax isax-calendar-1" />
+                        <span>{t('header.bookNow')}</span>
+                      </Link>
+                      <Link
+                        href={`/${locale}/coverage`}
+                        className="btn-outline-brand"
+                        onClick={onHandleLinkClick}
+                      >
+                        <i className="feather-map-pin" />
+                        <span>{t('nav.coverage')}</span>
+                      </Link>
+                    </li>
                   </ul>
                 </div>
                 <ul className="nav header-navbar-rht">
@@ -368,6 +405,12 @@ const Header = () => {
             </nav>
           </div>
         </header>
+        {/* Mobile drawer backdrop — visibility controlled by `html.menu-opened` */}
+        <div
+          className="mobile-menu-backdrop"
+          onClick={onHandleCloseMenu}
+          aria-hidden="true"
+        />
       </>
     </div>
   );

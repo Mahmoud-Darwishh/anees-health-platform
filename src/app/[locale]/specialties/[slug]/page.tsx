@@ -7,8 +7,14 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import { config } from '@/lib/config';
-import { generatePageMetadata } from '@/lib/utils/metadata';
-import { generateBreadcrumbSchema, generateDoctorsCollectionSchema, renderJsonLd } from '@/lib/utils/structured-data';
+import { buildSpecialtyMetadata } from '@/lib/seo/metadata';
+import {
+  breadcrumbSchema,
+  physiciansItemListSchema,
+  medicalSpecialtySchema,
+  renderJsonLd,
+} from '@/lib/seo/jsonld';
+import { site } from '@/lib/seo/site';
 import { getAllSpecialtyLandings, getSpecialtyDoctors } from '@/lib/seo/search-discovery';
 import styles from '../../seo-landing.module.scss';
 
@@ -36,18 +42,14 @@ export async function generateMetadata({ params }: SpecialtyPageProps): Promise<
     return { robots: { index: false, follow: true }, title: 'Not Found' };
   }
 
-  return generatePageMetadata({
+  return buildSpecialtyMetadata({
     locale,
-    path: `/${locale}/specialties/${slug}`,
-    title: locale === 'ar' ? `${data.specialtyName} | أطباء أنيس` : `${data.specialtyName} Doctors | Anees`,
+    slug,
+    name: data.specialtyName,
     description:
       locale === 'ar'
-        ? `تصفح أطباء ${data.specialtyName} على أنيس واحجز زيارة منزلية أو استشارة طبية مع صفحات شخصية قابلة للفهرسة لكل طبيب.`
-        : `Browse ${data.specialtyName} doctors on Anees and access indexed doctor profile pages for home visits and consultations.`,
-    keywords:
-      locale === 'ar'
-        ? `أنيس، ${data.specialtyName}، دكتور ${data.specialtyName}، طبيب منزلي، صفحة تخصص ${data.specialtyName}`
-        : `Anees, ${data.specialtyName}, ${data.specialtyName} doctor, home visit ${data.specialtyName}, ${data.specialtyName} specialist Egypt`,
+        ? `تصفح أطباء ${data.specialtyName} على أنيس واحجز زيارة منزلية أو استشارة طبية.`
+        : `Browse ${data.specialtyName} doctors on Anees and book a home visit or consultation in Egypt.`,
   });
 }
 
@@ -66,25 +68,40 @@ export default async function SpecialtyPage({ params }: SpecialtyPageProps) {
     { label: data.specialtyName, active: true },
   ];
 
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
-    { name: locale === 'ar' ? 'التخصصات' : 'Specialties', url: `${baseUrl}/${locale}/specialties` },
+  const crumbsLd = breadcrumbSchema([
+    { name: site.labels.home[locale], url: `${baseUrl}/${locale}` },
+    { name: site.labels.specialties[locale], url: `${baseUrl}/${locale}/specialties` },
     { name: data.specialtyName, url: `${baseUrl}/${locale}/specialties/${slug}` },
   ]);
 
-  const doctorSchema = generateDoctorsCollectionSchema(data.doctors, locale, 1);
+  const specialtyLd = medicalSpecialtySchema({
+    locale,
+    slug,
+    name: data.specialtyName,
+    description:
+      locale === 'ar'
+        ? `تخصص ${data.specialtyName} على أنيس هيلث في مصر.`
+        : `${data.specialtyName} on Anees Health in Egypt.`,
+  });
+
+  const doctorsLd = physiciansItemListSchema(locale, data.doctors, (d) => d.slug);
 
   return (
     <>
       <Script
         id="specialty-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
+      />
+      <Script
+        id="specialty-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(specialtyLd) }}
       />
       <Script
         id="specialty-doctors-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(doctorSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(doctorsLd) }}
       />
       <Header />
       <Breadcrumb items={breadcrumbItems} title={data.specialtyName} />

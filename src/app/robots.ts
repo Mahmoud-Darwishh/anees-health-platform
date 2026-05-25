@@ -72,10 +72,66 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
       },
+      {
+        userAgent: 'ClaudeBot', // Anthropic web crawler (distinct from anthropic-ai)
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'Claude-Web', // Anthropic on-demand fetcher
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'OAI-SearchBot', // OpenAI SearchGPT indexer
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'Applebot-Extended', // Apple Intelligence
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'Meta-ExternalAgent', // Meta AI training crawler
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'Meta-ExternalFetcher', // Meta AI on-demand fetcher
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'MistralAI-User', // Mistral Le Chat
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'DuckAssistBot', // DuckDuckGo AI assist
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'Amazonbot', // Amazon (Alexa / Rufus)
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'YouBot', // You.com AI search
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
+      {
+        userAgent: 'PerplexityBot-User', // Perplexity on-demand fetcher
+        allow: '/',
+        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
+      },
     ],
     sitemap: [
       `${baseUrl}/sitemap.xml`,
       `${baseUrl}/sitemap-doctors.xml`,
     ],
+    host: baseUrl,
   };
 }

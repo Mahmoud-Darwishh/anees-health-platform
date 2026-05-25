@@ -5,8 +5,9 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { config } from '@/lib/config';
-import { generatePageMetadata } from '@/lib/utils/metadata';
-import { generateBreadcrumbSchema, renderJsonLd } from '@/lib/utils/structured-data';
+import { buildSpecialtiesMetadata } from '@/lib/seo/metadata';
+import { breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
+import { site } from '@/lib/seo/site';
 import { getAllSpecialtyLandings } from '@/lib/seo/search-discovery';
 import styles from '../seo-landing.module.scss';
 
@@ -16,20 +17,7 @@ interface SpecialtiesIndexPageProps {
 
 export async function generateMetadata({ params }: SpecialtiesIndexPageProps): Promise<Metadata> {
   const { locale } = await params;
-
-  return generatePageMetadata({
-    locale,
-    path: `/${locale}/specialties`,
-    title: locale === 'ar' ? 'تخصصات الأطباء | أنيس' : 'Doctor Specialties | Anees',
-    description:
-      locale === 'ar'
-        ? 'اكتشف تخصصات الأطباء على أنيس مثل القلب والباطنة والعلاج الطبيعي وطب الشيخوخة مع صفحات قابلة للفهرسة لكل تخصص.'
-        : 'Explore indexed doctor specialty pages on Anees including cardiology, internal medicine, physiotherapy, geriatrics, and more.',
-    keywords:
-      locale === 'ar'
-        ? 'أنيس تخصصات الأطباء، قلب، باطنة، علاج طبيعي، طب الشيخوخة، طبيب منزلي، صفحات تخصصات الأطباء'
-        : 'Anees doctor specialties, cardiology, internal medicine, physiotherapy, geriatrics, home visit specialties, indexed specialty pages',
-  });
+  return buildSpecialtiesMetadata(locale);
 }
 
 export default async function SpecialtiesIndexPage({ params }: SpecialtiesIndexPageProps) {
@@ -42,9 +30,9 @@ export default async function SpecialtiesIndexPage({ params }: SpecialtiesIndexP
     { label: locale === 'ar' ? 'التخصصات' : 'Specialties', active: true },
   ];
 
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
-    { name: locale === 'ar' ? 'التخصصات' : 'Specialties', url: `${baseUrl}/${locale}/specialties` },
+  const crumbsLd = breadcrumbSchema([
+    { name: site.labels.home[locale], url: `${baseUrl}/${locale}` },
+    { name: site.labels.specialties[locale], url: `${baseUrl}/${locale}/specialties` },
   ]);
 
   return (
@@ -52,7 +40,7 @@ export default async function SpecialtiesIndexPage({ params }: SpecialtiesIndexP
       <Script
         id="specialties-index-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
       />
       <Header />
       <Breadcrumb

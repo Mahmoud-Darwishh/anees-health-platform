@@ -1,0 +1,160 @@
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+// ═══════════════════════════════════════════════════════════════════
+//  LOGOS — partners & trust strip (white bg, color logos)
+// ═══════════════════════════════════════════════════════════════════
+
+.section {
+  @include section-padding;
+  background: $white;
+  position: relative;
+
+  // Top + bottom hairlines to ground the strip
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline: 8%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #ece6d3 50%,
+      transparent 100%
+    );
+  }
+
+  &::before { top: 0; }
+  &::after  { bottom: 0; }
+}
+
+.header {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+
+  @include respond-below(custom767) {
+    margin-bottom: 36px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: $primary;
+  margin-bottom: 16px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+    margin-inline-end: 10px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+}
+
+.heading {
+  font-size: 36px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0;
+
+  @include respond-below(custom991) { font-size: 30px; }
+  @include respond-below(custom767) { font-size: 24px; }
+}
+
+// ─── Grid ───────────────────────────────────────────────────────────
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px 24px;
+  align-items: stretch;
+
+  @include respond-below(custom1199) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px 18px;
+  }
+
+  @include respond-below(custom991) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 14px;
+  }
+
+  @include respond-below(custom575) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 12px;
+  }
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+  padding: 22px 18px;
+  background: #fff;
+  border: 1px solid #f1ece0;
+  border-radius: 14px;
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 0.32s ease,
+              border-color 0.32s ease;
+  position: relative;
+  overflow: hidden;
+
+  // Subtle brand sheen on hover
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at 50% 0%,
+      rgba($primary, 0.06) 0%,
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(19, 44, 77, 0.08);
+    border-color: rgba($primary, 0.35);
+
+    &::after { opacity: 1; }
+  }
+
+  @include respond-below(custom767) {
+    min-height: 88px;
+    padding: 16px 14px;
+  }
+}
+
+.logo {
+  // Logos stay in full color — never grayscale.
+  filter: none;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 64px;
+  object-fit: contain;
+  transition: transform 0.32s ease;
+
+  .tile:hover & {
+    transform: scale(1.04);
+  }
+
+  @include respond-below(custom767) {
+    max-height: 52px;
+  }
+}

@@ -1,12 +1,16 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Script from 'next/script';
 import CoveragePageContent from '@/features/coverage/components/CoveragePageContent';
-import { generateCoverageMetadata } from '@/lib/utils/metadata';
+import { buildCoverageMetadata } from '@/lib/seo/metadata';
 import {
-  generateBreadcrumbSchema,
+  breadcrumbSchema,
+  coveragePlaceSchema,
+  faqPageSchema,
   renderJsonLd,
-} from '@/lib/utils/structured-data';
-import { config } from '@/lib/config';
+} from '@/lib/seo/jsonld';
+import { site, type SupportedLocale } from '@/lib/seo/site';
+import { getCoverageAreas } from '@/lib/seo/coverage';
+import { coverageFaqs } from '@/lib/seo/faqs';
 
 export async function generateMetadata({
   params,
@@ -14,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return generateCoverageMetadata(locale);
+  return buildCoverageMetadata((locale === 'ar' ? 'ar' : 'en') as SupportedLocale);
 }
 
 export default async function CoveragePage({
@@ -23,29 +27,33 @@ export default async function CoveragePage({
   params: Promise<{ locale: string }>;
 }) {
   const $locale = (await params).locale;
-  const baseUrl = config.api.baseUrl;
+  const loc = ($locale === 'ar' ? 'ar' : 'en') as SupportedLocale;
+  const baseUrl = site.baseUrl;
+  const areas = await getCoverageAreas();
 
-  // Breadcrumb schema for coverage page
-  const breadcrumbs = [
-    {
-      name: $locale === 'ar' ? 'الرئيسية' : 'Home',
-      url: `${baseUrl}/${$locale}`,
-    },
-    {
-      name: $locale === 'ar' ? 'منطقة التغطية' : 'Coverage',
-      url: `${baseUrl}/${$locale}/coverage`,
-    },
-  ];
-
-  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
+  const crumbsLd = breadcrumbSchema([
+    { name: site.labels.home[loc], url: `${baseUrl}/${loc}` },
+    { name: site.labels.coverage[loc], url: `${baseUrl}/${loc}/coverage` },
+  ]);
+  const placeLd = coveragePlaceSchema(loc, areas);
+  const faqLd = faqPageSchema(coverageFaqs[loc]);
 
   return (
     <>
-      {/* Breadcrumb Schema */}
       <Script
         id="coverage-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
+      />
+      <Script
+        id="coverage-place-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(placeLd) }}
+      />
+      <Script
+        id="coverage-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(faqLd) }}
       />
       <CoveragePageContent locale={$locale} />
     </>

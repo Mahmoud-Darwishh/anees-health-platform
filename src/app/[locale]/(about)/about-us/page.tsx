@@ -5,26 +5,27 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { Reveal } from '@/components/common/Reveal';
-import { generateAboutMetadata } from '@/lib/utils/metadata';
+import { buildAboutMetadata } from '@/lib/seo/metadata';
 import { generateDoctorSlug } from '@/lib/utils/slug';
 import {
-  generateBreadcrumbSchema,
-  generateArticleSchema,
+  breadcrumbSchema,
+  articleSchema,
   renderJsonLd,
-} from '@/lib/utils/structured-data';
-import { config } from '@/lib/config';
+} from '@/lib/seo/jsonld';
+import { site, type SupportedLocale } from '@/lib/seo/site';
 import styles from './about-us.module.scss';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  return generateAboutMetadata(locale);
+  return buildAboutMetadata((locale === 'ar' ? 'ar' : 'en') as SupportedLocale);
 }
 
 export default function AboutUsPage() {
   const t = useTranslations('aboutPage');
   const common = useTranslations('common');
   const locale = useLocale();
-  const baseUrl = config.api.baseUrl;
+  const loc = (locale === 'ar' ? 'ar' : 'en') as SupportedLocale;
+  const baseUrl = site.baseUrl;
   const isArabic = locale === 'ar';
   const founder1Slug = generateDoctorSlug('Dr. Mahmoud Darwish');
   const founder2Slug = generateDoctorSlug('Dr. Ahmed Oraby');
@@ -51,19 +52,20 @@ export default function AboutUsPage() {
   ];
 
   // Structured data
-  const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: locale === 'ar' ? 'الرئيسية' : 'Home', url: `${baseUrl}/${locale}` },
+  const crumbsLd = breadcrumbSchema([
+    { name: site.labels.home[loc], url: `${baseUrl}/${locale}` },
     { name: t('title'), url: `${baseUrl}/${locale}/about-us` },
   ]);
 
-  const articleSchema = generateArticleSchema(
+  const articleLd = articleSchema(
     {
       title: t('title'),
       description: t('hero_subtitle'),
       datePublished: '2024-01-01',
-      author: 'Anees Health',
+      dateModified: '2026-01-01',
+      author: site.name,
     },
-    locale,
+    loc,
     `${baseUrl}/${locale}/about-us`
   );
 
@@ -72,12 +74,12 @@ export default function AboutUsPage() {
       <Script
         id="about-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
       />
       <Script
         id="about-article-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(articleLd) }}
       />
 
       <Header />

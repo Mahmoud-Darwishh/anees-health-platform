@@ -3,13 +3,14 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import { Reveal } from '@/components/common/Reveal';
-import { generateContactMetadata } from '@/lib/utils/metadata';
-import { generateContactPageSchema, renderJsonLd } from '@/lib/utils/structured-data';
+import { buildContactMetadata } from '@/lib/seo/metadata';
+import { contactPageSchema, renderJsonLd } from '@/lib/seo/jsonld';
+import type { SupportedLocale } from '@/lib/seo/site';
 import styles from './contact-us.module.scss';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  return generateContactMetadata(locale);
+  return buildContactMetadata((locale === 'ar' ? 'ar' : 'en') as SupportedLocale);
 }
 
 export default function ContactUsPage() {
@@ -22,14 +23,15 @@ export default function ContactUsPage() {
     { label: t('title'), active: true },
   ];
 
-  const contactPageSchema = generateContactPageSchema(locale);
+  const loc = (locale === 'ar' ? 'ar' : 'en') as SupportedLocale;
+  const contactLd = contactPageSchema(loc);
   const whatsappMessage = encodeURIComponent(t('whatsapp_message'));
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(contactPageSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(contactLd) }}
       />
       <Header />
 

@@ -1,0 +1,127 @@
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+// ═══════════════════════════════════════════════════════════════════
+//  DOCTORS — featured carousel, elite header + refined nav
+// ═══════════════════════════════════════════════════════════════════
+
+.section {
+  @include section-padding;
+  background: #faf8f3;
+  position: relative;
+}
+
+.header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 52px;
+
+  @include respond-below(custom767) {
+    margin-bottom: 36px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: $primary;
+  margin-bottom: 16px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+    margin-inline-end: 10px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+}
+
+.heading {
+  font-size: 36px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0;
+
+  @include respond-below(custom991) { font-size: 30px; }
+  @include respond-below(custom767) { font-size: 24px; }
+}
+
+// ─── Carousel wrapper ───────────────────────────────────────────────
+.carousel {
+  position: relative;
+
+  // Slick lane spacing — small horizontal gutters between cards
+  :global(.slick-list) {
+    margin-inline: -10px;
+    padding-block: 6px; // breathing room for hover lift
+  }
+
+  :global(.slick-slide) > div {
+    padding-inline: 10px;
+  }
+
+  // Card outside hover lift is owned by DoctorCard; we just ensure
+  // the slide container doesn't clip it.
+  :global(.slick-track) { display: flex !important; }
+  :global(.slick-slide) { height: auto; }
+  :global(.slick-slide > div),
+  :global(.home-doctor-slide) { height: 100%; }
+}
+
+// ─── Navigation buttons ─────────────────────────────────────────────
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 36px;
+
+  @include respond-below(custom767) {
+    margin-top: 26px;
+  }
+
+  button {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: $white;
+    color: $brand-dark-blue;
+    border: 1px solid rgba($primary, 0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.22s ease, color 0.22s ease,
+                border-color 0.22s ease, transform 0.22s ease,
+                box-shadow 0.22s ease;
+
+    i { line-height: 1; }
+
+    [dir='rtl'] & i {
+      transform: scaleX(-1);
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: $primary;
+      color: $white;
+      border-color: $primary;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba($primary, 0.28);
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba($primary, 0.45);
+      outline-offset: 3px;
+    }
+  }
+}

@@ -1,13 +1,16 @@
 ﻿import { Metadata } from 'next';
 import Script from 'next/script';
 import GeneralHomeOne from '@/components/sections/home/generalHomeOne';
-import { generateHomeMetadata } from '@/lib/utils/metadata';
+import { buildHomeMetadata } from '@/lib/seo/metadata';
 import {
-  generateBreadcrumbSchema,
+  breadcrumbSchema,
+  faqPageSchema,
+  webPageSchema,
   renderJsonLd,
-} from '@/lib/utils/structured-data';
+} from '@/lib/seo/jsonld';
+import { homeFaqs } from '@/lib/seo/faqs';
+import { site, type SupportedLocale } from '@/lib/seo/site';
 import { getDoctors } from '@/lib/api/doctors';
-import { config } from '@/lib/config';
 
 export async function generateMetadata({
   params,
@@ -15,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return generateHomeMetadata(locale);
+  return buildHomeMetadata(locale === 'ar' ? 'ar' : 'en');
 }
 
 export default async function HomePage({
@@ -23,29 +26,44 @@ export default async function HomePage({
 }: {
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  const baseUrl = config.api.baseUrl;
+  const { locale: rawLocale } = await params;
+  const locale: SupportedLocale = rawLocale === 'ar' ? 'ar' : 'en';
 
-  // Fetch doctors for the homepage featured slider (first 6 are shown)
-  const doctors = await getDoctors(locale as 'en' | 'ar');
+  const doctors = await getDoctors(locale);
 
-  // Homepage breadcrumb
   const breadcrumbs = [
-    {
-      name: locale === 'ar' ? 'الرئيسية' : 'Home',
-      url: `${baseUrl}/${locale}`,
-    },
+    { name: site.labels.home[locale], url: `${site.baseUrl}/${locale}` },
   ];
 
-  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbs);
+  const homeBreadcrumb = breadcrumbSchema(breadcrumbs);
+  const homeFaq = faqPageSchema(homeFaqs[locale]);
+  const homeWebPage = webPageSchema({
+    locale,
+    path: `/${locale}`,
+    name: site.labels.home[locale],
+    description:
+      locale === 'ar'
+        ? 'أنيس هيلث — رعاية صحية منزلية في مصر: زيارات أطباء، تمريض، علاج طبيعي، وتحاليل في المنزل.'
+        : 'Anees Health — home healthcare in Egypt: doctor home visits, skilled nursing, physiotherapy, and labs at home.',
+    breadcrumbs,
+  });
 
   return (
     <>
-      {/* Homepage Breadcrumb Schema */}
       <Script
-        id="homepage-breadcrumb-schema"
+        id="home-breadcrumb-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: renderJsonLd(breadcrumbSchema) }}
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(homeBreadcrumb) }}
+      />
+      <Script
+        id="home-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(homeFaq) }}
+      />
+      <Script
+        id="home-webpage-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: renderJsonLd(homeWebPage) }}
       />
       <GeneralHomeOne doctors={doctors} />
     </>

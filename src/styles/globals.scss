@@ -15,6 +15,8 @@
 @use '../assets/scss/sections/book';
 // Footer social icons styling
 @use '../assets/scss/components/footer-social';
+// Header mobile menu (elite refresh) — overrides legacy drawer styles
+@use '../assets/scss/components/header-mobile-elite';
 // Footer layout styling (includes footer-three gradient)
 @use '../assets/scss/layout/footer';
 

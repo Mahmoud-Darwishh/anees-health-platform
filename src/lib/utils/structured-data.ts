@@ -1,544 +1,207 @@
 ﻿/**
- * Structured Data (JSON-LD) Utilities
+ * @deprecated Use `@/lib/seo/jsonld` directly.
  *
- * Generates schema.org structured data for:
- * - Organization
- * - MedicalOrganization
- * - LocalBusiness
- * - FAQPage
- * - BreadcrumbList
- * - MedicalService
- * - ContactPage
- * - Article
- *
- * For SEO and GEO (Generative Engine Optimization)
+ * Thin backward-compat shim. Every export below routes to the centralized
+ * SEO module in `src/lib/seo/`. New code MUST import from
+ * `@/lib/seo/jsonld`. This shim exists only so that existing callers
+ * continue to compile while we migrate them.
  */
 
-import { config } from '../config';
-import type { Doctor } from '../models/doctor.types';
-import { generateDoctorSlug } from './slug';
+import {
+  organizationSchema,
+  localBusinessSchema,
+  websiteSchema,
+  breadcrumbSchema,
+  faqPageSchema,
+  physicianSchema as newPhysicianSchema,
+  physiciansItemListSchema,
+  contactPageSchema,
+  articleSchema,
+  medicalProcedureSchema,
+  renderJsonLd as newRenderJsonLd,
+  type BreadcrumbItem,
+} from '@/lib/seo/jsonld';
+import type { SupportedLocale } from '@/lib/seo/site';
+import type { Doctor } from '@/lib/models/doctor.types';
+import type { FaqItem } from '@/lib/seo/faqs';
+
+function asLocale(locale: string | undefined): SupportedLocale {
+  return locale === 'ar' ? 'ar' : 'en';
+}
 
 export interface StructuredDataProps {
-	locale?: string;
-	type: 'organization' | 'medical' | 'faq' | 'breadcrumb' | 'service' | 'doctor';
-	data?: Record<string, unknown>;
+  type: string;
+  data: Record<string, unknown>;
 }
 
-/**
- * Organization Schema
- * Used for brand identity and social presence
- */
-export function generateOrganizationSchema(locale: string = 'en') {
-	const founderStatement =
-		locale === 'ar'
-			? 'ØªØ£Ø³Ø³Øª Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø« ÙÙŠ Ù…ØµØ± Ø¨Ù‚ÙŠØ§Ø¯Ø© Ø§Ù„Ø¯ÙƒØªÙˆØ± Ù…Ø­Ù…ÙˆØ¯ Ø¯Ø±ÙˆÙŠØ´ ÙˆØ§Ù„Ø¯ÙƒØªÙˆØ± Ø£Ø­Ù…Ø¯ Ø¹Ø±Ø§Ø¨ÙŠ.'
-			: 'Anees Health was founded in Egypt by Dr. Mahmoud Darwish and Dr. Ahmed Oraby.';
+export const renderJsonLd = newRenderJsonLd;
 
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'MedicalOrganization',
-		'@id': `${config.api.baseUrl}#organization`,
-		name: 'Anees Health',
-		alternateName: locale === 'ar' ? 'Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø«' : 'Anees Health',
-		description:
-			locale === 'ar'
-				? 'Ù…Ù†ØµØ© Ø±Ø§Ø¦Ø¯Ø© ÙÙŠ Ù…ØµØ± Ù„Ù„Ø±Ø¹Ø§ÙŠØ© Ø§Ù„ØµØ­ÙŠØ© Ø§Ù„Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ§Ù„ØªØ·Ø¨ÙŠØ¨ Ø¹Ù† Ø¨Ø¹Ø¯ Ù„Ù„Ù…Ø³Ù†ÙŠÙ† ÙˆÙ…Ø±Ø¶Ù‰ Ø§Ù„Ø£Ù…Ø±Ø§Ø¶ Ø§Ù„Ù…Ø²Ù…Ù†Ø©â€”Ø²ÙŠØ§Ø±Ø§Øª Ø·Ø¨ÙŠØ¨ Ù…Ù†Ø²Ù„ÙŠØŒ ØªÙ…Ø±ÙŠØ¶ Ù…Ø§Ù‡Ø±ØŒ Ø¹Ù„Ø§Ø¬ Ø·Ø¨ÙŠØ¹ÙŠØŒ Ù…Ø¹Ø§Ù…Ù„ Ù…Ù†Ø²Ù„ÙŠØ©ØŒ Ù…Ø±Ø§Ù‚Ø¨Ø© Ø¹Ù† Ø¨Ø¹Ø¯ØŒ Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø£Ø¯ÙˆÙŠØ©ØŒ ÙˆØ¯Ø¹Ù… Ø·Ø¨ÙŠ Ø¹Ù„Ù‰ Ù…Ø¯Ø§Ø± Ø§Ù„Ø³Ø§Ø¹Ø© ÙÙŠ Ù…Ø®ØªÙ„Ù Ø§Ù„Ù…Ù†Ø§Ø·Ù‚'
-				: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patientsâ€”doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Egypt",
-		url: config.api.baseUrl,
-		logo: `${config.api.baseUrl}/logos/anees-health-logo.png`,
-		image: `${config.api.baseUrl}/assets/img/banner/anees-health-og.jpg`,
-		telephone: '+20-1270558620',
-		email: 'info@aneeshealth.com',
-		address: {
-			'@type': 'PostalAddress',
-			streetAddress: 'Cairo',
-			addressLocality: 'Cairo',
-			addressRegion: 'Cairo Governorate',
-			postalCode: '11511',
-			addressCountry: 'EG',
-		},
-		geo: {
-			'@type': 'GeoCoordinates',
-			latitude: 30.0444,
-			longitude: 31.2357,
-		},
-		areaServed: [
-			{
-				'@type': 'Country',
-				name: locale === 'ar' ? 'Ù…ØµØ±' : 'Egypt',
-			},
-		],
-		sameAs: [
-			...config.brand.socialProfiles,
-		],
-		contactPoint: {
-			'@type': 'ContactPoint',
-			telephone: '+20-1270558620',
-			contactType: 'Customer Service',
-			availableLanguage: ['English', 'Arabic'],
-			areaServed: 'EG',
-		},
-		founder: [
-			{
-				'@type': 'Person',
-				'@id': `${config.api.baseUrl}/en/doctors/dr-mahmoud-darwish#person`,
-				name: locale === 'ar' ? 'Ø§Ù„Ø¯ÙƒØªÙˆØ± Ù…Ø­Ù…ÙˆØ¯ Ø¯Ø±ÙˆÙŠØ´' : 'Dr. Mahmoud Darwish',
-				url: `${config.api.baseUrl}/en/doctors/dr-mahmoud-darwish`,
-				description: founderStatement,
-				jobTitle: locale === 'ar' ? 'Ù…Ø¤Ø³Ø³ Ù…Ø´Ø§Ø±Ùƒ' : 'Co-Founder',
-				worksFor: {
-					'@id': `${config.api.baseUrl}#organization`,
-				},
-			},
-			{
-				'@type': 'Person',
-				'@id': `${config.api.baseUrl}/en/doctors/dr-ahmed-oraby#person`,
-				name: locale === 'ar' ? 'Ø§Ù„Ø¯ÙƒØªÙˆØ± Ø£Ø­Ù…Ø¯ Ø¹Ø±Ø§Ø¨ÙŠ' : 'Dr. Ahmed Oraby',
-				url: `${config.api.baseUrl}/en/doctors/dr-ahmed-oraby`,
-				description: founderStatement,
-				jobTitle: locale === 'ar' ? 'Ù…Ø¤Ø³Ø³ Ù…Ø´Ø§Ø±Ùƒ' : 'Co-Founder',
-				worksFor: {
-					'@id': `${config.api.baseUrl}#organization`,
-				},
-			},
-		],
-		knowsAbout: [
-			'Home Healthcare',
-			'Telemedicine',
-			'Elderly Care',
-			'Chronic Disease Management',
-			'Doctor Home Visits',
-			'Home Nursing',
-			'Physiotherapy',
-			'Palliative Care',
-			'Remote Patient Monitoring',
-		],
-		medicalSpecialty: [
-			'Geriatrics',
-			'Palliative Medicine',
-			'Internal Medicine',
-			'Family Medicine',
-			'Physical Therapy',
-			'Nursing',
-			'Home Healthcare',
-		],
-	};
-}
-
-/**
- * Local Business Schema
- * Enhances local SEO
- */
-export function generateLocalBusinessSchema() {
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'LocalBusiness',
-		'@id': `${config.api.baseUrl}#business`,
-		name: 'Anees Health',
-		image: `${config.api.baseUrl}/assets/img/banner/anees-health-og.jpg`,
-		priceRange: '$$',
-		address: {
-			'@type': 'PostalAddress',
-			streetAddress: 'Cairo',
-			addressLocality: 'Cairo',
-			addressRegion: 'Cairo Governorate',
-			postalCode: '11511',
-			addressCountry: 'EG',
-		},
-		geo: {
-			'@type': 'GeoCoordinates',
-			latitude: 30.0444,
-			longitude: 31.2357,
-		},
-		openingHoursSpecification: [
-			{
-				'@type': 'OpeningHoursSpecification',
-				dayOfWeek: [
-					'Monday',
-					'Tuesday',
-					'Wednesday',
-					'Thursday',
-					'Friday',
-					'Saturday',
-					'Sunday',
-				],
-				opens: '00:00',
-				closes: '23:59',
-			},
-		],
-	};
-}
-
-/**
- * Medical Service Schema
- * For individual services
- */
-export function generateMedicalServiceSchema(
-	service: {
-		name: string;
-		description: string;
-		slug: string;
-	},
-	locale: string = 'en'
-) {
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'MedicalProcedure',
-		name: service.name,
-		description: service.description,
-		url: `${config.api.baseUrl}/${locale}/services/${service.slug}`,
-		provider: {
-			'@type': 'MedicalOrganization',
-			name: 'Anees Health',
-		},
-	};
-}
-
-/**
- * Doctor/Physician Schema (Simple version)
- * For listing pages and simple references
- */
-export function generateDoctorSchema(
-	doctor: {
-		name: string;
-		specialty: string;
-		bio: string;
-		slug: string;
-		image?: string;
-	},
-	locale: string = 'en'
-) {
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'Physician',
-		name: doctor.name,
-		description: doctor.bio,
-		image: doctor.image || `${config.api.baseUrl}/assets/img/fav.png`,
-		url: `${config.api.baseUrl}/${locale}/doctors/${doctor.slug}`,
-		medicalSpecialty: doctor.specialty,
-		worksFor: {
-			'@type': 'MedicalOrganization',
-			name: 'Anees Health',
-		},
-	};
-}
-
-/**
- * Enhanced Physician Schema (Complete version)
- * For individual doctor profile pages with full details
- * Optimized for SEO and GEO
- */
-export function generatePhysicianSchema(
-	doctor: Doctor,
-	locale: string = 'en',
-	canonicalUrl: string
-) {
-	const baseUrl = config.api.baseUrl;
-	const imageUrl = doctor.image.startsWith('http')
-		? doctor.image
-		: `${baseUrl}/${doctor.image}`;
-
-	const priceRange = doctor.pricing?.homeVisit || doctor.pricing?.telemedicine
-		? [doctor.pricing.homeVisit, doctor.pricing.telemedicine, doctor.pricing.clinicVisit]
-				.filter(Boolean)
-				.join(' / ')
-		: undefined;
-
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'Physician',
-		'@id': canonicalUrl,
-		name: doctor.doctorName,
-		alternateName: doctor.professionalTitle,
-		description: doctor.bio,
-		image: imageUrl,
-		url: canonicalUrl,
-		jobTitle: doctor.professionalTitle,
-		gender: doctor.gender?.toLowerCase() === 'female' ? 'Female' : 'Male',
-		knowsLanguage: doctor.languages?.map((lang: string) => ({
-			'@type': 'Language',
-			name: lang,
-		})),
-		medicalSpecialty: doctor.speciality,
-		availableService: {
-			'@type': 'MedicalProcedure',
-			name: locale === 'ar' ? 'Ø§Ø³ØªØ´Ø§Ø±Ø© Ø·Ø¨ÙŠØ©' : 'Medical Consultation',
-			description:
-				locale === 'ar'
-					? `Ø§Ø³ØªØ´Ø§Ø±Ø© Ø·Ø¨ÙŠØ© Ù…Ø¹ ${doctor.doctorName}`
-					: `Medical consultation with ${doctor.doctorName}`,
-			availableChannel: doctor.channels?.map((channel: string) => ({
-				'@type': 'ServiceChannel',
-				name: channel,
-			})),
-		},
-		worksFor: {
-			'@type': 'MedicalOrganization',
-			'@id': `${baseUrl}#organization`,
-			name: 'Anees Health',
-			url: baseUrl,
-		},
-		hasCredential: doctor.certifications?.map((cert: string) => ({
-			'@type': 'EducationalOccupationalCredential',
-			credentialCategory: 'certification',
-			name: cert,
-		})),
-		alumniOf: doctor.education?.map((edu) => ({
-			'@type': 'EducationalOrganization',
-			name: edu.university,
-			description: `${edu.degree}${edu.year ? ` (${edu.year})` : ''}`,
-		})),
-		aggregateRating: doctor.rating
-			? {
-					'@type': 'AggregateRating',
-					ratingValue: doctor.rating,
-					bestRating: 5,
-					worstRating: 1,
-				}
-			: undefined,
-		areaServed: doctor.areaCoverage?.map((area: string) => ({
-			'@type': 'City',
-			name: area,
-		})),
-		priceRange,
-	};
-}
-
-/**
- * ItemList Schema for Doctors Collection
- * For doctors listing page
- */
-export function generateDoctorsCollectionSchema(
-	doctors: Array<{
-		doctorName: string;
-		bio?: string;
-		professionalTitle: string;
-		image: string;
-		profileLink: string;
-		speciality: string;
-		rating?: number;
-	}>,
-	locale: string = 'en',
-	currentPage: number = 1
-) {
-	const baseUrl = config.api.baseUrl;
-
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'ItemList',
-		name: locale === 'ar' ? 'Ø£Ø·Ø¨Ø§Ø¡ Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø«' : 'Anees Health Doctors',
-		description:
-			locale === 'ar'
-				? 'Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø£Ø·Ø¨Ø§Ø¡ Ø§Ù„Ù…ØªØ§Ø­ÙŠÙ† Ù„Ù„Ø²ÙŠØ§Ø±Ø§Øª Ø§Ù„Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ§Ù„Ø§Ø³ØªØ´Ø§Ø±Ø§Øª Ø§Ù„Ø·Ø¨ÙŠØ© Ø¹Ù† Ø¨Ø¹Ø¯'
-				: 'List of doctors available for home visits and telemedicine consultations',
-		url: `${baseUrl}/${locale}/doctors`,
-		numberOfItems: doctors.length,
-		/*itemListElement: doctors.slice(0, 20)map((doctor, index) => ({*/
-		itemListElement: doctors.map((doctor, index) => ({
-			'@type': 'ListItem',
-			position: (currentPage - 1) * doctors.length + index + 1,
-			item: {
-				'@type': 'Physician',
-				name: doctor.doctorName,
-				description: doctor.bio?.substring(0, 200) || doctor.professionalTitle,
-				image: doctor.image.startsWith('http')
-					? doctor.image
-					: `${baseUrl}/${doctor.image}`,
-				url: `${baseUrl}/${locale}/doctors/${generateDoctorSlug(doctor.doctorName)}`,
-				medicalSpecialty: doctor.speciality,
-				aggregateRating: doctor.rating
-					? {
-							'@type': 'AggregateRating',
-							ratingValue: doctor.rating,
-							bestRating: 5,
-						}
-					: undefined,
-			},
-		})),
-	};
-}
-
-/**
- * FAQ Page Schema
- * Helps appear in rich snippets
- */
-export function generateFAQSchema(
-	faqs: Array<{ question: string; answer: string }>
-) {
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'FAQPage',
-		mainEntity: faqs.map((faq) => ({
-			'@type': 'Question',
-			name: faq.question,
-			acceptedAnswer: {
-				'@type': 'Answer',
-				text: faq.answer,
-			},
-		})),
-	};
-}
-
-/**
- * Breadcrumb List Schema
- * Shows navigation path in search results
- */
-export function generateBreadcrumbSchema(
-	breadcrumbs: Array<{ name: string; url: string }>
-) {
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'BreadcrumbList',
-		itemListElement: breadcrumbs.map((item, index) => ({
-			'@type': 'ListItem',
-			position: index + 1,
-			name: item.name,
-			item: item.url,
-		})),
-	};
-}
-
-/**
- * Website Schema
- * Main website representation
- */
-export function generateWebsiteSchema(locale: string = 'en') {
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'WebSite',
-		'@id': `${config.api.baseUrl}#website`,
-		url: config.api.baseUrl,
-		name: 'Anees Health',
-		description:
-			locale === 'ar'
-				? 'Ù…Ù†ØµØ© Ø±Ø§Ø¦Ø¯Ø© ÙÙŠ Ù…ØµØ± Ù„Ù„Ø±Ø¹Ø§ÙŠØ© Ø§Ù„ØµØ­ÙŠØ© Ø§Ù„Ù…Ù†Ø²Ù„ÙŠØ© ÙˆØ§Ù„ØªØ·Ø¨ÙŠØ¨ Ø¹Ù† Ø¨Ø¹Ø¯'
-				: "Egypt's leading home healthcare and telemedicine platform",
-		potentialAction: {
-			'@type': 'SearchAction',
-			target: {
-				'@type': 'EntryPoint',
-				urlTemplate: `${config.api.baseUrl}/${locale}/doctors?search={search_term_string}`,
-			},
-			'query-input': 'required name=search_term_string',
-		},
-		inLanguage: locale === 'ar' ? 'ar-EG' : 'en-US',
-	};
-}
-
-/**
- * Helper to serialize JSON-LD as string for server-side rendering.
- *
- * Escapes characters that would let DB content break out of a <script> tag.
- * Without this, a doctor bio containing `</script>` or `<!--` becomes XSS
- * when inlined via dangerouslySetInnerHTML.
- *
- * See: https://html.spec.whatwg.org/multipage/scripting.html#restrictions-for-contents-of-script-elements
- */
-export function renderJsonLd(schema: object): string {
-	return JSON.stringify(schema, null, 0)
-		.replace(/</g, '\\u003c')
-		.replace(/>/g, '\\u003e')
-		.replace(/&/g, '\\u0026');
-}
-
-/**
- * Alias for rendering structured data as string (non-JSX to keep this file TS-only)
- */
+/** Alias kept for legacy callers. */
 export function renderStructuredData(schema: object): string {
-	return renderJsonLd(schema);
+  return newRenderJsonLd(schema);
+}
+
+export function generateOrganizationSchema(locale: string = 'en') {
+  return organizationSchema(asLocale(locale));
 }
 
 /**
- * ContactPage Schema with ContactPoint
- * For contact us page
+ * Legacy: LocalBusiness took no arguments. The new helper requires the
+ * coverage-area list — for the shim we pass an empty list, which yields a
+ * minimal LocalBusiness without per-area entries. Layouts should migrate
+ * to `localBusinessSchema(locale, await getCoverageAreas())`.
  */
+export function generateLocalBusinessSchema(locale: string = 'en') {
+  return localBusinessSchema(asLocale(locale), []);
+}
+
+export function generateWebsiteSchema(locale: string = 'en') {
+  return websiteSchema(asLocale(locale));
+}
+
+export function generateBreadcrumbSchema(items: BreadcrumbItem[]) {
+  return breadcrumbSchema(items);
+}
+
+export function generateFAQSchema(faqs: FaqItem[]) {
+  return faqPageSchema(faqs);
+}
+
 export function generateContactPageSchema(locale: string = 'en') {
-	const baseUrl = config.api.baseUrl;
-
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'ContactPage',
-		'@id': `${baseUrl}/${locale}/contact-us`,
-		url: `${baseUrl}/${locale}/contact-us`,
-		name: locale === 'ar' ? 'Ø§ØªØµÙ„ Ø¨Ù†Ø§' : 'Contact Us',
-		description:
-			locale === 'ar'
-				? 'ØªÙˆØ§ØµÙ„ Ù…Ø¹ ÙØ±ÙŠÙ‚ Ø£Ù†ÙŠØ³ Ù‡ÙŠÙ„Ø«'
-				: 'Get in touch with Anees Health team',
-		mainEntity: {
-			'@type': 'Organization',
-			'@id': `${baseUrl}#organization`,
-			name: 'Anees Health',
-			contactPoint: [
-				{
-					'@type': 'ContactPoint',
-					telephone: '+20-1270558620',
-					contactType: 'Customer Service',
-					availableLanguage: ['English', 'Arabic'],
-					areaServed: 'EG',
-					hoursAvailable: {
-						'@type': 'OpeningHoursSpecification',
-						dayOfWeek: [
-							'Monday',
-							'Tuesday',
-							'Wednesday',
-							'Thursday',
-							'Friday',
-							'Saturday',
-							'Sunday',
-						],
-						opens: '00:00',
-						closes: '23:59',
-					},
-				},
-			],
-		},
-	};
+  return contactPageSchema(asLocale(locale));
 }
 
-/**
- * Article Schema for content pages
- * Helps AI models understand content hierarchy and authorship
- */
 export function generateArticleSchema(
-	article: {
-		title: string;
-		description: string;
-		datePublished?: string;
-		dateModified?: string;
-		author?: string;
-	},
-	locale: string = 'en',
-	url: string
+  data: {
+    title: string;
+    description: string;
+    datePublished: string;
+    dateModified: string;
+    author: string;
+  },
+  locale: string,
+  url: string
 ) {
-	const baseUrl = config.api.baseUrl;
+  return articleSchema(data, asLocale(locale), url);
+}
 
-	return {
-		'@context': 'https://schema.org',
-		'@type': 'Article',
-		headline: article.title,
-		description: article.description,
-		url,
-		datePublished: article.datePublished || new Date().toISOString(),
-		dateModified: article.dateModified || new Date().toISOString(),
-		author: {
-			'@type': 'Organization',
-			name: article.author || 'Anees Health',
-			url: baseUrl,
-		},
-		publisher: {
-			'@type': 'Organization',
-			'@id': `${baseUrl}#organization`,
-			name: 'Anees Health',
-			logo: {
-				'@type': 'ImageObject',
-				url: `${baseUrl}/logos/anees-health-logo.png`,
-			},
-		},
-		inLanguage: locale === 'ar' ? 'ar-EG' : 'en-US',
-		mainEntityOfPage: {
-			'@type': 'WebPage',
-			'@id': url,
-		},
-	};
+export function generatePhysicianSchema(
+  doctor: Doctor,
+  locale: string = 'en',
+  canonicalUrl: string
+) {
+  // Derive slug from the canonical URL (last path segment)
+  const slug = canonicalUrl.replace(/\/$/, '').split('/').pop() || '';
+  return newPhysicianSchema(asLocale(locale), doctor, slug);
+}
+
+/** Legacy simple Physician (listing entries). Routed to MedicalProcedure-free Physician minimal block. */
+export function generateDoctorSchema(
+  doctor: {
+    name: string;
+    specialty: string;
+    bio: string;
+    slug: string;
+    image?: string;
+  },
+  locale: string = 'en'
+) {
+  const minimal: Doctor = {
+    id: 0,
+    image: doctor.image || '',
+    rating: 0,
+    speciality: doctor.specialty,
+    specialityColorClass: '',
+    specialityTextClass: '',
+    availabilityStatus: '',
+    availabilityBadgeClass: '',
+    doctorName: doctor.name,
+    location: 'Cairo',
+    duration: '',
+    consultationFee: '',
+    maxConsultationFee: '',
+    professionalTitle: '',
+    profileLink: '',
+    bookingLink: '',
+    gender: '',
+    channels: [],
+    languages: [],
+    clinics: [],
+    experienceYears: 0,
+    bio: doctor.bio,
+    certifications: [],
+    education: [],
+    pricing: { telemedicine: '', homeVisit: '', clinicVisit: '' },
+    successRate: '',
+    avgWaitTime: '',
+    totalPatients: '',
+    areaCoverage: [],
+    clinicDetails: [],
+    testimonials: [],
+  };
+  return newPhysicianSchema(asLocale(locale), minimal, doctor.slug);
+}
+
+export function generateMedicalServiceSchema(
+  service: { name: string; description: string; slug: string },
+  locale: string = 'en'
+) {
+  return medicalProcedureSchema({
+    locale: asLocale(locale),
+    slug: service.slug,
+    name: service.name,
+    description: service.description,
+  });
+}
+
+export function generateDoctorsCollectionSchema(
+  doctors: Array<{
+    doctorName: string;
+    bio?: string;
+    professionalTitle: string;
+    image: string;
+    profileLink: string;
+    speciality: string;
+    rating?: number;
+  }>,
+  locale: string = 'en'
+) {
+  // Adapt the partial shape to full Doctor type expected by the new helper.
+  const adapted: Doctor[] = doctors.map((d, idx) => ({
+    id: idx,
+    image: d.image,
+    rating: d.rating ?? 0,
+    speciality: d.speciality,
+    specialityColorClass: '',
+    specialityTextClass: '',
+    availabilityStatus: '',
+    availabilityBadgeClass: '',
+    doctorName: d.doctorName,
+    location: '',
+    duration: '',
+    consultationFee: '',
+    maxConsultationFee: '',
+    professionalTitle: d.professionalTitle,
+    profileLink: d.profileLink,
+    bookingLink: '',
+    gender: '',
+    channels: [],
+    languages: [],
+    clinics: [],
+    experienceYears: 0,
+    bio: d.bio ?? '',
+    certifications: [],
+    education: [],
+    pricing: { telemedicine: '', homeVisit: '', clinicVisit: '' },
+    successRate: '',
+    avgWaitTime: '',
+    totalPatients: '',
+    areaCoverage: [],
+    clinicDetails: [],
+    testimonials: [],
+  }));
+  return physiciansItemListSchema(asLocale(locale), adapted, (d) => {
+    // profileLink is like /en/doctors/<slug> — extract the slug
+    return d.profileLink.replace(/\/$/, '').split('/').pop() || '';
+  });
 }

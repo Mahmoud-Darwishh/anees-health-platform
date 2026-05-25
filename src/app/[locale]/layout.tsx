@@ -10,10 +10,13 @@ import FloatingIconsOnScroll from '@/components/common/FloatingIconsOnScroll';
 import PwaInstallPrompt from '@/components/common/PwaInstallPrompt';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import {
-  generateOrganizationSchema,
-  generateLocalBusinessSchema,
-  generateWebsiteSchema,
-} from '@/lib/utils/structured-data';
+  organizationSchema,
+  localBusinessSchema,
+  websiteSchema,
+  renderJsonLd,
+} from '@/lib/seo/jsonld';
+import { getCoverageAreas } from '@/lib/seo/coverage';
+import type { SupportedLocale } from '@/lib/seo/site';
 import SessionProvider from '@/components/common/SessionProvider';
 import '@/styles/globals.scss';
 import '@/styles/legacy.scss';
@@ -47,29 +50,36 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const t = await getTranslations({ locale, namespace: 'common' });
     const direction = locale === 'ar' ? 'rtl' : 'ltr';
+  const seoLocale: SupportedLocale = locale === 'ar' ? 'ar' : 'en';
 
-  // Generate structured data for this locale
-    const organizationSchema = generateOrganizationSchema(locale);
-  const localBusinessSchema = generateLocalBusinessSchema();
-    const websiteSchema = generateWebsiteSchema(locale);
+  // Coverage feeds LocalBusiness.areaServed so the schema reflects the
+  // real GeoJSON instead of a hardcoded city. Adding a feature to the
+  // GeoJSON automatically expands the served area list.
+  const coverageAreas = await getCoverageAreas();
+  const orgSchema = organizationSchema(seoLocale);
+  const lbSchema = localBusinessSchema(seoLocale, coverageAreas);
+  const wsSchema = websiteSchema(seoLocale);
 
   return (
       <NextIntlClientProvider messages={messages} locale={locale} timeZone="Africa/Cairo">
       <SessionProvider>
         <div dir={direction} lang={locale}>
         <a href="#main-content" className="skip-link">{t('skip_to_main_content')}</a>
-        {/* Structured Data for SEO & GEO */}
+        {/* Site-wide JSON-LD — emitted ONCE here so we don't ship duplicate
+            schema blocks from the root layout. Per-route JSON-LD (breadcrumb,
+            FAQ, Physician, MedicalProcedure, Place) is emitted by each
+            individual page. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: renderJsonLd(orgSchema) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+          dangerouslySetInnerHTML={{ __html: renderJsonLd(lbSchema) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+          dangerouslySetInnerHTML={{ __html: renderJsonLd(wsSchema) }}
         />
 
         {children}

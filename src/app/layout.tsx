@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { locales } from '@/i18n/request';
 import Script from 'next/script';
-import { config } from '@/lib/config';
+import { locales } from '@/i18n/request';
 import LazyStylesheet from '@/components/common/LazyStylesheet';
+import { buildSiteMetadata } from '@/lib/seo/metadata';
+import { site } from '@/lib/seo/site';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -13,87 +14,25 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-const siteUrl = config.api.baseUrl;
-
+/**
+ * Site-wide default metadata. Per-route metadata (in `[locale]/...`) overrides
+ * this. Concrete JSON-LD (Organization, LocalBusiness, WebSite, FAQ, etc.) is
+ * emitted ONCE from `[locale]/layout.tsx` — never here — so we don't ship
+ * duplicate schema blocks or a default English-only block on Arabic pages.
+ */
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: 'Anees Health | Home Healthcare & Telemedicine Egypt',
-    template: '%s | Anees Health',
-  },
-  description: 'Anees Health is Egypt\'s leading home healthcare and telemedicine platform for seniors and chronic care patients—doctor home visits, skilled nursing, physiotherapy, lab at home, remote monitoring, medication management, and 24/7 medical support across Egypt.',
-  keywords: 'Anees Health, home healthcare Egypt, doctor home visit, home nurse Egypt, telemedicine Egypt, physiotherapy at home, elderly care, chronic disease management, palliative home care, post operative care, lab tests at home, remote patient monitoring, medical equipment rental, رعاية صحية منزلية مصر، طبيب منزلي، تمريض منزلي',
-  authors: [{ name: 'Anees Health' }],
-  creator: 'Anees Health',
-  publisher: 'Anees Health',
-  formatDetection: {
-    telephone: true,
-    email: true,
-    address: true,
-  },
+  ...buildSiteMetadata(),
   icons: {
     icon: '/assets/img/fav.png',
     apple: '/assets/img/footer-logo.png',
   },
-  openGraph: {
-    title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
-    description: 'Trusted home healthcare and telemedicine across Egypt: doctor home visits, skilled nursing, physiotherapy, lab at home, chronic disease management, and 24/7 medical support for seniors and families.',
-    siteName: 'Anees Health',
-    url: `${siteUrl}/`,
-    type: 'website',
-    locale: 'en_US',
-    alternateLocale: ['ar_EG'],
-    images: [
-      {
-        url: '/assets/img/about-img1.png',
-        width: 1200,
-        height: 630,
-        alt: 'Anees Health - Home Healthcare Services',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Anees Health | Home Healthcare & Telemedicine Egypt',
-    description: 'Home healthcare and telemedicine in Egypt: doctor home visits, nursing, physiotherapy, lab at home, chronic care, and 24/7 support for seniors and families.',
-    creator: '@aneeshealth',
-    site: '@aneeshealth',
-    images: ['/assets/img/about-img1.png'],
-  },
-  alternates: {
-    canonical: `${siteUrl}/`,
-    languages: {
-      'en-US': `${siteUrl}/en`,
-      'ar-EG': `${siteUrl}/ar`,
-    },
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  verification: {
-    // Add your verification codes when available
-    // google: 'your-google-verification-code',
-    // yandex: 'your-yandex-verification-code',
-    // bing: 'your-bing-verification-code',
-  },
   category: 'Healthcare',
   other: {
-    // Additional metadata for AI crawlers
     'google-site-verification': process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
     'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || '',
-    // Chrome deprecates the Apple-specific flag; use the generic equivalent
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
-    'apple-mobile-web-app-title': 'Anees Health',
+    'apple-mobile-web-app-title': site.name,
   },
 };
 
@@ -112,10 +51,12 @@ export default function RootLayout({
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="theme-color" content="#0066cc" />
+        {/* Egypt-targeted geo signals. The locale layout emits richer
+            schema-level geo via LocalBusiness + Place. */}
         <meta name="geo.region" content="EG" />
         <meta name="geo.placename" content="Cairo, Egypt" />
-        <meta name="geo.position" content="30.0444;31.2357" />
-        <meta name="ICBM" content="30.0444, 31.2357" />
+        <meta name="geo.position" content={`${site.geo.latitude};${site.geo.longitude}`} />
+        <meta name="ICBM" content={`${site.geo.latitude}, ${site.geo.longitude}`} />
 
         {/* Connection warm-up for render-critical and third-party origins */}
         <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
@@ -125,10 +66,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://chatling.ai" crossOrigin="anonymous" />
 
-        {/* Third-party stylesheets. Bootstrap is render-blocking and used by */}
-        {/* most public layouts (grid + utilities) — keep eager. Font Awesome */}
-        {/* is decorative and never used above the fold on home, so we inject */}
-        {/* it lazily from the client to keep it off the critical path. */}
+        {/* Bootstrap (render-critical for shared grid/utilities) */}
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -151,269 +89,14 @@ export default function RootLayout({
         </noscript>
       </head>
       <body>
-        {/* Font Awesome — non-critical, decorative; load lazily from the */}
-        {/* client to keep it off the critical render path. */}
+        {/* Font Awesome — non-critical, decorative; lazy-loaded from client */}
         <LazyStylesheet
           id="fa-stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
         {children}
 
-        {/* Organization Schema for AI Search Engine Optimization (GEO) */}
-        <Script id="org-schema" type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'MedicalOrganization',
-            '@id': 'https://aneeshealth.com/#organization',
-            name: 'Anees Health',
-            alternateName: ['Anees', 'أنيس هيلث', 'أنيس'],
-            description: "Egypt's leading home healthcare and telemedicine platform for seniors and chronic care patients",
-            url: 'https://aneeshealth.com',
-            logo: 'https://aneeshealth.com/assets/img/footer-logo.png',
-            image: 'https://aneeshealth.com/assets/img/about-img1.png',
-            telephone: '+20-1270558620',
-            email: 'info@aneeshealth.com',
-            founder: [
-              {
-                '@type': 'Person',
-                '@id': 'https://aneeshealth.com/en/doctors/dr-mahmoud-darwish#person',
-                name: 'Dr. Mahmoud Darwish',
-                url: 'https://aneeshealth.com/en/doctors/dr-mahmoud-darwish',
-                jobTitle: 'Co-Founder',
-                worksFor: {
-                  '@id': 'https://aneeshealth.com/#organization',
-                },
-              },
-              {
-                '@type': 'Person',
-                '@id': 'https://aneeshealth.com/en/doctors/dr-ahmed-oraby#person',
-                name: 'Dr. Ahmed Oraby',
-                url: 'https://aneeshealth.com/en/doctors/dr-ahmed-oraby',
-                jobTitle: 'Co-Founder',
-                worksFor: {
-                  '@id': 'https://aneeshealth.com/#organization',
-                },
-              },
-            ],
-            
-            // 24/7 Availability - Key for AI search
-            openingHoursSpecification: {
-              '@type': 'OpeningHoursSpecification',
-              dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-              opens: '00:00',
-              closes: '23:59',
-            },
-            
-            // Main Address
-            address: {
-              '@type': 'PostalAddress',
-              streetAddress: 'Cairo',
-              addressLocality: 'Cairo',
-              addressRegion: 'Cairo',
-              postalCode: '11511',
-              addressCountry: 'EG',
-            },
-            
-            // Service Coverage
-            areaServed: {
-              '@type': 'Country',
-              name: 'Egypt',
-            },
-            
-            // Social Media & Online Presence
-            sameAs: config.brand.socialProfiles,
-            
-            // Contact Points
-            contactPoint: [
-              {
-                '@type': 'ContactPoint',
-                telephone: '+20-1270558620',
-                contactType: 'Customer Service',
-                availableLanguage: ['English', 'Arabic'],
-                areaServed: 'EG',
-              },
-              {
-                '@type': 'ContactPoint',
-                email: 'info@aneeshealth.com',
-                contactType: 'Support',
-              },
-            ],
-            
-            // Medical Specialties Offered
-            medicalSpecialty: [
-              'Geriatrics',
-              'Internal Medicine',
-              'Physiotherapy',
-              'Home Nursing',
-              'Palliative Care',
-              'Remote Patient Monitoring',
-              'Telemedicine',
-            ],
-            
-            // Services Offered with Pricing
-            availableService: [
-              {
-                '@type': 'MedicalService',
-                name: 'Doctor Home Visits',
-                description: 'In-home consultations with qualified doctors',
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'EGP',
-                  priceSpecification: {
-                    '@type': 'PriceSpecification',
-                    minPrice: '900',
-                    priceCurrency: 'EGP',
-                  },
-                  availability: 'https://schema.org/InStock',
-                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
-                },
-              },
-              {
-                '@type': 'MedicalService',
-                name: 'Home Nursing',
-                description: 'Skilled nursing care at home',
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'EGP',
-                  priceSpecification: {
-                    '@type': 'PriceSpecification',
-                    minPrice: '700',
-                    priceCurrency: 'EGP',
-                  },
-                  availability: 'https://schema.org/InStock',
-                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
-                },
-              },
-              {
-                '@type': 'MedicalService',
-                name: 'Physiotherapy',
-                description: 'Home-based physical therapy',
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'EGP',
-                  priceSpecification: {
-                    '@type': 'PriceSpecification',
-                    minPrice: '600',
-                    priceCurrency: 'EGP',
-                  },
-                  availability: 'https://schema.org/InStock',
-                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
-                },
-              },
-              {
-                '@type': 'MedicalService',
-                name: 'Lab Tests at Home',
-                description: 'In-home laboratory testing services',
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'EGP',
-                  priceSpecification: {
-                    '@type': 'PriceSpecification',
-                    minPrice: '150',
-                    priceCurrency: 'EGP',
-                  },
-                  availability: 'https://schema.org/InStock',
-                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
-                },
-              },
-              {
-                '@type': 'MedicalService',
-                name: 'Telemedicine',
-                description: 'Remote medical consultations',
-                offers: {
-                  '@type': 'Offer',
-                  priceCurrency: 'EGP',
-                  priceSpecification: {
-                    '@type': 'PriceSpecification',
-                    minPrice: '200',
-                    priceCurrency: 'EGP',
-                  },
-                  availability: 'https://schema.org/InStock',
-                  availableDeliveryMethod: 'https://schema.org/OnSitePickup',
-                },
-              },
-            ],
-            
-            // Key Features
-            knowsAbout: [
-              'Home Healthcare',
-              'Telemedicine',
-              'Elderly Care',
-              'Chronic Disease Management',
-              'Doctor Home Visits',
-              'Home Nursing',
-              'Physiotherapy',
-              'Palliative Care',
-              'Remote Patient Monitoring',
-              '24/7 Medical Support',
-            ],
-            
-            // Trust & Credibility
-            priceRange: '$$',
-            
-            // Keywords for AI
-            keywords: 'home healthcare Egypt, doctor home visit, telemedicine Egypt, nursing at home, physiotherapy home, elderly care Cairo, chronic disease management, remote monitoring',
-          })}
-        </Script>
-
-        {/* FAQPage Schema for AI Discovery */}
-        <Script id="faq-schema" type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              {
-                '@type': 'Question',
-                name: 'What is Anees Health?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Anees Health is Egypts leading home healthcare and telemedicine platform providing doctor home visits, nursing, physiotherapy, and 24/7 medical support.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Does Anees operate 24/7?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Yes, Anees Health provides 24/7 medical support and services across Egypt.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'What services does Anees offer?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Services include doctor home visits, home nursing, physiotherapy, lab tests at home, telemedicine, remote monitoring, and medication management.',
-                },
-              },
-              {
-                '@type': 'Question',
-                name: 'Where does Anees operate?',
-                acceptedAnswer: {
-                  '@type': 'Answer',
-                  text: 'Anees Health serves multiple regions across Egypt with comprehensive home healthcare services.',
-                },
-              },
-            ],
-          })}
-        </Script>
-
-        {/* Aggregate Review/Rating Schema - Visible in Search Results */}
-        <Script id="review-schema" type="application/ld+json">
-          {JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'AggregateRating',
-            '@id': 'https://aneeshealth.com/#review',
-            ratingValue: '4.9',
-            ratingCount: '287',
-            reviewCount: '287',
-            worstRating: 3.5,
-            bestRating: 5,
-            name: 'Anees Health Reviews',
-          })}
-        </Script>
-
-        {/* Microsoft Clarity - Lazy load */}
+        {/* Microsoft Clarity */}
         <Script id="clarity-script" strategy="lazyOnload">
           {`
             (function(c,l,a,r,i,t,y){
@@ -424,7 +107,7 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Chatling - Lazy load to improve first paint */}
+        {/* Chatling */}
         <Script id="chatling-script" strategy="lazyOnload">
           {`
             window.chtlConfig = { chatbotId: "9941775766" };
@@ -439,7 +122,7 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Meta Pixel - Lazy load */}
+        {/* Meta Pixel */}
         <Script id="facebook-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)

@@ -9,6 +9,7 @@ import { DoctorCard } from "@/features/doctors/components/doctorgrid/DoctorCard"
 import type { Doctor } from "@/features/doctors/components/doctorgrid/types";
 import { Reveal } from "@/components/common/Reveal";
 import { useCarouselAutoplay } from "@/hooks/useCarouselAutoplay";
+import styles from "./sectionDoctor.module.scss";
 
 // react-slick is ~40 KB min+gz and the Doctor section is below the fold.
 // Defer it (and its CSS) until the route actually renders the carousel.
@@ -141,14 +142,14 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
   };
 
   return (
-    <Reveal as="section" className="doctor-section">
+    <Reveal as="section" className={styles.section}>
       <div className="container">
-        <div className="section-header sec-header-one text-center">
-          <span className="badge badge-primary">{t("doctors.title")}</span>
-          <h2>{t("doctors.subtitle")}</h2>
+        <div className={styles.header}>
+          <span className={styles.badge}>{t("doctors.title")}</span>
+          <h2 className={styles.heading}>{t("doctors.subtitle")}</h2>
         </div>
         <div
-          className="doctors-slider slick-margins slick-arrow-center"
+          className={`${styles.carousel} doctors-slider slick-margins slick-arrow-center`}
           onMouseEnter={pause}
           onMouseLeave={() => scheduleResume()}
           onFocus={pause}
@@ -170,11 +171,10 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
               );
             })}
           </Slider>
-          <div className="owl-nav nav-bottom">
+          <div className={styles.nav}>
             <button
               type="button"
               aria-label="Previous"
-              className="owl-prev"
               onClick={() => {
                 pause();
                 slider?.slickPrev();
@@ -186,7 +186,6 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
             <button
               type="button"
               aria-label="Next"
-              className="owl-next"
               onClick={() => {
                 pause();
                 slider?.slickNext();
