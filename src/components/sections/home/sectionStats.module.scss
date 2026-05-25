@@ -1,0 +1,74 @@
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATS — thin white strip with hairline dividers
+// ═══════════════════════════════════════════════════════════════════
+
+.section {
+  padding: 24px 0;
+  background: $white;
+  border-top: 1px solid #ecebe6;
+  border-bottom: 1px solid #ecebe6;
+
+  @include respond-below(custom767) {
+    padding: 20px 0;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include respond-below(custom767) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 12px;
+  }
+}
+
+.item {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: 0;
+    top: 14%;
+    bottom: 14%;
+    width: 1px;
+    background: #ecebe6;
+
+    @include respond-below(custom767) {
+      display: none;
+    }
+  }
+}
+
+.value {
+  font-size: 30px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'tnum' 1;
+
+  @include respond-below(custom767) {
+    font-size: 24px;
+  }
+}
+
+.label {
+  font-size: 12px;
+  color: #8a8f99;
+  font-weight: $font-weight-medium;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}

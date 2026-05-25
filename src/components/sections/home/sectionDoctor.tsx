@@ -1,10 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Slider from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
 import { DoctorCard } from "@/features/doctors/components/doctorgrid/DoctorCard";
 import type { Doctor } from "@/features/doctors/components/doctorgrid/types";
+import { Reveal } from "@/components/common/Reveal";
+import { useCarouselAutoplay } from "@/hooks/useCarouselAutoplay";
+
+const AUTOPLAY_MS = 5000;
+const RESUME_DELAY_MS = 4000;
 
 interface SectionDoctorProps {
   doctors: Doctor[];
@@ -43,6 +48,20 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
       slider.slickGoTo(0);
     }
   }, [locale, slider, slidesToShow]);
+
+  // Shared autoplay coordination — drives slick imperatively via slickNext so
+  // we get the same pause-on-hover / pause-on-tab-hidden / reduced-motion
+  // semantics as Packages and PatientStories.
+  const advance = useCallback(() => {
+    slider?.slickNext();
+  }, [slider]);
+  const { pause, scheduleResume } = useCarouselAutoplay({
+    total: featuredDoctors.length,
+    autoplayMs: AUTOPLAY_MS,
+    resumeDelayMs: RESUME_DELAY_MS,
+    enabled: featuredDoctors.length > slidesToShow,
+    onAdvance: advance,
+  });
 
   const Doctoroptions = {
     slidesToShow,
@@ -109,13 +128,21 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
   };
 
   return (
-    <section className="doctor-section">
+    <Reveal as="section" className="doctor-section">
       <div className="container">
         <div className="section-header sec-header-one text-center">
           <span className="badge badge-primary">{t("doctors.title")}</span>
           <h2>{t("doctors.subtitle")}</h2>
         </div>
-        <div className="doctors-slider slick-margins slick-arrow-center">
+        <div
+          className="doctors-slider slick-margins slick-arrow-center"
+          onMouseEnter={pause}
+          onMouseLeave={() => scheduleResume()}
+          onFocus={pause}
+          onBlur={() => scheduleResume()}
+          onTouchStart={pause}
+          onTouchEnd={() => scheduleResume()}
+        >
           <Slider ref={setSlider} key={locale} {...Doctoroptions}>
             {featuredDoctors.map((doc) => {
               return (
@@ -135,7 +162,11 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
               type="button"
               aria-label="Previous"
               className="owl-prev"
-              onClick={() => slider?.slickPrev()}
+              onClick={() => {
+                pause();
+                slider?.slickPrev();
+                scheduleResume();
+              }}
             >
               <i className="fa-solid fa-chevron-left" />
             </button>
@@ -143,14 +174,18 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
               type="button"
               aria-label="Next"
               className="owl-next"
-              onClick={() => slider?.slickNext()}
+              onClick={() => {
+                pause();
+                slider?.slickNext();
+                scheduleResume();
+              }}
             >
               <i className="fa-solid fa-chevron-right" />
             </button>
           </div>
         </div>
       </div>
-    </section>
+    </Reveal>
   );
 };
 

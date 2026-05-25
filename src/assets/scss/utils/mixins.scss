@@ -79,6 +79,21 @@ $breakpoints: (
 }
 
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Section vertical padding — unified rhythm across home + landing sections.
+   Use @include section-padding; at the section root.
+   ────────────────────────────────────────────────────────────────────────── */
+@mixin section-padding {
+  padding: 112px 0 96px;
+
+  @include respond-below(custom991) {
+    padding: 88px 0 76px;
+  }
+  @include respond-below(custom767) {
+    padding: 64px 0 56px;
+  }
+}
+
 
 @mixin transform($property) {
   transform: $property;

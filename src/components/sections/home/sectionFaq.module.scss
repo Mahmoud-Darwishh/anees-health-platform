@@ -1,0 +1,173 @@
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+// ═══════════════════════════════════════════════════════════════════
+//  FAQ — minimal accordion, hairline dividers
+// ═══════════════════════════════════════════════════════════════════
+
+.section {
+  @include section-padding;
+  background: $white;
+}
+
+.header {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+
+  @include respond-below(custom767) {
+    margin-bottom: 40px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: $primary;
+  margin-bottom: 18px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+    margin-inline-end: 10px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+}
+
+.heading {
+  font-size: 40px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0;
+
+  @include respond-below(custom991) {
+    font-size: 32px;
+  }
+
+  @include respond-below(custom767) {
+    font-size: 26px;
+  }
+}
+
+// ─── List ────────────────────────────────────────────────────────
+
+.list {
+  max-width: 760px;
+  margin: 0 auto;
+  border-top: 1px solid #ecebe6;
+}
+
+.item {
+  border-bottom: 1px solid #ecebe6;
+  transition: background 0.2s ease;
+}
+
+.itemOpen {
+  .chevron i::before {
+    content: '\f068'; // unused — chevron handled via CSS transform below
+  }
+}
+
+.headingItem {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 4px;
+  background: transparent;
+  border: none;
+  text-align: start;
+  cursor: pointer;
+  font-family: inherit;
+  color: $brand-dark-blue;
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.55);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  @include respond-below(custom767) {
+    padding: 20px 2px;
+    gap: 12px;
+  }
+}
+
+.question {
+  flex: 1;
+  font-size: 17px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  transition: color 0.2s ease;
+
+  @include respond-below(custom767) {
+    font-size: 15px;
+  }
+}
+
+.trigger:hover .question {
+  color: $primary;
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa4b1;
+  font-size: 18px;
+  transition: transform 0.3s ease, color 0.3s ease;
+
+  i {
+    line-height: 1;
+  }
+}
+
+.itemOpen .chevron {
+  transform: rotate(45deg);
+  color: $primary;
+}
+
+// ─── Panel ───────────────────────────────────────────────────────
+
+.panel {
+  overflow: hidden;
+}
+
+.panelInner {
+  padding: 0 4px 26px;
+  max-width: 92%;
+
+  @include respond-below(custom767) {
+    padding: 0 2px 22px;
+    max-width: 100%;
+  }
+}
+
+.answer {
+  margin: 0;
+  font-size: 15px;
+  color: #5a6573;
+  line-height: 1.75;
+}

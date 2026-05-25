@@ -465,6 +465,10 @@
       "contact_note": "Have questions or need a custom package? We're here to help.",
       "contact_us": "Contact Us",
       "contact_us_aria": "Contact us to learn more about our health packages",
+      "pricing_label": "Choose your plan",
+      "sanad_contact_note": "Questions? Contact us directly",
+      "dots_aria": "Package slider navigation",
+      "go_to_package": "Go to {name} package",
       "sanad_badge": "Our Flagship",
       "sanad_main_tagline": "One Doctor · One Number · One Profile",
       "sanad_sub_tagline": "We relieve the hassle and manage your health journey end to end",
@@ -541,18 +545,18 @@
       }
     },
     "faqs": {
-      "badge": "FAQ'S",
-      "title": "Your Questions are Answered",
-      "q1": "How do I book an appointment with a doctor?",
-      "a1": "Yes, simply visit our website and log in or create an account. Search for a doctor based on specialization, location, or availability & confirm your booking.",
-      "q2": "Can I request a specific doctor when booking my appointment?",
-      "a2": "Yes, you can usually request a specific doctor when booking your appointment, though availability may vary based on their schedule.",
-      "q3": "What should I do if I need to cancel or reschedule my appointment?",
-      "a3": "If you need to cancel or reschedule your appointment, contact the doctor as soon as possible to inform them and to reschedule for another available time slot.",
-      "q4": "What if I'm running late for my appointment?",
-      "a4": "If you know you will be late, it's courteous to call the doctor's office and inform them. Depending on their policy and schedule, they may be able to accommodate you or reschedule your appointment.",
-      "q5": "Can I book appointments for family members or dependents?",
-      "a5": "Yes, in many cases, you can book appointments for family members or dependents. However, you may need to provide their personal information and consent to do so."
+      "badge": "Common questions",
+      "title": "What families ask us most",
+      "q1": "Which areas in Egypt do you cover?",
+      "a1": "We currently operate across Greater Cairo — including Maadi, Zamalek, New Cairo, Sheikh Zayed, 6th of October, Heliopolis, Nasr City, Mohandessin, and surrounding districts. Not sure about your area? Use our coverage checker or send us your address on WhatsApp and we’ll confirm in minutes. MENA expansion is next.",
+      "q2": "How quickly can a clinician be at my home?",
+      "a2": "For most home visits, we can have a clinician at your door the same day — often within a few hours. Urgent cases are triaged by our care coordinator the moment you reach out. For scheduled visits (physio courses, follow-ups, post-op care), we book the slot that works for your family.",
+      "q3": "What services can I actually get at home?",
+      "a3": "Doctor visits across specialties (geriatrics, internal medicine, pediatrics, and more), nursing care (wound care, IV therapy, injections, catheter care), physiotherapy courses, lab sample collection, mobile imaging where feasible, post-operative recovery, and chronic disease management. If you need something we don’t offer at home, we coordinate it with our hospital partners.",
+      "q4": "Are your clinicians licensed — and what happens if my condition gets worse?",
+      "a4": "Every doctor, nurse, and physiotherapist on our team is licensed by the Egyptian Ministry of Health and verified by Anees on top — credentials, references, and clinical experience. If a case escalates, we coordinate directly with our hospital partners (Andalusia, Cleopatra, Cairo University, Dar Al Fouad, Saudi German, and others) so you move quickly with your full record.",
+      "q5": "How do I pay, and do you accept insurance?",
+      "a5": "You can pay online by card (secured by Kashier) or in cash to the clinician at the visit. We provide a clear invoice for every visit. Insurance partnerships are rolling out — if you have a corporate or private plan, share the details when you reach out and we’ll check coverage before booking."
     },
     "reasons": {
       "badge": "Why Book With Us",
@@ -573,7 +577,104 @@
       "hospitals_clinics": "Hospitals & Clinic",
       "services_available": "Services Available",
       "experience_title": "Our Doctors Experience in Hospitals & Clinics like",
-      "hub_title": "Our Hub"
+      "hub_title": "Trusted Network"
+    },
+    "whyAnees": {
+      "badge": "What sets us apart",
+      "title": "Care that’s actually accountable",
+      "subtitle": "Most platforms hand you a list. We hand you a team — and stay with you until you’re better.",
+      "items": [
+        {
+          "icon": "feather-users",
+          "title": "One accountable team",
+          "desc": "Doctors, nurses, physiotherapy and lab staff — one team owns your care from first call to last visit."
+        },
+        {
+          "icon": "isax isax-clipboard-text",
+          "title": "One medical record",
+          "desc": "Every visit, test result and note in a single record — visible to every clinician treating you."
+        },
+        {
+          "icon": "isax isax-hospital",
+          "title": "Hospital backup",
+          "desc": "Coordinated with Andalusia, Cleopatra, Cairo University and more — escalation when it matters."
+        },
+        {
+          "icon": "isax isax-heart",
+          "title": "Continuous follow-up",
+          "desc": "Care doesn’t end at the door. Your team checks in until your outcome is stable."
+        }
+      ]
+    },
+    "stats": {
+      "badge": "By the numbers",
+      "items": [
+        { "value": "1,000+", "label": "Patients served" },
+        { "value": "8+", "label": "Hospital partners" },
+        { "value": "4.8★", "label": "Average rating" },
+        { "value": "24/7", "label": "Care coordination" }
+      ]
+    },
+    "howItWorks": {
+      "badge": "How it works",
+      "title": "Three steps from “I need help” to care at home",
+      "subtitle": "No marketplaces. No phone trees. One team handles everything.",
+      "steps": [
+        {
+          "number": "01",
+          "icon": "feather-message-circle",
+          "title": "Reach out",
+          "desc": "WhatsApp, call, or book online. Tell us what’s going on — a coordinator picks up in minutes."
+        },
+        {
+          "number": "02",
+          "icon": "feather-check-circle",
+          "title": "We build your care plan",
+          "desc": "One accountable doctor designs a plan and assigns the right team — nurse, physio, labs, scans, hospital backup."
+        },
+        {
+          "number": "03",
+          "icon": "feather-home",
+          "title": "Care at home",
+          "desc": "Same team, every visit. Every note lands in one medical record. We follow up until your outcome is stable."
+        }
+      ],
+      "cta": "Start with a chat",
+      "ctaSecondary": "See packages"
+    },
+    "patientStories": {
+      "badge": "Patient stories",
+      "title": "What families say",
+      "subtitle": "Real outcomes from real homes in Greater Cairo.",
+      "prev": "Previous story",
+      "next": "Next story",
+      "goTo": "Go to story",
+      "items": [
+        {
+          "quote": "My father refused to leave the house. The Anees team came to him — same doctor, same nurse, every visit. Six weeks later he was walking again.",
+          "name": "M. H.",
+          "relation": "Daughter of patient",
+          "location": "Maadi"
+        },
+        {
+          "quote": "Labs, physio, and the geriatrician all coordinated through one number. We never had to repeat ourselves. That alone was worth it.",
+          "name": "A. S.",
+          "relation": "Son of patient",
+          "location": "Sheikh Zayed"
+        },
+        {
+          "quote": "Post-op recovery at home without the chaos. They escalated to the hospital once when we needed it — quietly and quickly.",
+          "name": "N. K.",
+          "relation": "Wife of patient",
+          "location": "Nasr City"
+        }
+      ]
+    },
+    "coverageStrip": {
+      "badge": "Service area",
+      "title": "Do we cover your area?",
+      "desc": "We operate across Greater Cairo today — Maadi, Zamalek, New Cairo, Sheikh Zayed, 6th of October, Heliopolis, and more. MENA next.",
+      "cta": "Check coverage"
     },
     "hero": {
       "title": "Welcome to Anees Health",

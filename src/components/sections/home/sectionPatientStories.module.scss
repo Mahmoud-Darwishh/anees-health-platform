@@ -1,0 +1,294 @@
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+// ═══════════════════════════════════════════════════════════════════
+//  PATIENT STORIES — auto-looping carousel, quiet and editorial
+// ═══════════════════════════════════════════════════════════════════
+
+.section {
+  @include section-padding;
+  background: #faf8f3;
+}
+
+.header {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 48px;
+
+  @include respond-below(custom767) {
+    margin-bottom: 32px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: $primary;
+  margin-bottom: 18px;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+    margin-inline-end: 10px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+  }
+}
+
+.heading {
+  font-size: 40px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0 0 14px;
+
+  @include respond-below(custom991) {
+    font-size: 32px;
+  }
+
+  @include respond-below(custom767) {
+    font-size: 26px;
+  }
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #6a7585;
+  margin: 0;
+  line-height: 1.6;
+}
+
+// ─── Carousel shell ─────────────────────────────────────────────
+
+.carousel {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  outline: none;
+}
+
+.viewport {
+  overflow: hidden;
+}
+
+.track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  text-align: center;
+  padding: 12px 24px 8px;
+
+  @include respond-below(custom767) {
+    padding: 4px 12px 4px;
+  }
+}
+
+.quoteMark {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 56px;
+  line-height: 1;
+  color: $primary;
+  margin-bottom: 4px;
+  user-select: none;
+
+  @include respond-below(custom767) {
+    font-size: 44px;
+  }
+}
+
+.quote {
+  margin: 0 auto 32px;
+  padding: 0;
+  font-size: 22px;
+  color: $brand-dark-blue;
+  line-height: 1.55;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  max-width: 640px;
+
+  p {
+    margin: 0;
+  }
+
+  @include respond-below(custom991) {
+    font-size: 19px;
+  }
+
+  @include respond-below(custom767) {
+    font-size: 17px;
+    margin-bottom: 24px;
+  }
+}
+
+.attribution {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto;
+  padding-top: 18px;
+  border-top: 1px solid #ecebe6;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: $white;
+  border: 1px solid rgba($primary, 0.4);
+  color: $primary;
+  font-weight: $font-weight-semibold;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.attributionText {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  line-height: 1.35;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: $font-weight-semibold;
+  color: $brand-dark-blue;
+}
+
+.meta {
+  font-size: 12px;
+  color: #8a8f99;
+  margin-top: 2px;
+}
+
+// ─── Nav (minimal text-only chevrons) ──────────────────────────
+
+.navBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e2dfd6;
+  background: $white;
+  color: $brand-dark-blue;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  z-index: 3;
+
+  i {
+    line-height: 1;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: $primary;
+    border-color: $primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.4);
+    outline-offset: 3px;
+  }
+
+  @include respond-below(custom767) {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}
+
+.navPrev {
+  inset-inline-start: -8px;
+
+  [dir='rtl'] & i {
+    transform: scaleX(-1);
+  }
+
+  @include respond-below(custom991) {
+    inset-inline-start: -4px;
+  }
+}
+
+.navNext {
+  inset-inline-end: -8px;
+
+  [dir='rtl'] & i {
+    transform: scaleX(-1);
+  }
+
+  @include respond-below(custom991) {
+    inset-inline-end: -4px;
+  }
+}
+
+// ─── Dots ────────────────────────────────────────────────────────
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: #d2cec3;
+  cursor: pointer;
+  transition: background 0.2s ease, width 0.3s ease;
+
+  &:hover {
+    background: rgba($primary, 0.65);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.45);
+    outline-offset: 3px;
+  }
+}
+
+.dotActive {
+  width: 22px;
+  border-radius: 3px;
+  background: $primary;
+
+  &:hover {
+    background: $primary;
+  }
+}

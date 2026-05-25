@@ -1,0 +1,653 @@
+@use "sass:color";
+@use "../../../assets/scss/utils/variables" as *;
+@use "../../../assets/scss/utils/mixins" as *;
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Health Packages — minimal / elite
+   Section bg: white. Sanad hero card on cream, gold hairline border.
+   Other 3 packages on white hairline cards.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.section {
+  @include section-padding;
+  background: $white;
+}
+
+/* ─── Shared header ─── */
+.header {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 56px;
+
+  @include respond-below(custom767) {
+    margin-bottom: 40px;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: $font-family-primary;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $primary;
+  margin-bottom: 16px;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+  }
+}
+
+.heading {
+  font-family: $font-family-primary;
+  font-size: 40px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: $brand-dark-blue;
+  margin: 0 0 16px;
+
+  @include respond-below(custom991) { font-size: 32px; }
+  @include respond-below(custom767) { font-size: 26px; }
+}
+
+.subtitle {
+  font-family: $font-family-primary;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #6a7585;
+  margin: 0 auto;
+  max-width: 620px;
+}
+
+/* ─── Sanad — hero card ─────────────────────────────────────────────── */
+.sanadWrapper {
+  margin-bottom: 80px;
+
+  @include respond-below(custom767) {
+    margin-bottom: 56px;
+  }
+}
+
+.sanadCard {
+  position: relative;
+  background: #faf8f3;
+  border: 1px solid #e8e1d2;
+  border-radius: 24px;
+  padding: 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: stretch;
+
+  @include respond-below(custom1199) {
+    padding: 44px;
+    gap: 40px;
+  }
+  @include respond-below(custom991) {
+    grid-template-columns: 1fr;
+    padding: 36px;
+    gap: 32px;
+  }
+  @include respond-below(custom575) {
+    padding: 28px 22px;
+    border-radius: 18px;
+  }
+
+  /* tiny gold corner accent — restrained brand mark */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    inset-inline-start: 56px;
+    width: 64px;
+    height: 2px;
+    background: $primary;
+    border-radius: 0 0 2px 2px;
+
+    @include respond-below(custom991) { inset-inline-start: 36px; }
+    @include respond-below(custom575) { inset-inline-start: 22px; width: 48px; }
+  }
+}
+
+/* ── Sanad left column ── */
+.sanadLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.sanadFlag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: $font-family-primary;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: $primary;
+  margin-bottom: 18px;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+  }
+}
+
+.sanadName {
+  font-family: $font-family-primary;
+  font-size: 44px;
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: $brand-dark-blue;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  @include respond-below(custom991) { font-size: 36px; }
+  @include respond-below(custom575) { font-size: 30px; gap: 8px; }
+}
+
+.sanadNameEn { color: $brand-dark-blue; }
+
+.sanadNameAr {
+  color: $primary;
+  font-weight: 600;
+}
+
+.sanadTagline {
+  font-family: $font-family-primary;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a8f99;
+  margin: 0 0 28px;
+
+  @include respond-below(custom575) { font-size: 12px; margin-bottom: 22px; }
+}
+
+.sanadHero {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  background: $white;
+  border: 1px solid #ecebe6;
+  border-radius: 12px;
+  margin-bottom: 14px;
+
+  i {
+    font-size: 22px;
+    color: $primary;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  span {
+    font-family: $font-family-primary;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: $brand-dark-blue;
+    letter-spacing: -0.01em;
+  }
+
+  @include respond-below(custom575) {
+    padding: 14px 16px;
+    span { font-size: 15px; }
+  }
+}
+
+.sanadSubTagline {
+  font-family: $font-family-primary;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #6a7585;
+  margin: 0 0 28px;
+
+  @include respond-below(custom575) { font-size: 14px; margin-bottom: 22px; }
+}
+
+.sanadFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 12px;
+
+  @include respond-below(custom575) {
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+}
+
+.sanadFeature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: $font-family-primary;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5a6573;
+
+  i {
+    font-size: 16px;
+    color: $primary;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+/* ── Sanad right column (pricing) ── */
+.sanadRight {
+  display: flex;
+  flex-direction: column;
+}
+
+.pricingPanel {
+  background: $white;
+  border: 1px solid #ecebe6;
+  border-radius: 18px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  @include respond-below(custom575) { padding: 26px 22px; border-radius: 16px; }
+}
+
+.pricingLabel {
+  font-family: $font-family-primary;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a8f99;
+  margin: 0 0 20px;
+}
+
+.plan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid #ecebe6;
+  border-radius: 12px;
+  background: $white;
+  margin-bottom: 12px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    border-color: rgba($primary, 0.4);
+  }
+}
+
+.planFeatured {
+  position: relative;
+  border-color: rgba($primary, 0.55);
+  background: linear-gradient(180deg, rgba($primary, 0.04) 0%, rgba($primary, 0) 100%);
+
+  &:hover {
+    border-color: $primary;
+  }
+}
+
+.planLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.planDuration {
+  font-family: $font-family-primary;
+  font-size: 14px;
+  font-weight: 600;
+  color: $brand-dark-blue;
+  letter-spacing: -0.005em;
+}
+
+.planSavings {
+  font-family: $font-family-primary;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $primary;
+}
+
+.planRight {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.planAmount {
+  font-family: $font-family-primary;
+  font-size: 22px;
+  font-weight: 600;
+  color: $brand-dark-blue;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'tnum';
+}
+
+.planCurrency {
+  font-family: $font-family-primary;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8a8f99;
+  letter-spacing: 0.08em;
+}
+
+.sanadCta {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  background: $brand-dark-blue;
+  color: $white;
+  font-family: $font-family-primary;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  border: 1px solid $brand-dark-blue;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  i {
+    font-size: 18px;
+    color: $Crayola-Gold;
+  }
+
+  &:hover {
+    background: color.adjust($brand-dark-blue, $lightness: 6%);
+    color: $white;
+    transform: translateY(-1px);
+  }
+}
+
+.contactNote {
+  text-align: center;
+  font-family: $font-family-primary;
+  font-size: 12px;
+  color: #8a8f99;
+  margin: 14px 0 0;
+}
+
+/* ─── Sub-section header for the other 3 packages ─── */
+.subHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+
+.subDivider {
+  flex: 0 0 60px;
+  height: 1px;
+  background: #ecebe6;
+}
+
+.subLabel {
+  font-family: $font-family-primary;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a8f99;
+  white-space: nowrap;
+}
+
+/* ─── 3 condition-specific package cards ─── */
+.packagesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+
+  @include respond-below(custom991) {
+    grid-template-columns: 1fr;
+    /* mobile carousel mode */
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 16px;
+    padding: 0 4px 8px;
+    margin: 0 -4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+}
+
+.packageSlide {
+  display: flex;
+
+  @include respond-below(custom991) {
+    flex: 0 0 86%;
+    scroll-snap-align: center;
+    max-width: 86%;
+  }
+  @include respond-below(custom575) {
+    flex: 0 0 90%;
+    max-width: 90%;
+  }
+}
+
+.packageCard {
+  background: $white;
+  border: 1px solid #ecebe6;
+  border-radius: 16px;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  transition: border-color 0.25s ease, transform 0.25s ease;
+
+  &:hover {
+    border-color: rgba($primary, 0.42);
+    transform: translateY(-2px);
+  }
+}
+
+.packageTagline {
+  font-family: $font-family-primary;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $primary;
+  margin: 0 0 8px;
+}
+
+.packageName {
+  font-family: $font-family-primary;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: $brand-dark-blue;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.packageNameEn { color: $brand-dark-blue; }
+
+.packageNameAr {
+  color: $primary;
+  font-weight: 600;
+}
+
+.packageDuration {
+  font-family: $font-family-primary;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8f99;
+  margin: 0 0 18px;
+}
+
+.packageDivider {
+  height: 1px;
+  background: #ecebe6;
+  margin: 0 0 18px;
+}
+
+.packageFocus {
+  font-family: $font-family-primary;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: $brand-dark-blue;
+  margin: 0 0 18px;
+}
+
+.packageFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.packageFeature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: $font-family-primary;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #5a6573;
+
+  i {
+    font-size: 15px;
+    color: $primary;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.packageCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 18px;
+  background: transparent;
+  color: $primary;
+  font-family: $font-family-primary;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  border: 1px solid rgba($primary, 0.45);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background: rgba($primary, 0.06);
+    border-color: $primary;
+    color: $primary;
+  }
+}
+
+/* ─── Mobile dots ─── */
+.dots {
+  display: none;
+
+  @include respond-below(custom991) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #d6d6d2;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.25s ease, width 0.25s ease;
+}
+
+.dotActive {
+  width: 22px;
+  background: $primary;
+}
+
+/* ─── Footer note + contact CTA ─── */
+.footerCta {
+  text-align: center;
+  margin-top: 48px;
+
+  @include respond-below(custom767) { margin-top: 36px; }
+}
+
+.footerNote {
+  font-family: $font-family-primary;
+  font-size: 14px;
+  color: #6a7585;
+  margin: 0 0 18px;
+}
+
+.contactBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  background: transparent;
+  color: $brand-dark-blue;
+  font-family: $font-family-primary;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid $brand-dark-blue;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+
+  i { font-size: 16px; }
+
+  &:hover {
+    background: $brand-dark-blue;
+    color: $white;
+  }
+}
+
+/* RTL — flip arrow */
+:global([dir='rtl']) .contactBtn i {
+  transform: scaleX(-1);
+}

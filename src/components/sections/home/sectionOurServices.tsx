@@ -70,7 +70,7 @@ export default function SectionOurServices() {
             </ul>
           </div>
           <span className={styles.heroArrow} aria-hidden="true">
-            <i className="fa-solid fa-arrow-right" />
+            <i className="feather-arrow-right" />
           </span>
         </Link>
 
@@ -95,7 +95,7 @@ export default function SectionOurServices() {
                 {href && (
                   <span className={styles.cardArrow}>
                     {t('ourServices.learnMore')}
-                    <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+                    <i className="feather-arrow-right" aria-hidden="true" />
                   </span>
                 )}
               </>
@@ -121,7 +121,7 @@ export default function SectionOurServices() {
         <div className={styles.cta}>
           <Link href={`/${locale}/services`} className={styles.ctaBtn}>
             {t('ourServices.viewAll')}
-            <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+            <i className="feather-arrow-right" aria-hidden="true" />
           </Link>
         </div>
       </div>
