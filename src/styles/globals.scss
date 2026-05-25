@@ -16,7 +16,7 @@
 // Footer social icons styling
 @use '../assets/scss/components/footer-social';
 // Header mobile menu (elite refresh) — overrides legacy drawer styles
-@use '../assets/scss/components/header-mobile-elite';
+@use '../assets/scss/components/header';
 // Footer layout styling (includes footer-three gradient)
 @use '../assets/scss/layout/footer';
 
@@ -63,7 +63,9 @@
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  // `clip` (not `hidden`) prevents horizontal overflow without creating a
+  // scroll container — which would break `position: sticky` on the header.
+  overflow-x: clip;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;

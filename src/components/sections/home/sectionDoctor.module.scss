@@ -9,6 +9,31 @@
   @include section-padding;
   background: #faf8f3;
   position: relative;
+  // Edge-to-edge insurance — break out of any unexpected parent constraint
+  // and guarantee the creamy band spans the full viewport width.
+  width: 100vw;
+  max-width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  overflow: hidden;
+
+  // Subtle warm vignette so the band feels intentional and elite,
+  // not flat. Layered on top of the cream base.
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba($primary, 0.18) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+  &::before { top: 0; }
+  &::after  { bottom: 0; }
 }
 
 .header {
