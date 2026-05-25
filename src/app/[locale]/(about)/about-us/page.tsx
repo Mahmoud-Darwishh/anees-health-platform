@@ -13,7 +13,10 @@ import {
   renderJsonLd,
 } from '@/lib/seo/jsonld';
 import { site, type SupportedLocale } from '@/lib/seo/site';
+import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
 import styles from './about-us.module.scss';
+
+const CAREERS_EMAIL = 'careers@aneeshealth.com';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -27,16 +30,31 @@ export default function AboutUsPage() {
   const loc = (locale === 'ar' ? 'ar' : 'en') as SupportedLocale;
   const baseUrl = site.baseUrl;
   const isArabic = locale === 'ar';
+
   const founder1Slug = generateDoctorSlug('Dr. Mahmoud Darwish');
   const founder2Slug = generateDoctorSlug('Dr. Ahmed Oraby');
   const founder1Url = `${baseUrl}/en/doctors/${founder1Slug}`;
   const founder2Url = `${baseUrl}/en/doctors/${founder2Slug}`;
+
+  const whatsappHref = buildWhatsAppUrl(t('cta_whatsapp_message'));
 
   const pillars = [
     { title: t('pillar_1_title'), text: t('pillar_1_text') },
     { title: t('pillar_2_title'), text: t('pillar_2_text') },
     { title: t('pillar_3_title'), text: t('pillar_3_text') },
     { title: t('pillar_4_title'), text: t('pillar_4_text') },
+  ];
+
+  const notDo = [
+    { title: t('notdo_1_title'), text: t('notdo_1_text') },
+    { title: t('notdo_2_title'), text: t('notdo_2_text') },
+    { title: t('notdo_3_title'), text: t('notdo_3_text') },
+  ];
+
+  const ops = [
+    { value: t('ops_1_value'), title: t('ops_1_title'), text: t('ops_1_text') },
+    { value: t('ops_2_value'), title: t('ops_2_title'), text: t('ops_2_text') },
+    { value: t('ops_3_value'), title: t('ops_3_title'), text: t('ops_3_text') },
   ];
 
   const stats = [
@@ -51,7 +69,6 @@ export default function AboutUsPage() {
     { label: t('title'), active: true },
   ];
 
-  // Structured data
   const crumbsLd = breadcrumbSchema([
     { name: site.labels.home[loc], url: `${baseUrl}/${locale}` },
     { name: t('title'), url: `${baseUrl}/${locale}/about-us` },
@@ -83,162 +100,246 @@ export default function AboutUsPage() {
       />
 
       <Header />
-
       <Breadcrumb items={breadcrumbItems} title={t('title')} />
 
-      <div className={styles.aboutPage}>
-        <Reveal as="section" className={styles.heroSection}>
+      <main className={styles.page}>
+        {/* 1 ─── Hero ──────────────────────────────────────────── */}
+        <Reveal as="section" className={styles.hero} aria-labelledby="about-hero-title">
           <div className="container">
-            <div className="row align-items-center g-4">
-              <div className="col-lg-7">
-                <span className={styles.heroBadge}>{t('hero_badge')}</span>
-                <h1 className={styles.heroTitle}>{t('hero_title')}</h1>
-                <p className={styles.heroSubtitle}>{t('hero_subtitle')}</p>
+            <span className={styles.heroEyebrow}>{t('hero_badge')}</span>
+            <h1 id="about-hero-title" className={styles.heroTitle}>
+              {t('hero_title')}
+            </h1>
+            <p className={styles.heroSubtitle}>{t('hero_subtitle')}</p>
 
-                <div className={styles.foundedByCard}>
-                  <p className={styles.foundedLabel}>{t('founded_label')}</p>
-                  <p className={styles.foundedValue}>{t('founded_value')}</p>
-                </div>
+            <div className={styles.heroCtaRow}>
+              <a
+                href={whatsappHref}
+                className={styles.btnPrimary}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i className="feather-message-circle" aria-hidden="true" />
+                {t('hero_cta_primary')}
+              </a>
+              <Link href={`/${locale}/contact-us`} className={styles.btnGhost}>
+                {t('hero_cta_secondary')}
+              </Link>
+            </div>
 
-                <div className="d-flex flex-wrap gap-2">
-                  <span className={styles.heroPill}>{t('hero_pill_1')}</span>
-                  <span className={styles.heroPill}>{t('hero_pill_2')}</span>
-                  <span className={styles.heroPill}>{t('hero_pill_3')}</span>
-                  <span className={styles.heroPill}>{t('hero_pill_4')}</span>
-                </div>
-
-                <div className={styles.trustScoreWrap} aria-label={t('trust_aria')}>
-                  <span className={styles.trustStars} aria-hidden="true">★★★★☆</span>
-                  <span className={styles.trustValue}>{t('trust_value')}</span>
-                  <span className={styles.trustDivider}>|</span>
-                  <span className={styles.trustText}>{t('trust_text')}</span>
-                </div>
-              </div>
-
-              <div className="col-lg-5">
-                <div className={styles.heroMedia}>
-                  <div className={styles.imageStack}>
-                    <img
-                      src="/assets/img/about-img1.png"
-                      alt={t('hero_img_1_alt')}
-                      className={styles.heroImagePrimary}
-                    />
-                    <img
-                      src="/assets/img/about-img2.png"
-                      alt={t('hero_img_2_alt')}
-                      className={styles.heroImageSecondary}
-                    />
-                  </div>
-                </div>
-              </div>
+            <div className={styles.heroFoundedChip}>
+              <span className={styles.heroFoundedChip__pin} aria-hidden="true">
+                <i className="feather-shield" />
+              </span>
+              <span className={styles.heroFoundedChip__text}>
+                <span className={styles.heroFoundedChip__label}>{t('hero_founded_label')}</span>
+                <span className={styles.heroFoundedChip__value}>{t('hero_founded_value')}</span>
+              </span>
             </div>
           </div>
         </Reveal>
 
-        <Reveal as="section" className={styles.storySection}>
+        {/* 2 ─── Trust band ───────────────────────────────────── */}
+        <Reveal as="section" className={styles.trust} aria-label={t('trust_aria')}>
           <div className="container">
-            <div className="row g-4 align-items-stretch">
-              <div className="col-lg-7">
-                <article className={styles.storyCard}>
-                  <h2>{t('story_title')}</h2>
-                  <p>{t('story_paragraph_1')}</p>
-                  <p>{t('story_paragraph_2')}</p>
+            <div className={styles.trustInner}>
+              <i className="feather-shield" aria-hidden="true" />
+              <span>
+                <span className={styles.trustLicensingLabel}>{t('trust_licensing_label')}</span>
+                <span className={styles.trustLicensingText}>{t('trust_licensing_text')}</span>
+              </span>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* 3 ─── Story ────────────────────────────────────────── */}
+        <Reveal as="section" className={styles.story} aria-labelledby="about-story-title">
+          <div className="container">
+            <div className={styles.storyGrid}>
+              <article className={styles.storyBody}>
+                <span className={styles.eyebrow}>{t('story_eyebrow')}</span>
+                <h2 id="about-story-title" className={styles.storyTitle}>
+                  {t('story_title')}
+                </h2>
+                <p className={styles.storyParagraph}>{t('story_paragraph_1')}</p>
+                <p className={styles.storyParagraph}>{t('story_paragraph_2')}</p>
+              </article>
+              <aside className={styles.storyPull}>{t('story_pull')}</aside>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* 5 ─── Pillars ──────────────────────────────────────── */}
+        <Reveal as="section" className={styles.pillars} aria-labelledby="about-pillars-title">
+          <div className="container">
+            <header className={styles.header}>
+              <span className={styles.eyebrow}>{t('pillars_eyebrow')}</span>
+              <h2 id="about-pillars-title" className={styles.title}>{t('pillars_title')}</h2>
+              <p className={styles.subtitle}>{t('pillars_subtitle')}</p>
+            </header>
+
+            <div className={styles.pillarsGrid}>
+              {pillars.map((p, i) => (
+                <article key={p.title} className={styles.pillarCard}>
+                  <span className={styles.pillarIndex} aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className={styles.pillarTitle}>{p.title}</h3>
+                  <p className={styles.pillarText}>{p.text}</p>
                 </article>
-              </div>
-              <div className="col-lg-5">
-                <div className={styles.missionVisionWrap}>
-                  <article className={styles.focusCard}>
-                    <h3>{t('mission_title')}</h3>
-                    <p>{t('mission_text')}</p>
-                  </article>
-                  <article className={styles.focusCard}>
-                    <h3>{t('vision_title')}</h3>
-                    <p>{t('vision_text')}</p>
-                  </article>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </Reveal>
 
-        <Reveal as="section" className={styles.leadershipSection}>
+        {/* 6 ─── What we don't do ─────────────────────────────── */}
+        <Reveal as="section" className={styles.notDo} aria-labelledby="about-notdo-title">
           <div className="container">
-            <article className={styles.leadershipCard}>
-              <div>
-                <h2>{t('founders_title')}</h2>
-                <p>{t('founders_subtitle')}</p>
-                <p className={styles.leadershipSearchCopy}>{t('founders_search_statement')}</p>
+            <header className={styles.header}>
+              <span className={styles.eyebrow}>{t('notdo_eyebrow')}</span>
+              <h2 id="about-notdo-title" className={styles.title}>{t('notdo_title')}</h2>
+              <p className={styles.subtitle}>{t('notdo_subtitle')}</p>
+            </header>
+
+            <div className={styles.notDoGrid}>
+              {notDo.map((n) => (
+                <article key={n.title} className={styles.notDoCard}>
+                  <span className={styles.notDoMark} aria-hidden="true">
+                    <i className="feather-x" />
+                  </span>
+                  <h3 className={styles.notDoTitle}>{n.title}</h3>
+                  <p className={styles.notDoText}>{n.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* 7 ─── Operations promises ───────────────────────────── */}
+        <Reveal as="section" className={styles.ops} aria-labelledby="about-ops-title">
+          <div className="container">
+            <header className={styles.header}>
+              <span className={styles.eyebrow}>{t('ops_eyebrow')}</span>
+              <h2 id="about-ops-title" className={styles.title}>{t('ops_title')}</h2>
+              <p className={styles.subtitle}>{t('ops_subtitle')}</p>
+            </header>
+
+            <div className={styles.opsGrid}>
+              {ops.map((o) => (
+                <article key={o.title} className={styles.opsCard}>
+                  <span className={styles.opsValue}>{o.value}</span>
+                  <div>
+                    <h3 className={styles.opsTitle}>{o.title}</h3>
+                    <p className={styles.opsText}>{o.text}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        {/* 8 ─── Coverage teaser ──────────────────────────────── */}
+        <Reveal as="section" className={styles.coverage} aria-labelledby="about-coverage-title">
+          <div className="container">
+            <article className={styles.coverageCard}>
+              <div className={styles.coverageBody}>
+                <span className={styles.coverageEyebrow}>{t('coverage_eyebrow')}</span>
+                <h2 id="about-coverage-title" className={styles.coverageTitle}>
+                  {t('coverage_title')}
+                </h2>
+                <p className={styles.coverageText}>{t('coverage_text')}</p>
               </div>
-              <p className={styles.leadershipNames}>
-                <Link href={`/${locale}/doctors/${founder1Slug}`} className={styles.founderLink}>
-                  {t('founder_1_name')}
-                </Link>
-                <span className={styles.namesDivider} aria-hidden="true">•</span>
-                <Link href={`/${locale}/doctors/${founder2Slug}`} className={styles.founderLink}>
-                  {t('founder_2_name')}
-                </Link>
-              </p>
+              <Link href={`/${locale}/coverage`} className={styles.coverageLink}>
+                {t('coverage_link')}
+                <i className="feather-arrow-right" aria-hidden="true" />
+              </Link>
             </article>
           </div>
         </Reveal>
 
-        <Reveal as="section" className={styles.pillarsSection}>
+        {/* 10 ─── Stats strip ──────────────────────────────────── */}
+        <Reveal as="section" className={styles.stats} aria-label={t('stats_aria')}>
           <div className="container">
-            <div className="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
-              <h2 className={styles.sectionTitle}>{t('pillars_title')}</h2>
-              <span className={styles.sectionTag}>{t('pillars_tag')}</span>
-            </div>
-            <div className="row g-4">
-              {pillars.map((pillar) => (
-                <div className="col-lg-3 col-md-6" key={pillar.title}>
-                  <article className={styles.pillarCard}>
-                    <h3>{pillar.title}</h3>
-                    <p>{pillar.text}</p>
-                  </article>
-                </div>
+            <ul className={styles.statsGrid} role="list">
+              {stats.map((s) => (
+                <li key={s.label} className={styles.statItem}>
+                  <span className={styles.statValue}>{s.value}</span>
+                  <span className={styles.statLabel}>{s.label}</span>
+                </li>
               ))}
+            </ul>
+          </div>
+        </Reveal>
+
+        {/* 11 ─── Privacy + Careers band ───────────────────────── */}
+        <Reveal as="section" className={styles.band} aria-label={t('band_aria')}>
+          <div className="container">
+            <div className={styles.bandGrid}>
+              <Link href={`/${locale}/privacy-policy`} className={styles.bandCard}>
+                <span className={styles.bandIcon} aria-hidden="true">
+                  <i className="feather-lock" />
+                </span>
+                <div className={styles.bandBody}>
+                  <span className={styles.bandLabel}>{t('privacy_label')}</span>
+                  <h3 className={styles.bandTitle}>{t('privacy_title')}</h3>
+                  <p className={styles.bandText}>{t('privacy_text')}</p>
+                  <span className={styles.bandLink}>
+                    {t('privacy_link')}
+                    <i className="feather-arrow-right" aria-hidden="true" />
+                  </span>
+                </div>
+              </Link>
+
+              <a
+                href={`mailto:${CAREERS_EMAIL}?subject=${encodeURIComponent(t('careers_email_subject'))}`}
+                className={styles.bandCard}
+              >
+                <span className={styles.bandIcon} aria-hidden="true">
+                  <i className="feather-briefcase" />
+                </span>
+                <div className={styles.bandBody}>
+                  <span className={styles.bandLabel}>{t('careers_label')}</span>
+                  <h3 className={styles.bandTitle}>{t('careers_title')}</h3>
+                  <p className={styles.bandText}>{t('careers_text')}</p>
+                  <span className={styles.bandLink}>
+                    {t('careers_link')}
+                    <i className="feather-arrow-right" aria-hidden="true" />
+                  </span>
+                </div>
+              </a>
             </div>
           </div>
         </Reveal>
 
-        <Reveal as="section" className={styles.statsSection}>
-          <div className="container">
-            <div className="row g-3">
-              {stats.map((stat) => (
-                <div className="col-lg-3 col-md-6" key={stat.label}>
-                  <div className={styles.statCard}>
-                    <h3>{stat.value}</h3>
-                    <p>{stat.label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-
-        <Reveal as="section" className={styles.ctaSection}>
+        {/* 12 ─── CTA ──────────────────────────────────────────── */}
+        <Reveal as="section" className={styles.cta} aria-labelledby="about-cta-title">
           <div className="container">
             <div className={styles.ctaCard}>
               <div>
-                <h2>{t('cta_title')}</h2>
-                <p>{t('cta_text')}</p>
+                <h2 id="about-cta-title" className={styles.ctaTitle}>{t('cta_title')}</h2>
+                <p className={styles.ctaText}>{t('cta_text')}</p>
               </div>
-              <div className="d-flex flex-wrap gap-2">
-                <Link href={`/${locale}/booking`} className={`btn btn-primary ${styles.ctaBtn}`}>
+              <div className={styles.ctaActions}>
+                <a
+                  href={whatsappHref}
+                  className={styles.btnPrimary}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <i className="feather-message-circle" aria-hidden="true" />
                   {t('cta_primary')}
-                </Link>
-                <Link href={`/${locale}/contact-us`} className={`btn btn-outline-primary ${styles.ctaBtnSecondary}`}>
+                </a>
+                <Link href={`/${locale}/contact-us`} className={styles.btnOutlineLight}>
                   {t('cta_secondary')}
                 </Link>
               </div>
             </div>
           </div>
         </Reveal>
-
-      </div>
+      </main>
 
       <Script
-        id="about-founders-note"
+        id="about-organization-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: renderJsonLd({
@@ -247,18 +348,22 @@ export default function AboutUsPage() {
             inLanguage: isArabic ? 'ar-EG' : 'en-US',
             name: t('title'),
             mainEntity: {
-              '@type': 'Organization',
+              '@type': 'MedicalOrganization',
               '@id': `${baseUrl}#organization`,
               name: 'Anees Health',
               description: t('founders_search_statement'),
               url: `${baseUrl}/${locale}`,
+              areaServed: {
+                '@type': 'AdministrativeArea',
+                name: isArabic ? 'القاهرة الكبرى' : 'Greater Cairo',
+              },
               founder: [
                 {
                   '@type': 'Person',
                   '@id': `${founder1Url}#person`,
                   name: t('founder_1_name'),
                   url: founder1Url,
-                  description: t('founders_search_statement'),
+                  description: t('founder_1_credentials'),
                   jobTitle: isArabic ? 'مؤسس مشارك' : 'Co-Founder',
                 },
                 {
@@ -266,17 +371,11 @@ export default function AboutUsPage() {
                   '@id': `${founder2Url}#person`,
                   name: t('founder_2_name'),
                   url: founder2Url,
-                  description: t('founders_search_statement'),
+                  description: t('founder_2_credentials'),
                   jobTitle: isArabic ? 'مؤسس مشارك' : 'Co-Founder',
                 },
               ],
               sameAs: [founder1Url, founder2Url],
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: t('trust_value'),
-                bestRating: '5',
-                ratingCount: '1500',
-              },
             },
           }),
         }}
