@@ -1,0 +1,456 @@
+@use '../../../assets/scss/utils/variables' as *;
+@use '../../../assets/scss/utils/mixins' as *;
+
+// ── Palette (minimalist) ─────────────────────────────────────────────────────
+$portal-navy: #132c4d;
+$portal-gold: #aa8642;
+$portal-cream: #fdfaf4;
+$portal-surface: #ffffff;
+$portal-border: #ebdfc6;
+$portal-border-soft: #f1e6cd;
+$portal-ink: #1d2433;
+$portal-ink-muted: #7a6a4e;
+
+$sidebar-width: 260px;
+
+// ── Full-page shell ──────────────────────────────────────────────────────────
+.shell {
+  display: grid;
+  grid-template-columns: $sidebar-width minmax(0, 1fr);
+  min-height: 100vh;
+  align-items: stretch;
+
+  @include respond-below(custom991) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Sidebar (full-height, white, pinned left) ────────────────────────────────
+.sidebar {
+  background: $portal-surface;
+  border-right: 1px solid $portal-border;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+
+  @include respond-below(custom991) {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid $portal-border;
+  }
+}
+
+.sidebarInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.25rem 1rem;
+  gap: 1rem;
+
+  @include respond-below(custom991) {
+    padding: 0.9rem 1rem;
+  }
+}
+
+// ── Brand / logo ─────────────────────────────────────────────────────────────
+.brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brandLogo {
+  width: auto;
+  height: 36px;
+  object-fit: contain;
+}
+
+// ── Locale switcher pill ─────────────────────────────────────────────────────
+.localeSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid $portal-border;
+  background: $portal-cream;
+  color: $portal-navy;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+
+  i { color: $portal-gold; font-size: 0.85rem; }
+
+  &:hover,
+  &:focus-visible {
+    background: #fff;
+    border-color: $portal-gold;
+    transform: translateY(-1px);
+    outline: none;
+  }
+}
+
+// ── Greeting block ───────────────────────────────────────────────────────────
+.greeting {
+  padding: 0.6rem 0 1rem;
+  border-bottom: 1px solid $portal-border-soft;
+}
+
+.greetingLine {
+  margin: 0;
+  color: $portal-ink-muted;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.greetingName {
+  margin: 0.25rem 0 0;
+  color: $portal-navy;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+
+  @include respond-below(custom991) {
+    font-size: 1.3rem;
+  }
+}
+
+// ── Section nav ──────────────────────────────────────────────────────────────
+.nav {
+  display: grid;
+  gap: 0.15rem;
+  flex: 1 1 auto;
+  align-content: start;
+
+  @include respond-below(custom991) {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding-bottom: 0.2rem;
+
+    &::-webkit-scrollbar { height: 4px; }
+    &::-webkit-scrollbar-thumb { background: $portal-border; border-radius: 2px; }
+  }
+}
+
+.navItem {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: $portal-ink-muted;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  letter-spacing: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(19, 44, 77, 0.04);
+    color: $portal-navy;
+    outline: none;
+
+    .navIcon {
+      background: rgba(170, 134, 66, 0.14);
+      color: $portal-gold;
+    }
+  }
+
+  @include respond-below(custom991) {
+    white-space: nowrap;
+    width: auto;
+    border-radius: 0;
+    padding: 0.55rem 0.85rem;
+    border-bottom: 2px solid transparent;
+    grid-template-columns: auto auto auto;
+  }
+}
+
+.navIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(19, 44, 77, 0.05);
+  color: $portal-ink-muted;
+  transition: background 0.18s ease, color 0.18s ease;
+
+  i {
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+}
+
+.navLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: rgba(19, 44, 77, 0.08);
+  color: $portal-navy;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.navItemActive {
+  background: $portal-navy;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 6px 16px -10px rgba(19, 44, 77, 0.55);
+
+  .navIcon {
+    background: rgba(170, 134, 66, 0.22);
+    color: $portal-gold;
+  }
+
+  .navBadge {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: $portal-navy;
+    color: #ffffff;
+
+    .navIcon {
+      background: rgba(170, 134, 66, 0.28);
+      color: $portal-gold;
+    }
+  }
+
+  @include respond-below(custom991) {
+    background: transparent;
+    color: $portal-navy;
+    border-bottom-color: $portal-navy;
+    border-radius: 0;
+    box-shadow: none;
+
+    .navIcon {
+      background: rgba(170, 134, 66, 0.18);
+    }
+
+    .navBadge {
+      background: rgba(19, 44, 77, 0.12);
+      color: $portal-navy;
+    }
+  }
+}
+
+// ── Sidebar footer (export + home) ───────────────────────────────────────────
+.sidebarFooter {
+  display: grid;
+  gap: 0.45rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid $portal-border-soft;
+  margin-top: auto;
+
+  @include respond-below(custom991) {
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+
+.exportBtn,
+.homeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid $portal-border;
+  background: $portal-surface;
+  color: $portal-navy;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.55rem 0.85rem;
+  min-height: 2.35rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  i {
+    color: $portal-gold;
+    font-size: 0.95rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: $portal-navy;
+    border-color: $portal-navy;
+    color: #ffffff;
+    outline: none;
+
+    i {
+      color: #ffffff;
+    }
+  }
+}
+
+.exportBtn {
+  background: $portal-navy;
+  color: #ffffff;
+  border-color: $portal-navy;
+
+  i {
+    color: #ffffff;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: $portal-surface;
+    color: $portal-navy;
+    border-color: $portal-navy;
+
+    i {
+      color: $portal-gold;
+    }
+  }
+}
+
+// ── Main column ──────────────────────────────────────────────────────────────
+.main {
+  min-width: 0;
+  padding: 1.5rem 1.5rem 2.5rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+
+  @include respond-below(custom991) {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  @include respond-below(custom767) {
+    padding: 1rem 0.8rem 1.8rem;
+  }
+}
+
+.notices {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.content {
+  min-width: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+// Multi-section render: only the active one is visible on screen,
+// all sections are revealed at print time to produce a full PDF.
+.section {
+  min-width: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.sectionHidden {
+  display: none;
+}
+
+.printSectionTitle,
+.printHeader {
+  display: none;
+}
+
+// ── Print: full-record PDF export ────────────────────────────────────────────
+@media print {
+  .sidebar { display: none; }
+  .shell { grid-template-columns: 1fr; }
+  .main { padding: 0; gap: 0.5rem; }
+  .notices { display: none; }
+
+  .printHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 0 0.6rem;
+    margin-bottom: 0.4rem;
+    border-bottom: 1px solid $portal-border;
+  }
+
+  .printHeaderLogo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .printHeaderMeta {
+    text-align: right;
+  }
+
+  .printHeaderName {
+    margin: 0;
+    color: $portal-navy;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .printHeaderLine {
+    margin: 0.1rem 0 0;
+    color: $portal-ink-muted;
+    font-size: 0.72rem;
+  }
+
+  .sectionHidden { display: grid; }
+
+  .section {
+    break-inside: avoid-page;
+  }
+
+  .section + .section {
+    page-break-before: always;
+    padding-top: 0.3rem;
+  }
+
+  .printSectionTitle {
+    display: block;
+    margin: 0 0 0.65rem;
+    padding-bottom: 0.3rem;
+    color: $portal-navy;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-bottom: 1px solid $portal-border;
+  }
+}

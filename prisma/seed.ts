@@ -419,9 +419,18 @@ async function main() {
         areaId: demoArea.id,
         addressDetail: 'Fifth Settlement, Cairo',
         primaryCaregiver: 'Mahmoud Ali',
+        primaryCaregiverPhone: '+201155500099',
         caregiverRelation: 'Son',
         chiefComplaint: 'Follow-up for blood pressure and mobility',
         status: 'active',
+        gender: 'M',
+        dateOfBirth: new Date('1958-03-14'),
+        bloodGroup: 'O_POSITIVE',
+        insuranceProvider: 'AXA Egypt — Premium Care',
+        insurancePolicyNumber: 'POL-2026-44871',
+        insuranceMemberId: 'AXA-EG-554-001',
+        insuranceExpiry: new Date('2026-12-31'),
+        addressMapUrl: 'https://maps.google.com/?q=30.0287,31.4969',
       },
       create: {
         code: 'PT-DEMO-001',
@@ -431,9 +440,18 @@ async function main() {
         addressDetail: 'Fifth Settlement, Cairo',
         registrationDate: new Date('2026-01-10'),
         primaryCaregiver: 'Mahmoud Ali',
+        primaryCaregiverPhone: '+201155500099',
         caregiverRelation: 'Son',
         chiefComplaint: 'Follow-up for blood pressure and mobility',
         status: 'active',
+        gender: 'M',
+        dateOfBirth: new Date('1958-03-14'),
+        bloodGroup: 'O_POSITIVE',
+        insuranceProvider: 'AXA Egypt — Premium Care',
+        insurancePolicyNumber: 'POL-2026-44871',
+        insuranceMemberId: 'AXA-EG-554-001',
+        insuranceExpiry: new Date('2026-12-31'),
+        addressMapUrl: 'https://maps.google.com/?q=30.0287,31.4969',
       },
     });
 
@@ -850,9 +868,9 @@ async function main() {
           visitId: demoVisit1.id,
           title: 'CBC Lab Result - Apr 2026',
           category: 'lab_result',
-          storagePath: 'demo/cbc-apr-2026.pdf',
-          mimeType: 'application/pdf',
-          fileSizeBytes: 135000,
+          storagePath: '/assets/demo/sample-lab-result.txt',
+          mimeType: 'text/plain',
+          fileSizeBytes: 1450,
           uploadedByStaffId: demoStaff.id,
         },
       });
@@ -999,9 +1017,824 @@ async function main() {
       });
     }
 
+    // ── Extended realistic demo data ─────────────────────────────────────────
+    // Additional medications
+    const extraMedications = [
+      {
+        medicationName: 'Metformin',
+        dose: '500 mg',
+        frequency: 'Twice daily',
+        route: 'oral',
+        startDate: new Date('2026-02-15'),
+        notes: 'Take with meals to reduce GI upset.',
+      },
+      {
+        medicationName: 'Atorvastatin',
+        dose: '20 mg',
+        frequency: 'Once at bedtime',
+        route: 'oral',
+        startDate: new Date('2026-03-20'),
+        notes: 'Monitor LFTs every 6 months.',
+      },
+    ];
+    for (const med of extraMedications) {
+      const exists = await prisma.medication.findFirst({
+        where: { patientId: demoPatient1.id, medicationName: med.medicationName, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.medication.create({
+          data: { ...med, patientId: demoPatient1.id, enteredByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // Additional allergies
+    const extraAllergies = [
+      { allergen: 'Sulfa drugs', reaction: 'Hives and pruritus', severity: 'mild', notes: 'Avoid sulfonamide antibiotics.' },
+      { allergen: 'Peanuts',     reaction: 'Throat tightness',  severity: 'high',  notes: 'Carry adrenaline auto-injector when travelling.' },
+    ];
+    for (const al of extraAllergies) {
+      const exists = await prisma.allergy.findFirst({
+        where: { patientId: demoPatient1.id, allergen: al.allergen, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.allergy.create({
+          data: { ...al, patientId: demoPatient1.id, enteredByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // Additional diagnoses
+    const extraDiagnoses = [
+      { diagnosisName: 'Type 2 Diabetes Mellitus', icd10Code: 'E11.9', diagnosedOn: new Date('2026-02-15'), status: 'active', notes: 'HbA1c 7.2% on diagnosis. Lifestyle counselling provided.' },
+      { diagnosisName: 'Dyslipidaemia',            icd10Code: 'E78.5', diagnosedOn: new Date('2026-03-20'), status: 'active', notes: 'LDL 168 mg/dL — started on statin.' },
+    ];
+    for (const dx of extraDiagnoses) {
+      const exists = await prisma.diagnosis.findFirst({
+        where: { patientId: demoPatient1.id, diagnosisName: dx.diagnosisName, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.diagnosis.create({
+          data: { ...dx, patientId: demoPatient1.id, visitId: demoVisit2.id, enteredByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // Additional vital signs (3 historical readings)
+    const extraVitals = [
+      { measuredAt: new Date('2026-04-15T09:05:00.000Z'), systolicBp: 138, diastolicBp: 86, heartRate: 80, oxygenSaturation: 96, temperatureC: 36.6, weightKg: 78.8 },
+      { measuredAt: new Date('2026-03-18T08:55:00.000Z'), systolicBp: 142, diastolicBp: 88, heartRate: 82, oxygenSaturation: 96, temperatureC: 36.9, weightKg: 79.2 },
+      { measuredAt: new Date('2026-05-20T18:30:00.000Z'), systolicBp: 128, diastolicBp: 82, heartRate: 76, oxygenSaturation: 98, temperatureC: 36.7, weightKg: 78.1 },
+    ];
+    for (const v of extraVitals) {
+      const exists = await prisma.vitalSigns.findFirst({
+        where: { patientId: demoPatient1.id, measuredAt: v.measuredAt, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.vitalSigns.create({
+          data: { ...v, patientId: demoPatient1.id, visitId: demoVisit2.id, enteredByStaffId: demoNurse.id },
+        });
+      }
+    }
+
+    // Additional progress notes
+    const extraProgressNote = await prisma.progressNote.findFirst({
+      where: { patientId: demoPatient1.id, noteBody: { contains: 'Family education completed' }, deletedAt: null },
+    });
+    if (!extraProgressNote) {
+      await prisma.progressNote.create({
+        data: {
+          patientId: demoPatient1.id,
+          visitId: demoVisit2.id,
+          noteBody:
+            'Family education completed on home BP monitoring technique. Demonstrated proper cuff placement. Patient and caregiver verbalised understanding.',
+          enteredByStaffId: demoNurse.id,
+        },
+      });
+    }
+
+    // Additional documents (lab, scan, insurance, discharge)
+    const extraDocuments = [
+      {
+        title: 'MRI Brain — Apr 2026',
+        category: 'imaging_report',
+        storagePath: '/assets/demo/sample-mri-report.txt',
+        mimeType: 'text/plain',
+        fileSizeBytes: 1620,
+        visitId: demoVisit2.id,
+      },
+      {
+        title: 'AXA Insurance Membership Card',
+        category: 'insurance_document',
+        storagePath: '/assets/demo/sample-insurance-card.txt',
+        mimeType: 'text/plain',
+        fileSizeBytes: 720,
+        visitId: null,
+      },
+      {
+        title: 'Discharge Summary — Visit VIS-DEMO-002',
+        category: 'discharge_summary',
+        storagePath: '/assets/demo/sample-discharge-summary.txt',
+        mimeType: 'text/plain',
+        fileSizeBytes: 1280,
+        visitId: demoVisit2.id,
+      },
+    ];
+    for (const doc of extraDocuments) {
+      const exists = await prisma.document.findFirst({
+        where: { patientId: demoPatient1.id, title: doc.title, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.document.create({
+          data: { ...doc, patientId: demoPatient1.id, uploadedByStaffId: demoStaff.id },
+        });
+      }
+    }
+
+    // Lab orders
+    const labOrders = [
+      { testName: 'HbA1c',                  clinicalReason: 'Diabetes monitoring',     priority: 'routine' as const, status: 'active' as const,    orderedAt: new Date('2026-05-12T09:30:00.000Z'), targetDate: new Date('2026-05-19') },
+      { testName: 'Fasting Lipid Panel',    clinicalReason: 'Statin therapy review',   priority: 'routine' as const, status: 'completed' as const, orderedAt: new Date('2026-04-02T08:30:00.000Z'), targetDate: new Date('2026-04-04'), resultSummary: 'LDL 124, HDL 48, TG 142 — improved from baseline.' },
+    ];
+    for (const lo of labOrders) {
+      const exists = await prisma.labOrder.findFirst({
+        where: { patientId: demoPatient1.id, testName: lo.testName, orderedAt: lo.orderedAt },
+      });
+      if (!exists) {
+        await prisma.labOrder.create({
+          data: { ...lo, patientId: demoPatient1.id, visitId: demoVisit2.id, orderedByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // Imaging orders
+    const imagingOrders = [
+      { studyName: 'MRI Brain (non-contrast)', modality: 'MRI',        bodyPart: 'Brain', clinicalReason: 'Rule out cerebrovascular cause for dizziness', priority: 'high' as const,    status: 'completed' as const, orderedAt: new Date('2026-04-10T10:00:00.000Z'), targetDate: new Date('2026-04-18'), resultSummary: 'Mild small-vessel ischaemic changes; no acute pathology.' },
+      { studyName: 'Echocardiogram',           modality: 'Ultrasound', bodyPart: 'Heart', clinicalReason: 'Hypertension follow-up',                       priority: 'routine' as const, status: 'active' as const,    orderedAt: new Date('2026-05-15T11:00:00.000Z'), targetDate: new Date('2026-06-05') },
+    ];
+    for (const im of imagingOrders) {
+      const exists = await prisma.imagingOrder.findFirst({
+        where: { patientId: demoPatient1.id, studyName: im.studyName, orderedAt: im.orderedAt },
+      });
+      if (!exists) {
+        await prisma.imagingOrder.create({
+          data: { ...im, patientId: demoPatient1.id, visitId: demoVisit2.id, orderedByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // Care tasks
+    const careTasks = [
+      { title: 'Home BP log review',         taskType: 'nurse_check' as const,         priority: 'routine' as const, status: 'open' as const,         dueAt: new Date('2026-05-30T10:00:00.000Z'), description: 'Caregiver to upload 14-day BP log for clinician review.' },
+      { title: 'Physiotherapy session #4',   taskType: 'physio_exercise' as const,     priority: 'routine' as const, status: 'open' as const,         dueAt: new Date('2026-05-27T14:00:00.000Z'), description: 'Continue lower-limb strengthening protocol.' },
+      { title: 'Refill Metformin',           taskType: 'medication_reminder' as const, priority: 'high' as const,    status: 'in_progress' as const,  dueAt: new Date('2026-05-26T09:00:00.000Z'), description: 'Pharmacy to dispatch 30-day supply.' },
+    ];
+    for (const task of careTasks) {
+      const exists = await prisma.careTask.findFirst({
+        where: { patientId: demoPatient1.id, title: task.title, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.careTask.create({
+          data: {
+            ...task,
+            patientId: demoPatient1.id,
+            visitId: demoVisit1.id,
+            assignedToStaffId: demoNurse.id,
+            createdByStaffId: demoDoctor.id,
+          },
+        });
+      }
+    }
+
+    // Invoices + payment for the completed visit
+    const cardPaymentMethod = await prisma.paymentMethod.findFirst({ where: { code: 'PM-04' } });
+    const cashPaymentMethod = await prisma.paymentMethod.findFirst({ where: { code: 'PM-01' } });
+
+    const existingInvoice1 = await prisma.invoice.findFirst({ where: { code: 'INV-DEMO-001' } });
+    const invoice1 = existingInvoice1 ?? await prisma.invoice.create({
+      data: {
+        code: 'INV-DEMO-001',
+        patientId: demoPatient1.id,
+        invoiceDate: new Date('2026-05-12'),
+        linkedType: 'visit',
+        linkedVisitId: demoVisit2.id,
+        grossAmountEgp: 350,
+        discountPct: 0,
+        netAmountEgp: 350,
+        dueDate: new Date('2026-05-12'),
+        status: 'paid',
+        notes: 'Telemedicine follow-up — paid online.',
+      },
+    });
+
+    const existingInvoice2 = await prisma.invoice.findFirst({ where: { code: 'INV-DEMO-002' } });
+    if (!existingInvoice2) {
+      await prisma.invoice.create({
+        data: {
+          code: 'INV-DEMO-002',
+          patientId: demoPatient1.id,
+          invoiceDate: new Date('2026-06-08'),
+          linkedType: 'visit',
+          linkedVisitId: demoVisit1.id,
+          grossAmountEgp: 1500,
+          discountPct: 0,
+          netAmountEgp: 1500,
+          dueDate: new Date('2026-06-12'),
+          status: 'issued',
+          notes: 'Upcoming in-home visit — invoice issued at booking.',
+        },
+      });
+    }
+
+    if (cardPaymentMethod) {
+      const existingPayment = await prisma.payment.findFirst({ where: { code: 'PAY-DEMO-001' } });
+      if (!existingPayment) {
+        await prisma.payment.create({
+          data: {
+            code: 'PAY-DEMO-001',
+            invoiceId: invoice1.id,
+            patientId: demoPatient1.id,
+            paymentDate: new Date('2026-05-12'),
+            amountEgp: 350,
+            paymentMethodId: cardPaymentMethod.id,
+            referenceNumber: 'KASHIER-TX-882431',
+            notes: 'Online payment via Kashier.',
+          },
+        });
+      }
+    } else if (cashPaymentMethod) {
+      const existingPayment = await prisma.payment.findFirst({ where: { code: 'PAY-DEMO-001' } });
+      if (!existingPayment) {
+        await prisma.payment.create({
+          data: {
+            code: 'PAY-DEMO-001',
+            invoiceId: invoice1.id,
+            patientId: demoPatient1.id,
+            paymentDate: new Date('2026-05-12'),
+            amountEgp: 350,
+            paymentMethodId: cashPaymentMethod.id,
+            notes: 'Cash on visit completion.',
+          },
+        });
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Real-world case — Raqia Ragab Mohamed (AN-3211-0725)
+    //
+    // STRICT MODE: every field below is taken verbatim from the case file
+    // supplied by the clinical team. Fabricated dates, ICD codes, biometric
+    // data, addresses, and social-history narratives have been removed.
+    // Where a clinical event is mentioned without a specific date (e.g.
+    // immediate-post-op X-ray on the surgical day), the most narrowly
+    // defensible date is used; otherwise the row is omitted.
+    // ─────────────────────────────────────────────────────────────────────
+    const raqiaArabicAddress =
+      'مدينة نصر، الحى الثامن، شارع محمود البدرى متفرع من محمد مقلد، عمارة 15 برج المستشار، الدور العاشر، شقة 19';
+    const raqiaMapUrl = 'https://maps.app.goo.gl/mVFXPQiq5REzErQr8';
+    const raqiaCaregiverPhone = '+201142444144';
+
+    // Provider for physio visits (separate from the doctor demoProvider so
+    // the portal can group visits by clinical role).
+    const physioProviderRole = await prisma.providerRole.findUnique({ where: { code: 'RL-02' } });
+    if (!physioProviderRole) throw new Error('Provider role RL-02 (Physiotherapist) missing.');
+    const physioServiceLookup = await prisma.service.findUnique({ where: { code: 'SV-005' } });
+    if (!physioServiceLookup) throw new Error('Service SV-005 (Physiotherapy) missing.');
+    await prisma.provider.upsert({
+      where: { code: 'PRV-RAQ-PT' },
+      update: {
+        fullName: 'Anees Physiotherapy Team',
+        roleId: physioProviderRole.id,
+        paymentType: 'per_visit',
+        primaryAreaId: demoArea.id,
+        status: 'active',
+      },
+      create: {
+        code: 'PRV-RAQ-PT',
+        fullName: 'Anees Physiotherapy Team',
+        roleId: physioProviderRole.id,
+        joiningDate: new Date('2025-06-01'),
+        baseRateEgp: 300,
+        paymentType: 'per_visit',
+        primaryAreaId: demoArea.id,
+        status: 'active',
+      },
+    });
+    const physioProvider = await prisma.provider.findUnique({ where: { code: 'PRV-RAQ-PT' } });
+    if (!physioProvider) throw new Error('Failed to seed physio provider.');
+
+    await prisma.patient.upsert({
+      where: { code: 'AN-3211-0725' },
+      update: {
+        fullName: 'Raqia Ragab Mohamed',
+        arabicName: 'رقية رجب محمد',
+        phone: raqiaCaregiverPhone,
+        gender: 'F',
+        addressDetail: raqiaArabicAddress,
+        addressMapUrl: raqiaMapUrl,
+        primaryCaregiver: 'Eng. Mohamed Abdallah',
+        primaryCaregiverPhone: raqiaCaregiverPhone,
+        primaryCaregiverWhatsapp: raqiaCaregiverPhone,
+        caregiverRelation: 'Son',
+        emergencyContactName: 'Eng. Mohamed Abdallah',
+        emergencyContactPhone: raqiaCaregiverPhone,
+        emergencyContactRelation: 'Son',
+        chiefComplaint:
+          'Post-ORIF rehabilitation — right trans-trochanteric femoral fracture (RTA).',
+        status: 'active',
+        notes:
+          'Non-weight-bearing right leg for one month post-PFN fixation. Caregiver-driven portal access.',
+      },
+      create: {
+        code: 'AN-3211-0725',
+        fullName: 'Raqia Ragab Mohamed',
+        arabicName: 'رقية رجب محمد',
+        phone: raqiaCaregiverPhone,
+        gender: 'F',
+        addressDetail: raqiaArabicAddress,
+        addressMapUrl: raqiaMapUrl,
+        registrationDate: new Date('2025-06-20'),
+        primaryCaregiver: 'Eng. Mohamed Abdallah',
+        primaryCaregiverPhone: raqiaCaregiverPhone,
+        primaryCaregiverWhatsapp: raqiaCaregiverPhone,
+        caregiverRelation: 'Son',
+        emergencyContactName: 'Eng. Mohamed Abdallah',
+        emergencyContactPhone: raqiaCaregiverPhone,
+        emergencyContactRelation: 'Son',
+        chiefComplaint:
+          'Post-ORIF rehabilitation — right trans-trochanteric femoral fracture (RTA).',
+        status: 'active',
+        notes:
+          'Non-weight-bearing right leg for one month post-PFN fixation. Caregiver-driven portal access.',
+      },
+    });
+
+    const raqia = await prisma.patient.findUnique({ where: { code: 'AN-3211-0725' } });
+    if (!raqia) throw new Error('Failed to seed Raqia demo patient.');
+
+    // Caregiver-driven portal login
+    await prisma.user.upsert({
+      where: { phone: raqiaCaregiverPhone },
+      update: {
+        name: raqia.fullName,
+        role: 'patient',
+        patientId: raqia.id,
+        passwordHash: patientPasswordHash,
+      },
+      create: {
+        name: raqia.fullName,
+        phone: raqiaCaregiverPhone,
+        role: 'patient',
+        patientId: raqia.id,
+        passwordHash: patientPasswordHash,
+      },
+    });
+
+    // Caregiver row (separate from User; the structured relationship record)
+    const existingCaregiver = await prisma.patientCaregiver.findFirst({
+      where: { patientId: raqia.id, phoneNumber: raqiaCaregiverPhone, deletedAt: null },
+    });
+    if (!existingCaregiver) {
+      await prisma.patientCaregiver.create({
+        data: {
+          patientId: raqia.id,
+          fullName: 'Eng. Mohamed Abdallah',
+          relationship: 'Son',
+          phoneNumber: raqiaCaregiverPhone,
+          whatsappNumber: raqiaCaregiverPhone,
+          isPrimary: true,
+          isAuthorized: true,
+          notes: 'Primary caregiver and decision-maker. Coordinates all home care logistics.',
+          enteredByStaffId: demoStaff.id,
+        },
+      });
+    }
+
+    // ── Visits — grouped by clinical role ───────────────────────────────
+    // Doctor visits: ADM / OR / DCH go to demoProvider (RL-01 Doctor).
+    // Physio visits: PT1 / PT2 go to physioProvider (RL-02 Physiotherapist).
+    // No nursing visits in source record.
+    const raqiaVisits: Array<{
+      code: string; scheduled: string; status: 'completed' | 'scheduled' | 'in_progress';
+      visitType: 'in_home' | 'telemedicine'; providerId: string; notes: string;
+    }> = [
+      { code: 'VIS-RAQ-ADM', scheduled: '2025-06-20', status: 'completed', visitType: 'in_home',
+        providerId: demoProvider.id,
+        notes: 'Hospital admission for RTA — displaced trans-trochanteric right femoral fracture.' },
+      { code: 'VIS-RAQ-OR',  scheduled: '2025-06-21', status: 'completed', visitType: 'in_home',
+        providerId: demoProvider.id,
+        notes: 'ORIF with proximal femoral nail (PFN).' },
+      { code: 'VIS-RAQ-DCH', scheduled: '2025-06-26', status: 'completed', visitType: 'in_home',
+        providerId: demoProvider.id,
+        notes: 'Discharge after 6-day stay. NWB right leg ordered for one month. Physio referral issued.' },
+      { code: 'VIS-RAQ-PT1', scheduled: '2025-07-16', status: 'completed', visitType: 'in_home',
+        providerId: physioProvider.id,
+        notes: 'Block 1 home physiotherapy (12-session protocol). First session: patient bedridden, fully dependent — release of gastrocnemius and hamstrings; gentle distal release of VMO and IT band; initial activation exercises (VMO, quad set, hamstring set, heel slide). Later sessions in this block (10–12) progressed by increasing resistance and repetition.' },
+      { code: 'VIS-RAQ-PT2', scheduled: '2025-08-17', status: 'completed', visitType: 'in_home',
+        providerId: physioProvider.id,
+        notes: 'Block 2 home physiotherapy (additional 12-session protocol) following follow-up X-ray showing incomplete healing.' },
+    ];
+    const raqiaVisitMap = new Map<string, string>();
+    for (const v of raqiaVisits) {
+      const visit = await prisma.visit.upsert({
+        where: { code: v.code },
+        update: {
+          patientId: raqia.id, providerId: v.providerId,
+          serviceId: v.providerId === physioProvider.id ? physioServiceLookup.id : demoService.id,
+          areaId: demoArea.id, scheduledDate: new Date(v.scheduled), bookedDate: new Date(v.scheduled),
+          status: v.status, visitType: v.visitType,
+          servicePriceEgp: 0, discountEgp: 0, netPriceEgp: 0, providerPayoutEgp: 0,
+          notes: v.notes,
+        },
+        create: {
+          code: v.code, patientId: raqia.id, providerId: v.providerId,
+          serviceId: v.providerId === physioProvider.id ? physioServiceLookup.id : demoService.id,
+          areaId: demoArea.id, scheduledDate: new Date(v.scheduled), bookedDate: new Date(v.scheduled),
+          status: v.status, visitType: v.visitType,
+          servicePriceEgp: 0, discountEgp: 0, netPriceEgp: 0, providerPayoutEgp: 0,
+          notes: v.notes,
+        },
+      });
+      raqiaVisitMap.set(v.code, visit.id);
+    }
+    const admissionVisitId = raqiaVisitMap.get('VIS-RAQ-ADM')!;
+    const dischargeVisitId = raqiaVisitMap.get('VIS-RAQ-DCH')!;
+    const physio1VisitId = raqiaVisitMap.get('VIS-RAQ-PT1')!;
+    const physio2VisitId = raqiaVisitMap.get('VIS-RAQ-PT2')!;
+
+    // Strict-mode cleanup — remove rows seeded by earlier (lax) versions.
+    await prisma.visit.deleteMany({ where: { code: 'VIS-RAQ-FUP' } });
+    await prisma.physioSessionReport.deleteMany({
+      where: {
+        patientId: raqia.id,
+        sessionNumber: { in: [1, 10, 11, 12, 16, 18, 20, 21, 22, 23, 24] },
+      },
+    });
+    await prisma.imagingOrder.deleteMany({
+      where: {
+        patientId: raqia.id,
+        studyName: { in: ['X-ray Right Hip — Post-Surgery', 'X-ray Right Hip — 6-week follow-up'] },
+      },
+    });
+    await prisma.diagnosis.deleteMany({
+      where: { patientId: raqia.id, diagnosisName: 'Generalised osteopenia' },
+    });
+    await prisma.patientSocialHistory.deleteMany({
+      where: { patientId: raqia.id },
+    });
+    await prisma.document.deleteMany({
+      where: {
+        patientId: raqia.id,
+        storagePath: { startsWith: '/assets/' },
+      },
+    });
+
+    // ── Medical history (chronic + past surgical) ────────────────────────
+    // Strict: no onset dates — source report did not give them.
+    const raqiaMedicalHistory: Array<{ conditionName: string; status: string; notes: string }> = [
+      { conditionName: 'Diabetes mellitus (Type 2)', status: 'active',
+        notes: 'Long-standing T2DM. Controlled.' },
+      { conditionName: 'Essential hypertension', status: 'active',
+        notes: 'Stable on antihypertensive regimen.' },
+      { conditionName: 'Total knee replacement — contralateral (left) side', status: 'resolved',
+        notes: 'Status post left TKR — well-functioning prosthesis.' },
+      { conditionName: 'Grade 3 left knee osteoarthritis', status: 'chronic',
+        notes: 'Severe medial compartment osteoarthritis. Symptomatic management.' },
+      { conditionName: 'Lumbar spinal surgery (history)', status: 'resolved',
+        notes: 'Prior lumbar decompression — no current radicular symptoms.' },
+      { conditionName: 'Radiofrequency nerve root decompression (history)', status: 'resolved',
+        notes: 'Successful symptom relief at time of procedure.' },
+    ];
+    for (const mh of raqiaMedicalHistory) {
+      const exists = await prisma.medicalHistory.findFirst({
+        where: { patientId: raqia.id, conditionName: mh.conditionName, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.medicalHistory.create({
+          data: { ...mh, patientId: raqia.id, enteredByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // ── Diagnoses ────────────────────────────────────────────────────────
+    // Strict: no ICD-10 codes — none supplied in source report.
+    const raqiaDiagnoses = [
+      { diagnosisName: 'Displaced trans-trochanteric fracture, right femur',
+        diagnosedOn: new Date('2025-06-20'), visitId: admissionVisitId, status: 'resolved',
+        notes: 'Post-ORIF with PFN. Healing in progress on serial imaging.' },
+      { diagnosisName: 'Aftercare following ORIF, right femur',
+        diagnosedOn: new Date('2025-06-26'), visitId: dischargeVisitId, status: 'active',
+        notes: 'Non-weight-bearing for one month. Active rehabilitation.' },
+      { diagnosisName: 'Diffuse osteopenia',
+        diagnosedOn: new Date('2025-06-20'), visitId: admissionVisitId, status: 'active',
+        notes: 'Diffuse osteopenia noted on imaging — bone density review advised.' },
+    ];
+    for (const dx of raqiaDiagnoses) {
+      const exists = await prisma.diagnosis.findFirst({
+        where: { patientId: raqia.id, diagnosisName: dx.diagnosisName, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.diagnosis.create({
+          data: { ...dx, patientId: raqia.id, enteredByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // ── Imaging orders (trauma-day workup only — strict) ─────────────────
+    // The post-op X-ray and 6-week follow-up X-ray are mentioned in the
+    // source narrative but no specific date is given, so they are NOT seeded
+    // as ImagingOrder rows. Their findings are captured in the discharge
+    // summary document and in the Block-1 / Block-2 physio visit notes.
+    const raqiaImaging = [
+      { studyName: 'X-ray Pelvis', modality: 'X-ray', bodyPart: 'Pelvis / Right hip',
+        clinicalReason: 'Initial trauma assessment after RTA',
+        priority: 'urgent' as const, status: 'completed' as const,
+        orderedAt: new Date('2025-06-20T00:00:00.000Z'), targetDate: new Date('2025-06-20'),
+        resultSummary: 'Displaced trans-trochanteric fracture, right femur. No lytic/sclerotic lesions.' },
+      { studyName: 'CT Hip Joints', modality: 'CT', bodyPart: 'Both hips',
+        clinicalReason: 'Pre-operative planning for displaced fracture',
+        priority: 'urgent' as const, status: 'completed' as const,
+        orderedAt: new Date('2025-06-20T00:00:00.000Z'), targetDate: new Date('2025-06-20'),
+        resultSummary: 'Displaced trans-trochanteric fracture with displaced lesser trochanter. Peri-articular soft tissue edema. Mild hip joint effusion. Diffuse osteopenia.' },
+      { studyName: 'FAST (Focused Abdominal Sonography)', modality: 'Ultrasound', bodyPart: 'Abdomen',
+        clinicalReason: 'Rule out abdominal trauma post-RTA',
+        priority: 'urgent' as const, status: 'completed' as const,
+        orderedAt: new Date('2025-06-20T00:00:00.000Z'), targetDate: new Date('2025-06-20'),
+        resultSummary: 'No free intraperitoneal fluid, organ tears, or hematomas.' },
+    ];
+    for (const im of raqiaImaging) {
+      const exists = await prisma.imagingOrder.findFirst({
+        where: { patientId: raqia.id, studyName: im.studyName, orderedAt: im.orderedAt },
+      });
+      if (!exists) {
+        await prisma.imagingOrder.create({
+          data: { ...im, patientId: raqia.id, visitId: admissionVisitId, orderedByStaffId: demoDoctor.id },
+        });
+      }
+    }
+
+    // ── Document — discharge summary stored privately ────────────────────
+    // The file lives OUTSIDE `public/` at $EHR_STORAGE_ROOT and is served only
+    // through the authenticated streaming endpoint `/api/portal/documents/[id]/file`.
+    const raqiaReportTitle = 'Comprehensive Medical Report — Raqia Ragab Mohamed';
+    const existingReport = await prisma.document.findFirst({
+      where: { patientId: raqia.id, title: raqiaReportTitle, deletedAt: null },
+    });
+    if (!existingReport) {
+      const reportContent = [
+        'COMPREHENSIVE MEDICAL REPORT',
+        '============================',
+        '',
+        'Patient: Raqia Ragab Mohamed (AN-3211-0725)',
+        'Gender: Female  |  Age: 73 years',
+        'Caregiver: Eng. Mohamed Abdallah (son) — +201142444144',
+        '',
+        'CHIEF COMPLAINT',
+        '---------------',
+        'Post-ORIF rehabilitation following a road-traffic accident causing a',
+        'displaced right trans-trochanteric femoral fracture.',
+        '',
+        'ADMISSION & SURGERY',
+        '-------------------',
+        '20-Jun-2025  Admission for RTA; trauma workup performed.',
+        '21-Jun-2025  ORIF with proximal femoral nail (PFN). Uneventful procedure.',
+        '26-Jun-2025  Discharge after a 6-day stay. Strict non-weight-bearing of the',
+        '             right lower limb ordered for one month. Home-care physiotherapy',
+        '             referral issued.',
+        '',
+        'TRAUMA-DAY IMAGING (20-Jun-2025)',
+        '--------------------------------',
+        '* X-ray Pelvis / Right Hip: Displaced trans-trochanteric fracture, right',
+        '  femur. No lytic or sclerotic lesions.',
+        '* CT Hip Joints (both): Displaced trans-trochanteric fracture with displaced',
+        '  lesser trochanter. Peri-articular soft tissue edema. Mild hip joint effusion.',
+        '  Diffuse osteopenia.',
+        '* FAST abdominal ultrasound: No free intraperitoneal fluid, organ tears, or',
+        '  hematomas.',
+        '',
+        'POST-OPERATIVE IMAGING',
+        '----------------------',
+        'Immediate post-op X-ray of the right hip (date not recorded in source):',
+        '  Internal fixation in good position. No loosening or displacement.',
+        '  Persistent osteopenia. No signs of infection.',
+        '',
+        'Six-week follow-up X-ray (date not recorded in source — performed between',
+        'Block 1 session 12 and Block 2 session 1):',
+        '  Incomplete bone healing. Surgeon recommended an additional 12',
+        '  physiotherapy sessions.',
+        '',
+        'PAST MEDICAL HISTORY',
+        '--------------------',
+        '* Type 2 diabetes mellitus (long-standing, controlled).',
+        '* Essential hypertension (stable on antihypertensive regimen).',
+        '* Left total knee replacement — contralateral side (resolved; well-functioning',
+        '  prosthesis).',
+        '* Grade 3 left knee osteoarthritis (chronic; symptomatic management).',
+        '* Lumbar spinal decompression surgery (resolved; no current radicular symptoms).',
+        '* Radiofrequency nerve-root decompression (resolved; successful at the time).',
+        '',
+        'BASELINE FUNCTIONAL STATUS',
+        '--------------------------',
+        'Mobility: bedridden. Functional independence: full assistance required.',
+        '',
+        'PHYSIOTHERAPY — BLOCK 1 (12 sessions; in-home)',
+        '----------------------------------------------',
+        'Approach: Release of gastrocnemius and hamstrings; gentle distal release of',
+        'VMO and IT band; progressive activation of VMO, quad set, hamstring set, heel',
+        'slide; addition of hip abductor work, core activation, short-arc quads,',
+        'bridging, kinesio tape for patellar medialization, iliopsoas release, assisted',
+        'SLR, and rectus femoris activation. Final three sessions of the block (10–12)',
+        'progressed by increasing resistance and repetition.',
+        '',
+        'Dated sessions in source record: 16-Jul, 20-Jul, 22-Jul, 24-Jul, 27-Jul,',
+        '29-Jul, 31-Jul, 03-Aug (2025).',
+        '',
+        'Outcome of Block 1: Patient progressed from fully bedridden to independent',
+        'sitting on the edge of the bed and active hip flexion control. Pain reduced',
+        'from 7/10 pre-treatment to 2/10 post-treatment by end of block.',
+        '',
+        'PHYSIOTHERAPY — BLOCK 2 (additional 12 sessions; in-home)',
+        '----------------------------------------------------------',
+        'Triggered by the follow-up X-ray showing incomplete healing. Continued the',
+        'Block 1 protocol with added VMO drills, clamshell exercise, iliotibial band',
+        'release, pelvic rocking, and sacrum release. Progressive loading and',
+        'functional gait training with a walker were added in the later sessions.',
+        '',
+        'Dated sessions in source record: 17-Aug, 19-Aug, 21-Aug, 26-Aug, 31-Aug',
+        '(2025).',
+        '',
+        'RISK FLAGS',
+        '----------',
+        '* High fall risk — strict NWB for one month; caregiver supervision required',
+        '  for all transfers.',
+        '',
+        'PRIVACY',
+        '-------',
+        'This document contains protected health information (PHI). It is stored on',
+        'private server storage and is served only through the authenticated',
+        'patient/caregiver portal. Do not redistribute.',
+        '',
+      ].join('\n');
+
+      const crypto = await import('node:crypto');
+      const fs = await import('node:fs/promises');
+      const pathMod = await import('node:path');
+
+      const storageRoot = process.env.EHR_STORAGE_ROOT
+        ? pathMod.resolve(process.env.EHR_STORAGE_ROOT)
+        : pathMod.resolve(process.cwd(), 'private-storage', 'ehr');
+
+      const yyyy = '2025';
+      const mm = '06';
+      const fileKey = `${raqia.id}/${yyyy}/${mm}/${crypto.randomUUID()}-medical-report.txt`;
+      const absolute = pathMod.join(storageRoot, fileKey);
+      await fs.mkdir(pathMod.dirname(absolute), { recursive: true });
+      await fs.writeFile(absolute, reportContent, { mode: 0o640 });
+      const buffer = Buffer.from(reportContent, 'utf8');
+      const checksum = crypto.createHash('sha256').update(buffer).digest('hex');
+
+      await prisma.document.create({
+        data: {
+          patientId: raqia.id,
+          visitId: dischargeVisitId,
+          title: raqiaReportTitle,
+          category: 'discharge_summary',
+          storagePath: fileKey,
+          mimeType: 'text/plain; charset=utf-8',
+          fileSizeBytes: buffer.byteLength,
+          checksum,
+          uploadedByStaffId: demoStaff.id,
+        },
+      });
+    }
+
+    // ── Risk flag — fall risk ────────────────────────────────────────────
+    const existingFallFlag = await prisma.patientRiskFlag.findFirst({
+      where: { patientId: raqia.id, code: 'fall_risk', isActive: true },
+    });
+    if (!existingFallFlag) {
+      await prisma.patientRiskFlag.create({
+        data: {
+          patientId: raqia.id,
+          code: 'fall_risk',
+          label: 'High fall risk — non-weight-bearing post-ORIF',
+          severity: 'high',
+          source: 'Orthopaedic discharge note',
+          notes: 'Strict NWB right leg for 1 month. Caregiver supervision required for all transfers.',
+          flaggedByStaffId: demoDoctor.id,
+        },
+      });
+    }
+
+    // ── Social history — mobility & support (strict — verbatim only) ────
+    const existingSocial = await prisma.patientSocialHistory.findFirst({
+      where: { patientId: raqia.id, deletedAt: null },
+    });
+    if (!existingSocial) {
+      await prisma.patientSocialHistory.create({
+        data: {
+          patientId: raqia.id,
+          mobility: 'bedridden',
+          functionalIndependence: 'full_assistance',
+          enteredByStaffId: demoNurse.id,
+        },
+      });
+    }
+
+    // ── Physiotherapy sessions — only sessions with explicit dates ───────
+    // Block 1: source-dated sessions are #2–#9. Session #1 and #10–#12 are
+    // documented in the source narrative but without dates — their clinical
+    // content is captured in VIS-RAQ-PT1.notes above instead of being seeded
+    // with an arbitrary sessionDate.
+    // Block 2: source-dated sessions are #1, #2, #3, #5, #7 (numbered
+    // 13–19 with gaps inside the full 24-session course).
+    const raqiaPhysioSessions: Array<{
+      sessionNumber: number; sessionDate: string; visitId: string;
+      interventions: string; response?: string;
+      painScoreBefore?: number; painScoreAfter?: number;
+      mobilityNote?: string; homeExercisePlan?: string;
+    }> = [
+      // Block 1 — dated
+      { sessionNumber: 2, sessionDate: '2025-07-16', visitId: physio1VisitId,
+        interventions: 'Same protocol as session 1 + hip abductor exercises and rectus abdominis activation (core).',
+        response: 'Mild improvement in quadriceps activation.',
+        painScoreBefore: 6, painScoreAfter: 4,
+        mobilityNote: 'Still bedridden but starting to assist with rolling.' },
+      { sessionNumber: 3, sessionDate: '2025-07-20', visitId: physio1VisitId,
+        interventions: 'Mobilization to increase knee extension. Isometric resistance (gentle), short-arc quad exercise, bridging.',
+        response: 'Significant: patient can now sit independently.',
+        painScoreBefore: 5, painScoreAfter: 3,
+        mobilityNote: 'Transitioned to independent short-sit on edge of bed.' },
+      { sessionNumber: 4, sessionDate: '2025-07-22', visitId: physio1VisitId,
+        interventions: 'Same + hip flexion via forward trunk motion.',
+        response: 'Good engagement. Hip flexion arc increasing.',
+        painScoreBefore: 5, painScoreAfter: 3 },
+      { sessionNumber: 5, sessionDate: '2025-07-24', visitId: physio1VisitId,
+        interventions: 'Hip external rotation. Static hip abductor. Isometric quad + hamstring (sitting). Kinesio tape — patellar medialization.',
+        response: 'Tolerated tape well; reports reduced anterior knee discomfort.',
+        painScoreBefore: 5, painScoreAfter: 3 },
+      { sessionNumber: 6, sessionDate: '2025-07-27', visitId: physio1VisitId,
+        interventions: 'Iliopsoas release. Bridging. Assisted SLR. Rectus femoris activation. Rolling on sound limb.',
+        response: 'Tolerated SLR with assistance — early sign of active hip flexion control.',
+        painScoreBefore: 4, painScoreAfter: 3 },
+      { sessionNumber: 7, sessionDate: '2025-07-29', visitId: physio1VisitId,
+        interventions: 'Same + assisted hip flexion on affected side from sitting.',
+        response: 'Consistent improvement.', painScoreBefore: 4, painScoreAfter: 3 },
+      { sessionNumber: 8, sessionDate: '2025-07-31', visitId: physio1VisitId,
+        interventions: 'Consolidation of full protocol.', response: 'Stable.',
+        painScoreBefore: 4, painScoreAfter: 2 },
+      { sessionNumber: 9, sessionDate: '2025-08-03', visitId: physio1VisitId,
+        interventions: 'Continued protocol.', response: 'Stable.',
+        painScoreBefore: 4, painScoreAfter: 2 },
+      // Block 2 — dated (numbered 13, 14, 15, 17, 19 within the 24-session course)
+      { sessionNumber: 13, sessionDate: '2025-08-17', visitId: physio2VisitId,
+        interventions: 'Same protocol + dedicated VMO drills + clamshell exercise.',
+        response: 'Re-energized after rest week.', painScoreBefore: 4, painScoreAfter: 3 },
+      { sessionNumber: 14, sessionDate: '2025-08-19', visitId: physio2VisitId,
+        interventions: 'Progression — increased repetitions.', response: 'Tolerated.',
+        painScoreBefore: 4, painScoreAfter: 2 },
+      { sessionNumber: 15, sessionDate: '2025-08-21', visitId: physio2VisitId,
+        interventions: 'Iliotibial band release added.', response: 'Improved lateral hip flexibility.',
+        painScoreBefore: 3, painScoreAfter: 2 },
+      { sessionNumber: 17, sessionDate: '2025-08-26', visitId: physio2VisitId,
+        interventions: 'Pelvic rocking exercise added.', response: 'Patient enjoys new motion pattern.',
+        painScoreBefore: 3, painScoreAfter: 2 },
+      { sessionNumber: 19, sessionDate: '2025-08-31', visitId: physio2VisitId,
+        interventions: 'Sacrum release added.', response: 'Reduced low-back stiffness.',
+        painScoreBefore: 3, painScoreAfter: 1 },
+    ];
+
+    for (const s of raqiaPhysioSessions) {
+      const sessionDate = new Date(s.sessionDate);
+      const exists = await prisma.physioSessionReport.findFirst({
+        where: { patientId: raqia.id, sessionNumber: s.sessionNumber, deletedAt: null },
+      });
+      if (!exists) {
+        await prisma.physioSessionReport.create({
+          data: {
+            patientId: raqia.id,
+            visitId: s.visitId,
+            sessionDate,
+            sessionNumber: s.sessionNumber,
+            interventions: s.interventions,
+            response: s.response ?? null,
+            painScoreBefore: s.painScoreBefore ?? null,
+            painScoreAfter: s.painScoreAfter ?? null,
+            mobilityNote: s.mobilityNote ?? null,
+            homeExercisePlan: s.homeExercisePlan ?? null,
+            enteredByStaffId: demoPhysio.id,
+          },
+        });
+      }
+    }
+
     console.log('Demo patient seed ready:');
     console.log('  - Identifier (phone): +201055500001');
     console.log('  - Identifier (case id): PT-DEMO-001');
+    console.log('  - Password: Portal@123');
+    console.log('Real-world case (Raqia Ragab) seed ready:');
+    console.log('  - Identifier (phone): +201142444144 (caregiver login)');
+    console.log('  - Identifier (case id): AN-3211-0725');
     console.log('  - Password: Portal@123');
     console.log('Demo staff seed ready:');
     console.log('  - Email: admin@aneeshealth.local');

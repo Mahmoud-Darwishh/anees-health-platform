@@ -111,6 +111,112 @@
       "notes": "Additional Notes",
       "disclaimer": "This portal summary is informational and does not replace clinical diagnosis or emergency care."
     },
+    "workspace": {
+      "subtitle": "Professional static EHR view designed for quick review and future mobile scalability.",
+      "staticMode": "Static Snapshot Mode",
+      "tabsLabel": "Portal sections",
+      "field": "Field",
+      "value": "Value",
+      "caregiverPhone": "Caregiver Phone",
+      "bloodGroup": "Blood Group",
+      "severity": "Severity",
+      "reaction": "Reaction",
+      "priority": "Priority",
+      "orderedAt": "Ordered",
+      "targetDate": "Target Date",
+      "bodyPart": "Body Part",
+      "category": "Category",
+      "recordDate": "Record Date",
+      "fileStatus": "File Status",
+      "notes": "Notes"
+    },
+    "tabs": {
+      "general": "General Profile",
+      "financial": "Financials & Receipts",
+      "medical": "Medical Records",
+      "labs": "Labs, Scans & Files",
+      "care": "Care Coordination",
+      "visits": "Visits & Timeline"
+    },
+    "nav": {
+      "overview": "Overview",
+      "profile": "Profile",
+      "visits": "Visits",
+      "medical": "Medical",
+      "labs": "Labs & Files",
+      "financial": "Billing",
+      "care": "Care",
+      "home": "Back to Home"
+    },
+    "greetings": {
+      "morning": "Good morning,",
+      "afternoon": "Good afternoon,",
+      "evening": "Good evening,"
+    },
+    "actions": {
+      "exportPdf": "Export as PDF"
+    },
+    "brand": {
+      "logoAlt": "Anees Health"
+    },
+    "overview": {
+      "chartsLabel": "Patient overview charts",
+      "visitTrendTitle": "Visit trend",
+      "visitTrendSubtitle": "Visits per month — last 6 months",
+      "documentsTitle": "Documents",
+      "documentsSubtitle": "Distribution by category",
+      "billingTitle": "Billing settled",
+      "billingSubtitle": "Paid vs. outstanding"
+    },
+    "financial": {
+      "subtitle": "Invoices, receipts, and insurance information in one table-driven view.",
+      "invoices": "Invoices",
+      "receipts": "Receipts",
+      "invoiceCode": "Invoice",
+      "invoiceDate": "Invoice Date",
+      "paymentDate": "Payment Date",
+      "receiptCode": "Receipt",
+      "amount": "Amount",
+      "status": "Status",
+      "dueDate": "Due Date",
+      "paymentMethod": "Method",
+      "reference": "Reference",
+      "outstandingAmount": "Outstanding",
+      "openInvoices": "Open Invoices",
+      "emptyInvoices": "No invoices available yet.",
+      "emptyReceipts": "No payment receipts available yet.",
+      "insurance": "Insurance Provider",
+      "policy": "Policy / Member ID",
+      "expiry": "Insurance Expiry"
+    },
+    "labsPanel": {
+      "labOrders": "Lab Orders",
+      "scanOrders": "Imaging Orders",
+      "test": "Test",
+      "study": "Study",
+      "modality": "Modality",
+      "emptyLabOrders": "No lab orders available.",
+      "emptyScanOrders": "No imaging orders available."
+    },
+    "orders": {
+      "title": "Active Orders",
+      "orderType": "Order Type",
+      "item": "Item",
+      "frequency": "Frequency",
+      "medications": "Medication",
+      "nursing": "Nursing",
+      "physio": "Physiotherapy",
+      "empty": "No active care orders available."
+    },
+    "care": {
+      "subtitle": "Current tasks, multidisciplinary orders, and risk alerts.",
+      "tasks": "Care Tasks",
+      "task": "Task",
+      "emptyTasks": "No care tasks available.",
+      "riskFlags": "Risk Flags",
+      "flag": "Risk Flag",
+      "emptyFlags": "No active risk flags."
+    },
     "medicalHistory": {
       "title": "Medical History",
       "empty": "No medical history records are available yet.",
@@ -140,6 +246,14 @@
       "title": "Allergies",
       "empty": "No allergy records available."
     },
+    "medicalHistory": {
+      "title": "Past Medical History",
+      "condition": "Condition",
+      "onset": "Onset",
+      "status": "Status",
+      "notes": "Notes",
+      "empty": "No past medical history recorded."
+    },
     "doctorNotes": {
       "title": "Doctor Notes",
       "empty": "No progress notes available.",
@@ -152,6 +266,11 @@
       "title": "Physiotherapy Sessions",
       "empty": "No physiotherapy session reports yet.",
       "session": "Session",
+      "date": "Date",
+      "interventions": "Interventions",
+      "painBefore": "Pain Before",
+      "painAfter": "Pain After",
+      "response": "Response",
       "pain": "Pain",
       "by": "Physio",
       "homePlan": "Home Plan"
@@ -182,7 +301,13 @@
       "service": "Service",
       "provider": "Provider",
       "type": "Visit Type",
-      "status": "Status"
+      "status": "Status",
+      "doctor": "Doctor Visits",
+      "doctorEmpty": "No doctor visits recorded yet.",
+      "physio": "Physiotherapy Sessions",
+      "physioEmpty": "No physiotherapy sessions recorded yet.",
+      "nursing": "Nursing Visits",
+      "nursingEmpty": "No nursing visits recorded yet."
     },
     "requests": {
       "title": "Appointment Requests",
@@ -205,6 +330,15 @@
       "emptyScans": "No scans or radiology files yet.",
       "ready": "Available",
       "pending": "Pending file upload",
+      "viewerTitle": "Document details",
+      "viewerSubtitle": "Review file information and open the original.",
+      "backToLabs": "Back to Labs & Documents",
+      "openFile": "Open original file",
+      "download": "Download",
+      "awaitingUpload": "Awaiting secure upload",
+      "mimeType": "File type",
+      "fileSize": "File size",
+      "linkedVisit": "Linked visit",
       "items": {
         "1": {
           "title": "CBC Lab Result",

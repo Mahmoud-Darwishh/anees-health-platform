@@ -1064,6 +1064,7 @@ model Document {
   storagePath      String?
   mimeType         String?
   fileSizeBytes    Int?
+  checksum         String?
   uploadedByStaffId String?
   sensitivity      ClinicalSensitivity @default(sensitive)
   deletedAt        DateTime?

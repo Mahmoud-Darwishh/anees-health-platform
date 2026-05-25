@@ -2409,6 +2409,7 @@ export default async function AdminPatientDetailPage({ params, searchParams }: P
               <div className={styles.exportCtaRow}>
                 <Link href={`/admin/patients/${patient.id}/export`} className={styles.primaryLinkBtn}>Open export template</Link>
                 <Link href={`/admin/patients/${patient.id}/export/verify`} className={styles.secondaryLinkBtn}>Open verification page</Link>
+                <Link href={`/admin/patients/${patient.id}/documents`} className={styles.secondaryLinkBtn}>Patient files</Link>
               </div>
             </article>
 

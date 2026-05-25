@@ -1,0 +1,89 @@
+@use '../../../../../assets/scss/utils/variables' as *;
+
+$portal-navy: #132c4d;
+$portal-gold: #aa8642;
+$portal-cream: #fdfaf4;
+$portal-surface: #ffffff;
+$portal-border: #ebdfc6;
+$portal-ink-muted: #7a6a4e;
+
+.shell {
+  max-width: 880px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: $portal-ink-muted;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.3rem 0;
+  transition: color 0.18s ease;
+
+  i {
+    font-size: 0.95rem;
+    color: $portal-gold;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: $portal-navy;
+    outline: none;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #f1e6cd;
+}
+
+.openBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: $portal-navy;
+  color: #ffffff;
+  border: 1px solid $portal-navy;
+  border-radius: 8px;
+  padding: 0.55rem 1.05rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.18s ease, color 0.18s ease;
+
+  i {
+    color: $portal-gold;
+    font-size: 0.95rem;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: $portal-surface;
+    color: $portal-navy;
+    outline: none;
+  }
+}
+
+.disabledBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: $portal-cream;
+  color: $portal-ink-muted;
+  border: 1px dashed $portal-border;
+  border-radius: 8px;
+  padding: 0.55rem 1.05rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: not-allowed;
+
+  i {
+    font-size: 0.95rem;
+    color: $portal-gold;
+  }
+}
