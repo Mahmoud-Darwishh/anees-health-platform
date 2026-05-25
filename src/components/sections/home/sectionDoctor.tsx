@@ -1,12 +1,25 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import Slider from "react-slick";
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import type SliderType from "react-slick";
+import type { Settings } from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
 import { DoctorCard } from "@/features/doctors/components/doctorgrid/DoctorCard";
 import type { Doctor } from "@/features/doctors/components/doctorgrid/types";
 import { Reveal } from "@/components/common/Reveal";
 import { useCarouselAutoplay } from "@/hooks/useCarouselAutoplay";
+
+// react-slick is ~40 KB min+gz and the Doctor section is below the fold.
+// Defer it (and its CSS) until the route actually renders the carousel.
+// next/dynamic doesn't forward refs, so wrap with forwardRef so `ref={setSlider}`
+// continues to receive the underlying Slider instance.
+const DynamicSlider = dynamic(() => import("react-slick"), { ssr: false }) as unknown as React.ComponentType<Settings & { children?: React.ReactNode; ref?: React.Ref<SliderType> }>;
+const Slider = forwardRef<SliderType, Settings & { children?: React.ReactNode }>(
+  function SliderWithRef(props, ref) {
+    return <DynamicSlider {...props} ref={ref ?? undefined} />;
+  }
+);
 
 const AUTOPLAY_MS = 5000;
 const RESUME_DELAY_MS = 4000;
@@ -21,7 +34,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
   const tg = (key: string, values?: Record<string, string | number>) =>
     t(`doctorGrid.${key}`, values);
   const isRTL = locale === "ar";
-  const [slider, setSlider] = useState<Slider | null>(null);
+  const [slider, setSlider] = useState<SliderType | null>(null);
   const [slidesToShow, setSlidesToShow] = useState<number>(1);
   const featuredDoctors = useMemo(() => doctors.slice(0, 6), [doctors]);
 
@@ -168,7 +181,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                 scheduleResume();
               }}
             >
-              <i className="fa-solid fa-chevron-left" />
+              <i className="feather-chevron-left" aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -180,7 +193,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                 scheduleResume();
               }}
             >
-              <i className="fa-solid fa-chevron-right" />
+              <i className="feather-chevron-right" aria-hidden="true" />
             </button>
           </div>
         </div>

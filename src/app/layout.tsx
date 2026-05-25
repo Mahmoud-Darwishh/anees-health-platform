@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { locales } from '@/i18n/request';
 import Script from 'next/script';
 import { config } from '@/lib/config';
+import LazyStylesheet from '@/components/common/LazyStylesheet';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -124,11 +125,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://chatling.ai" crossOrigin="anonymous" />
 
-        {/* Third-party stylesheets for Bootstrap and Icons */}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
+        {/* Third-party stylesheets. Bootstrap is render-blocking and used by */}
+        {/* most public layouts (grid + utilities) — keep eager. Font Awesome */}
+        {/* is decorative and never used above the fold on home, so we inject */}
+        {/* it lazily from the client to keep it off the critical path. */}
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
@@ -151,6 +151,12 @@ export default function RootLayout({
         </noscript>
       </head>
       <body>
+        {/* Font Awesome — non-critical, decorative; load lazily from the */}
+        {/* client to keep it off the critical render path. */}
+        <LazyStylesheet
+          id="fa-stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
         {children}
 
         {/* Organization Schema for AI Search Engine Optimization (GEO) */}

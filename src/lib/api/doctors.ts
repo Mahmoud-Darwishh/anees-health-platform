@@ -3,10 +3,16 @@
  * Reads from PostgreSQL via Prisma — replaces JSON file loading
  */
 
+import { unstable_cache } from 'next/cache';
 import { Doctor, LocalizedDoctorData } from '@/lib/models/doctor.types';
 import { generateDoctorSlug } from '@/lib/utils/slug';
 import { prisma } from '@/lib/db/prisma';
 import type { Doctor as PrismaDoctor } from '@prisma/client';
+
+// Cache tags. Call `revalidateTag(DOCTORS_CACHE_TAG)` from any admin
+// mutation that edits the Doctor table to bust the cache immediately.
+export const DOCTORS_CACHE_TAG = 'doctors';
+const DOCTORS_CACHE_TTL_SECONDS = 300; // 5 minutes
 
 /**
  * Map a Prisma Doctor row to the Doctor interface for a given locale
@@ -53,15 +59,23 @@ function mapDoctor(row: PrismaDoctor, locale: 'en' | 'ar'): Doctor {
 }
 
 /**
- * Get all active doctors for a given locale
+ * Get all active doctors for a given locale.
+ *
+ * Cached with `unstable_cache` keyed by locale. Bust with
+ * `revalidateTag(DOCTORS_CACHE_TAG)` from admin mutations.
  */
-export async function getDoctors(locale: 'en' | 'ar'): Promise<Doctor[]> {
-  const rows = await prisma.doctor.findMany({
-    where: { isActive: true },
-    orderBy: { id: 'asc' },
-  });
-  return rows.map((row) => mapDoctor(row, locale));
-}
+export const getDoctors = (locale: 'en' | 'ar'): Promise<Doctor[]> =>
+  unstable_cache(
+    async (loc: 'en' | 'ar'): Promise<Doctor[]> => {
+      const rows = await prisma.doctor.findMany({
+        where: { isActive: true },
+        orderBy: { id: 'asc' },
+      });
+      return rows.map((row) => mapDoctor(row, loc));
+    },
+    ['doctors', locale],
+    { tags: [DOCTORS_CACHE_TAG], revalidate: DOCTORS_CACHE_TTL_SECONDS },
+  )(locale);
 
 /**
  * Find a doctor by slug in a specific locale

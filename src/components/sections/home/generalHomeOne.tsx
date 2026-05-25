@@ -1,13 +1,9 @@
-'use client';
-
-import React, { useRef } from 'react';
-import { usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import React from 'react';
 import Header from '@/components/layout/Header'
 import HomeBanner from './homeBanner'
 import Footer from '@/components/layout/Footer'
 import type { Doctor } from '@/features/doctors/components/doctorgrid/types';
-import { useReveal } from '@/hooks/useReveal';
+import HomeRevealRoot from './HomeRevealRoot';
 
 import SectionDoctor from './sectionDoctor';
 import SectionLogos from './sectionLogos';
@@ -26,17 +22,13 @@ interface GeneralHomeOneProps {
   doctors: Doctor[];
 }
 
+// Server component. Only HomeRevealRoot and the three interactive carousels
+// (Doctor, Packages, PatientStories) + Faq accordion ship to the client bundle.
 const GeneralHomeOne: React.FC<GeneralHomeOneProps> = ({ doctors }) => {
-  const mainRef = useRef<HTMLElement>(null);
-  const pathname = usePathname();
-  const locale = useLocale();
-  // Wire scroll-reveal for every <Reveal>-wrapped section below.
-  useReveal(mainRef, [pathname, locale]);
-
   return (
     <div className='main-wrapper'>
       <Header />
-      <main id="main-content" tabIndex={-1} ref={mainRef}>
+      <HomeRevealRoot>
         <HomeBanner />
         {/* Trust → Differentiator → Process → Offer → People → Proof → Stories → Coverage → Objections */}
         <SectionLogos />
@@ -48,7 +40,7 @@ const GeneralHomeOne: React.FC<GeneralHomeOneProps> = ({ doctors }) => {
         <SectionPatientStories />
         <SectionCoverageStrip />
         <SectionFaq />
-      </main>
+      </HomeRevealRoot>
       <Footer />
     </div>
   )
