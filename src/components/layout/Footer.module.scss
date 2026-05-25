@@ -1,0 +1,347 @@
+// ═══════════════════════════════════════════════════════════════════════════
+//   Footer — refactored, identity-aligned (white/gold header → navy/gold foot)
+// ═══════════════════════════════════════════════════════════════════════════
+@use 'sass:color';
+@use '@/assets/scss/utils/variables' as *;
+@use '@/assets/scss/utils/mixins' as *;
+
+// ─── Local tokens ────────────────────────────────────────────────────────
+$f-bg-from:      #0d2240;            // deep navy
+$f-bg-to:        #132c4d;            // brand-dark-blue
+$f-text:         rgba(255, 255, 255, 0.78);
+$f-text-strong:  #ffffff;
+$f-text-muted:   rgba(255, 255, 255, 0.55);
+$f-divider:      rgba(255, 255, 255, 0.08);
+$f-divider-soft: rgba(255, 255, 255, 0.05);
+$f-radius:       14px;
+$f-easing:       cubic-bezier(0.22, 0.61, 0.36, 1);
+
+// ─── Shell ───────────────────────────────────────────────────────────────
+.footer {
+  position: relative;
+  isolation: isolate;
+  margin-top: 60px;
+  color: $f-text;
+  background:
+    radial-gradient(80% 60% at 0% 0%, rgba($primary, 0.16) 0%, rgba($primary, 0) 60%),
+    radial-gradient(70% 60% at 100% 100%, rgba($primary, 0.10) 0%, rgba($primary, 0) 70%),
+    linear-gradient(180deg, $f-bg-from 0%, $f-bg-to 100%);
+  overflow: hidden;
+
+  // Gold hairline echoing the header — visual signature
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba($primary, 0.55) 50%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+}
+
+// ─── Top grid ────────────────────────────────────────────────────────────
+.top {
+  padding: 64px 0 40px;
+
+  @include respond-below(lg) { padding: 48px 0 28px; }
+  @include respond-below(md) { padding: 40px 0 16px; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: 48px;
+
+  @include respond-below(lg) {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px 32px;
+  }
+
+  @include respond-below(md) {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+// ─── Column primitives ───────────────────────────────────────────────────
+.col { min-width: 0; }
+
+.colTitle {
+  position: relative;
+  margin: 0 0 22px;
+  font-size: 14px;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $f-text-strong;
+
+  &::after {
+    content: '';
+    display: block;
+    margin-top: 10px;
+    width: 32px;
+    height: 2px;
+    background: $primary;
+    border-radius: 2px;
+  }
+}
+
+.linkList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  line-height: 1.4;
+  font-weight: $font-weight-medium;
+  color: $f-text;
+  text-decoration: none;
+  transition: color 0.22s $f-easing, transform 0.22s $f-easing;
+  width: max-content;
+  max-width: 100%;
+
+  // Subtle gold dot — appears on hover (replaces legacy chevron clutter)
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $primary;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.22s $f-easing, transform 0.22s $f-easing;
+    flex-shrink: 0;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: $f-text-strong;
+    transform: translateX(2px);
+
+    &::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  // RTL: the bullet sits on the right; translate goes inward (negative X)
+  :global([dir='rtl']) &:hover,
+  :global([dir='rtl']) &:focus-visible {
+    transform: translateX(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.55);
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+}
+
+// ─── Brand column ────────────────────────────────────────────────────────
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+
+  img {
+    height: 46px;
+    width: auto;
+    object-fit: contain;
+
+    @include respond-below(md) { height: 40px; }
+  }
+}
+
+.tagline {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: $f-text;
+  max-width: 42ch;
+}
+
+// ─── Socials ─────────────────────────────────────────────────────────────
+.socials {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.socialBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: $f-text;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-decoration: none;
+  transition: background 0.22s $f-easing, color 0.22s $f-easing,
+              border-color 0.22s $f-easing, transform 0.22s $f-easing;
+
+  i { font-size: 15px; }
+
+  &:hover,
+  &:focus-visible {
+    background: $primary;
+    color: $f-text-strong;
+    border-color: $primary;
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.55);
+    outline-offset: 3px;
+  }
+}
+
+// ─── Contact column ──────────────────────────────────────────────────────
+.contactList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14.5px;
+  line-height: 1.5;
+
+  .contactIcon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba($primary, 0.14);
+    color: $primary;
+    font-size: 14px;
+    margin-top: 1px;
+  }
+
+  .contactBody {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .contactLabel {
+    font-size: 11px;
+    font-weight: $font-weight-semibold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $primary;
+    margin-bottom: 2px;
+  }
+
+  .contactMuted {
+    color: $f-text-muted;
+    font-size: 13.5px;
+  }
+
+  a {
+    color: $f-text;
+    text-decoration: none;
+    transition: color 0.22s $f-easing;
+    word-break: break-word;
+    // Phone numbers in RTL contexts read better LTR
+    unicode-bidi: plaintext;
+
+    &:hover,
+    &:focus-visible { color: $f-text-strong; }
+
+    &:focus-visible {
+      outline: 2px solid rgba($primary, 0.55);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// ─── Bottom bar ──────────────────────────────────────────────────────────
+.bottom {
+  border-top: 1px solid $f-divider;
+  padding: 20px 0;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.bottomInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.copyText {
+  margin: 0;
+  font-size: 13px;
+  color: $f-text-muted;
+  line-height: 1.5;
+}
+
+.legalLinks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.legalLink {
+  font-size: 13px;
+  font-weight: $font-weight-medium;
+  color: $f-text-muted;
+  text-decoration: none;
+  transition: color 0.22s $f-easing;
+
+  &:hover,
+  &:focus-visible {
+    color: $primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.55);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+@include respond-below(custom479) {
+  .bottomInner { flex-direction: column; align-items: flex-start; }
+  .legalLinks { gap: 14px; }
+}

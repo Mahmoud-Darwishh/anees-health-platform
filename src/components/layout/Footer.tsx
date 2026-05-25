@@ -1,183 +1,208 @@
 'use client';
 
-import Link from "next/link";
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import styles from './Footer.module.scss';
 
-const Home3Footer = () => {
+/**
+ * Site-wide public footer.
+ *
+ * Identity: dark-navy backdrop with gold ($primary) accents — provides
+ * deliberate contrast to the white/gold sticky header above, and ties the
+ * brand together via the gold hairline echoing the header's top edge.
+ *
+ * - Semantic HTML5 (footer / nav / address)
+ * - CSS Module (scoped, no global class collisions with legacy footer.scss)
+ * - Logical layout — RTL-safe via grid + flex (no left/right paddings)
+ * - Accessible: aria labels, visible focus, hidden link text for socials
+ */
+const Footer = () => {
   const t = useTranslations();
   const locale = useLocale();
-  const isRTL = locale === 'ar';
-  
+  const year = new Date().getFullYear();
+
+  const href = (path: string) => `/${locale}${path}`;
+
+  // Compact tagline derived from the long about_text — keeps the brand column
+  // focused without adding a new translation key.
+  const tagline = t('footer.about_text');
+
   return (
-    <div>
-      {/* Footer */}
-      <footer className="footer footer-three">
-        {/* Footer Top */}
-        <div className="footer-top">
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-lg-3 col-md-6">
-                {/* Footer Widget */}
-                <div className="footer-widget footer-about">
-                  <div className="footer-logo">
-                    <img src="/assets/img/footer-logo.png" alt={t('header.title')} />
-                  </div>
-                  <div className="footer-about-content">
-                    <p>
-                      {t('footer.about_text')}
-                    </p>
-                  </div>
-                </div>
-                {/* /Footer Widget */}
-              </div>
-              <div className="col-lg-3 col-md-6">
-                {/* Footer Widget */}
-                <div className="footer-widget footer-menu">
-                  <h2 className="footer-title">{t('footer.for_patients')}</h2>
-                  <ul>
-                    <li>
-                      <Link href={`/${locale}/doctors`}>{t('footer.search_doctors')}</Link>
-                    </li>
-                    <li>
-                      <Link href={`/${locale}/booking`}>{t('footer.booking')}</Link>
-                    </li>
-                    <li>
-                      <Link href={`/${locale}/coverage`}>{t('nav.coverage')}</Link>
-                    </li>
-                    <li>
-                      <Link href={`/${locale}/specialties`}>{t('footer.specialities')}</Link>
-                    </li>
-                    <li>
-                      <Link href={`/${locale}/contact-us`}>{t('footer.contact')}</Link>
-                    </li>
-                  </ul>
-                </div>
-                {/* /Footer Widget */}
-              </div>
-              <div className="col-lg-3 col-md-6">
-                {/* Footer Widget */}
-                <div className="footer-widget footer-menu">
-                    <h2 className="footer-title">{t('footer.quick_links')}</h2>
-                  <ul>
-                    <li>
-                        <Link href={`/${locale}/services`}>{t('footer.our_services')}</Link>
-                    </li>
-                    <li>
-                        <Link href={`/${locale}/about-us`}>{t('footer.about_us')}</Link>
-                    </li>
-                    <li>
-                        <Link href={`/${locale}/doctors`}>{t('nav.doctors')}</Link>
-                    </li>
-                    <li>
-                        <Link href={`/${locale}/coverage`}>{t('nav.coverage')}</Link>
-                    </li>
-                  </ul>
-                </div>
-                {/* /Footer Widget */}
-              </div>
-              <div className="col-lg-3 col-md-6">
-                {/* Footer Widget */}
-                <div className="footer-widget footer-contact">
-                  <h2 className="footer-title">{t('footer.contact')}</h2>
-                  <div className="footer-contact-info">
-                    {/*
-                    <div className="footer-address d-flex align-items-start gap-2 mb-3">
-                      <span className="me-3">
-                        <i className="fas fa-map-marker-alt" />
-                      </span>
-                      <p className="mb-3">
-                        {t('footer.address')}
-                        <br />
-                        {t('footer.city')}
-                      </p>
-                    </div> */}
-                    <div className="d-flex align-items-start gap-3 mb-2">
-                      <i className="fa-solid fa-mobile-screen-button mt-1" aria-hidden="true" />
-                      <div className="d-flex flex-column">
-                        <a className="mb-1 text-white text-decoration-none" href="tel:+201270558620">+201270558620</a>
-                        <a className="mb-0 text-white text-decoration-none" href="tel:+201096169459">+201096169459</a>
-                      </div>
-                    </div> 
-                    <p className="mb-3">
-                      <i className="fas fa-envelope me-3 mb-3" aria-hidden="true" />
-                      <a className="text-white text-decoration-none" href="mailto:info@aneeshealth.com">info@aneeshealth.com</a>
-                    </p>
-                    <div className="social-icon mt-3">
-                      <ul className="list-unstyled d-flex gap-3 mb-0">
-                        <li>
-                          <Link href="https://www.facebook.com/aneeshealthcare/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <span className="visually-hidden">{t('footer.social_facebook')}</span>
-                            <i className="fa-brands fa-facebook" aria-hidden="true" />
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="https://www.tiktok.com/@aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <span className="visually-hidden">{t('footer.social_tiktok')}</span>
-                            <i className="fa-brands fa-tiktok" aria-hidden="true" />
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="https://www.instagram.com/aneeshealth/" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <span className="visually-hidden">{t('footer.social_instagram')}</span>
-                            <i className="fa-brands fa-instagram" aria-hidden="true" />
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="https://www.linkedin.com/company/aneeshealth" className="text-decoration-none d-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <span className="visually-hidden">{t('footer.social_linkedin')}</span>
-                            <i className="fa-brands fa-linkedin" aria-hidden="true" />
-                          </Link>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                {/* /Footer Widget */}
-              </div>
+    <footer className={styles.footer} role="contentinfo">
+      <div className={styles.top}>
+        <div className="container">
+          <div className={styles.grid}>
+            {/* ─── Brand ─────────────────────────────────────────────── */}
+            <div className={`${styles.col} ${styles.brand}`}>
+              <Link href={href('/')} className={styles.logo} aria-label={t('header.title')}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/img/footer-logo.png" alt={t('header.title')} />
+              </Link>
+              <p className={styles.tagline}>{tagline}</p>
+
+              <ul className={styles.socials} aria-label={t('footer.follow_us')}>
+                <li>
+                  <a
+                    href="https://www.facebook.com/aneeshealthcare/"
+                    className={styles.socialBtn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="visually-hidden">{t('footer.social_facebook')}</span>
+                    <i className="fa-brands fa-facebook-f" aria-hidden="true" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.instagram.com/aneeshealth/"
+                    className={styles.socialBtn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="visually-hidden">{t('footer.social_instagram')}</span>
+                    <i className="fa-brands fa-instagram" aria-hidden="true" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.tiktok.com/@aneeshealth"
+                    className={styles.socialBtn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="visually-hidden">{t('footer.social_tiktok')}</span>
+                    <i className="fa-brands fa-tiktok" aria-hidden="true" />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.linkedin.com/company/aneeshealth"
+                    className={styles.socialBtn}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="visually-hidden">{t('footer.social_linkedin')}</span>
+                    <i className="fa-brands fa-linkedin-in" aria-hidden="true" />
+                  </a>
+                </li>
+              </ul>
             </div>
+
+            {/* ─── For Patients ──────────────────────────────────────── */}
+            <nav className={styles.col} aria-label={t('footer.for_patients')}>
+              <h2 className={styles.colTitle}>{t('footer.for_patients')}</h2>
+              <ul className={styles.linkList}>
+                <li>
+                  <Link href={href('/doctors')} className={styles.link}>
+                    {t('footer.search_doctors')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/booking')} className={styles.link}>
+                    {t('footer.booking')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/coverage')} className={styles.link}>
+                    {t('nav.coverage')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/specialties')} className={styles.link}>
+                    {t('footer.specialities')}
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            {/* ─── Company ───────────────────────────────────────────── */}
+            <nav className={styles.col} aria-label={t('footer.quick_links')}>
+              <h2 className={styles.colTitle}>{t('footer.quick_links')}</h2>
+              <ul className={styles.linkList}>
+                <li>
+                  <Link href={href('/about-us')} className={styles.link}>
+                    {t('footer.about_us')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/services')} className={styles.link}>
+                    {t('footer.our_services')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/doctors')} className={styles.link}>
+                    {t('nav.doctors')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/contact-us')} className={styles.link}>
+                    {t('footer.contact')}
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            {/* ─── Contact ───────────────────────────────────────────── */}
+            <address className={styles.col} style={{ fontStyle: 'normal' }}>
+              <h2 className={styles.colTitle}>{t('footer.contact')}</h2>
+              <ul className={styles.contactList}>
+                <li className={styles.contactItem}>
+                  <span className={styles.contactIcon} aria-hidden="true">
+                    <i className="fa-solid fa-phone" />
+                  </span>
+                  <div className={styles.contactBody}>
+                    <a href="tel:+201270558620" dir="ltr">+20 127 055 8620</a>
+                    <a href="tel:+201096169459" dir="ltr">+20 109 616 9459</a>
+                  </div>
+                </li>
+                <li className={styles.contactItem}>
+                  <span className={styles.contactIcon} aria-hidden="true">
+                    <i className="fa-solid fa-envelope" />
+                  </span>
+                  <div className={styles.contactBody}>
+                    <a href="mailto:info@aneeshealth.com">info@aneeshealth.com</a>
+                  </div>
+                </li>
+                <li className={styles.contactItem}>
+                  <span className={styles.contactIcon} aria-hidden="true">
+                    <i className="fa-solid fa-location-dot" />
+                  </span>
+                  <div className={styles.contactBody}>
+                    <span className={styles.contactLabel}>{t('footer.admin_office')}</span>
+                    <span>{t('footer.address')}</span>
+                    <span className={styles.contactMuted}>{t('footer.city')}</span>
+                  </div>
+                </li>
+              </ul>
+            </address>
           </div>
         </div>
-        {/* /Footer Top */}
-        {/* Footer Bottom */}
-        <div className="footer-bottom py-3">
-          <div className="container-fluid">
-            {/* Copyright */}
-            <div className="copyright">
-              <div className="row align-items-center">
-                <div className="col-md-6 col-12 mb-3 mb-md-0">
-                  <div className={`copyright-text text-center ${isRTL ? 'text-md-end' : 'text-md-start'}`}>
-                    <p className="mb-0 text-white">
-                      {t('footer.copyright')}
-                    </p>
-                  </div>
-                </div>
-                <div className="col-md-6 col-12">
-                  {/* Copyright Menu */}
-                  <div className={`copyright-menu text-center ${isRTL ? 'text-md-start' : 'text-md-end'}`}>
-                    <p className="policy-links d-inline-flex align-items-center flex-wrap mb-0 text-white">
-                      <Link href={`/${locale}/terms-and-conditions`} className="text-white text-decoration-none">
-                        {t('footer.terms')}
-                      </Link>
-                      <span className="text-white-50 mx-2" aria-hidden="true">|</span>
-                      <Link href={`/${locale}/privacy-policy`} className="text-white text-decoration-none">
-                        {t('footer.privacy')}
-                      </Link>
-                    </p>
-                  </div>
-                  {/* /Copyright Menu */}
-                </div>
-              </div>
-            </div>
-            {/* /Copyright */}
+      </div>
+
+      {/* ─── Bottom bar ─────────────────────────────────────────────── */}
+      <div className={styles.bottom}>
+        <div className="container">
+          <div className={styles.bottomInner}>
+            <p className={styles.copyText}>
+              © {year} {t('header.title')}. {t('footer.rights')}.
+            </p>
+            <ul className={styles.legalLinks}>
+              <li>
+                <Link href={href('/terms-and-conditions')} className={styles.legalLink}>
+                  {t('footer.terms')}
+                </Link>
+              </li>
+              <li>
+                <Link href={href('/privacy-policy')} className={styles.legalLink}>
+                  {t('footer.privacy')}
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
-        {/* /Footer Bottom */}
-      </footer>
-      {/* /Footer */}
-    </div>
+      </div>
+    </footer>
   );
 };
 
-export default Home3Footer;
-
-
+export default Footer;
