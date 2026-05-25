@@ -109,6 +109,7 @@ enum OnlinePackageType {
   haraka
   wai
   amal
+  sanad
 }
 
 enum StaffRole {
@@ -727,6 +728,7 @@ model OnlineBooking {
   serviceType          OnlineServiceType?
   specialty            String?
   packageType          OnlinePackageType?
+  packageDuration      String?
   preferredDate        DateTime?           @db.Date
   timePreference       String?
   sessionCount         String?
@@ -734,14 +736,22 @@ model OnlineBooking {
   nursingType          String?
   nursingHoursPerDay   String?
   nursingDuration      String?
+  baseAmountEgp        Decimal             @db.Decimal(10, 2) @default(0)
+  discountEgp          Decimal             @db.Decimal(10, 2) @default(0)
   amountEgp            Decimal             @db.Decimal(10, 2)
   currency             String              @default("EGP")
   status               OnlineBookingStatus @default(pending)
+
+  promocodeId          String?
+  promocodeCode        String?
+  promocode            Promocode?          @relation(fields: [promocodeId], references: [id])
 
   kashierSessionId     String?
   kashierOrderId       String?
   kashierTransactionId String?
   paymentCompletedAt   DateTime?
+
+  confirmationSentAt   DateTime?
 
   convertedVisitId     String?  @unique
   convertedAt          DateTime?
@@ -759,7 +769,43 @@ model OnlineBooking {
   @@index([status])
   @@index([phoneNumber])
   @@index([createdAt])
+  @@index([promocodeId])
   @@map("online_bookings")
+}
+
+// ============================================================================
+// PROMOCODES — Booking discount codes (% or fixed EGP)
+// ============================================================================
+
+enum PromocodeKind {
+  percentage
+  fixed
+}
+
+model Promocode {
+  id              String        @id @default(cuid())
+  code            String        @unique // Stored uppercase; lookups normalise input
+  description     String?
+  kind            PromocodeKind @default(percentage)
+  /// When kind=percentage, value is 0-100. When kind=fixed, value is EGP.
+  value           Decimal       @db.Decimal(10, 2)
+  /// Optional minimum booking amount before discount applies (EGP).
+  minAmountEgp    Decimal?      @db.Decimal(10, 2)
+  /// Optional cap on the absolute discount applied (EGP).
+  maxDiscountEgp  Decimal?      @db.Decimal(10, 2)
+  /// Total redemption cap across all bookings. null = unlimited.
+  maxRedemptions  Int?
+  redeemedCount   Int           @default(0)
+  startsAt        DateTime?
+  expiresAt       DateTime?
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  bookings        OnlineBooking[]
+
+  @@index([isActive, expiresAt])
+  @@map("promocodes")
 }
 
 // ============================================================================

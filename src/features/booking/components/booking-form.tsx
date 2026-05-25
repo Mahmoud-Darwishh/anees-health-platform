@@ -1,29 +1,82 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
-import { useState } from 'react';
+/**
+ * Booking Form — single, scalable catalog-driven flow.
+ *
+ * Telemedicine and Packages are unified in one SERVICE list, so adding a
+ * future product = one entry in the catalog. No code branching per service.
+ *
+ *   Step 1 — Pick a service card
+ *   Step 2 — Pick a duration  (only if the entry exposes >1 durations)
+ *   Step 3 — Contact info     (revealed after the service is fully chosen)
+ */
+
+import { useTranslations, useLocale } from 'next-intl';
+import { useMemo, useState } from 'react';
 import {
   BookingFormState,
   BookingPriceMap,
+  PackageType,
+  PackageDuration,
+  VisitType,
+  PACKAGE_CATALOG,
   calculateBookingPrice,
   validateBookingForm,
-  PHYSIOTHERAPY_CASE_TYPES,
-  NURSING_TYPES,
-  NURSING_HOURS,
-  NURSING_DURATIONS,
-  PackageType,
+  getPackageEntry,
 } from '@/lib/models/booking.types';
 import type { SpecialtyOption } from '@/lib/api/specialties';
 import BookingSummary from './booking-summary';
 import styles from '@/assets/scss/components/booking-form.module.scss';
 
+// ── Unified catalog (telemedicine + packages) ────────────────────────────────
+// Adding a new service in the future = one new entry below.
+interface ServiceEntry {
+  id: string;
+  visitType: VisitType;
+  packageType: PackageType | null;
+  titleKey: string;
+  subtitleKey: string;
+  featured?: boolean;
+  durations: Array<{
+    value: PackageDuration | null;
+    priceKey: keyof BookingPriceMap;
+    labelKey: string | null;
+  }>;
+}
+
+const SERVICE_CATALOG: ServiceEntry[] = [
+  {
+    id: 'telemedicine',
+    visitType: 'telemedicine',
+    packageType: null,
+    titleKey: 'booking.form.telemedicine',
+    subtitleKey: 'booking.form.telemedicineDescription',
+    durations: [{ value: null, priceKey: 'telemedicine', labelKey: null }],
+  },
+  ...PACKAGE_CATALOG.map<ServiceEntry>((p) => ({
+    id: `package:${p.value}`,
+    visitType: 'package',
+    packageType: p.value,
+    titleKey: p.titleKey,
+    subtitleKey: p.subtitleKey,
+    featured: p.featured,
+    durations: p.durations.map((d) => ({
+      value: d.value,
+      priceKey: d.priceKey,
+      labelKey: d.labelKey,
+    })),
+  })),
+];
+
 const INITIAL_FORM_STATE: BookingFormState = {
   fullName: '',
-  countryCode: '20', // Egypt by default
+  countryCode: '20',
   phoneNumber: '',
-  visitType: 'homeVisit',
+  visitType: null,
   packageType: null,
+  packageDuration: null,
+  promocode: null,
+  // Legacy fields — kept null for type compatibility.
   serviceType: null,
   specialty: null,
   preferredDate: '',
@@ -43,16 +96,23 @@ interface BookingFormProps {
 }
 
 function createInitialFormState(preSelectedPackage?: PackageType | null): BookingFormState {
-  if (!preSelectedPackage) {
-    return INITIAL_FORM_STATE;
-  }
-
+  if (!preSelectedPackage) return INITIAL_FORM_STATE;
+  const entry = getPackageEntry(preSelectedPackage);
   return {
     ...INITIAL_FORM_STATE,
     visitType: 'package',
     packageType: preSelectedPackage,
+    packageDuration: entry && entry.durations.length === 1 ? entry.durations[0].value : null,
   };
 }
+
+const COUNTRIES = [
+  { code: '20',  flag: '🇪🇬', name: 'Egypt' },
+  { code: '966', flag: '🇸🇦', name: 'Saudi Arabia' },
+  { code: '971', flag: '🇦🇪', name: 'UAE' },
+  { code: '965', flag: '🇰🇼', name: 'Kuwait' },
+  { code: '974', flag: '🇶🇦', name: 'Qatar' },
+];
 
 export default function BookingForm({ onSubmit, preSelectedPackage, prices, specialties }: BookingFormProps) {
   const t = useTranslations();
@@ -63,842 +123,285 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Clean phone number - remove country code and leading 0
+  const basePrice = useMemo(() => calculateBookingPrice(formState, prices), [formState, prices]);
+
+  // Currently selected catalog entry (drives the duration step + summary).
+  const selectedEntry = useMemo<ServiceEntry | null>(() => {
+    if (!formState.visitType) return null;
+    return (
+      SERVICE_CATALOG.find(
+        (s) => s.visitType === formState.visitType && s.packageType === formState.packageType,
+      ) ?? null
+    );
+  }, [formState.visitType, formState.packageType]);
+
+  const needsDuration = !!selectedEntry && selectedEntry.durations.length > 1;
+  const durationChosen = !needsDuration || formState.packageDuration !== null;
+  const showContactStep = !!selectedEntry && durationChosen;
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
   const cleanPhoneNumber = (value: string, countryCode: string): string => {
-    let digits = value.replace(/\D/g, ''); // Remove all non-digits
-    
-    // Remove country code if it's at the start
-    if (digits.startsWith(countryCode)) {
-      digits = digits.slice(countryCode.length);
-    }
-    
-    // Remove leading 0 if present
-    if (digits.startsWith('0')) {
-      digits = digits.slice(1);
-    }
-    
+    let digits = value.replace(/\D/g, '');
+    if (digits.startsWith(countryCode)) digits = digits.slice(countryCode.length);
+    if (digits.startsWith('0')) digits = digits.slice(1);
     return digits;
   };
 
-  // Update form field
-  const handleFieldChange = (field: keyof BookingFormState, value: BookingFormState[keyof BookingFormState]) => {
-      // Clean phone number - remove leading 0 or country code
-      if (field === 'phoneNumber') {
-        value = cleanPhoneNumber(String(value ?? ''), formState.countryCode);
-      }
+  const selectService = (entry: ServiceEntry) => {
+    setFormState((prev) => ({
+      ...prev,
+      visitType: entry.visitType,
+      packageType: entry.packageType,
+      // Auto-pick the only duration when there's no choice to make.
+      packageDuration: entry.durations.length === 1 ? entry.durations[0].value : null,
+    }));
+    setErrors((prev) => ({ ...prev, visitType: '', packageType: '', packageDuration: '' }));
+  };
 
-      setFormState((prev) => {
-        const updated = { ...prev, [field]: value };
+  const selectDuration = (duration: PackageDuration) => {
+    setFormState((prev) => ({ ...prev, packageDuration: duration }));
+    setErrors((prev) => ({ ...prev, packageDuration: '' }));
+  };
 
-        // Reset dependent fields when parent selection changes
-        if (field === 'visitType') {
-          updated.packageType = null;
-          updated.serviceType = null;
-          updated.specialty = null;
-          updated.preferredDate = '';
-          updated.timePreference = null;
-          updated.sessionCount = null;
-          updated.caseType = null;
-          updated.nursingType = null;
-          updated.nursingHoursPerDay = null;
-          updated.nursingDuration = null;
-        }
-
-        if (field === 'serviceType') {
-          updated.specialty = null;
-          updated.preferredDate = '';
-          updated.timePreference = null;
-          updated.sessionCount = null;
-          updated.caseType = null;
-          updated.nursingType = null;
-          updated.nursingHoursPerDay = null;
-          updated.nursingDuration = null;
-        }
-
-        return updated;
-      });
-
-      // Clear error for this field
-      if (errors[field]) {
-        setErrors((prev) => {
-          const updated = { ...prev };
-          delete updated[field];
-          return updated;
-        });
-      }
-    };
+  const handleField = (field: 'fullName' | 'phoneNumber' | 'countryCode', value: string) => {
+    setFormState((prev) => {
+      let next = value;
+      if (field === 'phoneNumber') next = cleanPhoneNumber(value, prev.countryCode);
+      return { ...prev, [field]: next };
+    });
+    setErrors((prev) => ({ ...prev, [field]: '' }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Form submission is now handled by the onClick handler of the button
-    // This is kept for backward compatibility
+    const validationErrors = validateBookingForm(formState);
+    if (validationErrors.length > 0) {
+      const map: Record<string, string> = {};
+      validationErrors.forEach((err) => { map[err.field] = err.message; });
+      setErrors(map);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await onSubmit?.(formState);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const totalPrice = calculateBookingPrice(formState, prices);
+  const formatPrice = (n: number) => n.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US');
+  const currency = t('booking.summary.currency');
+
+  // Smallest price for a service entry — drives the card label.
+  const minPriceOf = (entry: ServiceEntry) =>
+    Math.min(...entry.durations.map((d) => prices[d.priceKey]));
 
   return (
-    <div className={styles.bookingContainer} dir={dir}>
+    <div className={styles.bookingContainer}>
       <div className={styles.bookingWrapper}>
-        {/* Main Form */}
-        <form onSubmit={handleSubmit} className={styles.bookingForm}>
+        <form className={styles.bookingForm} onSubmit={handleSubmit} dir={dir} noValidate>
           <div className={styles.formContent}>
-            {/* Section 1: Visit Type Selection */}
-            <fieldset className={styles.formSection}>
-              <legend className={styles.sectionTitle}>
+
+            {/* ── Step 1 — Choose a service ───────────────────────────── */}
+            <section className={styles.formSection} aria-labelledby="step-service">
+              <h2 id="step-service" className={styles.sectionTitle}>
+                <span className={styles.stepNumber}>1</span>
                 {t('booking.form.visitType')}
-              </legend>
+              </h2>
 
-              <div className={`${styles.radioGroup} ${styles.visitTypeCompact}`}>
-                <div className={styles.radioOption}>
-                  <input
-                    id="homeVisit"
-                    type="radio"
-                    name="visitType"
-                    value="homeVisit"
-                    checked={formState.visitType === 'homeVisit'}
-                    onChange={() => handleFieldChange('visitType', 'homeVisit')}
-                    disabled={isSubmitting}
-                    aria-label={t('booking.form.homeVisit')}
-                  />
-                  <label htmlFor="homeVisit" className={styles.optionContent}>
-                    <div>
-                      <span className={styles.optionTitle}>{t('booking.form.homeVisit')}</span>
-                      <span className={styles.optionSubtitle}>{t('booking.form.homeVisitDescription')}</span>
-                    </div>
-                  </label>
-                </div>
+              <div className={styles.svcGrid}>
+                {SERVICE_CATALOG.map((entry) => {
+                  const isActive =
+                    formState.visitType === entry.visitType &&
+                    formState.packageType === entry.packageType;
+                  const price = minPriceOf(entry);
+                  const showFrom = entry.durations.length > 1;
+                  const classes = [
+                    styles.svcCard,
+                    isActive ? styles.svcCardActive : '',
+                    entry.featured ? styles.svcCardFeatured : '',
+                  ].filter(Boolean).join(' ');
 
-                <div className={styles.radioOption}>
-                  <input
-                    id="telemedicine"
-                    type="radio"
-                    name="visitType"
-                    value="telemedicine"
-                    checked={formState.visitType === 'telemedicine'}
-                    onChange={() =>
-                      handleFieldChange('visitType', 'telemedicine')
-                    }
-                    disabled={isSubmitting}
-                    aria-label={t('booking.form.telemedicine')}
-                  />
-                  <label htmlFor="telemedicine" className={styles.optionContent}>
-                    <div>
-                      <span className={styles.optionTitle}>{t('booking.form.telemedicine')}</span>
-                      <span className={styles.optionSubtitle}>{t('booking.form.telemedicineDescription')}</span>
-                    </div>
-                  </label>
-                </div>
-
-                <div className={styles.radioOption}>
-                  <input
-                    id="package"
-                    type="radio"
-                    name="visitType"
-                    value="package"
-                    checked={formState.visitType === 'package'}
-                    onChange={() =>
-                      handleFieldChange('visitType', 'package')
-                    }
-                    disabled={isSubmitting}
-                    aria-label={locale === 'ar' ? 'باقات الرعاية' : 'Care Packages'}
-                  />
-                  <label htmlFor="package" className={styles.optionContent}>
-                    <div>
-                      <span className={styles.optionTitle}>{locale === 'ar' ? 'باقات' : 'Packages'}</span>
-                      <span className={styles.optionSubtitle}>{locale === 'ar' ? 'برامج رعاية شاملة' : 'Care programs'}</span>
-                    </div>
-                  </label>
-                </div>
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      className={classes}
+                      onClick={() => selectService(entry)}
+                      aria-pressed={isActive}
+                    >
+                      {entry.featured && (
+                        <span className={styles.svcBadge}>{t('booking.packages.mostPopular')}</span>
+                      )}
+                      <span className={styles.svcBody}>
+                        <span className={styles.svcTitle}>{t(entry.titleKey)}</span>
+                        <span className={styles.svcSubtitle}>{t(entry.subtitleKey)}</span>
+                      </span>
+                      <span className={styles.svcPrice}>
+                        {showFrom && (
+                          <span className={styles.svcPriceFrom}>{t('booking.form.priceFrom')}</span>
+                        )}
+                        <span className={styles.svcPriceValue}>
+                          {formatPrice(price)} <span className={styles.svcPriceUnit}>{currency}</span>
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {errors.visitType && (
-                <span
-                  id="visitType-error"
-                  className={styles.errorText}
-                  role="alert"
-                >
-                  {errors.visitType}
-                </span>
-              )}
-            </fieldset>
+              {errors.visitType && <p className={styles.errorText}>{t(errors.visitType)}</p>}
+              {errors.packageType && <p className={styles.errorText}>{t(errors.packageType)}</p>}
+            </section>
 
-            {/* Section 2: Personal Information */}
-            <fieldset className={styles.formSection}>
-              <legend className={styles.sectionTitle}>
-                {t('booking.form.personalInfo')}
-              </legend>
+            {/* ── Step 2 — Duration (only if the entry has >1 options) ── */}
+            {selectedEntry && needsDuration && (
+              <section className={`${styles.formSection} ${styles.expandingSection}`} aria-labelledby="step-duration">
+                <h2 id="step-duration" className={styles.sectionTitle}>
+                  <span className={styles.stepNumber}>2</span>
+                  {t('booking.packages.duration.label')}
+                </h2>
 
-              <div className={styles.inlineFieldGrid}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="fullName" className={styles.label}>
-                    {t('booking.form.fullName')}
-                    <span className={styles.required} aria-label="required">
-                      *
-                    </span>
-                  </label>
-                  <input
-                    id="fullName"
-                    type="text"
-                    className={`${styles.input} ${
-                      errors.fullName ? styles.inputError : ''
-                    }`}
-                    placeholder={t('booking.form.fullNamePlaceholder')}
-                    value={formState.fullName}
-                    onChange={(e) =>
-                      handleFieldChange('fullName', e.target.value)
-                    }
-                    disabled={isSubmitting}
-                    aria-invalid={!!errors.fullName}
-                    aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-                  />
-                  {errors.fullName && (
-                    <span
-                      id="fullName-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.fullName}
-                    </span>
-                  )}
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="phoneNumber" className={styles.label}>
-                    {t('booking.form.phoneNumber')}
-                    <span className={styles.required} aria-label="required">
-                      *
-                    </span>
-                  </label>
-                  <div className={styles.phoneInputWrapper}>
-                    <select
-                      className={`${styles.countryCodeSelect} ${
-                        errors.countryCode ? styles.inputError : ''
-                      }`}
-                      value={formState.countryCode}
-                      onChange={(e) =>
-                        handleFieldChange('countryCode', e.target.value)
-                      }
-                      disabled={isSubmitting}
-                      aria-label="Country code"
-                    >
-                      <option value="20">🇪🇬 +20</option>
-                      <option value="966">🇸🇦 +966</option>
-                      <option value="971">🇦🇪 +971</option>
-                      <option value="965">🇰🇼 +965</option>
-                      <option value="974">🇶🇦 +974</option>
-                    </select>
-                    <input
-                      id="phoneNumber"
-                      type="tel"
-                      className={`${styles.phoneNumberInput} ${
-                        errors.phoneNumber ? styles.inputError : ''
-                      }`}
-                      placeholder={t('booking.form.phoneNumberPlaceholder')}
-                      value={formState.phoneNumber}
-                      onChange={(e) =>
-                        handleFieldChange('phoneNumber', e.target.value)
-                      }
-                      disabled={isSubmitting}
-                      aria-invalid={!!errors.phoneNumber}
-                      aria-describedby={
-                        errors.phoneNumber ? 'phoneNumber-error' : undefined
-                      }
-                    />
-                  </div>
-                  {(errors.countryCode || errors.phoneNumber) && (
-                    <span
-                      id="phoneNumber-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.phoneNumber || errors.countryCode}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              </fieldset>
-
-              {/* Package Selection - Only show if visitType is 'package' */}
-              {formState.visitType === 'package' && (
-                <fieldset className={styles.formSection}>
-                  <legend className={styles.sectionTitle}>
-                    {locale === 'ar' ? 'اختر الباقة' : 'Select Package'}
-                  </legend>
-
-                  <div className={`${styles.radioGroup} ${styles.packageGrid}`}>
-                    <div className={styles.radioOption}>
-                      <input
-                        id="haraka"
-                        type="radio"
-                        name="packageType"
-                        value="haraka"
-                        checked={formState.packageType === 'haraka'}
-                        onChange={() => handleFieldChange('packageType', 'haraka')}
-                        disabled={isSubmitting}
-                        aria-label="Harakā - حَرَكَة"
-                      />
-                      <label htmlFor="haraka" className={styles.optionContent}>
-                        <div>
-                          <span className={styles.optionTitle}>Harakā - حَرَكَة</span>
-                          <span className={styles.optionSubtitle}>
-                            {locale === 'ar' 
-                              ? 'خشونة المفاصل والروماتويد - 5,000 جنيه' 
-                              : 'Joint & Arthritis Care - 5,000 EGP'}
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-
-                    <div className={styles.radioOption}>
-                      <input
-                        id="wai"
-                        type="radio"
-                        name="packageType"
-                        value="wai"
-                        checked={formState.packageType === 'wai'}
-                        onChange={() => handleFieldChange('packageType', 'wai')}
-                        disabled={isSubmitting}
-                        aria-label="Wa'i - وَعْي"
-                      />
-                      <label htmlFor="wai" className={styles.optionContent}>
-                        <div>
-                          <span className={styles.optionTitle}>Wa&apos;i - وَعْي</span>
-                          <span className={styles.optionSubtitle}>
-                            {locale === 'ar' 
-                              ? 'الزهايمر والخرف - 8,000 جنيه' 
-                              : 'Cognitive & Dementia Care - 8,000 EGP'}
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-
-                    <div className={styles.radioOption}>
-                      <input
-                        id="amal"
-                        type="radio"
-                        name="packageType"
-                        value="amal"
-                        checked={formState.packageType === 'amal'}
-                        onChange={() => handleFieldChange('packageType', 'amal')}
-                        disabled={isSubmitting}
-                        aria-label="Amal - أَمَل"
-                      />
-                      <label htmlFor="amal" className={styles.optionContent}>
-                        <div>
-                          <span className={styles.optionTitle}>Amal - أَمَل</span>
-                          <span className={styles.optionSubtitle}>
-                            {locale === 'ar' 
-                              ? 'التعافي من الجلطات - 6,000 جنيه' 
-                              : 'Stroke Recovery - 6,000 EGP'}
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-
-                  {errors.packageType && (
-                    <span
-                      id="packageType-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.packageType}
-                    </span>
-                  )}
-                </fieldset>
-              )}
-
-              {/* Section 3: Service Type (Home Visit Only) */}
-              {formState.visitType === 'homeVisit' && (
-                <fieldset className={`${styles.formSection} ${styles.expandingSection}`}>
-                  <legend className={styles.sectionTitle}>
-                    {t('booking.form.serviceType')}
-                  </legend>
-
-                  <div className={`${styles.radioGroup} ${styles.sessionCountGroup}`}>
-                    <div className={styles.radioOption}>
-                      <input
-                        id="doctorVisit"
-                        type="radio"
-                        name="serviceType"
-                        value="doctorVisit"
-                        checked={formState.serviceType === 'doctorVisit'}
-                        onChange={() =>
-                          handleFieldChange('serviceType', 'doctorVisit')
-                        }
-                        disabled={isSubmitting}
-                        aria-label={t('booking.form.doctorVisit')}
-                      />
-                      <label htmlFor="doctorVisit">
-                        {t('booking.form.doctorVisit')}
-                      </label>
-                    </div>
-
-                    <div className={styles.radioOption}>
-                      <input
-                        id="physiotherapy"
-                        type="radio"
-                        name="serviceType"
-                        value="physiotherapy"
-                        checked={formState.serviceType === 'physiotherapy'}
-                        onChange={() =>
-                          handleFieldChange('serviceType', 'physiotherapy')
-                        }
-                        disabled={isSubmitting}
-                        aria-label={t('booking.form.physiotherapy.label')}
-                      />
-                      <label htmlFor="physiotherapy">
-                        {t('booking.form.physiotherapy.label')}
-                      </label>
-                    </div>
-
-                    <div className={styles.radioOption}>
-                      <input
-                        id="nursing"
-                        type="radio"
-                        name="serviceType"
-                        value="nursing"
-                        checked={formState.serviceType === 'nursing'}
-                        onChange={() =>
-                          handleFieldChange('serviceType', 'nursing')
-                        }
-                        disabled={isSubmitting}
-                        aria-label={t('booking.form.nursing.label')}
-                      />
-                      <label htmlFor="nursing">
-                        {t('booking.form.nursing.label')}
-                      </label>
-                    </div>
-                  </div>
-
-                  {errors.serviceType && (
-                    <span
-                      id="serviceType-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.serviceType}
-                    </span>
-                  )}
-                </fieldset>
-              )}
-
-              {/* Section 4: Doctor Visit (Home Visit) */}
-              {formState.serviceType === 'doctorVisit' && (
-              <fieldset className={`${styles.formSection} ${styles.expandingSection}`}>
-                <legend className={styles.sectionTitle}>
-                  {t('booking.form.doctorVisit')} {t('booking.form.details')}
-                </legend>
-
-                <div className={styles.inlineFieldGrid}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="specialty" className={styles.label}>
-                      {t('booking.form.specialty.label')}
-                      <span className={styles.required} aria-label="required">
-                        *
-                      </span>
-                    </label>
-                    <select
-                      id="specialty"
-                      className={`${styles.select} ${
-                        errors.specialty ? styles.inputError : ''
-                      }`}
-                      value={formState.specialty || ''}
-                      onChange={(e) =>
-                        handleFieldChange('specialty', e.target.value || null)
-                      }
-                      disabled={isSubmitting}
-                      aria-invalid={!!errors.specialty}
-                      aria-describedby={
-                        errors.specialty ? 'specialty-error' : undefined
-                      }
-                    >
-                      <option value="">
-                        {t('booking.form.specialtySelect')}
-                      </option>
-                      {specialties.map((spec) => (
-                        <option key={spec.value} value={spec.value}>
-                          {locale === 'ar' ? spec.nameAr : spec.nameEn}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.specialty && (
-                      <span
-                        id="specialty-error"
-                        className={styles.errorText}
-                        role="alert"
+                <div className={styles.durationRow} role="radiogroup" aria-label={t('booking.packages.duration.label')}>
+                  {selectedEntry.durations.map((d) => {
+                    const isActive = formState.packageDuration === d.value;
+                    return (
+                      <button
+                        key={d.value ?? 'default'}
+                        type="button"
+                        role="radio"
+                        aria-checked={isActive}
+                        className={`${styles.durationPill} ${isActive ? styles.durationPillActive : ''}`}
+                        onClick={() => d.value && selectDuration(d.value)}
                       >
-                        {errors.specialty}
-                      </span>
-                    )}
-                  </div>
+                        {d.labelKey && <span className={styles.durationLabel}>{t(d.labelKey)}</span>}
+                        <span className={styles.durationPrice}>
+                          {formatPrice(prices[d.priceKey])} {currency}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
 
+                {errors.packageDuration && <p className={styles.errorText}>{t(errors.packageDuration)}</p>}
+              </section>
+            )}
+
+            {/* ── Step 3 — Contact ────────────────────────────────────── */}
+            {showContactStep && (
+              <section className={`${styles.formSection} ${styles.expandingSection}`} aria-labelledby="step-contact">
+                <h2 id="step-contact" className={styles.sectionTitle}>
+                  <span className={styles.stepNumber}>{needsDuration ? 3 : 2}</span>
+                  {t('booking.form.personalInfo')}
+                </h2>
+
+                <div className={styles.contactGrid}>
                   <div className={styles.formGroup}>
-                    <label htmlFor="preferredDate" className={styles.label}>
-                      {t('booking.form.preferredDate')}
-                      <span className={styles.required} aria-label="required">
-                        *
-                      </span>
+                    <label htmlFor="fullName" className={styles.label}>
+                      {t('booking.form.fullName')} <span className={styles.required}>*</span>
                     </label>
                     <input
-                      id="preferredDate"
-                      type="date"
-                      className={`${styles.input} ${
-                        errors.preferredDate ? styles.inputError : ''
-                      }`}
-                      value={formState.preferredDate}
-                      onChange={(e) =>
-                        handleFieldChange('preferredDate', e.target.value)
-                      }
-                      disabled={isSubmitting}
-                      aria-invalid={!!errors.preferredDate}
-                      aria-describedby={
-                        errors.preferredDate ? 'preferredDate-error' : undefined
-                      }
+                      id="fullName"
+                      type="text"
+                      className={styles.input}
+                      placeholder={t('booking.form.fullNamePlaceholder')}
+                      value={formState.fullName}
+                      onChange={(e) => handleField('fullName', e.target.value)}
+                      autoComplete="name"
+                      dir="auto"
                     />
-                    {errors.preferredDate && (
-                      <span
-                        id="preferredDate-error"
-                        className={styles.errorText}
-                        role="alert"
-                      >
-                        {errors.preferredDate}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <fieldset className={styles.subFieldset}>
-                  <legend className={styles.subLegend}>
-                    {t('booking.form.timePreference')}
-                  </legend>
-                  <div className={`${styles.radioGroup} ${styles.timePreferenceGroup}`}>
-                    {[
-                      { value: 'morning', label: 'booking.form.morning' },
-                      { value: 'evening', label: 'booking.form.evening' },
-                      {
-                        value: 'doesntMatter',
-                        label: 'booking.form.doesntMatter',
-                      },
-                    ].map((option) => (
-                      <div key={option.value} className={styles.radioOption}>
-                        <input
-                          id={`timePreference-${option.value}`}
-                          type="radio"
-                          name="timePreference"
-                          value={option.value}
-                          checked={formState.timePreference === option.value}
-                          onChange={() =>
-                            handleFieldChange('timePreference', option.value)
-                          }
-                          disabled={isSubmitting}
-                          aria-label={t(option.label)}
-                        />
-                        <label htmlFor={`timePreference-${option.value}`}>
-                          {t(option.label)}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  {errors.timePreference && (
-                    <span
-                      id="timePreference-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.timePreference}
-                    </span>
-                  )}
-                </fieldset>
-              </fieldset>
-            )}
-
-            {/* Section 5: Physiotherapy (Home Visit) */}
-            {formState.serviceType === 'physiotherapy' && (
-              <fieldset className={`${styles.formSection} ${styles.expandingSection}`}>
-                <legend className={styles.sectionTitle}>
-                  {t('booking.form.physiotherapy.label')} {t('booking.form.details')}
-                </legend>
-
-                <fieldset className={styles.subFieldset}>
-                  <legend className={styles.subLegend}>
-                    {t('booking.form.sessions')}
-                  </legend>
-                  <div className={`${styles.radioGroup} ${styles.sessionCountGroup}`}>
-                    <div className={styles.radioOption}>
-                      <input
-                        id="sessions1"
-                        type="radio"
-                        name="sessionCount"
-                        value="1"
-                        checked={formState.sessionCount === '1'}
-                        onChange={() =>
-                          handleFieldChange('sessionCount', '1')
-                        }
-                        disabled={isSubmitting}
-                        aria-label={t('booking.form.sessions1')}
-                      />
-                      <label htmlFor="sessions1">
-                        {t('booking.form.sessions1')}
-                      </label>
-                    </div>
-
-                    <div className={styles.radioOption}>
-                      <input
-                        id="sessions12"
-                        type="radio"
-                        name="sessionCount"
-                        value="12"
-                        checked={formState.sessionCount === '12'}
-                        onChange={() =>
-                          handleFieldChange('sessionCount', '12')
-                        }
-                        disabled={isSubmitting}
-                        aria-label={t('booking.form.sessions12')}
-                      />
-                      <label htmlFor="sessions12">
-                        {t('booking.form.sessions12')}
-                      </label>
-                    </div>
-                  </div>
-                  {errors.sessionCount && (
-                    <span
-                      id="sessionCount-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.sessionCount}
-                    </span>
-                  )}
-                </fieldset>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="caseType" className={styles.label}>
-                    {t('booking.form.caseType')}
-                    <span className={styles.required} aria-label="required">
-                      *
-                    </span>
-                  </label>
-                  <select
-                    id="caseType"
-                    className={`${styles.select} ${
-                      errors.caseType ? styles.inputError : ''
-                    }`}
-                    value={formState.caseType || ''}
-                    onChange={(e) =>
-                      handleFieldChange('caseType', e.target.value || null)
-                    }
-                    disabled={isSubmitting}
-                    aria-invalid={!!errors.caseType}
-                    aria-describedby={
-                      errors.caseType ? 'caseType-error' : undefined
-                    }
-                  >
-                    <option value="">
-                      {t('booking.form.caseTypeSelect')}
-                    </option>
-                    {PHYSIOTHERAPY_CASE_TYPES.map((caseType) => (
-                      <option key={caseType.value} value={caseType.value}>
-                        {t(`booking.form.${caseType.label}`)}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.caseType && (
-                    <span
-                      id="caseType-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.caseType}
-                    </span>
-                  )}
-                </div>
-              </fieldset>
-            )}
-
-            {/* Section 6: Nursing (Home Visit) */}
-            {formState.serviceType === 'nursing' && (
-              <fieldset className={`${styles.formSection} ${styles.expandingSection}`}>
-                <legend className={styles.sectionTitle}>
-                  {t('booking.form.nursing.label')} {t('booking.form.details')}
-                </legend>
-
-                <div className={styles.formGroup}>
-                  <label htmlFor="nursingType" className={styles.label}>
-                    {t('booking.form.nursingType')}
-                    <span className={styles.required} aria-label="required">
-                      *
-                    </span>
-                  </label>
-                  <select
-                    id="nursingType"
-                    className={`${styles.select} ${
-                      errors.nursingType ? styles.inputError : ''
-                    }`}
-                    value={formState.nursingType || ''}
-                    onChange={(e) =>
-                      handleFieldChange('nursingType', e.target.value || null)
-                    }
-                    disabled={isSubmitting}
-                    aria-invalid={!!errors.nursingType}
-                    aria-describedby={
-                      errors.nursingType ? 'nursingType-error' : undefined
-                    }
-                  >
-                    <option value="">
-                      {t('booking.form.nursingTypeSelect')}
-                    </option>
-                    {NURSING_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {t(`booking.form.${type.label}`)}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.nursingType && (
-                    <span
-                      id="nursingType-error"
-                      className={styles.errorText}
-                      role="alert"
-                    >
-                      {errors.nursingType}
-                    </span>
-                  )}
-                </div>
-
-                <div className={styles.inlineFieldGrid}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="nursingHours" className={styles.label}>
-                      {t('booking.form.hoursPerDay')}
-                      <span className={styles.required} aria-label="required">
-                        *
-                      </span>
-                    </label>
-                    <select
-                      id="nursingHours"
-                      className={`${styles.select} ${
-                        errors.nursingHoursPerDay ? styles.inputError : ''
-                      }`}
-                      value={formState.nursingHoursPerDay || ''}
-                      onChange={(e) =>
-                        handleFieldChange('nursingHoursPerDay', e.target.value || null)
-                      }
-                      disabled={isSubmitting}
-                      aria-invalid={!!errors.nursingHoursPerDay}
-                      aria-describedby={
-                        errors.nursingHoursPerDay ? 'nursingHours-error' : undefined
-                      }
-                    >
-                      <option value="">
-                        {t('booking.form.hoursPerDaySelect')}
-                      </option>
-                      {NURSING_HOURS.map((hours) => (
-                        <option key={hours.value} value={hours.value}>
-                          {t(`booking.form.${hours.label}`)}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.nursingHoursPerDay && (
-                      <span
-                        id="nursingHours-error"
-                        className={styles.errorText}
-                        role="alert"
-                      >
-                        {errors.nursingHoursPerDay}
-                      </span>
-                    )}
+                    {errors.fullName && <p className={styles.errorText}>{t(errors.fullName)}</p>}
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label htmlFor="nursingDuration" className={styles.label}>
-                      {t('booking.form.duration')}
-                      <span className={styles.required} aria-label="required">
-                        *
-                      </span>
+                    <label htmlFor="phoneNumber" className={styles.label}>
+                      {t('booking.form.phoneNumber')} <span className={styles.required}>*</span>
                     </label>
-                    <select
-                      id="nursingDuration"
-                      className={`${styles.select} ${
-                        errors.nursingDuration ? styles.inputError : ''
-                      }`}
-                      value={formState.nursingDuration || ''}
-                      onChange={(e) =>
-                        handleFieldChange('nursingDuration', e.target.value || null)
-                      }
-                      disabled={isSubmitting}
-                      aria-invalid={!!errors.nursingDuration}
-                      aria-describedby={
-                        errors.nursingDuration ? 'nursingDuration-error' : undefined
-                      }
-                    >
-                      <option value="">
-                        {t('booking.form.durationSelect')}
-                      </option>
-                      {NURSING_DURATIONS.map((duration) => (
-                        <option key={duration.value} value={duration.value}>
-                          {t(`booking.form.${duration.label}`)}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.nursingDuration && (
-                      <span
-                        id="nursingDuration-error"
-                        className={styles.errorText}
-                        role="alert"
+                    <div className={styles.phoneInputWrapper} dir="ltr">
+                      <select
+                        className={styles.countryCodeSelect}
+                        value={formState.countryCode}
+                        onChange={(e) => handleField('countryCode', e.target.value)}
+                        aria-label={t('booking.form.countryCode')}
                       >
-                        {errors.nursingDuration}
-                      </span>
-                    )}
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>{c.flag} +{c.code}</option>
+                        ))}
+                      </select>
+                      <input
+                        id="phoneNumber"
+                        type="tel"
+                        inputMode="numeric"
+                        className={styles.phoneNumberInput}
+                        placeholder={t('booking.form.phoneNumberPlaceholder')}
+                        value={formState.phoneNumber}
+                        onChange={(e) => handleField('phoneNumber', e.target.value)}
+                        autoComplete="tel-national"
+                        maxLength={11}
+                      />
+                    </div>
+                    {errors.phoneNumber && <p className={styles.errorText}>{t(errors.phoneNumber)}</p>}
                   </div>
                 </div>
-              </fieldset>
+              </section>
             )}
 
-            {/* Submit Button */}
+            {/* ── Desktop submit ──────────────────────────────────────── */}
             <button
-              type="button"
+              type="submit"
               className={styles.submitButton}
-              disabled={isSubmitting}
-              onClick={async () => {
-                // Validate form first
-                const validationErrors = validateBookingForm(formState);
-                
-                if (validationErrors.length > 0) {
-                  const errorMap: Record<string, string> = {};
-                  validationErrors.forEach((error) => {
-                    errorMap[error.field] = t(error.message);
-                  });
-                  setErrors(errorMap);
-                  return;
-                }
-
-                if (onSubmit) {
-                  setIsSubmitting(true);
-                  try {
-                    await onSubmit(formState);
-                  } finally {
-                    setIsSubmitting(false);
-                  }
-                }
-              }}
+              disabled={isSubmitting || basePrice <= 0 || !showContactStep}
             >
-              {isSubmitting
-                ? t('booking.actions.processing')
-                : t('booking.actions.submitBooking')}
+              {isSubmitting ? t('booking.actions.processing') : t('booking.actions.submitBooking')}
             </button>
           </div>
         </form>
 
-        {/* Booking Summary (Sticky on Desktop, Collapsible on Mobile) */}
+        {/* Sticky desktop summary */}
         <aside className={styles.summarySection}>
           <BookingSummary
             formState={formState}
-            totalPrice={totalPrice}
+            totalPrice={basePrice}
             isSubmitting={isSubmitting}
             specialties={specialties}
           />
         </aside>
       </div>
+
+      {/* Mobile sticky action bar — total + CTA */}
+      {basePrice > 0 && (
+        <div className={styles.mobileBar} aria-hidden={!showContactStep && basePrice <= 0}>
+          <div className={styles.mobileBarPrice}>
+            <span className={styles.mobileBarLabel}>{t('booking.summary.totalPrice')}</span>
+            <span className={styles.mobileBarValue}>
+              {formatPrice(basePrice)} <span className={styles.mobileBarUnit}>{currency}</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            className={styles.mobileBarCta}
+            onClick={() => {
+              const submitBtn = document.querySelector<HTMLButtonElement>(`form button[type="submit"]`);
+              if (showContactStep) {
+                submitBtn?.click();
+              } else {
+                // Nudge to next unanswered step
+                const target = document.getElementById(
+                  needsDuration && formState.packageDuration === null ? 'step-duration' : 'step-contact',
+                );
+                target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+            disabled={isSubmitting}
+          >
+            {showContactStep
+              ? isSubmitting
+                ? t('booking.actions.processing')
+                : t('booking.actions.submitBooking')
+              : t('booking.actions.continue')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

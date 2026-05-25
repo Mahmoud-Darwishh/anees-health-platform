@@ -28,11 +28,14 @@ export default function BookingPage({ locale, prices, specialties }: PageContent
     try {
       setSubmitError(null);
 
-      // Step 1: Create booking intent on the server
+      // Step 1: Create booking intent on the server (price + promo revalidated)
       const response = await fetch('/api/bookings/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          promocode: formData.promocode || undefined,
+        }),
       });
 
       const data = await response.json();

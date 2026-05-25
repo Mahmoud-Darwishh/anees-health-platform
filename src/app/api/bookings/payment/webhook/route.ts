@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/db/prisma';
+import {
+  isWapilotConfigured,
+  normalizeWhatsAppChatId,
+  sendWapilotTextMessage,
+  maskWhatsAppChatId,
+} from '@/lib/auth/wapilot';
+import { buildPaymentConfirmationMessage } from '@/lib/utils/booking-whatsapp';
 
 export async function POST(request: NextRequest) {
   // ── Parse body ─────────────────────────────────────────────────────────────
@@ -52,7 +59,11 @@ export async function POST(request: NextRequest) {
             countryCode: true,
             phoneNumber: true,
             amountEgp: true,
+            discountEgp: true,
+            promocodeCode: true,
             currency: true,
+            locale: true,
+            confirmationSentAt: true,
           },
         });
 
@@ -147,6 +158,53 @@ export async function POST(request: NextRequest) {
               data: { status: 'active' },
             });
           });
+
+          // ── Non-blocking WhatsApp confirmation ─────────────────────────────
+          // We never block the webhook on Wapilot failure — Kashier retries
+          // would create duplicate Invoices/Payments. Confirmation is
+          // best-effort and we record `confirmationSentAt` to avoid resends.
+          if (!booking.confirmationSentAt && isWapilotConfigured()) {
+            try {
+              const chatId = normalizeWhatsAppChatId(
+                `${booking.countryCode}${booking.phoneNumber}`,
+              );
+              if (chatId) {
+                const localeForMsg: 'en' | 'ar' = booking.locale === 'ar' ? 'ar' : 'en';
+                const text = buildPaymentConfirmationMessage(
+                  {
+                    fullName: booking.fullName,
+                    bookingRef: booking.bookingRef,
+                    amountEgp: Number(booking.amountEgp),
+                    currency: booking.currency,
+                    discountEgp: Number(booking.discountEgp ?? 0),
+                    promocode: booking.promocodeCode,
+                  },
+                  localeForMsg,
+                );
+                const result = await sendWapilotTextMessage({ chatId, text });
+                if (result.ok) {
+                  await prisma.onlineBooking.update({
+                    where: { bookingRef: booking.bookingRef },
+                    data: { confirmationSentAt: new Date() },
+                  });
+                  console.log(
+                    '[Webhook] Confirmation sent to %s for %s',
+                    maskWhatsAppChatId(chatId),
+                    booking.bookingRef,
+                  );
+                } else {
+                  console.error(
+                    '[Webhook] Wapilot send failed for %s: status=%d',
+                    booking.bookingRef,
+                    result.status,
+                  );
+                }
+              }
+            } catch (err) {
+              // Never let messaging crash the webhook
+              console.error('[Webhook] Confirmation send threw for', booking.bookingRef, err);
+            }
+          }
         } else {
           await prisma.$transaction(async (tx) => {
             await tx.onlineBooking.update({

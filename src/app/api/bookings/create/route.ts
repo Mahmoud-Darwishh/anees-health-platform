@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateBookingForm, CreateBookingIntentRequest, calculateBookingPrice, type Specialty } from '@/lib/models/booking.types';
+import {
+  validateBookingForm,
+  CreateBookingIntentRequest,
+  calculateBookingPrice,
+  BookingFormState,
+  PackageType,
+  PackageDuration,
+  getPackageEntry,
+} from '@/lib/models/booking.types';
 import { getBookingPrices } from '@/lib/api/pricing';
+import { validatePromocode, claimPromocodeWithinTx } from '@/lib/api/promocode';
 import { prisma } from '@/lib/db/prisma';
 import { resolveCorsHeaders } from '@/lib/utils/cors';
 import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
@@ -10,7 +19,6 @@ const MAX = {
   fullName: 100,
   phoneNumber: 20,
   countryCode: 5,
-  specialty: 50,
   userAgent: 500,
 } as const;
 
@@ -48,7 +56,6 @@ export async function POST(request: NextRequest) {
     const fullName = clip(body.fullName, MAX.fullName);
     const phoneNumber = clip(body.phoneNumber, MAX.phoneNumber);
     const countryCode = clip(body.countryCode, MAX.countryCode);
-    const specialty = clip(body.specialty, MAX.specialty);
 
     if (!fullName || !phoneNumber || !countryCode) {
       return NextResponse.json(
@@ -57,21 +64,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const formState = {
+    // Only accept the two live visit tracks; reject retired homeVisit funnel.
+    if (body.visitType !== 'telemedicine' && body.visitType !== 'package') {
+      return NextResponse.json(
+        { success: false, message: 'Invalid visitType' },
+        { status: 400, headers: cors },
+      );
+    }
+
+    const packageType: PackageType | null =
+      body.visitType === 'package' && body.packageType ? body.packageType : null;
+
+    // Derive duration server-side: '3m' default for non-sanad, explicit for sanad.
+    let packageDuration: PackageDuration | null = null;
+    if (body.visitType === 'package' && packageType) {
+      const entry = getPackageEntry(packageType);
+      if (entry) {
+        if (entry.durations.length === 1) {
+          packageDuration = entry.durations[0].value;
+        } else if (body.packageDuration === '3m' || body.packageDuration === '1y') {
+          packageDuration = body.packageDuration;
+        }
+      }
+    }
+
+    const formState: BookingFormState = {
       fullName,
       countryCode,
       phoneNumber,
       visitType: body.visitType,
-      packageType: body.packageType || null,
-      serviceType: body.serviceType || null,
-      specialty: (specialty as Specialty) || null,
-      preferredDate: body.preferredDate || '',
-      timePreference: body.timePreference || null,
-      sessionCount: body.sessionCount || null,
-      caseType: body.caseType || null,
-      nursingType: body.nursingType || null,
-      nursingHoursPerDay: body.nursingHoursPerDay || null,
-      nursingDuration: body.nursingDuration || null,
+      packageType,
+      packageDuration,
+      // Legacy fields — always null in the new funnel.
+      serviceType: null,
+      specialty: null,
+      preferredDate: '',
+      timePreference: null,
+      sessionCount: null,
+      caseType: null,
+      nursingType: null,
+      nursingHoursPerDay: null,
+      nursingDuration: null,
     };
 
     const validationErrors = validateBookingForm(formState);
@@ -84,12 +117,32 @@ export async function POST(request: NextRequest) {
 
     // Fetch authoritative prices from DB — never trust the client-side calculation
     const prices = await getBookingPrices();
-    const amount = calculateBookingPrice(formState, prices);
-    if (amount <= 0) {
+    const baseAmount = calculateBookingPrice(formState, prices);
+    if (baseAmount <= 0) {
       return NextResponse.json(
         { success: false, message: 'Invalid booking configuration: could not calculate price' },
         { status: 400, headers: cors },
       );
+    }
+
+    // Optional promocode — validated server-side, never trust client discount math
+    let promoId: string | null = null;
+    let promoCode: string | null = null;
+    let discountEgp = 0;
+    let amount = baseAmount;
+    const rawPromo = clip(body.promocode, 64);
+    if (rawPromo) {
+      const promoResult = await validatePromocode(rawPromo, baseAmount);
+      if (!promoResult.ok) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid promo code', promocodeError: promoResult.error },
+          { status: 400, headers: cors },
+        );
+      }
+      promoId = promoResult.promocode.id;
+      promoCode = promoResult.promocode.code;
+      discountEgp = promoResult.discountEgp;
+      amount = promoResult.finalAmountEgp;
     }
 
     const timestamp = Date.now();
@@ -121,26 +174,31 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      // Re-claim promocode atomically to defend against races on usage limits
+      if (promoId) {
+        const claimed = await claimPromocodeWithinTx(tx, promoId);
+        if (!claimed) {
+          throw new Error('PROMOCODE_RACE');
+        }
+      }
+
+      // TODO(audit): wire when auth lands — emit AuditLog row for booking create
       return tx.onlineBooking.create({
         data: {
           bookingRef,
           fullName,
           countryCode,
           phoneNumber,
-          visitType: body.visitType as 'homeVisit' | 'telemedicine' | 'package',
-          serviceType: body.serviceType as 'doctorVisit' | 'physiotherapy' | 'nursing' | undefined,
-          specialty: specialty || undefined,
-          packageType: body.packageType as 'haraka' | 'wai' | 'amal' | undefined,
-          preferredDate: body.preferredDate ? new Date(body.preferredDate) : undefined,
-          timePreference: body.timePreference,
-          sessionCount: body.sessionCount,
-          caseType: body.caseType,
-          nursingType: body.nursingType,
-          nursingHoursPerDay: body.nursingHoursPerDay,
-          nursingDuration: body.nursingDuration,
+          visitType: body.visitType as 'telemedicine' | 'package',
+          packageType: packageType ?? undefined,
+          packageDuration: packageDuration ?? undefined,
+          baseAmountEgp: baseAmount,
+          discountEgp,
           amountEgp: amount,
           currency: 'EGP',
           status: 'pending',
+          promocodeId: promoId ?? undefined,
+          promocodeCode: promoCode ?? undefined,
           ipAddress: ip,
           userAgent,
         },
@@ -148,10 +206,24 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { success: true, bookingId: booking.bookingRef, amount, currency: 'EGP' as const },
+      {
+        success: true,
+        bookingId: booking.bookingRef,
+        amount,
+        baseAmount,
+        discount: discountEgp,
+        promocode: promoCode,
+        currency: 'EGP' as const,
+      },
       { status: 201, headers: cors },
     );
   } catch (error) {
+    if (error instanceof Error && error.message === 'PROMOCODE_RACE') {
+      return NextResponse.json(
+        { success: false, message: 'Promo code is no longer available', promocodeError: 'usage_limit' },
+        { status: 409, headers: cors },
+      );
+    }
     console.error('[Booking API Error]', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create booking intent' },

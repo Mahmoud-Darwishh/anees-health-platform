@@ -1470,12 +1470,37 @@
       "countryCode": "Country Code",
       "phoneNumber": "Phone Number",
       "phoneNumberPlaceholder": "e.g., 10 5516 4595",
-      "visitType": "Select Visit Type",
+      "visitType": "Choose how we can help",
+      "chooseTrack": "Choose your care path",
+      "choosePackage": "Pick the program that fits",
+      "chooseDuration": "How long do you need it?",
+      "contactInfo": "Your contact details",
+      "quickConsult": {
+        "title": "Quick Consultation",
+        "tagline": "One-off 30-minute video call with our care team.",
+        "benefit1": "Same-day availability",
+        "benefit2": "Licensed clinicians",
+        "benefit3": "Prescription if needed"
+      },
+      "carePackage": {
+        "title": "Continuous Care Package",
+        "tagline": "Ongoing program with a dedicated team and medical follow-up.",
+        "benefit1": "Dedicated care companion",
+        "benefit2": "Routine follow-ups & reports",
+        "benefit3": "24/7 family support line"
+      },
+      "step": "Step",
+      "stepOf": "of",
+      "stepService": "Service",
+      "stepPackage": "Package",
+      "stepDuration": "Duration",
+      "stepContact": "Contact",
       "homeVisit": "Home Visit",
       "telemedicine": "Telemedicine",
-      "telemedicinePrice": "250 EGP",
+      "telemedicinePrice": "700 EGP",
       "homeVisitDescription": "Clinician visits your home",
-      "telemedicineDescription": "Video consult anywhere",
+      "telemedicineDescription": "30-minute video consult with our care team",
+      "priceFrom": "From",
       "serviceType": "Select Service Type",
       "doctorVisit": "Doctor Visit",
       "physiotherapy": {
@@ -1547,13 +1572,58 @@
       "yourDetails": "Your Details",
       "serviceDetails": "Service Details",
       "pricing": "Pricing",
+      "servicePrice": "Service Price",
       "totalPrice": "Total Price",
       "currency": "EGP",
       "empty": "Complete the form to see your booking summary",
       "selectService": "Select a service to see pricing"
     },
+    "packages": {
+      "label": "Package",
+      "mostPopular": "Most Popular",
+      "duration": {
+        "label": "Choose Duration",
+        "3m": "3 Months",
+        "1y": "1 Year",
+        "save": "Save {percent}%",
+        "bestValue": "Best value"
+      },
+      "sanad": {
+        "title": "Sanad — Continuous Care",
+        "subtitle": "Dedicated companion + full medical follow-up. Pick 3 months or a full year."
+      },
+      "haraka": {
+        "title": "Haraka — Joint & Arthritis",
+        "subtitle": "3-month program for joint pain, arthritis and post-surgery mobility."
+      },
+      "wai": {
+        "title": "Wai — Cognitive & Dementia",
+        "subtitle": "3-month program for dementia, memory loss and cognitive support."
+      },
+      "amal": {
+        "title": "Amal — Stroke Recovery",
+        "subtitle": "3-month program for post-stroke rehabilitation and recovery."
+      }
+    },
+    "promocode": {
+      "label": "Promo Code",
+      "placeholder": "Enter code (e.g. TEST99)",
+      "apply": "Apply",
+      "remove": "Remove",
+      "applied": "{code} applied successfully",
+      "discount": "Discount",
+      "errors": {
+        "invalid": "Invalid promo code",
+        "inactive": "This promo code is no longer active",
+        "not_started": "This promo code is not active yet",
+        "expired": "This promo code has expired",
+        "usage_limit": "This promo code has reached its usage limit",
+        "min_amount": "Minimum order amount not met"
+      }
+    },
     "actions": {
       "submitBooking": "Proceed to Payment",
+      "continue": "Continue",
       "chatWithTeam": "Chat with Care Team",
       "processing": "Processing...",
       "confirm": "Confirm Booking",
@@ -1567,6 +1637,7 @@
       "invalidPhoneNumber": "Please enter a valid phone number (10 digits)",
       "visitTypeRequired": "Please select a visit type",
       "packageTypeRequired": "Please select a package",
+      "packageDurationRequired": "Please choose a package duration",
       "serviceTypeRequired": "Please select a service type",
       "specialtyRequired": "Please select a specialty",
       "preferredDateRequired": "Please select a preferred date",

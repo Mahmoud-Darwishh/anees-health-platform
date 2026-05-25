@@ -1470,12 +1470,37 @@
       "countryCode": "رمز الدولة",
       "phoneNumber": "رقم الهاتف",
       "phoneNumberPlaceholder": "مثال: 10 5516 4595",
-      "visitType": "اختر نوع الزيارة",
+      "visitType": "كيف يمكننا مساعدتك؟",
+      "chooseTrack": "اختر مسار الرعاية",
+      "choosePackage": "اختر البرنامج المناسب لك",
+      "chooseDuration": "لكم من الوقت تحتاجها؟",
+      "contactInfo": "بيانات التواصل",
+      "quickConsult": {
+        "title": "استشارة سريعة",
+        "tagline": "مكالمة فيديو لمدة 30 دقيقة مع فريق الرعاية.",
+        "benefit1": "متاح في نفس اليوم",
+        "benefit2": "أطباء معتمدون",
+        "benefit3": "وصفة طبية عند الحاجة"
+      },
+      "carePackage": {
+        "title": "باقة رعاية مستمرة",
+        "tagline": "برنامج متواصل مع فريق مختص ومتابعة طبية.",
+        "benefit1": "مرافق رعاية مخصص",
+        "benefit2": "متابعات دورية وتقارير",
+        "benefit3": "دعم للعائلة على مدار الساعة"
+      },
+      "step": "خطوة",
+      "stepOf": "من",
+      "stepService": "الخدمة",
+      "stepPackage": "الباقة",
+      "stepDuration": "المدة",
+      "stepContact": "بياناتك",
       "homeVisit": "زيارة منزلية",
       "telemedicine": "استشارة عن بُعد",
-      "telemedicinePrice": "250 جنيه مصري",
+      "telemedicinePrice": "700 جنيه مصري",
       "homeVisitDescription": "الطبيب يزورك في المنزل",
-      "telemedicineDescription": "استشارة مرئية عن بُعد",
+      "telemedicineDescription": "استشارة مرئية مدتها 30 دقيقة مع فريق الرعاية",
+      "priceFrom": "يبدأ من",
       "serviceType": "اختر نوع الخدمة",
       "doctorVisit": "زيارة طبيب",
       "physiotherapy": {
@@ -1547,13 +1572,58 @@
       "yourDetails": "بياناتك",
       "serviceDetails": "تفاصيل الخدمة",
       "pricing": "التسعير",
+      "servicePrice": "سعر الخدمة",
       "totalPrice": "السعر الإجمالي",
       "currency": "جنيه مصري",
       "empty": "أكمل النموذج لرؤية ملخص حجزك",
       "selectService": "اختر خدمة لرؤية السعر"
     },
+    "packages": {
+      "label": "الباقة",
+      "mostPopular": "الأكثر اختيارًا",
+      "duration": {
+        "label": "اختر مدة الباقة",
+        "3m": "ثلاثة أشهر",
+        "1y": "سنة كاملة",
+        "save": "وفّر {percent}%",
+        "bestValue": "الأفضل سعرًا"
+      },
+      "sanad": {
+        "title": "سَنَد — الرعاية المستمرة",
+        "subtitle": "مرافق مخصص + متابعة طبية شاملة. اختر 3 أشهر أو سنة كاملة."
+      },
+      "haraka": {
+        "title": "حركة — رعاية المفاصل والتهاباتها",
+        "subtitle": "برنامج 3 أشهر لآلام المفاصل والتهاباتها وما بعد العمليات."
+      },
+      "wai": {
+        "title": "وعي — رعاية الإدراك والخرف",
+        "subtitle": "برنامج 3 أشهر للخرف وفقدان الذاكرة ودعم القدرات الإدراكية."
+      },
+      "amal": {
+        "title": "أمل — التعافي من السكتة الدماغية",
+        "subtitle": "برنامج 3 أشهر لإعادة التأهيل بعد السكتة الدماغية."
+      }
+    },
+    "promocode": {
+      "label": "كود الخصم",
+      "placeholder": "أدخل الكود (مثال: TEST99)",
+      "apply": "تطبيق",
+      "remove": "إزالة",
+      "applied": "تم تطبيق الكود {code} بنجاح",
+      "discount": "الخصم",
+      "errors": {
+        "invalid": "كود الخصم غير صحيح",
+        "inactive": "هذا الكود لم يعد فعالاً",
+        "not_started": "هذا الكود غير مفعّل بعد",
+        "expired": "انتهت صلاحية هذا الكود",
+        "usage_limit": "تم استنفاد عدد مرات استخدام هذا الكود",
+        "min_amount": "لم يتم الوصول إلى الحد الأدنى للطلب"
+      }
+    },
     "actions": {
       "submitBooking": "المتابعة للدفع",
+      "continue": "متابعة",
       "chatWithTeam": "تحدث مع فريق الرعاية",
       "processing": "جاري المعالجة...",
       "confirm": "تأكيد الحجز",
@@ -1567,6 +1637,7 @@
       "invalidPhoneNumber": "الرجاء إدخال رقم هاتف صحيح (10 أرقام)",
       "visitTypeRequired": "الرجاء تحديد نوع الزيارة",
       "packageTypeRequired": "الرجاء اختيار الباقة",
+      "packageDurationRequired": "الرجاء اختيار مدة الباقة",
       "serviceTypeRequired": "الرجاء تحديد نوع الخدمة",
       "specialtyRequired": "الرجاء اختيار تخصص",
       "preferredDateRequired": "الرجاء تحديد تاريخ مفضل",

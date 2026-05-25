@@ -601,3 +601,99 @@
     border-bottom-color: #e5e7eb; // Keep original border color
   }
 }
+
+/* ============================================================================
+   PROMOCODE
+   ============================================================================ */
+.promoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba($brand-dark-blue, 0.04) 0%, rgba($primary, 0.05) 100%);
+  border: 1px dashed rgba($primary, 0.45);
+  border-radius: 10px;
+  margin-top: 0.75rem;
+}
+.promoLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $brand-dark-blue;
+}
+.promoInputWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.promoInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid rgba($brand-dark-blue, 0.18);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: $white;
+  color: $dark;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.18);
+  }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+.promoApply, .promoRemove {
+  flex-shrink: 0;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  &:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+}
+.promoApply {
+  background: linear-gradient(135deg, $brand-dark-blue 0%, lighten($brand-dark-blue, 8%) 100%);
+  color: $white;
+  &:hover:not(:disabled) { transform: translateY(-1px); }
+}
+.promoRemove {
+  background: transparent;
+  color: $brand-dark-blue;
+  border: 1px solid rgba($brand-dark-blue, 0.25);
+  &:hover:not(:disabled) { background: rgba($brand-dark-blue, 0.06); }
+}
+.promoStatus {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.promoStatusOk { color: #15803d; }
+.promoStatusError { color: #b91c1c; }
+.promoChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba($primary, 0.15);
+  color: $bony;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.discountRow {
+  color: #15803d;
+  font-weight: 600;
+}
+.strikethrough {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 0.95rem;
+  margin-inline-end: 0.4rem;
+}

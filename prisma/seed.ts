@@ -294,19 +294,36 @@ async function main() {
 
   // ── Booking Prices ────────────────────────────────────────────────────────
   console.log('Seeding booking prices...');
+  await prisma.bookingPrice.deleteMany({});
   await prisma.bookingPrice.createMany({
     skipDuplicates: true,
     data: [
-      { key: 'telemedicine',                      label: 'Telemedicine Consultation',              priceEgp: 250  },
-      { key: 'homeVisit:doctorVisit',              label: 'Home Doctor Visit',                      priceEgp: 1500 },
-      { key: 'homeVisit:physiotherapy:single',     label: 'Physiotherapy — Single Session',         priceEgp: 900  },
-      { key: 'homeVisit:physiotherapy:twelve',     label: 'Physiotherapy — 12-Session Package',     priceEgp: 9500 },
-      { key: 'homeVisit:nursing:nurse',            label: 'Nursing Care (Registered Nurse) per hr', priceEgp: 150  },
-      { key: 'homeVisit:nursing:nurseAssistant',   label: 'Nursing Care (Assistant) per hr',        priceEgp: 100  },
-      { key: 'package:haraka',                     label: 'Haraka — Joint & Arthritis Care',        priceEgp: 5000 },
-      { key: 'package:wai',                        label: 'Wai — Cognitive & Dementia Care',        priceEgp: 8000 },
-      { key: 'package:amal',                       label: 'Amal — Stroke Recovery',                priceEgp: 6000 },
+      { key: 'telemedicine',        label: 'Telemedicine Consultation',                priceEgp: 700   },
+      { key: 'package:haraka',      label: 'Haraka — Joint & Arthritis Care (3 mo)',   priceEgp: 19500 },
+      { key: 'package:wai',         label: 'Wai — Cognitive & Dementia Care (3 mo)',   priceEgp: 19500 },
+      { key: 'package:amal',        label: 'Amal — Stroke Recovery (3 mo)',            priceEgp: 19500 },
+      { key: 'package:sanad:3m',    label: 'Sanad — Continuous Care (3 months)',       priceEgp: 19500 },
+      { key: 'package:sanad:1y',    label: 'Sanad — Continuous Care (1 year)',         priceEgp: 65000 },
     ],
+  });
+
+  // ── Promocodes ────────────────────────────────────────────────────────────
+  console.log('Seeding promocodes...');
+  await prisma.promocode.upsert({
+    where: { code: 'TEST99' },
+    update: {
+      isActive: true,
+      kind: 'percentage',
+      value: 99,
+      description: 'Internal test code — 99% off',
+    },
+    create: {
+      code: 'TEST99',
+      description: 'Internal test code — 99% off',
+      kind: 'percentage',
+      value: 99,
+      isActive: true,
+    },
   });
 
   // ── Specialties ───────────────────────────────────────────────────────────

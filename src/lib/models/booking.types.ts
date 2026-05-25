@@ -1,46 +1,51 @@
 /**
  * Booking Form Types & Constants
- * Defines data models, pricing rules, and form state for the booking system
+ * Defines data models, pricing rules, and form state for the booking system.
+ *
+ * Current product (May 2026):
+ *   • Telemedicine — single consultation
+ *   • Packages    — Haraka / Wai / Amal / Sanad
+ *     - Haraka, Wai, Amal: flat 3-month program
+ *     - Sanad: choose 3 months OR 1 year
+ *
+ * Home-visit options (doctor/physio/nursing) are intentionally retired in
+ * this funnel. The DB enums still retain the old variants for back-compat
+ * with historical bookings; do not reintroduce them in the UI.
  */
 
-import { BOOKING_PRICING } from '@/lib/config/booking-pricing';
-
 // ============================================================================
-// PRICING MAP — shape returned by getBookingPrices() and accepted by
-//               calculateBookingPrice(). Keys match booking_prices.key in DB.
+// PRICING MAP — keys match booking_prices.key in DB.
 // ============================================================================
 export interface BookingPriceMap {
   telemedicine: number;
-  'homeVisit:doctorVisit': number;
-  'homeVisit:physiotherapy:single': number;
-  'homeVisit:physiotherapy:twelve': number;
-  'homeVisit:nursing:nurse': number;
-  'homeVisit:nursing:nurseAssistant': number;
   'package:haraka': number;
   'package:wai': number;
   'package:amal': number;
+  'package:sanad:3m': number;
+  'package:sanad:1y': number;
 }
 
-/** Default prices derived from the hardcoded config — used as client-side fallback */
+/** Hard-coded fallback used by the client when DB load fails. */
 const DEFAULT_PRICES: BookingPriceMap = {
-  telemedicine: BOOKING_PRICING.telemedicine,
-  'homeVisit:doctorVisit': BOOKING_PRICING.homeVisit.doctorVisit,
-  'homeVisit:physiotherapy:single': BOOKING_PRICING.homeVisit.physiotherapy.single,
-  'homeVisit:physiotherapy:twelve': BOOKING_PRICING.homeVisit.physiotherapy.twelve,
-  'homeVisit:nursing:nurse': BOOKING_PRICING.homeVisit.nursing.nurse,
-  'homeVisit:nursing:nurseAssistant': BOOKING_PRICING.homeVisit.nursing.nurseAssistant,
-  'package:haraka': 5000,
-  'package:wai': 8000,
-  'package:amal': 6000,
+  telemedicine: 700,
+  'package:haraka': 19500,
+  'package:wai': 19500,
+  'package:amal': 19500,
+  'package:sanad:3m': 19500,
+  'package:sanad:1y': 65000,
 };
 
 // ============================================================================
 // BOOKING TYPES
 // ============================================================================
 
-export type VisitType = 'homeVisit' | 'telemedicine' | 'package';
+export type VisitType = 'telemedicine' | 'package';
+export type PackageType = 'haraka' | 'wai' | 'amal' | 'sanad';
+export type PackageDuration = '3m' | '1y';
+
+// Legacy types — preserved only because shared helpers and the DB still
+// reference them. Do not surface in the UI.
 export type ServiceType = 'doctorVisit' | 'physiotherapy' | 'nursing';
-export type PackageType = 'haraka' | 'wai' | 'amal';
 export type Specialty = 'generalMedicine' | 'pediatrics' | 'orthopedics' | 'cardiology' | 'dermatology';
 export type TimePreference = 'morning' | 'evening' | 'doesntMatter';
 export type PhysiotherapySessions = '1' | '12';
@@ -54,30 +59,26 @@ export type NursingDuration = '1week' | '2weeks' | '1month';
 // ============================================================================
 
 export interface BookingFormState {
-  // Personal Info
+  // Personal info
   fullName: string;
-  countryCode: string; // e.g., '20' for Egypt
-  phoneNumber: string; // 10 digits for Egypt
+  countryCode: string;
+  phoneNumber: string;
 
-  // Visit Selection
+  // Service selection
   visitType: VisitType | null;
-
-  // Package Selection (for package visitType)
   packageType: PackageType | null;
+  packageDuration: PackageDuration | null; // required only when packageType === 'sanad'
 
-  // Service Type (Home Visit only)
+  // Promo (preview only; revalidated on server)
+  promocode?: string | null;
+
+  // ── Legacy retired fields (kept as null so existing helpers don't crash) ──
   serviceType: ServiceType | null;
-
-  // Doctor Visit (Home Visit)
   specialty: Specialty | null;
-  preferredDate: string; // ISO date string
+  preferredDate: string;
   timePreference: TimePreference | null;
-
-  // Physiotherapy (Home Visit)
   sessionCount: PhysiotherapySessions | null;
   caseType: PhysiotherapyCaseType | null;
-
-  // Nursing (Home Visit)
   nursingType: NursingType | null;
   nursingHoursPerDay: NursingHours | null;
   nursingDuration: NursingDuration | null;
@@ -102,15 +103,8 @@ export interface CreateBookingIntentRequest {
   phoneNumber: string;
   visitType: VisitType;
   packageType?: PackageType;
-  serviceType?: ServiceType;
-  specialty?: Specialty;
-  preferredDate?: string;
-  timePreference?: TimePreference;
-  sessionCount?: PhysiotherapySessions;
-  caseType?: PhysiotherapyCaseType;
-  nursingType?: NursingType;
-  nursingHoursPerDay?: NursingHours;
-  nursingDuration?: NursingDuration;
+  packageDuration?: PackageDuration;
+  promocode?: string;
 }
 
 export interface BookingValidationError {
@@ -119,58 +113,75 @@ export interface BookingValidationError {
 }
 
 // ============================================================================
-// OPTION LISTS
+// PACKAGE CATALOG — single source of truth for the product cards.
 // ============================================================================
 
-export const SPECIALTIES = [
-  // Priority specialties at top
-  { value: 'geriatrics', label: 'specialty.geriatrics' },
-  { value: 'orthopedics', label: 'specialty.orthopedics' },
-  { value: 'neurology', label: 'specialty.neurology' },
-  { value: 'cardiology', label: 'specialty.cardiology' },
-  
-  // Most common specialties
-  { value: 'generalMedicine', label: 'specialty.generalMedicine' },
-  { value: 'pediatrics', label: 'specialty.pediatrics' },
-  { value: 'dermatology', label: 'specialty.dermatology' },
-  { value: 'gynecology', label: 'specialty.gynecology' },
-  { value: 'ophthalmology', label: 'specialty.ophthalmology' },
-  { value: 'otolaryngology', label: 'specialty.otolaryngology' },
-  { value: 'psychiatry', label: 'specialty.psychiatry' },
-  { value: 'urology', label: 'specialty.urology' },
-  { value: 'gastroenterology', label: 'specialty.gastroenterology' },
-  { value: 'pulmonology', label: 'specialty.pulmonology' },
-  { value: 'rheumatology', label: 'specialty.rheumatology' },
-  { value: 'endocrinology', label: 'specialty.endocrinology' },
-  { value: 'nephrology', label: 'specialty.nephrology' },
-  { value: 'oncology', label: 'specialty.oncology' },
-  { value: 'hematology', label: 'specialty.hematology' },
-  { value: 'immunology', label: 'specialty.immunology' },
+export interface PackageCatalogEntry {
+  value: PackageType;
+  /** i18n key under `booking.packages.<value>.title` */
+  titleKey: string;
+  /** i18n key under `booking.packages.<value>.subtitle` */
+  subtitleKey: string;
+  /** Decorative emoji for the card (no locale variant needed). */
+  emoji: string;
+  /** Featured / "most popular" — shown with a highlight badge. */
+  featured?: boolean;
+  /** Duration options. Single-entry array = no duration toggle. */
+  durations: Array<{ value: PackageDuration; priceKey: keyof BookingPriceMap; labelKey: string }>;
+}
+
+export const PACKAGE_CATALOG: readonly PackageCatalogEntry[] = [
+  {
+    value: 'sanad',
+    titleKey: 'booking.packages.sanad.title',
+    subtitleKey: 'booking.packages.sanad.subtitle',
+    emoji: '🤝',
+    featured: true,
+    durations: [
+      { value: '3m', priceKey: 'package:sanad:3m', labelKey: 'booking.packages.duration.3m' },
+      { value: '1y', priceKey: 'package:sanad:1y', labelKey: 'booking.packages.duration.1y' },
+    ],
+  },
+  {
+    value: 'haraka',
+    titleKey: 'booking.packages.haraka.title',
+    subtitleKey: 'booking.packages.haraka.subtitle',
+    emoji: '🦵',
+    durations: [
+      { value: '3m', priceKey: 'package:haraka', labelKey: 'booking.packages.duration.3m' },
+    ],
+  },
+  {
+    value: 'wai',
+    titleKey: 'booking.packages.wai.title',
+    subtitleKey: 'booking.packages.wai.subtitle',
+    emoji: '🧠',
+    durations: [
+      { value: '3m', priceKey: 'package:wai', labelKey: 'booking.packages.duration.3m' },
+    ],
+  },
+  {
+    value: 'amal',
+    titleKey: 'booking.packages.amal.title',
+    subtitleKey: 'booking.packages.amal.subtitle',
+    emoji: '💗',
+    durations: [
+      { value: '3m', priceKey: 'package:amal', labelKey: 'booking.packages.duration.3m' },
+    ],
+  },
 ] as const;
 
-export const PHYSIOTHERAPY_CASE_TYPES = [
-  { value: 'postoperative', label: 'physiotherapy.postoperative' },
-  { value: 'fracture', label: 'physiotherapy.fracture' },
-  { value: 'neuro', label: 'physiotherapy.neuro' },
-  { value: 'other', label: 'physiotherapy.other' },
-] as const;
+export function getPackageEntry(value: PackageType | null): PackageCatalogEntry | undefined {
+  if (!value) return undefined;
+  return PACKAGE_CATALOG.find((p) => p.value === value);
+}
 
-export const NURSING_TYPES = [
-  { value: 'nurse', label: 'nursing.nurse' },
-  { value: 'nursingAssistant', label: 'nursing.nursingAssistant' },
-] as const;
-
-export const NURSING_HOURS = [
-  { value: '8hrs', label: 'nursing.hours.8hrs' },
-  { value: '12hrs', label: 'nursing.hours.12hrs' },
-  { value: '24hrs', label: 'nursing.hours.24hrs' },
-] as const;
-
-export const NURSING_DURATIONS = [
-  { value: '1week', label: 'nursing.duration.1week' },
-  { value: '2weeks', label: 'nursing.duration.2weeks' },
-  { value: '1month', label: 'nursing.duration.1month' },
-] as const;
+// Retained for legacy summary helpers — empty lists so nothing renders.
+export const SPECIALTIES: ReadonlyArray<{ value: string; label: string }> = [];
+export const PHYSIOTHERAPY_CASE_TYPES: ReadonlyArray<{ value: string; label: string }> = [];
+export const NURSING_TYPES: ReadonlyArray<{ value: string; label: string }> = [];
+export const NURSING_HOURS: ReadonlyArray<{ value: string; label: string }> = [];
+export const NURSING_DURATIONS: ReadonlyArray<{ value: string; label: string }> = [];
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -179,65 +190,34 @@ export const NURSING_DURATIONS = [
 /**
  * Calculate total booking price based on selections.
  *
- * @param state   - Current booking form state
- * @param prices  - Price map fetched from DB (server) or omitted (client fallback)
- *
  * On the server (booking create route) always pass DB prices — they are authoritative.
  * On the client (live preview) pass the prices received as props from the server page.
- * If omitted, falls back to the hardcoded BOOKING_PRICING constants.
  */
 export function calculateBookingPrice(state: BookingFormState, prices?: BookingPriceMap): number {
   const p = prices ?? DEFAULT_PRICES;
-
-  if (!state.visitType) return 0;
-
-  if (state.visitType === 'package') {
-    if (!state.packageType) return 0;
-    return p[`package:${state.packageType}` as keyof BookingPriceMap] as number || 0;
-  }
 
   if (state.visitType === 'telemedicine') {
     return p.telemedicine;
   }
 
-  if (!state.serviceType) return 0;
-
-  if (state.serviceType === 'doctorVisit') {
-    return p['homeVisit:doctorVisit'];
-  }
-
-  if (state.serviceType === 'physiotherapy') {
-    if (!state.sessionCount) return 0;
-    return state.sessionCount === '1'
-      ? p['homeVisit:physiotherapy:single']
-      : p['homeVisit:physiotherapy:twelve'];
-  }
-
-  if (state.serviceType === 'nursing') {
-    if (!state.nursingType || !state.nursingHoursPerDay || !state.nursingDuration) return 0;
-
-    const basePrice = state.nursingType === 'nurse'
-      ? p['homeVisit:nursing:nurse']
-      : p['homeVisit:nursing:nurseAssistant'];
-
-    // Hour multipliers and duration discounts stay in code — they are fixed ratios, not prices
-    const hourMultiplier = BOOKING_PRICING.homeVisit.nursing.hourMultipliers[state.nursingHoursPerDay];
-    const durationMultiplier = BOOKING_PRICING.homeVisit.nursing.durationMultipliers[state.nursingDuration];
-    const daysMap = { '1week': 7, '2weeks': 14, '1month': 30 };
-    const days = daysMap[state.nursingDuration];
-
-    return Math.round(basePrice * hourMultiplier * days * durationMultiplier);
+  if (state.visitType === 'package') {
+    const entry = getPackageEntry(state.packageType);
+    if (!entry) return 0;
+    const duration =
+      entry.durations.length === 1
+        ? entry.durations[0]
+        : entry.durations.find((d) => d.value === state.packageDuration);
+    if (!duration) return 0;
+    return p[duration.priceKey] ?? 0;
   }
 
   return 0;
 }
 
 /**
- * Validate booking form data
+ * Validate booking form data.
  */
-export function validateBookingForm(
-  state: BookingFormState
-): BookingValidationError[] {
+export function validateBookingForm(state: BookingFormState): BookingValidationError[] {
   const errors: BookingValidationError[] = [];
 
   if (!state.fullName?.trim()) {
@@ -245,109 +225,27 @@ export function validateBookingForm(
   }
 
   if (!state.countryCode?.trim()) {
-    errors.push({
-      field: 'countryCode',
-      message: 'booking.validation.countryCodeRequired',
-    });
+    errors.push({ field: 'countryCode', message: 'booking.validation.countryCodeRequired' });
   }
 
   if (!state.phoneNumber?.trim()) {
-    errors.push({
-      field: 'phoneNumber',
-      message: 'booking.validation.phoneNumberRequired',
-    });
+    errors.push({ field: 'phoneNumber', message: 'booking.validation.phoneNumberRequired' });
   }
 
-  // Simple phone validation (10 digits for Egyptian phone)
   if (state.phoneNumber && !/^[0-9]{10}$/.test(state.phoneNumber.replace(/\s/g, ''))) {
-    errors.push({
-      field: 'phoneNumber',
-      message: 'booking.validation.invalidPhoneNumber',
-    });
+    errors.push({ field: 'phoneNumber', message: 'booking.validation.invalidPhoneNumber' });
   }
 
   if (!state.visitType) {
-    errors.push({
-      field: 'visitType',
-      message: 'booking.validation.visitTypeRequired',
-    });
+    errors.push({ field: 'visitType', message: 'booking.validation.visitTypeRequired' });
   }
 
-  // Package validation
   if (state.visitType === 'package') {
-    if (!state.packageType) {
-      errors.push({
-        field: 'packageType',
-        message: 'booking.validation.packageTypeRequired',
-      });
-    }
-    // For packages, we only need personal info, no other validations needed
-    return errors;
-  }
-
-  if (state.visitType === 'homeVisit') {
-    if (!state.serviceType) {
-      errors.push({
-        field: 'serviceType',
-        message: 'booking.validation.serviceTypeRequired',
-      });
-    }
-
-    if (state.serviceType === 'doctorVisit') {
-      if (!state.specialty) {
-        errors.push({
-          field: 'specialty',
-          message: 'booking.validation.specialtyRequired',
-        });
-      }
-      if (!state.preferredDate) {
-        errors.push({
-          field: 'preferredDate',
-          message: 'booking.validation.preferredDateRequired',
-        });
-      }
-      if (!state.timePreference) {
-        errors.push({
-          field: 'timePreference',
-          message: 'booking.validation.timePreferenceRequired',
-        });
-      }
-    }
-
-    if (state.serviceType === 'physiotherapy') {
-      if (!state.sessionCount) {
-        errors.push({
-          field: 'sessionCount',
-          message: 'booking.validation.sessionCountRequired',
-        });
-      }
-      if (!state.caseType) {
-        errors.push({
-          field: 'caseType',
-          message: 'booking.validation.caseTypeRequired',
-        });
-      }
-    }
-
-    if (state.serviceType === 'nursing') {
-      if (!state.nursingType) {
-        errors.push({
-          field: 'nursingType',
-          message: 'booking.validation.nursingTypeRequired',
-        });
-      }
-      if (!state.nursingHoursPerDay) {
-        errors.push({
-          field: 'nursingHoursPerDay',
-          message: 'booking.validation.nursingHoursRequired',
-        });
-      }
-      if (!state.nursingDuration) {
-        errors.push({
-          field: 'nursingDuration',
-          message: 'booking.validation.nursingDurationRequired',
-        });
-      }
+    const entry = getPackageEntry(state.packageType);
+    if (!entry) {
+      errors.push({ field: 'packageType', message: 'booking.validation.packageTypeRequired' });
+    } else if (entry.durations.length > 1 && !state.packageDuration) {
+      errors.push({ field: 'packageDuration', message: 'booking.validation.packageDurationRequired' });
     }
   }
 
@@ -355,16 +253,10 @@ export function validateBookingForm(
 }
 
 /**
- * Get service type display name (for summary)
+ * Get service type display key (legacy helper kept for older code paths).
  */
-export function getServiceLabel(
-  serviceType: ServiceType | null,
-  specialty?: Specialty | null
-): string {
-  if (!serviceType) return '';
-  if (serviceType === 'doctorVisit' && specialty) {
-    const spec = SPECIALTIES.find((s) => s.value === specialty);
-    return spec ? spec.label : '';
-  }
-  return `serviceType.${serviceType}`;
+export function getServiceLabel(): string {
+  return '';
 }
+
+
