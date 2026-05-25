@@ -1,264 +1,206 @@
 /* ========================================
-   Banner Section Styles
+   Banner / Hero Section
+   Centered, single-column premium healthtech layout
    ======================================== */
 
 // ── Section Background ────────────────────────────────────────────────────────
 .banner-sec-one {
-  background: linear-gradient(135deg, #fdf9f3 0%, #f8f4ee 60%, #f5f0e8 100%);
   position: relative;
   overflow: hidden;
+  padding: 72px 0 64px;
+  background:
+    radial-gradient(900px 480px at 50% -10%, rgba(170, 134, 66, 0.10), transparent 70%),
+    linear-gradient(180deg, #fdfaf4 0%, #f8f4ec 100%);
 
-  // Subtle decorative blob (top-right)
-  &::before {
-    content: '';
-    position: absolute;
-    top: -120px;
-    right: -80px;
-    width: 420px;
-    height: 420px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(170, 134, 66, 0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  // Subtle decorative blob (bottom-left)
+  // Subtle hairline at bottom for crisp section separation
   &::after {
     content: '';
     position: absolute;
-    bottom: -80px;
-    left: -60px;
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(170, 134, 66, 0.05) 0%, transparent 70%);
+    inset: auto 0 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(19, 44, 77, 0.08), transparent);
     pointer-events: none;
   }
 }
 
-// Banner Content Entry Animation
+// ── Content Wrapper ───────────────────────────────────────────────────────────
+.banner-content {
+  &--centered {
+    max-width: 820px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+  }
+}
+
+// ── Entry Animations ──────────────────────────────────────────────────────────
 .banner-animate-in {
-  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .banner-animate-in[data-reveal],
-.animate-slide-up[data-reveal],
-.credential-animate[data-reveal] {
+.animate-slide-up[data-reveal] {
   animation: none;
   opacity: 1;
   transform: none;
 }
 
-// Slide Up Animation
 .animate-slide-up {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(20px);
   animation: slideUpFade 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 
   &[data-delay="0.1"] { animation-delay: 0.1s; }
+  &[data-delay="0.2"] { animation-delay: 0.2s; }
   &[data-delay="0.3"] { animation-delay: 0.3s; }
   &[data-delay="0.4"] { animation-delay: 0.4s; }
   &[data-delay="0.5"] { animation-delay: 0.5s; }
+  &[data-delay="0.6"] { animation-delay: 0.6s; }
   &[data-delay="0.9"] { animation-delay: 0.9s; }
 }
 
-// Credential Staggered Animation
-.credential-animate {
-  opacity: 0;
-  transform: translateX(-20px);
-  animation: slideInFade 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-
-  &[data-delay="0.6"] { animation-delay: 0.6s; }
-  &[data-delay="0.7"] { animation-delay: 0.7s; }
-  &[data-delay="0.8"] { animation-delay: 0.8s; }
-}
-
-// Medical Icon Pulse
-.medical-icon-pulse {
-  animation: medicalPulse 2.5s ease-in-out infinite;
-  transform-origin: center;
-}
-
-// Trust Score Pulse
-.trust-score-pulse {
-  animation: scorePulse 3s ease-in-out infinite;
-}
-
-// Stat Number Glow
-.stat-number-animate {
-  display: inline-block;
-  animation: numberGlow 3s ease-in-out infinite;
-}
-
-// Title Underline
-.title-underline-animate {
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #aa8642 0%, transparent 100%);
-    border-radius: 2px;
-    animation: underlineExpand 1s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards;
-  }
-}
-
-// Banner Image
-.banner-img-animate {
-  position: relative;
-  animation: fadeInScale 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
-
-  img {
-    animation: breathe 4s ease-in-out infinite;
-  }
-}
-
-// ── Trust Badge ───────────────────────────────────────────────────────────────
-.trust-badge {
-  display: flex;
+// ── Tertiary WhatsApp link ────────────────────────────────────────────────────
+.banner-whatsapp-link {
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #5a6b80;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
 
-  &__rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  i {
+    font-size: 1rem;
+    color: #25d366; // WhatsApp green
   }
 
-  .trust-stars {
-    display: flex;
-    gap: 0.25rem;
-
-    .star-icon {
-      color: #ffc107;
-      font-size: 1.25rem;
-      line-height: 1;
-      opacity: 0;
-      animation: starFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-
-      &[data-delay="0.2"] { animation-delay: 0.2s; }
-      &[data-delay="0.3"] { animation-delay: 0.3s; }
-      &[data-delay="0.4"] { animation-delay: 0.4s; }
-      &[data-delay="0.5"] { animation-delay: 0.5s; }
-      &[data-delay="0.6"] { animation-delay: 0.6s; }
-
-      &:hover {
-        transform: scale(1.2) rotate(15deg);
-        filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.6));
-      }
-    }
+  &:hover {
+    color: #132c4d;
+    background: rgba(37, 211, 102, 0.08);
   }
 
-  .trust-score {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #2c3e50;
-  }
-
-  .trust-divider {
-    color: #dee2e6;
-    font-size: 0.9rem;
-  }
-
-  .trust-stats {
-    font-size: 0.9rem;
-    color: #6c757d;
+  &:focus-visible {
+    outline: 2px solid #25d366;
+    outline-offset: 2px;
   }
 }
 
-// ── Banner Title ──────────────────────────────────────────────────────────────
+// ── Availability Eyebrow ──────────────────────────────────────────────────────
+.banner-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(19, 44, 77, 0.08);
+  backdrop-filter: blur(6px);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #2c3e50;
+  box-shadow: 0 1px 2px rgba(19, 44, 77, 0.04);
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+    animation: livePulse 2.2s ease-out infinite;
+  }
+}
+
+// ── Headline ──────────────────────────────────────────────────────────────────
 .banner-title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 4.2vw, 3.25rem);
   font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1rem;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #132c4d;
+  margin: 0;
+
+  &__line {
+    display: block;
+  }
 
   &__highlight {
     color: #aa8642;
   }
 }
 
-// ── Banner Subtitle ───────────────────────────────────────────────────────────
+// ── Subtitle ──────────────────────────────────────────────────────────────────
 .banner-subtitle {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #6c757d;
-  margin-bottom: 1.5rem;
+  font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+  line-height: 1.55;
+  color: #5a6b80;
+  margin: 0;
+  max-width: 56ch;
 }
 
-// ── Trust Block (badge + credential chips) ────────────────────────────────────
-.trust-block {
-  margin-bottom: 1.25rem;
-}
-
-// ── Credential Chips ──────────────────────────────────────────────────────────
-.credentials-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.credential-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 50px;
-  background: rgba(170, 134, 66, 0.08);
-  border: 1px solid rgba(170, 134, 66, 0.2);
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #2c3e50;
-
-  i {
-    color: #aa8642;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-  }
-}
-
-// ── Primary CTA Row ───────────────────────────────────────────────────────────
+// ── CTAs ──────────────────────────────────────────────────────────────────────
 .banner-cta-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  margin-bottom: 3.5rem;
+  margin-top: 0.25rem;
 }
 
 .btn-banner-primary {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
-  background: linear-gradient(90deg, #aa8642 0%, #d4b16a 100%);
+  padding: 0.95rem 1.85rem;
+  background: linear-gradient(90deg, #aa8642 0%, #c9a05a 100%);
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 50px;
+  border-radius: 999px;
   text-decoration: none;
   border: none;
-  box-shadow: 0 4px 16px rgba(170, 134, 66, 0.38);
-  transition: box-shadow 0.2s, transform 0.15s, opacity 0.15s;
+  box-shadow: 0 6px 20px rgba(170, 134, 66, 0.32);
+  transition: box-shadow 0.2s ease, transform 0.15s ease, opacity 0.15s ease;
   white-space: nowrap;
 
-  i {
-    font-size: 1.1rem;
+  i { font-size: 1.05rem; }
+
+  &__arrow {
+    transition: transform 0.2s ease;
   }
 
   &:hover {
     color: #fff;
-    opacity: 0.92;
-    box-shadow: 0 6px 22px rgba(170, 134, 66, 0.5);
+    box-shadow: 0 10px 28px rgba(170, 134, 66, 0.42);
     transform: translateY(-2px);
+
+    .btn-banner-primary__arrow {
+      transform: translateX(3px);
+    }
   }
 
-  &:active {
-    transform: translateY(0);
+  &:active { transform: translateY(0); }
+  &:focus-visible {
+    outline: 2px solid #aa8642;
+    outline-offset: 3px;
+  }
+
+  [dir='rtl'] & {
+    .btn-banner-primary__arrow {
+      transform: scaleX(-1);
+    }
+
+    &:hover .btn-banner-primary__arrow {
+      transform: scaleX(-1) translateX(3px);
+    }
   }
 }
 
@@ -266,30 +208,68 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.825rem 1.65rem;
-  background: transparent;
-  color: #aa8642;
+  padding: 0.9rem 1.7rem;
+  background: rgba(255, 255, 255, 0.6);
+  color: #132c4d;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 50px;
+  border-radius: 999px;
   text-decoration: none;
-  border: 2px solid #aa8642;
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s, transform 0.15s;
+  border: 1px solid rgba(19, 44, 77, 0.12);
+  backdrop-filter: blur(6px);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
   white-space: nowrap;
 
-  i {
-    font-size: 1.1rem;
-  }
+  i { font-size: 1.05rem; color: #aa8642; }
 
   &:hover {
-    background: #aa8642;
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(170, 134, 66, 0.3);
+    background: #fff;
+    border-color: rgba(170, 134, 66, 0.45);
+    color: #132c4d;
     transform: translateY(-2px);
   }
 
-  &:active {
-    transform: translateY(0);
+  &:active { transform: translateY(0); }
+  &:focus-visible {
+    outline: 2px solid #aa8642;
+    outline-offset: 3px;
+  }
+}
+
+// ── Trust Strip ───────────────────────────────────────────────────────────────
+.banner-trust-strip {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 0.9rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #2c3e50;
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    strong { font-weight: 700; color: #132c4d; }
+    i { color: #aa8642; font-size: 1rem; }
+  }
+
+  &__stars {
+    color: #f0b400;
+    letter-spacing: 0.05em;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  &__muted { color: #6b7a8e; }
+
+  &__divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(19, 44, 77, 0.15);
+    display: inline-block;
   }
 }
 
@@ -297,21 +277,25 @@
 .service-pills-section {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.6rem;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
+  width: 100%;
 }
 
 .service-pills-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #9ca3af;
+  color: #8a99ad;
   text-transform: uppercase;
-  letter-spacing: 0.08em;margin: 1;
+  letter-spacing: 0.1em;
+  margin: 0;
 }
 
 .service-pills {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
 }
 
@@ -319,58 +303,60 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 50px;
-  border: 1.5px solid #e8dcc8;
-  background: #f8f4ee;
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(19, 44, 77, 0.10);
+  background: rgba(255, 255, 255, 0.75);
   color: #132c4d;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
-  transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.15s, box-shadow 0.18s;
+  backdrop-filter: blur(6px);
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
 
-  i {
-    font-size: 0.95rem;
-    flex-shrink: 0;
-  }
+  i { font-size: 0.95rem; flex-shrink: 0; color: #aa8642; }
 
   &:hover {
     background: #aa8642;
     color: #fff;
     border-color: #aa8642;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(170, 134, 66, 0.28);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(170, 134, 66, 0.28);
+
+    i { color: #fff; }
   }
 
-  &:active {
-    transform: translateY(0);
+  &:active { transform: translateY(0); }
+  &:focus-visible {
+    outline: 2px solid #aa8642;
+    outline-offset: 2px;
   }
 
-  // ── Featured pill (Geriatrics) ───────────────────────────────────────────
+  // Featured pill (Geriatrics) — softened so the primary CTA wins visually
   &--featured {
-    background: linear-gradient(90deg, #aa8642 0%, #c9a05a 100%);
-    color: #fff;
-    border-color: transparent;
+    background: rgba(170, 134, 66, 0.08);
+    color: #8f6e36;
+    border-color: rgba(170, 134, 66, 0.45);
     font-weight: 600;
-    box-shadow: 0 3px 10px rgba(170, 134, 66, 0.32);
 
-    i {
-      animation: heartbeat 1.8s ease-in-out infinite;
-    }
+    i { color: #aa8642; }
 
     &:hover {
-      background: linear-gradient(90deg, #8f6e36 0%, #aa8642 100%);
-      box-shadow: 0 5px 16px rgba(170, 134, 66, 0.45);
+      background: #aa8642;
+      color: #fff;
+      border-color: #aa8642;
+      box-shadow: 0 6px 16px rgba(170, 134, 66, 0.28);
+
+      i { color: #fff; }
     }
   }
 }
 
-// Small badge inside the featured pill
 .pill-badge {
   display: inline-flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
+  background: rgba(170, 134, 66, 0.18);
+  color: #8f6e36;
   font-size: 0.65rem;
   font-weight: 700;
   padding: 0.1rem 0.4rem;
@@ -378,233 +364,74 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   line-height: 1.4;
+
+  .service-pill--featured:hover & {
+    background: rgba(255, 255, 255, 0.28);
+    color: #fff;
+  }
 }
 
 // ── Keyframes ─────────────────────────────────────────────────────────────────
-
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(40px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideInFade {
-  from { opacity: 0; transform: translateX(-20px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes medicalPulse {
-  0%, 40%, 100% { transform: scale(1); opacity: 1; }
-  10%, 30%      { transform: scale(1.15); opacity: 0.9; }
-}
-
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  14%       { transform: scale(1.2); }
-  28%       { transform: scale(1); }
-  42%       { transform: scale(1.15); }
-  70%       { transform: scale(1); }
-}
-
-@keyframes scorePulse {
-  0%, 100% { transform: scale(1); color: #2c3e50; }
-  50%       { transform: scale(1.05); color: #aa8642; }
-}
-
-@keyframes numberGlow {
-  0%, 100% { text-shadow: none; }
-  50%       { text-shadow: 0 0 8px rgba(170, 134, 66, 0.4); }
-}
-
-@keyframes underlineExpand {
-  from { width: 0; }
-  to   { width: 100%; }
-}
-
-@keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-@keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.02); }
-}
-
-@keyframes starFadeIn {
-  from { opacity: 0; transform: scale(0) rotate(-180deg); }
-  to   { opacity: 1; transform: scale(1) rotate(0); }
+@keyframes livePulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
 }
 
 // ── Responsive ────────────────────────────────────────────────────────────────
-
 @media (max-width: 991px) {
-  .banner-section {
-    padding: 50px 0 40px;
-  }
-
-  .banner-img {
-    margin-bottom: 30px;
-    order: -1;
-
-    img {
-      max-width: 400px;
-      margin: 0 auto;
-      display: block;
-    }
-  }
-
-  .banner-content {
-    text-align: center;
-  }
-
-  .trust-badge {
-    justify-content: center;
-  }
-
-  .credentials-chips {
-    justify-content: center;
-  }
-
-  .banner-cta-row {
-    justify-content: center;
-  }
-
-  .service-pills-section {
-    align-items: center;
-  }
-
-  .service-pills {
-    justify-content: center;
-  }
+  .banner-sec-one { padding: 60px 0 52px; }
 }
 
 @media (max-width: 767px) {
-  .banner-section {
-    padding: 40px 0 30px;
-  }
+  .banner-sec-one { padding: 48px 0 40px; }
 
-  .banner-title {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  .banner-subtitle {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .trust-badge {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-
-    &__rating { gap: 0.75rem; }
-    .trust-divider { display: none; }
-    .trust-stars .star-icon { font-size: 1.1rem; }
-    .trust-score { font-size: 1.25rem; }
-    .trust-stats { font-size: 0.85rem; text-align: center; }
-  }
-
-  .credentials-chips {
-    justify-content: center;
-  }
+  .banner-content--centered { gap: 0.75rem; }
 
   .banner-cta-row {
-    flex-direction: column;
-    gap: 0.75rem;
+    width: 100%;
 
-    .btn-banner-primary,
-    .btn-banner-secondary {
+    .btn-banner-primary {
       width: 100%;
       justify-content: center;
-      padding: 0.9rem 1.5rem;
     }
   }
 
-  .service-pills {
-    gap: 0.4rem;
-  }
+  .banner-trust-strip {
+    gap: 0.35rem 0.7rem;
+    font-size: 0.8rem;
 
-  .service-pill {
-    font-size: 0.8125rem;
-    padding: 0.4rem 0.75rem;
-  }
-
-  .banner-img {
-    margin-bottom: 2rem;
-
-    img {
-      max-width: 100%;
-      border-radius: 16px;
-    }
+    &__divider { display: none; }
   }
 }
 
 @media (max-width: 575px) {
-  .banner-title {
-    font-size: 1.75rem;
-  }
-
-  .banner-subtitle {
-    font-size: 0.9rem;
-  }
-
-  .trust-badge {
-    .trust-score { font-size: 1.1rem; }
-    .trust-stats { font-size: 0.8rem; }
-  }
-
-  .credential-chip {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.6rem;
+  .service-pill {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.8rem;
   }
 }
 
-// ── RTL ───────────────────────────────────────────────────────────────────────
-
-[dir='rtl'] {
-  .title-underline-animate::after {
-    left: auto;
-    right: 0;
-    background: linear-gradient(270deg, #aa8642 0%, transparent 100%);
-  }
-
-  .credential-animate {
-    transform: translateX(20px);
-  }
-}
-
-// ── Accessibility ─────────────────────────────────────────────────────────────
-
+// ── Reduced Motion ────────────────────────────────────────────────────────────
 @media (prefers-reduced-motion: reduce) {
   .banner-animate-in,
-  .animate-slide-up,
-  .credential-animate,
-  .banner-img-animate,
-  .star-icon {
+  .animate-slide-up {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
 
-  .medical-icon-pulse,
-  .trust-score-pulse,
-  .stat-number-animate,
-  .service-pill--featured i {
+  .banner-eyebrow__dot {
     animation: none !important;
-  }
-
-  .banner-img-animate img {
-    animation: none !important;
-  }
-
-  .title-underline-animate::after {
-    animation: none !important;
-    width: 100%;
   }
 }
