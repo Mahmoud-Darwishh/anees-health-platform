@@ -1,52 +1,10 @@
 import React from 'react';
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import LucideIcon from '@/components/common/LucideIcon';
 
 const HomeBanner: React.FC = () => {
     const t = useTranslations();
     const locale = useLocale();
-
-    const services = [
-        {
-            key: 'geriatrics',
-            icon: 'fa-solid fa-heart',
-            label: t('home.specialities.geriatrics'),
-            href: `/${locale}/booking?service=geriatrics`,
-            featured: true,
-            badge: t('home.banner.featuredBadge'),
-        },
-        {
-            key: 'nursing',
-            icon: 'fa-solid fa-heart-pulse',
-            label: t('home.list.nursing'),
-            href: `/${locale}/booking?service=nursing`,
-        },
-        {
-            key: 'physiotherapy',
-            icon: 'fa-solid fa-bolt',
-            label: t('home.list.physiotherapy'),
-            href: `/${locale}/booking?service=physiotherapy`,
-        },
-        {
-            key: 'doctor_visit',
-            icon: 'fa-solid fa-user',
-            label: t('home.list.doctor_visit'),
-            href: `/${locale}/booking?service=doctor_visit`,
-        },
-        {
-            key: 'lab_testing',
-            icon: 'fa-solid fa-droplet',
-            label: t('home.list.lab_testing'),
-            href: `/${locale}/booking?service=lab_testing`,
-        },
-        {
-            key: 'telemedicine',
-            icon: 'fa-solid fa-video',
-            label: t('home.list.telemedicine'),
-            href: `/${locale}/booking?service=telemedicine`,
-        },
-    ];
 
     // WhatsApp shortcut — matches src/components/common/WhatsAppButton.tsx
     const whatsappPhone = '201055164595';
@@ -73,7 +31,7 @@ const HomeBanner: React.FC = () => {
                         {t('home.banner.professional_subtitle')}
                     </p>
 
-                    {/* CTAs: primary low-friction chat + secondary high-intent booking */}
+                    {/* Clear CTA hierarchy: chat first, services second */}
                     <div className="banner-cta-row animate-slide-up" data-delay="0.4">
                         <a
                             href={whatsappHref}
@@ -85,9 +43,9 @@ const HomeBanner: React.FC = () => {
                             <span>{t('home.banner.chatWithDoctor')}</span>
                             <LucideIcon iconClass="fa-solid fa-arrow-right btn-banner-primary__arrow" aria-hidden="true" />
                         </a>
-                        <a href="#packages" className="btn-banner-secondary">
+                        <a href={`/${locale}/services`} className="btn-banner-secondary">
                             <LucideIcon iconClass="fa-solid fa-box-open" aria-hidden="true" />
-                            <span>{t('home.banner.viewPackages')}</span>
+                            <span>{t('home.banner.servicesCta')}</span>
                         </a>
                     </div>
 
@@ -113,29 +71,6 @@ const HomeBanner: React.FC = () => {
                             <LucideIcon iconClass="fa-solid fa-user-group" aria-hidden="true" />
                             {t('home.banner.dedicated_team')}
                         </span>
-                    </div>
-
-                    {/* Quick Service Pills */}
-                    <div className="service-pills-section animate-slide-up" data-delay="0.6">
-                        <p className="service-pills-label">{t('home.banner.bookByService')}</p>
-                        <div className="service-pills" role="list">
-                            {services.map((service) => (
-                                <Link
-                                    key={service.key}
-                                    href={service.href}
-                                    className={`service-pill${service.featured ? ' service-pill--featured' : ''}`}
-                                    role="listitem"
-                                >
-                                    <LucideIcon iconClass={service.icon} aria-hidden="true" />
-                                    <span>{service.label}</span>
-                                    {service.badge && (
-                                        <span className="pill-badge" aria-label={service.badge}>
-                                            {service.badge}
-                                        </span>
-                                    )}
-                                </Link>
-                            ))}
-                        </div>
                     </div>
 
                 </div>

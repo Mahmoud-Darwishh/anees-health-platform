@@ -7,7 +7,7 @@
 .banner-sec-one {
   position: relative;
   overflow: hidden;
-  padding: 72px 0 64px;
+  padding: 80px 0 68px;
   background:
     radial-gradient(900px 480px at 50% -10%, rgba(170, 134, 66, 0.10), transparent 70%),
     linear-gradient(180deg, #fdfaf4 0%, #f8f4ec 100%);
@@ -32,7 +32,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.9rem;
+    gap: 1.1rem;
   }
 }
 
@@ -150,9 +150,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.9rem;
   flex-wrap: wrap;
-  margin-top: 0.25rem;
+  margin-top: 0.45rem;
 }
 
 .btn-banner-primary {
@@ -243,7 +243,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem 0.9rem;
-  margin-top: 0.5rem;
+  margin-top: 0.8rem;
   font-size: 0.875rem;
   color: #2c3e50;
 
@@ -273,104 +273,6 @@
   }
 }
 
-// ── Service Pills ─────────────────────────────────────────────────────────────
-.service-pills-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 1rem;
-  width: 100%;
-}
-
-.service-pills-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #8a99ad;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin: 0;
-}
-
-.service-pills {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.service-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.95rem;
-  border-radius: 999px;
-  border: 1px solid rgba(19, 44, 77, 0.10);
-  background: rgba(255, 255, 255, 0.75);
-  color: #132c4d;
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-decoration: none;
-  backdrop-filter: blur(6px);
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease;
-
-  i { font-size: 0.95rem; flex-shrink: 0; color: #aa8642; }
-
-  &:hover {
-    background: #aa8642;
-    color: #fff;
-    border-color: #aa8642;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(170, 134, 66, 0.28);
-
-    i { color: #fff; }
-  }
-
-  &:active { transform: translateY(0); }
-  &:focus-visible {
-    outline: 2px solid #aa8642;
-    outline-offset: 2px;
-  }
-
-  // Featured pill (Geriatrics) — softened so the primary CTA wins visually
-  &--featured {
-    background: rgba(170, 134, 66, 0.08);
-    color: #8f6e36;
-    border-color: rgba(170, 134, 66, 0.45);
-    font-weight: 600;
-
-    i { color: #aa8642; }
-
-    &:hover {
-      background: #aa8642;
-      color: #fff;
-      border-color: #aa8642;
-      box-shadow: 0 6px 16px rgba(170, 134, 66, 0.28);
-
-      i { color: #fff; }
-    }
-  }
-}
-
-.pill-badge {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(170, 134, 66, 0.18);
-  color: #8f6e36;
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  line-height: 1.4;
-
-  .service-pill--featured:hover & {
-    background: rgba(255, 255, 255, 0.28);
-    color: #fff;
-  }
-}
-
 // ── Keyframes ─────────────────────────────────────────────────────────────────
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(24px); }
@@ -390,18 +292,19 @@
 
 // ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 991px) {
-  .banner-sec-one { padding: 60px 0 52px; }
+  .banner-sec-one { padding: 64px 0 54px; }
 }
 
 @media (max-width: 767px) {
-  .banner-sec-one { padding: 48px 0 40px; }
+  .banner-sec-one { padding: 52px 0 42px; }
 
-  .banner-content--centered { gap: 0.75rem; }
+  .banner-content--centered { gap: 0.9rem; }
 
   .banner-cta-row {
     width: 100%;
 
-    .btn-banner-primary {
+    .btn-banner-primary,
+    .btn-banner-secondary {
       width: 100%;
       justify-content: center;
     }
@@ -412,13 +315,6 @@
     font-size: 0.8rem;
 
     &__divider { display: none; }
-  }
-}
-
-@media (max-width: 575px) {
-  .service-pill {
-    font-size: 0.8125rem;
-    padding: 0.4rem 0.8rem;
   }
 }
 

@@ -167,6 +167,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                     locale={locale}
                     tg={tg}
                     useGridColumn={false}
+                    compactHome
                   />
                 </div>
               );

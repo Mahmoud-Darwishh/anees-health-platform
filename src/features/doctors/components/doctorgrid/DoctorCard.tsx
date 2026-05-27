@@ -11,6 +11,7 @@ interface DoctorCardProps {
   locale: string;
   tg: (key: string, values?: MessageValues) => string;
   useGridColumn?: boolean;
+  compactHome?: boolean;
 }
 
 export const DoctorCard = memo(function DoctorCard({
@@ -18,6 +19,7 @@ export const DoctorCard = memo(function DoctorCard({
   locale,
   tg,
   useGridColumn = true,
+  compactHome = false,
 }: DoctorCardProps) {
   // profileLink is already set to /doctors/<slug> by the data layer
   const profileHref = `/${locale}${doctor.profileLink}`;
@@ -46,7 +48,7 @@ export const DoctorCard = memo(function DoctorCard({
         className="doctor-card-link"
         aria-label={`${doctor.doctorName} - ${tg('card.view_profile')}`}
       >
-        <div className="card doctor-card-enhanced">
+        <div className={`card doctor-card-enhanced${compactHome ? ' doctor-card--home-compact' : ''}`}>
           {/* Image with verified badge overlay */}
           <div className="card-img card-img-hover doctor-image-wrapper position-relative">
             <Image
@@ -59,22 +61,25 @@ export const DoctorCard = memo(function DoctorCard({
               quality={85}
             />
             <div className="verified-badge-overlay position-absolute top-0 end-0 m-2">
-              <span className="badge rounded-pill bg-primary text-white">
-                <LucideIcon iconClass="fa-solid fa-shield-halved me-1"></LucideIcon>
-                {tg('card.verified')}
-              </span>
+              {!compactHome && (
+                <span className="badge rounded-pill bg-primary text-white">
+                  <LucideIcon iconClass="fa-solid fa-shield-halved me-1"></LucideIcon>
+                  {tg('card.verified')}
+                </span>
+              )}
             </div>
           </div>
 
           <div className="card-body doctor-card-body p-0">
-            {/* Speciality bar with themed color classes from data */}
-            <div
-              className={`d-flex active-bar ${doctor.specialityColorClass || ''} align-items-center justify-content-between p-3 pb-2`}
-            >
-              <span className={`${doctor.specialityTextClass || ''} fw-medium fs-14`}>
-                {doctor.speciality}
-              </span>
-            </div>
+            {!compactHome && (
+              <div
+                className={`d-flex active-bar ${doctor.specialityColorClass || ''} align-items-center justify-content-between p-3 pb-2`}
+              >
+                <span className={`${doctor.specialityTextClass || ''} fw-medium fs-14`}>
+                  {doctor.speciality}
+                </span>
+              </div>
+            )}
 
             {/* Main info */}
             <div className="doctor-info-content p-3">
@@ -88,7 +93,7 @@ export const DoctorCard = memo(function DoctorCard({
                   <LucideIcon iconClass="fa-solid fa-star" aria-hidden="true"></LucideIcon>
                   {doctor.rating}
                 </span>
-                {estimatedReviews > 0 && (
+                {!compactHome && estimatedReviews > 0 && (
                   <span className="meta-item meta-item-reviews">
                     <LucideIcon iconClass="fa-solid fa-message-1" aria-hidden="true"></LucideIcon>
                     {tg('card.from_reviews', { count: `${estimatedReviews}+` })}
@@ -101,10 +106,10 @@ export const DoctorCard = memo(function DoctorCard({
                 {doctor.experienceYears}+ {tg('card.yrs_exp')}
               </p>
 
-              {summaryPreview && <p className="doctor-summary mb-3">{summaryPreview}</p>}
+              {!compactHome && summaryPreview && <p className="doctor-summary mb-3">{summaryPreview}</p>}
 
               {/* Services offered chips */}
-              {visibleChannels.length > 0 && (
+              {!compactHome && visibleChannels.length > 0 && (
                 <div className="services-offered mb-3">
                   <div className="service-chips-container">
                       {visibleChannels.map((channelRaw, idx) => {

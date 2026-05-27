@@ -278,19 +278,6 @@ const SectionPackages: React.FC = () => {
           ))}
         </div>
 
-        {/* Footer CTA */}
-        <div className={styles.footerCta}>
-          <p className={styles.footerNote}>{t('contact_note')}</p>
-          <Link
-            href={`/${locale}/contact-us`}
-            className={styles.contactBtn}
-            aria-label={t('contact_us_aria')}
-          >
-            {t('contact_us')}
-            <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true" />
-          </Link>
-        </div>
-
       </div>
     </Reveal>
   );

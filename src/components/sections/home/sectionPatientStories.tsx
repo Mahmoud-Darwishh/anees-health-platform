@@ -138,6 +138,7 @@ const SectionPatientStories: React.FC = () => {
                       <blockquote className={styles.quote}>
                         <p>{story.quote}</p>
                       </blockquote>
+
                       <figcaption className={styles.attribution}>
                         <span className={styles.avatar} aria-hidden="true">
                           {story.name.charAt(0)}
