@@ -44,7 +44,7 @@ const HomeBanner: React.FC = () => {
                             <LucideIcon iconClass="fa-solid fa-arrow-right btn-banner-primary__arrow" aria-hidden="true" />
                         </a>
                         <a href={`/${locale}/services`} className="btn-banner-secondary">
-                            <LucideIcon iconClass="fa-solid fa-box-open" aria-hidden="true" />
+                            <LucideIcon iconClass="fa-solid fa-user-doctor" aria-hidden="true" />
                             <span>{t('home.banner.servicesCta')}</span>
                         </a>
                     </div>
