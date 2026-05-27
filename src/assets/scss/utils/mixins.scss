@@ -84,13 +84,13 @@ $breakpoints: (
    Use @include section-padding; at the section root.
    ────────────────────────────────────────────────────────────────────────── */
 @mixin section-padding {
-  padding: 112px 0 96px;
+  padding: 128px 0 112px;
 
   @include respond-below(custom991) {
-    padding: 88px 0 76px;
+    padding: 100px 0 86px;
   }
   @include respond-below(custom767) {
-    padding: 64px 0 56px;
+    padding: 76px 0 64px;
   }
 }
 

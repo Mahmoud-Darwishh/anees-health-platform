@@ -3,14 +3,38 @@
    Centered, single-column premium healthtech layout
    ======================================== */
 
+@use "../utils/variables";
+
+$banner-radius-control: variables.$border-radius-lg;
+$banner-radius-chip: variables.$border-radius-xl;
+
 // ── Section Background ────────────────────────────────────────────────────────
 .banner-sec-one {
   position: relative;
   overflow: hidden;
-  padding: 80px 0 68px;
+  padding: 104px 0 92px;
   background:
-    radial-gradient(900px 480px at 50% -10%, rgba(170, 134, 66, 0.10), transparent 70%),
-    linear-gradient(180deg, #fdfaf4 0%, #f8f4ec 100%);
+    radial-gradient(1100px 560px at 50% -14%, rgba(variables.$primary, 0.09), transparent 72%),
+    radial-gradient(860px 420px at 88% 22%, rgba(variables.$brand-dark-blue, 0.035), transparent 74%),
+    linear-gradient(180deg, variables.$default-background 0%, variables.$light-300 100%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(620px 250px at 10% 100%, rgba(variables.$primary, 0.028), transparent 76%),
+      repeating-linear-gradient(
+        0deg,
+        rgba(variables.$brand-dark-blue, 0.008) 0,
+        rgba(variables.$brand-dark-blue, 0.008) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    opacity: 0.32;
+    mix-blend-mode: multiply;
+  }
 
   // Subtle hairline at bottom for crisp section separation
   &::after {
@@ -18,7 +42,7 @@
     position: absolute;
     inset: auto 0 0 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(19, 44, 77, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(variables.$brand-dark-blue, 0.08), transparent);
     pointer-events: none;
   }
 }
@@ -32,7 +56,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.1rem;
+    gap: 1.35rem;
   }
 }
 
@@ -71,23 +95,23 @@
   padding: 0.25rem 0.5rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #5a6b80;
+  color: variables.$text-muted;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: $banner-radius-control;
   transition: color 0.15s ease, background 0.15s ease;
 
   i {
     font-size: 1rem;
-    color: #25d366; // WhatsApp green
+    color: variables.$success;
   }
 
   &:hover {
-    color: #132c4d;
-    background: rgba(37, 211, 102, 0.08);
+    color: variables.$brand-dark-blue;
+    background: rgba(variables.$success, 0.08);
   }
 
   &:focus-visible {
-    outline: 2px solid #25d366;
+    outline: 2px solid variables.$success;
     outline-offset: 2px;
   }
 }
@@ -98,22 +122,22 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(19, 44, 77, 0.08);
+  border-radius: $banner-radius-chip;
+  background: rgba(variables.$white, 0.7);
+  border: 1px solid rgba(variables.$brand-dark-blue, 0.08);
   backdrop-filter: blur(6px);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #2c3e50;
-  box-shadow: 0 1px 2px rgba(19, 44, 77, 0.04);
+  color: variables.$gray-800;
+  box-shadow: 0 1px 2px rgba(variables.$brand-dark-blue, 0.04);
 
   &__dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #22c55e;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+    background: variables.$success;
+    box-shadow: 0 0 0 0 rgba(variables.$success, 0.55);
     animation: livePulse 2.2s ease-out infinite;
   }
 }
@@ -124,7 +148,7 @@
   font-weight: 600;
   line-height: 1.18;
   letter-spacing: -0.02em;
-  color: #132c4d;
+  color: variables.$brand-dark-blue;
   margin: 0;
 
   &__line {
@@ -132,7 +156,7 @@
   }
 
   &__highlight {
-    color: #aa8642;
+    color: variables.$primary;
   }
 }
 
@@ -140,7 +164,7 @@
 .banner-subtitle {
   font-size: clamp(0.95rem, 1.3vw, 1.1rem);
   line-height: 1.72;
-  color: #5a6b80;
+  color: variables.$text-muted;
   margin: 0;
   max-width: 56ch;
 }
@@ -160,14 +184,14 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.95rem 1.85rem;
-  background: linear-gradient(90deg, #aa8642 0%, #c9a05a 100%);
-  color: #fff;
+  background: linear-gradient(90deg, variables.$primary 0%, variables.$primary-600 100%);
+  color: variables.$white;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: $banner-radius-control;
   text-decoration: none;
   border: none;
-  box-shadow: 0 6px 20px rgba(170, 134, 66, 0.32);
+  box-shadow: 0 6px 20px rgba(variables.$primary, 0.32);
   transition: box-shadow 0.2s ease, transform 0.15s ease, opacity 0.15s ease;
   white-space: nowrap;
 
@@ -178,8 +202,8 @@
   }
 
   &:hover {
-    color: #fff;
-    box-shadow: 0 10px 28px rgba(170, 134, 66, 0.42);
+    color: variables.$white;
+    box-shadow: 0 10px 28px rgba(variables.$primary, 0.42);
     transform: translateY(-2px);
 
     .btn-banner-primary__arrow {
@@ -189,7 +213,7 @@
 
   &:active { transform: translateY(0); }
   &:focus-visible {
-    outline: 2px solid #aa8642;
+    outline: 2px solid variables.$primary;
     outline-offset: 3px;
   }
 
@@ -209,29 +233,29 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.9rem 1.7rem;
-  background: rgba(255, 255, 255, 0.6);
-  color: #132c4d;
+  background: rgba(variables.$white, 0.6);
+  color: variables.$brand-dark-blue;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 999px;
+  border-radius: $banner-radius-control;
   text-decoration: none;
-  border: 1px solid rgba(19, 44, 77, 0.12);
+  border: 1px solid rgba(variables.$brand-dark-blue, 0.12);
   backdrop-filter: blur(6px);
   transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
   white-space: nowrap;
 
-  i { font-size: 1.05rem; color: #aa8642; }
+  i { font-size: 1.05rem; color: variables.$primary; }
 
   &:hover {
-    background: #fff;
-    border-color: rgba(170, 134, 66, 0.45);
-    color: #132c4d;
+    background: variables.$white;
+    border-color: rgba(variables.$primary, 0.45);
+    color: variables.$brand-dark-blue;
     transform: translateY(-2px);
   }
 
   &:active { transform: translateY(0); }
   &:focus-visible {
-    outline: 2px solid #aa8642;
+    outline: 2px solid variables.$primary;
     outline-offset: 3px;
   }
 }
@@ -245,30 +269,30 @@
   gap: 0.5rem 0.9rem;
   margin-top: 0.8rem;
   font-size: 0.875rem;
-  color: #2c3e50;
+  color: variables.$gray-800;
 
   &__item {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
 
-    strong { font-weight: 700; color: #132c4d; }
-    i { color: #aa8642; font-size: 1rem; }
+    strong { font-weight: 700; color: variables.$brand-dark-blue; }
+    i { color: variables.$primary; font-size: 1rem; }
   }
 
   &__stars {
-    color: #f0b400;
+    color: variables.$warning;
     letter-spacing: 0.05em;
     font-size: 0.95rem;
     line-height: 1;
   }
 
-  &__muted { color: #6b7a8e; }
+  &__muted { color: variables.$text-muted; }
 
   &__divider {
     width: 1px;
     height: 14px;
-    background: rgba(19, 44, 77, 0.15);
+    background: rgba(variables.$brand-dark-blue, 0.15);
     display: inline-block;
   }
 }
@@ -285,18 +309,18 @@
 }
 
 @keyframes livePulse {
-  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
-  70%  { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(variables.$success, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(variables.$success, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(variables.$success, 0); }
 }
 
 // ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 991px) {
-  .banner-sec-one { padding: 64px 0 54px; }
+  .banner-sec-one { padding: 84px 0 70px; }
 }
 
 @media (max-width: 767px) {
-  .banner-sec-one { padding: 52px 0 42px; }
+  .banner-sec-one { padding: 64px 0 50px; }
 
   .banner-content--centered { gap: 0.9rem; }
 

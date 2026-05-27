@@ -13,10 +13,10 @@
 .header {
   text-align: center;
   max-width: 620px;
-  margin: 0 auto 48px;
+  margin: 0 auto 62px;
 
   @include respond-below(custom767) {
-    margin-bottom: 32px;
+    margin-bottom: 44px;
   }
 }
 
@@ -121,7 +121,7 @@
 }
 
 .quote {
-  margin: 0 auto 32px;
+  margin: 0 auto 40px;
   padding: 0;
   font-size: 22px;
   color: $brand-dark-blue;
@@ -140,7 +140,7 @@
 
   @include respond-below(custom767) {
     font-size: 17px;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
   }
 }
 
@@ -260,7 +260,7 @@
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 32px;
+  margin-top: 40px;
 }
 
 .dot {

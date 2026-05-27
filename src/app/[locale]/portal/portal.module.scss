@@ -1,15 +1,16 @@
 @use '../../../assets/scss/utils/variables' as *;
 @use '../../../assets/scss/utils/mixins' as *;
+@use 'sass:color';
 
 // ── Minimalist cream/navy/gold palette ───────────────────────────────────────
-$portal-navy: #132c4d;
-$portal-gold: #aa8642;
-$portal-cream: #fdfaf4;
-$portal-surface: #ffffff;
-$portal-border: #ebdfc6;
-$portal-border-soft: #f1e6cd;
-$portal-ink: #1d2433;
-$portal-ink-muted: #7a6a4e;
+$portal-navy: $brand-dark-blue;
+$portal-gold: $primary;
+$portal-cream: $default-background;
+$portal-surface: $white;
+$portal-border: $gray-transparent;
+$portal-border-soft: $light-700;
+$portal-ink: $gray-900;
+$portal-ink-muted: $text-muted;
 
 // ── Page shell ───────────────────────────────────────────────────────────────
 .page {
@@ -38,13 +39,13 @@ $portal-ink-muted: #7a6a4e;
 .noticeSuccess {
   background: $portal-surface;
   border: 1px solid $portal-border;
-  color: #6b541d;
+  color: color.adjust($portal-gold, $lightness: -20%);
 }
 
 .noticeError {
   background: $portal-surface;
-  border: 1px solid #e8b8ad;
-  color: #8a2b1a;
+  border: 1px solid rgba($danger, 0.3);
+  color: color.adjust($danger, $lightness: -20%);
 }
 
 // ── Hero (flat, minimalist) ──────────────────────────────────────────────────
@@ -96,7 +97,7 @@ $portal-ink-muted: #7a6a4e;
   border-radius: 8px;
   border: 1px solid $portal-navy;
   background: $portal-navy;
-  color: #ffffff;
+  color: $white;
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -479,15 +480,15 @@ $portal-ink-muted: #7a6a4e;
 }
 
 .statusReady {
-  background: rgba(19, 44, 77, 0.08);
+  background: rgba($portal-navy, 0.08);
   color: $portal-navy;
-  border: 1px solid rgba(19, 44, 77, 0.15);
+  border: 1px solid rgba($portal-navy, 0.15);
 }
 
 .statusPending {
-  background: rgba(170, 134, 66, 0.1);
+  background: rgba($portal-gold, 0.1);
   color: $portal-gold;
-  border: 1px solid rgba(170, 134, 66, 0.25);
+  border: 1px solid rgba($portal-gold, 0.25);
 }
 
 // -- Document link & status pills --
@@ -528,13 +529,13 @@ $portal-ink-muted: #7a6a4e;
 }
 
 .statusReady {
-  background: rgba(19, 44, 77, 0.08);
+  background: rgba($portal-navy, 0.08);
   color: $portal-navy;
-  border: 1px solid rgba(19, 44, 77, 0.15);
+  border: 1px solid rgba($portal-navy, 0.15);
 }
 
 .statusPending {
-  background: rgba(170, 134, 66, 0.1);
+  background: rgba($portal-gold, 0.1);
   color: $portal-gold;
-  border: 1px solid rgba(170, 134, 66, 0.25);
+  border: 1px solid rgba($portal-gold, 0.25);
 }

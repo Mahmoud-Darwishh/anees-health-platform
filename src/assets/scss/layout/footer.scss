@@ -5,10 +5,11 @@
 
 .footer {
     background-color: colors.$blue;
+    border-top: 1px solid rgba(variables.$primary, 0.32);
 
 	// Gradient variant for footer-three
 	&.footer-three {
-		background-image: linear-gradient(90deg, #aa8642, #d4b16a);
+		background-image: linear-gradient(160deg, rgba(19, 44, 77, 1) 0%, rgba(24, 51, 86, 1) 70%, rgba(26, 56, 93, 1) 100%);
 	}
 	&.footer-one {
 		.footer-bottom {
@@ -30,10 +31,10 @@
 			padding-bottom: 10px;
 		}
 		.footer-title {
-		    color: colors.$white;
+		    color: #f6efe1;
 		    font-size: typography.$font__size__17;
 		    font-weight: typography.$bold;
-		    letter-spacing: 0.2px;
+		    letter-spacing: 0.32px;
 		    @include mixins.margin-padding(0 0 22px, null);
 		    text-transform: variables.$capitalize;
 		    @include mixins.respond-below(md) {
@@ -59,7 +60,7 @@
 							margin-bottom: 0;
 						}
 						a {
-							color: colors.$white;
+							color: rgba(255, 250, 241, 0.9);
 							font-size: typography.$font__size__14;
 							line-height: 1.65;
 							padding-left: 20px;
@@ -68,7 +69,7 @@
 							opacity: 0.92;
 							font-weight: 400;
 							&:hover {
-								color: colors.$white;
+								color: #f8e6bd;
 								opacity: 1;
 								padding-left: 24px;
 							}
@@ -94,7 +95,7 @@
 			}
 			.footer-about-content {
 				 p {
-					color: colors.$white;
+					color: rgba(255, 250, 241, 0.9);
 					font-size: typography.$font__size__14;
 					line-height: 1.7;
 					opacity: 0.93;
@@ -102,7 +103,7 @@
 					font-weight: 400;
 					&:last-child {
 						margin-bottom: 0;
-						color: colors.$white;
+						color: rgba(255, 250, 241, 0.78);
 						opacity: 0.85;
 						font-size: typography.$font__size__13;
 					}
@@ -111,7 +112,7 @@
 					/* Bootstrap utilities handle layout: list-unstyled, d-flex, gap-3 */
 					/* Link hover color on interaction */
 					li a:hover {
-						color: colors.$primarycolor;
+						color: #f8e6bd;
 					}
 				}
 			}
@@ -160,8 +161,9 @@
 							a {
 								width: 30px;
 								height: 30px;
-								background-color: colors.$white;
-								color: colors.$primarycolor;
+								background-color: rgba(255, 250, 241, 0.12);
+								border: 1px solid rgba(248, 230, 189, 0.35);
+								color: #f8e6bd;
 								border-radius: 50%;
 								display: inline-flex;
 								align-items: center;
@@ -169,9 +171,9 @@
 								font-size: 16px;
 								transition: all 0.3s ease;
 								&:hover {
-									background-color: colors.$primarycolor;
-									color: colors.$white;
-									transform: scale(1.1);
+									background-color: rgba(248, 230, 189, 0.2);
+									color: #ffffff;
+									transform: translateY(-1px);
 								}
 							}
 						}

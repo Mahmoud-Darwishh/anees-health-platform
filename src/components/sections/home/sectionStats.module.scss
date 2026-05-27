@@ -6,13 +6,13 @@
 // ═══════════════════════════════════════════════════════════════════
 
 .section {
-  padding: 24px 0;
+  padding: 36px 0;
   background: $white;
   border-top: 1px solid #ecebe6;
   border-bottom: 1px solid #ecebe6;
 
   @include respond-below(custom767) {
-    padding: 20px 0;
+    padding: 28px 0;
   }
 }
 

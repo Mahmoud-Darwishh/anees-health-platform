@@ -34,7 +34,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  background: #fff;
+  background: $white;
   border: 1px solid $gray-200;
   border-radius: 12px;
   margin-bottom: 1.5rem;
@@ -58,7 +58,7 @@
 }
 
 .frameWrapper {
-  background: #fff;
+  background: $white;
   border: 1px solid $gray-200;
   border-radius: 12px;
   overflow: hidden;
@@ -115,7 +115,7 @@
   border: none;
   border-radius: 8px;
   background: $primary;
-  color: #fff;
+  color: $white;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;

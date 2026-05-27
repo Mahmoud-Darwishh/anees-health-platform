@@ -13,10 +13,10 @@
 .header {
   text-align: center;
   max-width: 620px;
-  margin: 0 auto 64px;
+  margin: 0 auto 78px;
 
   @include respond-below(custom767) {
-    margin-bottom: 44px;
+    margin-bottom: 56px;
   }
 }
 
@@ -180,14 +180,14 @@
 // ─── CTAs ────────────────────────────────────────────────────────
 
 .cta {
-  margin-top: 64px;
+  margin-top: 80px;
   display: flex;
   justify-content: center;
   gap: 14px;
   flex-wrap: wrap;
 
   @include respond-below(custom767) {
-    margin-top: 48px;
+    margin-top: 60px;
   }
 
   @include respond-below(custom479) {

@@ -16,9 +16,9 @@ $font-family-primary: var(--font-sans);
 $font-awesome: "Fontawesome";
 $font-iconsax: 'iconsax';
 
-//Anees Pallete Variables
+// Anees palette variables
 $bony: #684507;
-$primary: #aa8642;
+$primary: #a68341;
 $deer: #ac9055;
 $Crayola-Gold: #E1C582;
 $brand-dark-blue: #132c4d;
@@ -29,7 +29,7 @@ $metallic-blue: $brand-dark-blue;
 
 
 // Theme Colors Variables
-$primary: #aa8642;
+$primary: #a68341;
 $primary-hover: color.adjust($primary, $lightness: -10%);
 $secondary: $brand-dark-blue;
 $secondary-hover: color.adjust($secondary, $lightness: -10%);
@@ -41,8 +41,8 @@ $warning: #FFCA18;
 $warning-hover: color.adjust($warning, $lightness: -10%);
 $danger: #FF0000;
 $danger-hover: color.adjust($danger, $lightness: -10%);
-$dark: #000F28;
-$light: #E2EDFF;
+$dark: #0f243f;
+$light: #f4efe4;
 $white: #FFF;
 $black: #000;
 $purple: #6938EF;
@@ -53,16 +53,16 @@ $indigo: #3538CD;
 $orange: #E04F16;
 
 // Primary
-$primary-50: #aa86420f;
-$primary-100: #EAF3FF;
-$primary-200: #D4E8FF;
-$primary-300: #BFDCFF;
-$primary-400: #AAD0FF;
-$primary-500: #95C4FF;
-$primary-600: #7FB7FF;
-$primary-700: #69ABFF;
-$primary-800: #519EFF;
-$primary-900: #3790FF;
+$primary-50: #a683410f;
+$primary-100: #faf4e8;
+$primary-200: #f1e6ce;
+$primary-300: #e8d8b2;
+$primary-400: #dcc792;
+$primary-500: #cfb472;
+$primary-600: #c4a35f;
+$primary-700: #b7924d;
+$primary-800: #a68341;
+$primary-900: #8f6f34;
 
 // Secondary
 $secondary-100: #F1ECFD;
@@ -120,26 +120,26 @@ $info-800: #2E61FF;
 $info-900: #1944FF;
 
 // Light
-$light-100: #FCFDFF;
-$light-200: #F9FBFF;
-$light-300: #F6FAFF;
-$light-400: #F3F8FF;
-$light-500: #F0F6FF;
-$light-600: #EEF4FF;
-$light-700: #EBF2FF;
-$light-800: #EEF4FF;
-$light-900: #E5EFFF;
+$light-100: #fffdf9;
+$light-200: #fcf9f2;
+$light-300: #f8f4ea;
+$light-400: #f3eee2;
+$light-500: #eee8db;
+$light-600: #e8e1d1;
+$light-700: #e1d9c7;
+$light-800: #dad1be;
+$light-900: #d2c8b4;
 
 // Gray
-$gray-100: #E3E6EC;
-$gray-200: #ACB7C6;
-$gray-300: #91A0B3;
-$gray-400: #7789A0;
-$gray-500: #5E738E;
-$gray-600: #465D7C;
-$gray-700: #2F486A;
-$gray-800: #183458;
-$gray-900: #012047;
+$gray-100: #ebe8e1;
+$gray-200: #d2ccc1;
+$gray-300: #b8b1a5;
+$gray-400: #9e9589;
+$gray-500: #7e7771;
+$gray-600: #5f5e63;
+$gray-700: #3f4f67;
+$gray-800: #233b5a;
+$gray-900: #132c4d;
 
 // Purple
 $purple-100: #EDEDFF;
@@ -230,29 +230,29 @@ $theme-colors: (
     "purple": $purple
 );
 
-$text-color: $gray-600;
+$text-color: #4f5d6f;
 $title-color: $gray-900;
-$text-muted: $gray-400;
-$body-bg: #fff;
-$default-background: #fff;
-$form-control-bg: #ffffff;
+$text-muted: #768296;
+$body-bg: #fbf8f1;
+$default-background: #fdfaf4;
+$form-control-bg: #fffefb;
 
 // Gradient Variables
-$primary-transparent: #EEF5FF;
-$secondary-transparent: #F8F5FE;
+$primary-transparent: #f7f0df;
+$secondary-transparent: #edf2f7;
 $success-transparent: #F1FAF3;
 $warning-transparent: #FFFDF5;
 $danger-transparent: #FFE8E8;
 $info-transparent: #E9F1FF;
 $pink-transparent: #FCEBF5;
-$light-transparent: #F9F9F9;
-$gray-transparent: #E6E8EE;
+$light-transparent: #f8f4ea;
+$gray-transparent: #e8e1d4;
 $teal-transparent: #E9F5F4;
 $purple-transparent: #F2EDFE;
 $cyan-transparent: #E9F8FB;
 $indigo-transparent: #EDEDFB;
 $orange-transparent: #FCEFEA;
-$primary-gradient: linear-gradient(90deg, #aa8642 0%, #d4b16a 100%);
+$primary-gradient: linear-gradient(120deg, #a68341 0%, #b99756 100%);
 
 // Style Anchor Elements
 $link-color: $primary;
@@ -270,21 +270,21 @@ $default-border: $gray-transparent;
 $input-border: $gray-transparent;
 
 // Border Radius
-$border-radius: 4px;
-$border-radius-sm: 3px;
-$border-radius-lg: 5px;
-$border-radius-xl: 8px;
-$border-radius-xxl: 12px;
+$border-radius: 10px;
+$border-radius-sm: 8px;
+$border-radius-lg: 14px;
+$border-radius-xl: 18px;
+$border-radius-xxl: 24px;
 $rounded: 50%;
 $rounded-pill: 1.5rem;
 
 // Box Shadow
-$box-shadow: 0px 4px 14px 0px rgba(226, 237, 255, 0.25);
-$box-shadow-xs: 0px 1px 1px 1px rgba(198, 198, 198, 0.2);
-$box-shadow-sm: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
-$box-shadow-md: 0px 3px 8px 0px rgba(0, 0, 0, 0.1);
-$box-shadow-lg: 0px 4px 44px 0px rgba(187, 187, 187, 0.25);
-$drop-shadow: 0px 4px 24px 0px rgba(221, 220, 255, 1);
+$box-shadow: 0 10px 30px -22px rgba(19, 44, 77, 0.34);
+$box-shadow-xs: 0 2px 8px -6px rgba(19, 44, 77, 0.22);
+$box-shadow-sm: 0 8px 20px -16px rgba(19, 44, 77, 0.26);
+$box-shadow-md: 0 12px 30px -20px rgba(19, 44, 77, 0.28);
+$box-shadow-lg: 0 24px 60px -38px rgba(19, 44, 77, 0.35);
+$drop-shadow: 0 18px 42px -30px rgba(19, 44, 77, 0.35);
 ;
 
 // Font Size

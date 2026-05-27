@@ -1,11 +1,11 @@
 @use '../../../../../assets/scss/utils/variables' as *;
 
-$portal-navy: #132c4d;
-$portal-gold: #aa8642;
-$portal-cream: #fdfaf4;
-$portal-surface: #ffffff;
-$portal-border: #ebdfc6;
-$portal-ink-muted: #7a6a4e;
+$portal-navy: $brand-dark-blue;
+$portal-gold: $primary;
+$portal-cream: $default-background;
+$portal-surface: $white;
+$portal-border: $gray-transparent;
+$portal-ink-muted: $text-muted;
 
 .shell {
   max-width: 880px;
@@ -39,7 +39,7 @@ $portal-ink-muted: #7a6a4e;
   flex-wrap: wrap;
   gap: 0.6rem;
   padding-top: 0.4rem;
-  border-top: 1px solid #f1e6cd;
+  border-top: 1px solid $light-700;
 }
 
 .openBtn {
@@ -47,7 +47,7 @@ $portal-ink-muted: #7a6a4e;
   align-items: center;
   gap: 0.45rem;
   background: $portal-navy;
-  color: #ffffff;
+  color: $white;
   border: 1px solid $portal-navy;
   border-radius: 8px;
   padding: 0.55rem 1.05rem;
