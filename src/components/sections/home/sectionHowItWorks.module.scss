@@ -1,5 +1,6 @@
 @use "../../../assets/scss/utils/variables" as *;
 @use "../../../assets/scss/utils/mixins" as *;
+@use "sass:color";
 
 // ═══════════════════════════════════════════════════════════════════
 //  HOW IT WORKS — light, minimal, three quiet steps
@@ -231,7 +232,7 @@
   &:hover,
   &:focus-visible {
     color: $white;
-    background: lighten($brand-dark-blue, 6%);
+    background: color.adjust($brand-dark-blue, $lightness: 6%);
   }
 }
 
