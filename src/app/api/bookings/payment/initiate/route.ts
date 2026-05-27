@@ -40,9 +40,12 @@ export async function POST(request: NextRequest) {
         fullName: true,
         countryCode: true,
         phoneNumber: true,
+        baseAmountEgp: true,
+        discountEgp: true,
         amountEgp: true,
         currency: true,
         status: true,
+        promocodeCode: true,
       },
     });
 
@@ -61,6 +64,8 @@ export async function POST(request: NextRequest) {
     }
 
     const amount = Number(booking.amountEgp);
+    const baseAmount = Number(booking.baseAmountEgp ?? booking.amountEgp);
+    const discountAmount = Number(booking.discountEgp ?? 0);
     const currency = booking.currency || 'EGP';
 
     // ── Read Kashier credentials from env ─────────────────────────────
@@ -144,6 +149,9 @@ export async function POST(request: NextRequest) {
       metaData: {
         bookingId,
         platform: 'anees-health',
+        baseAmount,
+        discountAmount,
+        promocode: booking.promocodeCode ?? null,
       },
       customer: {
         reference: bookingId,
@@ -214,17 +222,21 @@ export async function POST(request: NextRequest) {
           code: invoiceCode,
           patientId: patient.id,
           linkedType: 'visit',
-          grossAmountEgp: amount,
+          grossAmountEgp: baseAmount,
           netAmountEgp: amount,
           status: 'issued',
-          notes: `Auto-created from online booking ${booking.bookingRef}`,
+          notes:
+            `Auto-created from online booking ${booking.bookingRef}` +
+            (booking.promocodeCode ? ` (promo ${booking.promocodeCode}, discount ${discountAmount} EGP)` : ''),
         },
         update: {
           patientId: patient.id,
-          grossAmountEgp: amount,
+          grossAmountEgp: baseAmount,
           netAmountEgp: amount,
           status: 'issued',
-          notes: `Auto-created from online booking ${booking.bookingRef}`,
+          notes:
+            `Auto-created from online booking ${booking.bookingRef}` +
+            (booking.promocodeCode ? ` (promo ${booking.promocodeCode}, discount ${discountAmount} EGP)` : ''),
         },
       });
 

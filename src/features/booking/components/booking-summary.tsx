@@ -44,7 +44,7 @@ export default function BookingSummary({
 }: BookingSummaryProps) {
   const t = useTranslations('booking');
   const locale = useLocale();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
   const [promoInput, setPromoInput] = useState('');
   const [promo, setPromo] = useState<PromoState>(INITIAL_PROMO);
   const lastBaseRef = useRef<number>(totalPrice);
@@ -123,6 +123,7 @@ export default function BookingSummary({
   }, [onPromocodeChange, totalPrice]);
 
   const finalTotal = promo.status === 'applied' ? promo.finalAmount : totalPrice;
+  const formatMoney = (value: number) => value.toLocaleString(numberLocale);
 
   const handleWhatsAppClick = () => {
     const message = generateBookingMessage(formState, finalTotal, locale);
@@ -133,87 +134,20 @@ export default function BookingSummary({
 
   return (
     <div className={styles.summaryContainer}>
-      {/* Mobile Toggle Button */}
-      <button
-        className={styles.summaryToggle}
-        onClick={() => setIsExpanded(!isExpanded)}
-        aria-expanded={isExpanded}
-        aria-label={
-          isExpanded ? t('actions.collapseSummary') : t('actions.expandSummary')
-        }
-      >
-        <span className={styles.toggleLabel}>
-          {t('summary.title')}
-          {hasServiceSelection && totalPrice > 0 && (
-            <span className={styles.totalBadge}>
-              {finalTotal} {t('summary.currency')}
-            </span>
-          )}
-        </span>
-        <svg
-          className={`${styles.toggleIcon} ${isExpanded ? styles.expanded : ''}`}
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
+      <div className={styles.summaryHeader}>
+        <h2 className={styles.summaryTitle}>{t('summary.title')}</h2>
+        {hasServiceSelection && totalPrice > 0 && (
+          <span className={styles.headerTotal}>
+            {formatMoney(finalTotal)} <span>{t('summary.currency')}</span>
+          </span>
+        )}
+      </div>
 
-      {/* Summary Content */}
-      <div className={`${styles.summaryContent} ${isExpanded ? styles.show : ''}`}>
+      <div className={styles.summaryContent}>
         {!hasServiceSelection ? (
           <p className={styles.emptyState}>{t('summary.empty')}</p>
         ) : (
           <>
-            {/* Your Details */}
-            <div className={styles.summarySection}>
-              <h3 className={styles.sectionTitle}>{t('summary.yourDetails')}</h3>
-              <ul className={styles.detailsList}>
-                {formState.fullName && (
-                  <li className={styles.detailsItem}>
-                    <span className={styles.detailsLabel}>{t('form.fullName')}</span>
-                    <span className={styles.detailsValue}>{formState.fullName}</span>
-                  </li>
-                )}
-                {formState.phoneNumber && (
-                  <li className={styles.detailsItem}>
-                    <span className={styles.detailsLabel}>{t('form.phoneNumber')}</span>
-                    <span className={styles.detailsValue}>+{formState.countryCode} {formState.phoneNumber}</span>
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            {/* Service Details */}
-            <div className={styles.summarySection}>
-              <h3 className={styles.sectionTitle}>{t('summary.serviceDetails')}</h3>
-              <ul className={styles.detailsList}>
-                <li className={styles.detailsItem}>
-                  <span className={styles.detailsLabel}>{t('form.visitType')}</span>
-                  <span className={styles.detailsValue}>{getVisitTypeLabel()}</span>
-                </li>
-
-                {formState.visitType === 'package' && formState.packageType && (
-                  <li className={styles.detailsItem}>
-                    <span className={styles.detailsLabel}>{t('packages.label')}</span>
-                    <span className={styles.detailsValue}>{getPackageLabel()}</span>
-                  </li>
-                )}
-
-                {formState.visitType === 'package' && formState.packageDuration && (
-                  <li className={styles.detailsItem}>
-                    <span className={styles.detailsLabel}>{t('packages.duration.label')}</span>
-                    <span className={styles.detailsValue}>{getPackageDurationLabel()}</span>
-                  </li>
-                )}
-              </ul>
-            </div>
-
-            {/* Pricing */}
             <div className={styles.summarySection}>
               <h3 className={styles.sectionTitle}>{t('summary.pricing')}</h3>
 
@@ -221,7 +155,7 @@ export default function BookingSummary({
               <div className={styles.pricingRow}>
                 <span className={styles.pricingLabel}>{t('summary.servicePrice')}</span>
                 <span className={styles.pricingValue}>
-                  {totalPrice}
+                  {formatMoney(totalPrice)}
                   <span className={styles.currency}>{t('summary.currency')}</span>
                 </span>
               </div>
@@ -294,7 +228,7 @@ export default function BookingSummary({
                     {t('promocode.discount')} ({promo.code})
                   </span>
                   <span className={styles.pricingValue}>
-                    −{promo.discount}
+                    −{formatMoney(promo.discount)}
                     <span className={styles.currency}>{t('summary.currency')}</span>
                   </span>
                 </div>
@@ -305,12 +239,54 @@ export default function BookingSummary({
                 <span className={styles.priceLabel}>{t('summary.totalPrice')}</span>
                 <span className={styles.priceValue}>
                   {promo.status === 'applied' && promo.discount > 0 && (
-                    <span className={styles.strikethrough}>{totalPrice}</span>
+                    <span className={styles.strikethrough}>{formatMoney(totalPrice)}</span>
                   )}
-                  {finalTotal}
+                  {formatMoney(finalTotal)}
                   <span className={styles.currency}>{t('summary.currency')}</span>
                 </span>
               </div>
+            </div>
+
+            <div className={styles.summarySection}>
+              <h3 className={styles.sectionTitle}>{t('summary.serviceDetails')}</h3>
+              <ul className={styles.detailsList}>
+                <li className={styles.detailsItem}>
+                  <span className={styles.detailsLabel}>{t('form.visitType')}</span>
+                  <span className={styles.detailsValue}>{getVisitTypeLabel()}</span>
+                </li>
+
+                {formState.visitType === 'package' && formState.packageType && (
+                  <li className={styles.detailsItem}>
+                    <span className={styles.detailsLabel}>{t('packages.label')}</span>
+                    <span className={styles.detailsValue}>{getPackageLabel()}</span>
+                  </li>
+                )}
+
+                {formState.visitType === 'package' && formState.packageDuration && (
+                  <li className={styles.detailsItem}>
+                    <span className={styles.detailsLabel}>{t('packages.duration.label')}</span>
+                    <span className={styles.detailsValue}>{getPackageDurationLabel()}</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div className={styles.summarySection}>
+              <h3 className={styles.sectionTitle}>{t('summary.yourDetails')}</h3>
+              <ul className={styles.detailsList}>
+                {formState.fullName && (
+                  <li className={styles.detailsItem}>
+                    <span className={styles.detailsLabel}>{t('form.fullName')}</span>
+                    <span className={styles.detailsValue}>{formState.fullName}</span>
+                  </li>
+                )}
+                {formState.phoneNumber && (
+                  <li className={styles.detailsItem}>
+                    <span className={styles.detailsLabel}>{t('form.phoneNumber')}</span>
+                    <span className={styles.detailsValue}>+{formState.countryCode} {formState.phoneNumber}</span>
+                  </li>
+                )}
+              </ul>
             </div>
 
             {/* Action Buttons */}

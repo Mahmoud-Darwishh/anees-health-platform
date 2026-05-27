@@ -12,7 +12,7 @@
  */
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import {
   BookingFormState,
   BookingPriceMap,
@@ -36,6 +36,7 @@ interface ServiceEntry {
   packageType: PackageType | null;
   titleKey: string;
   subtitleKey: string;
+  featureKeys: [string, string];
   featured?: boolean;
   durations: Array<{
     value: PackageDuration | null;
@@ -51,6 +52,7 @@ const SERVICE_CATALOG: ServiceEntry[] = [
     packageType: null,
     titleKey: 'booking.form.telemedicine',
     subtitleKey: 'booking.form.telemedicineDescription',
+    featureKeys: ['booking.form.telemedicineFeature1', 'booking.form.telemedicineFeature2'],
     durations: [{ value: null, priceKey: 'telemedicine', labelKey: null }],
   },
   ...PACKAGE_CATALOG.map<ServiceEntry>((p) => ({
@@ -59,6 +61,10 @@ const SERVICE_CATALOG: ServiceEntry[] = [
     packageType: p.value,
     titleKey: p.titleKey,
     subtitleKey: p.subtitleKey,
+    featureKeys: [
+      `booking.packages.${p.value}.feature1`,
+      `booking.packages.${p.value}.feature2`,
+    ],
     featured: p.featured,
     durations: p.durations.map((d) => ({
       value: d.value,
@@ -122,8 +128,10 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
   const [formState, setFormState] = useState<BookingFormState>(() => createInitialFormState(preSelectedPackage));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [payableAmount, setPayableAmount] = useState<number>(0);
 
   const basePrice = useMemo(() => calculateBookingPrice(formState, prices), [formState, prices]);
+  const effectivePrice = formState.promocode && payableAmount > 0 ? payableAmount : basePrice;
 
   // Currently selected catalog entry (drives the duration step + summary).
   const selectedEntry = useMemo<ServiceEntry | null>(() => {
@@ -138,6 +146,20 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
   const needsDuration = !!selectedEntry && selectedEntry.durations.length > 1;
   const durationChosen = !needsDuration || formState.packageDuration !== null;
   const showContactStep = !!selectedEntry && durationChosen;
+  const contactStepNumber = needsDuration ? 3 : 2;
+
+  const stepItems = [
+    { id: 'service', label: t('booking.form.stepService'), number: 1, done: !!selectedEntry },
+    ...(needsDuration
+      ? [{ id: 'duration', label: t('booking.form.stepDuration'), number: 2, done: durationChosen }]
+      : []),
+    {
+      id: 'contact',
+      label: t('booking.form.stepContact'),
+      number: contactStepNumber,
+      done: !!formState.fullName && !!formState.phoneNumber,
+    },
+  ];
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const cleanPhoneNumber = (value: string, countryCode: string): string => {
@@ -189,6 +211,11 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
     }
   };
 
+  const handlePromocodeChange = useCallback((code: string | null, _discount: number, finalAmount: number) => {
+    setFormState((prev) => ({ ...prev, promocode: code }));
+    setPayableAmount(finalAmount > 0 ? finalAmount : 0);
+  }, []);
+
   const formatPrice = (n: number) => n.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US');
   const currency = t('booking.summary.currency');
 
@@ -201,6 +228,24 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
       <div className={styles.bookingWrapper}>
         <form className={styles.bookingForm} onSubmit={handleSubmit} dir={dir} noValidate>
           <div className={styles.formContent}>
+
+            <section className={styles.formIntro} aria-label={t('booking.form.visitType')}>
+              <p className={styles.formIntroKicker}>{t('booking.form.chooseTrack')}</p>
+              <h1 className={styles.formIntroTitle}>{t('booking.form.eliteTitle')}</h1>
+              <p className={styles.formIntroSubtitle}>{t('booking.form.eliteSubtitle')}</p>
+            </section>
+
+            <div className={styles.progressRail} aria-label={t('booking.form.step')}>
+              {stepItems.map((step) => (
+                <span
+                  key={step.id}
+                  className={`${styles.progressItem} ${step.done ? styles.progressItemDone : ''}`}
+                >
+                  <span className={styles.progressNumber}>{step.number}</span>
+                  <span className={styles.progressLabel}>{step.label}</span>
+                </span>
+              ))}
+            </div>
 
             {/* ── Step 1 — Choose a service ───────────────────────────── */}
             <section className={styles.formSection} aria-labelledby="step-service">
@@ -236,6 +281,13 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
                       <span className={styles.svcBody}>
                         <span className={styles.svcTitle}>{t(entry.titleKey)}</span>
                         <span className={styles.svcSubtitle}>{t(entry.subtitleKey)}</span>
+                        <span className={styles.svcHighlights}>
+                          {entry.featureKeys.map((featureKey) => (
+                            <span key={featureKey} className={styles.svcHighlight}>
+                              {t(featureKey)}
+                            </span>
+                          ))}
+                        </span>
                       </span>
                       <span className={styles.svcPrice}>
                         {showFrom && (
@@ -291,7 +343,7 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
             {showContactStep && (
               <section className={`${styles.formSection} ${styles.expandingSection}`} aria-labelledby="step-contact">
                 <h2 id="step-contact" className={styles.sectionTitle}>
-                  <span className={styles.stepNumber}>{needsDuration ? 3 : 2}</span>
+                  <span className={styles.stepNumber}>{contactStepNumber}</span>
                   {t('booking.form.personalInfo')}
                 </h2>
 
@@ -364,6 +416,7 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
             totalPrice={basePrice}
             isSubmitting={isSubmitting}
             specialties={specialties}
+            onPromocodeChange={handlePromocodeChange}
           />
         </aside>
       </div>
@@ -374,9 +427,22 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
           <div className={styles.mobileBarPrice}>
             <span className={styles.mobileBarLabel}>{t('booking.summary.totalPrice')}</span>
             <span className={styles.mobileBarValue}>
-              {formatPrice(basePrice)} <span className={styles.mobileBarUnit}>{currency}</span>
+              {formatPrice(effectivePrice)} <span className={styles.mobileBarUnit}>{currency}</span>
             </span>
           </div>
+          <button
+            type="button"
+            className={styles.mobileBarPromo}
+            onClick={() => {
+              const promoInput = document.getElementById('promocode');
+              promoInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              if (promoInput instanceof HTMLInputElement) {
+                window.setTimeout(() => promoInput.focus(), 220);
+              }
+            }}
+          >
+            {t('booking.promocode.label')}
+          </button>
           <button
             type="button"
             className={styles.mobileBarCta}

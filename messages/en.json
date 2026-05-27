@@ -1605,6 +1605,8 @@
       "phoneNumber": "Phone Number",
       "phoneNumberPlaceholder": "e.g., 10 5516 4595",
       "visitType": "Choose how we can help",
+      "eliteTitle": "Clinician-led booking, designed for high-trust care",
+      "eliteSubtitle": "Select your care track and we will confirm the final medical plan and payment details before your first session.",
       "chooseTrack": "Choose your care path",
       "choosePackage": "Pick the program that fits",
       "chooseDuration": "How long do you need it?",
@@ -1634,6 +1636,8 @@
       "telemedicinePrice": "700 EGP",
       "homeVisitDescription": "Clinician visits your home",
       "telemedicineDescription": "30-minute video consult with our care team",
+      "telemedicineFeature1": "Priority response from the care desk",
+      "telemedicineFeature2": "Clinical notes prepared for follow-up",
       "priceFrom": "From",
       "serviceType": "Select Service Type",
       "doctorVisit": "Doctor Visit",
@@ -1662,7 +1666,6 @@
       "specialty": {
         "label": "Medical Specialty",
         "geriatrics": "Geriatrics",
-        "orthopedics": "Orthopedics",
         "neurology": "Neurology",
         "cardiology": "Cardiology",
         "generalMedicine": "General Medicine",
@@ -1724,19 +1727,27 @@
       },
       "sanad": {
         "title": "Sanad — Continuous Care",
-        "subtitle": "Dedicated companion + full medical follow-up. Pick 3 months or a full year."
+        "subtitle": "Dedicated companion + full medical follow-up. Pick 3 months or a full year.",
+        "feature1": "Dedicated coordinator for family updates",
+        "feature2": "Integrated doctor, nursing, and follow-up pathway"
       },
       "haraka": {
         "title": "Haraka — Joint & Arthritis",
-        "subtitle": "3-month program for joint pain, arthritis and post-surgery mobility."
+        "subtitle": "3-month program for joint pain, arthritis and post-surgery mobility.",
+        "feature1": "Structured mobility and pain-tracking protocol",
+        "feature2": "Post-op continuity with progress checkpoints"
       },
       "wai": {
         "title": "Wai — Cognitive & Dementia",
-        "subtitle": "3-month program for dementia, memory loss and cognitive support."
+        "subtitle": "3-month program for dementia, memory loss and cognitive support.",
+        "feature1": "Family-guided cognitive routine and reporting",
+        "feature2": "Ongoing coordination with a dedicated care team"
       },
       "amal": {
         "title": "Amal — Stroke Recovery",
-        "subtitle": "3-month program for post-stroke rehabilitation and recovery."
+        "subtitle": "3-month program for post-stroke rehabilitation and recovery.",
+        "feature1": "Recovery roadmap tailored to current function",
+        "feature2": "Regular milestone reviews with the clinical team"
       }
     },
     "promocode": {
