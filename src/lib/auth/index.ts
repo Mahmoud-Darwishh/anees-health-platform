@@ -1,5 +1,4 @@
 import { auth } from '@/auth';
-import { hasPermission, type AppPermission } from './permissions';
 import type { Session } from 'next-auth';
 
 export async function getSession(): Promise<Session | null> {
@@ -18,14 +17,6 @@ export async function requireStaff(): Promise<Session> {
   const session = await auth();
   if (!session || session.user.role !== 'staff') {
     throw new Error('Unauthorized');
-  }
-  return session;
-}
-
-export async function requireStaffPermission(permission: AppPermission): Promise<Session> {
-  const session = await requireStaff();
-  if (!hasPermission(session.user.staffRole, permission)) {
-    throw new Error('Forbidden');
   }
   return session;
 }

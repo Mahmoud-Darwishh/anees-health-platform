@@ -277,16 +277,6 @@ const Header = () => {
                     {userMenuOpen && (
                       <ul className="dropdown-menu show header-user-menu">
                         <li>
-                          <Link
-                            className="dropdown-item"
-                            href={`/${locale}/portal`}
-                            onClick={() => { setUserMenuOpen(false); onHandleLinkClick(); }}
-                          >
-                            <LucideIcon iconClass="fa-solid fa-table-cells-large me-2" />{t('header.myPortal')}
-                          </Link>
-                        </li>
-                        <li><hr className="dropdown-divider" /></li>
-                        <li>
                           <button
                             type="button"
                             className="dropdown-item text-danger"
@@ -441,12 +431,6 @@ const Header = () => {
 
             {status !== 'loading' && session && (
               <>
-                <li>
-                  <Link href={`/${locale}/portal`} onClick={onHandleLinkClick}>
-                    <LucideIcon iconClass="fa-solid fa-table-cells-large" />
-                    <span>{t('header.myPortal')}</span>
-                  </Link>
-                </li>
                 <li>
                   <button
                     type="button"

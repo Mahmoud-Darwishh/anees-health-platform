@@ -18,10 +18,10 @@ export default async function LoginPage({ params }: Props) {
   const session = await auth();
 
   if (session?.user.role === 'patient') {
-    redirect(`/${locale}/portal`);
+    redirect(`/${locale}`);
   }
   if (session?.user.role === 'staff') {
-    redirect('/admin/patients');
+    redirect(`/${locale}`);
   }
 
   return (

@@ -60,7 +60,7 @@ export default function SignupForm() {
 
   async function handleGoogle() {
     setGoogleLoading(true);
-    await signIn('google', { callbackUrl: `/${locale}/auth/link-account` });
+    await signIn('google', { callbackUrl: `/${locale}` });
   }
 
   return (

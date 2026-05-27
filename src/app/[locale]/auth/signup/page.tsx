@@ -17,8 +17,8 @@ export default async function SignupPage({ params }: Props) {
   const { locale } = await params;
   const session = await auth();
 
-  if (session?.user.role === 'patient') redirect(`/${locale}/portal`);
-  if (session?.user.role === 'staff') redirect('/admin/patients');
+  if (session?.user.role === 'patient') redirect(`/${locale}`);
+  if (session?.user.role === 'staff') redirect(`/${locale}`);
 
   return (
     <Suspense>

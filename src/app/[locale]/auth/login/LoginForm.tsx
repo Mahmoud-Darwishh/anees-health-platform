@@ -13,7 +13,7 @@ export default function LoginForm() {
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || `/${locale}/portal`;
+  const callbackUrl = searchParams.get('callbackUrl') || `/${locale}`;
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
