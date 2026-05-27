@@ -59,7 +59,7 @@ export const DoctorCard = memo(function DoctorCard({
             />
             <div className="verified-badge-overlay position-absolute top-0 end-0 m-2">
               <span className="badge rounded-pill bg-primary text-white">
-                <i className="isax isax-shield-tick me-1"></i>
+                <i className="fa-solid fa-shield-halved me-1"></i>
                 {tg('card.verified')}
               </span>
             </div>
@@ -84,19 +84,19 @@ export const DoctorCard = memo(function DoctorCard({
 
               <div className="doctor-meta mb-2" aria-label={tg('filters.rating')}>
                 <span className="meta-item meta-item-rating">
-                  <i className="isax isax-star-1" aria-hidden="true"></i>
+                  <i className="fa-solid fa-star" aria-hidden="true"></i>
                   {doctor.rating}
                 </span>
                 {estimatedReviews > 0 && (
                   <span className="meta-item meta-item-reviews">
-                    <i className="isax isax-message-text-1" aria-hidden="true"></i>
+                    <i className="fa-solid fa-message-1" aria-hidden="true"></i>
                     {tg('card.from_reviews', { count: `${estimatedReviews}+` })}
                   </span>
                 )}
               </div>
 
               <p className="experience-badge text-muted fs-13 mb-2">
-                <i className="isax isax-calendar-1 me-1"></i>
+                <i className="fa-solid fa-calendar-days me-1"></i>
                 {doctor.experienceYears}+ {tg('card.yrs_exp')}
               </p>
 
@@ -177,13 +177,13 @@ export const DoctorCard = memo(function DoctorCard({
               Location section intentionally hidden for a cleaner professional card style.
               Restore by uncommenting this block.
               <div className="location-section d-flex align-items-center mb-3">
-                <i className="isax isax-location me-2 text-muted"></i>
+                <i className="fa-solid fa-location-dot me-2 text-muted"></i>
                 <p className="text-muted fs-13 mb-0">{doctor.location}</p>
               </div>
               */}
 
               <div className="profile-hint d-inline-flex align-items-center gap-2">
-                <i className="isax isax-arrow-right-3" aria-hidden="true"></i>
+                <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 <span>{tg('card.view_profile')}</span>
               </div>
 
@@ -194,7 +194,7 @@ export const DoctorCard = memo(function DoctorCard({
                 href={profileHref}
                 className="btn btn-sm btn-primary w-100 rounded-pill"
               >
-                <i className="isax isax-calendar-1 me-2"></i>
+                <i className="fa-solid fa-calendar-days me-2"></i>
                 {tg('card.book')}
               </Link>
               */}
@@ -213,3 +213,4 @@ export const DoctorCard = memo(function DoctorCard({
 });
 
 DoctorCard.displayName = 'DoctorCard';
+

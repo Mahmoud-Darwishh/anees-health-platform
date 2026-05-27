@@ -65,7 +65,7 @@ export default async function PortalDocumentPage({ params }: Props) {
     <div className={portalStyles.page}>
       <div className={`${portalStyles.shell} ${styles.shell}`}>
         <Link href={`/${locale}/portal#labs`} className={styles.backLink}>
-          <i className="feather-arrow-left" aria-hidden="true" />
+          <i className="fa-solid fa-arrow-left" aria-hidden="true" />
           <span>{t('documents.backToLabs')}</span>
         </Link>
 
@@ -119,17 +119,17 @@ export default async function PortalDocumentPage({ params }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <i className="feather-external-link" aria-hidden="true" />
+                  <i className="fa-solid fa-up-right-from-square" aria-hidden="true" />
                   <span>{t('documents.openFile')}</span>
                 </a>
                 <a className={styles.openBtn} href={downloadHref}>
-                  <i className="feather-download" aria-hidden="true" />
+                  <i className="fa-solid fa-download" aria-hidden="true" />
                   <span>{t('documents.download')}</span>
                 </a>
               </>
             ) : (
               <span className={styles.disabledBtn}>
-                <i className="feather-clock" aria-hidden="true" />
+                <i className="fa-solid fa-clock" aria-hidden="true" />
                 <span>{t('documents.awaitingUpload')}</span>
               </span>
             )}

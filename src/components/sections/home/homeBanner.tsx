@@ -9,7 +9,7 @@ const HomeBanner: React.FC = () => {
     const services = [
         {
             key: 'geriatrics',
-            icon: 'feather-heart',
+            icon: 'fa-solid fa-heart',
             label: t('home.specialities.geriatrics'),
             href: `/${locale}/booking?service=geriatrics`,
             featured: true,
@@ -17,31 +17,31 @@ const HomeBanner: React.FC = () => {
         },
         {
             key: 'nursing',
-            icon: 'feather-activity',
+            icon: 'fa-solid fa-heart-pulse',
             label: t('home.list.nursing'),
             href: `/${locale}/booking?service=nursing`,
         },
         {
             key: 'physiotherapy',
-            icon: 'feather-zap',
+            icon: 'fa-solid fa-bolt',
             label: t('home.list.physiotherapy'),
             href: `/${locale}/booking?service=physiotherapy`,
         },
         {
             key: 'doctor_visit',
-            icon: 'feather-user',
+            icon: 'fa-solid fa-user',
             label: t('home.list.doctor_visit'),
             href: `/${locale}/booking?service=doctor_visit`,
         },
         {
             key: 'lab_testing',
-            icon: 'feather-droplet',
+            icon: 'fa-solid fa-droplet',
             label: t('home.list.lab_testing'),
             href: `/${locale}/booking?service=lab_testing`,
         },
         {
             key: 'telemedicine',
-            icon: 'feather-video',
+            icon: 'fa-solid fa-video',
             label: t('home.list.telemedicine'),
             href: `/${locale}/booking?service=telemedicine`,
         },
@@ -80,12 +80,12 @@ const HomeBanner: React.FC = () => {
                             rel="noopener noreferrer"
                             className="btn-banner-primary"
                         >
-                            <i className="feather-message-circle" aria-hidden="true" />
+                            <i className="fa-solid fa-comment-dots" aria-hidden="true" />
                             <span>{t('home.banner.chatWithDoctor')}</span>
-                            <i className="feather-arrow-right btn-banner-primary__arrow" aria-hidden="true" />
+                            <i className="fa-solid fa-arrow-right btn-banner-primary__arrow" aria-hidden="true" />
                         </a>
                         <a href="#packages" className="btn-banner-secondary">
-                            <i className="feather-package" aria-hidden="true" />
+                            <i className="fa-solid fa-box-open" aria-hidden="true" />
                             <span>{t('home.banner.viewPackages')}</span>
                         </a>
                     </div>
@@ -104,12 +104,12 @@ const HomeBanner: React.FC = () => {
                         </span>
                         <span className="banner-trust-strip__divider" aria-hidden="true" />
                         <span className="banner-trust-strip__item">
-                            <i className="isax isax-shield-tick" aria-hidden="true" />
+                            <i className="fa-solid fa-shield-halved" aria-hidden="true" />
                             {t('home.banner.licensed_verified')}
                         </span>
                         <span className="banner-trust-strip__divider" aria-hidden="true" />
                         <span className="banner-trust-strip__item">
-                            <i className="isax isax-profile-2user" aria-hidden="true" />
+                            <i className="fa-solid fa-user-group" aria-hidden="true" />
                             {t('home.banner.dedicated_team')}
                         </span>
                     </div>
@@ -144,3 +144,4 @@ const HomeBanner: React.FC = () => {
 };
 
 export default HomeBanner;
+

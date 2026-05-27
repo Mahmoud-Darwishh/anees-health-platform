@@ -13,7 +13,7 @@ const SectionCoverageStrip: React.FC = () => {
       <div className="container">
         <div className={styles.band}>
           <span className={styles.iconWrap} aria-hidden="true">
-            <i className="isax isax-location5" />
+            <i className="fa-solid fa-location-dot" />
           </span>
 
           <div className={styles.text}>
@@ -26,7 +26,7 @@ const SectionCoverageStrip: React.FC = () => {
 
           <Link href={`/${locale}/coverage`} className={styles.cta}>
             {t('cta')}
-            <i className="feather-arrow-right" aria-hidden="true" />
+            <i className="fa-solid fa-arrow-right" aria-hidden="true" />
           </Link>
         </div>
       </div>
@@ -35,3 +35,4 @@ const SectionCoverageStrip: React.FC = () => {
 };
 
 export default SectionCoverageStrip;
+

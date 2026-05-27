@@ -156,20 +156,20 @@ export default function DoctorProfileContent({
                   {/* Inline meta row: verified + availability + location + languages */}
                   <div className="info-inline">
                     <span className="status-pill verified">
-                      <i className="isax isax-shield-tick" aria-hidden="true"></i>
+                      <i className="fa-solid fa-shield-halved" aria-hidden="true"></i>
                       {isArabic ? 'موثق' : 'Verified'}
                     </span>
                     <span className="status-pill availability">
-                      <i className="isax isax-activity" aria-hidden="true"></i>
+                      <i className="fa-solid fa-heart-pulse" aria-hidden="true"></i>
                       {doctor.availabilityStatus}
                     </span>
                     <div className="location-chip">
-                      <i className="isax isax-location"></i>
+                      <i className="fa-solid fa-location-dot"></i>
                       <span>{doctor.location}</span>
                     </div>
                     {doctor.languages.length > 0 && (
                       <div className="languages-list">
-                        <i className="isax isax-global"></i>
+                        <i className="fa-solid fa-globe"></i>
                         <span>{doctor.languages.join(', ')}</span>
                       </div>
                     )}
@@ -198,7 +198,7 @@ export default function DoctorProfileContent({
                   {/* CTA Buttons */}
                   <div className="cta-buttons">
                     <Link href={`/${locale}/booking`} className="btn btn-primary btn-lg">
-                      <i className="isax isax-calendar-1"></i>
+                      <i className="fa-solid fa-calendar-days"></i>
                       {labels.bookNow}
                     </Link>
                     <button
@@ -208,7 +208,7 @@ export default function DoctorProfileContent({
                       aria-disabled="true"
                       title={isArabic ? 'التواصل غير متاح حالياً' : 'Contact is currently unavailable'}
                     >
-                      <i className="isax isax-message"></i>
+                      <i className="fa-solid fa-message"></i>
                       {labels.contact}
                     </button>
                   </div>
@@ -251,7 +251,7 @@ export default function DoctorProfileContent({
             {/* Telemedicine */}
             <div className="service-card">
               <div className="service-icon">
-                <i className="isax isax-video"></i>
+                <i className="fa-solid fa-video"></i>
               </div>
               <h3>{labels.telemedicine}</h3>
               <p
@@ -269,7 +269,7 @@ export default function DoctorProfileContent({
             {/* Home Visit */}
             <div className="service-card">
               <div className="service-icon">
-                <i className="isax isax-home-1"></i>
+                <i className="fa-solid fa-house"></i>
               </div>
               <h3>{labels.homeVisit}</h3>
               <p
@@ -287,7 +287,7 @@ export default function DoctorProfileContent({
             {/* Clinic Visit */}
             <div className="service-card">
               <div className="service-icon">
-                <i className="isax isax-hospital"></i>
+                <i className="fa-solid fa-hospital"></i>
               </div>
               <h3>{labels.clinicVisit}</h3>
               <p
@@ -319,7 +319,7 @@ export default function DoctorProfileContent({
                   {doctor.education.map((edu, idx) => (
                     <div key={idx} className="education-item">
                       <div className="edu-marker">
-                        <i className="isax isax-award"></i>
+                        <i className="fa-solid fa-award"></i>
                       </div>
                       <div className="edu-content">
                         <h4 className="degree">{edu.degree}</h4>
@@ -339,7 +339,7 @@ export default function DoctorProfileContent({
                 <div className="certifications-items">
                   {doctor.certifications.map((cert, idx) => (
                     <div key={idx} className="certification-item">
-                      <i className="isax isax-shield-tick"></i>
+                      <i className="fa-solid fa-shield-halved"></i>
                       <span>{cert}</span>
                     </div>
                   ))}
@@ -359,7 +359,7 @@ export default function DoctorProfileContent({
               <div className="network-list" aria-label={labels.clinics}>
                 {hospitalsAndClinics.map((item) => (
                   <span key={item} className="network-item">
-                    <i className="isax isax-hospital"></i>
+                    <i className="fa-solid fa-hospital"></i>
                     {item}
                   </span>
                 ))}
@@ -375,11 +375,11 @@ export default function DoctorProfileContent({
                   </div>
                   <div className="clinic-details">
                     <p className="clinic-location">
-                      <i className="isax isax-location"></i>
+                      <i className="fa-solid fa-location-dot"></i>
                       {clinic.address}
                     </p>
                     <p className="clinic-hours">
-                      <i className="isax isax-clock"></i>
+                      <i className="fa-solid fa-clock"></i>
                       {clinic.hours}
                     </p>
                   </div>
@@ -399,7 +399,7 @@ export default function DoctorProfileContent({
             <div className="coverage-areas">
               {doctor.areaCoverage.map((area, idx) => (
                 <span key={idx} className="area-badge">
-                  <i className="isax isax-location"></i>
+                  <i className="fa-solid fa-location-dot"></i>
                   {area}
                 </span>
               ))}
@@ -419,7 +419,7 @@ export default function DoctorProfileContent({
                   <div className="testimonial-header">
                     <div className="stars">
                       {Array.from({ length: Math.floor(testimonial.rating) }).map((_, i) => (
-                        <i key={i} className="isax isax-star-1"></i>
+                        <i key={i} className="fa-solid fa-star"></i>
                       ))}
                     </div>
                     <span className="rating-number">{testimonial.rating}/5</span>
@@ -442,7 +442,7 @@ export default function DoctorProfileContent({
                 <div className="faq-question-row">
                   <h3 className="faq-question">{item.question}</h3>
                   <span className="faq-icon" aria-hidden="true">
-                    <i className="isax isax-message-question"></i>
+                    <i className="fa-solid fa-message-question"></i>
                   </span>
                 </div>
                 <p className="faq-answer">{item.answer}</p>
@@ -457,7 +457,7 @@ export default function DoctorProfileContent({
         <div className="container">
           <div className="chat-coming-soon">
             <div className="chat-icon">
-              <i className="isax isax-message-text"></i>
+              <i className="fa-solid fa-message"></i>
             </div>
             <div>
               <h3>{isArabic ? 'الدردشة قادمة قريباً' : 'Chat Coming Soon'}</h3>
@@ -478,3 +478,4 @@ export default function DoctorProfileContent({
     </div>
   );
 }
+

@@ -48,7 +48,7 @@ const SectionHowItWorks: React.FC = () => {
               <p className={styles.stepDesc}>{step.desc}</p>
               {i < steps.length - 1 && (
                 <span className={styles.connector} aria-hidden="true">
-                  <i className="feather-arrow-right" />
+                  <i className="fa-solid fa-arrow-right" />
                 </span>
               )}
             </li>
@@ -62,7 +62,7 @@ const SectionHowItWorks: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <i className="feather-message-circle" aria-hidden="true" />
+            <i className="fa-solid fa-comment-dots" aria-hidden="true" />
             {t('cta')}
           </a>
           <Link href={`/${locale}#packages`} className={styles.ctaSecondary}>
@@ -75,3 +75,4 @@ const SectionHowItWorks: React.FC = () => {
 };
 
 export default SectionHowItWorks;
+

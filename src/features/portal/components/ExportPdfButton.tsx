@@ -18,8 +18,9 @@ export function ExportPdfButton({ label, className }: Props) {
       className={className ?? styles.exportBtn}
       onClick={() => window.print()}
     >
-      <i className="feather-download" aria-hidden="true" />
+      <i className="fa-solid fa-download" aria-hidden="true" />
       <span>{label}</span>
     </button>
   );
 }
+

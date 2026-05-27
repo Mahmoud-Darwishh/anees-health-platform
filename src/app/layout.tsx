@@ -72,13 +72,9 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
         />
 
-        {/* Legacy website stylesheets */}
-        <link rel="stylesheet" href="/assets/css/feather.css" />
-        <link rel="stylesheet" href="/assets/css/iconsax.css" />
-        <link rel="stylesheet" href="/assets/css/custom.css" />
-
         {/* Meta Pixel NoScript */}
         <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             height="1"
             width="1"

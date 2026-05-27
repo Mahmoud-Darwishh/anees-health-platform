@@ -14,9 +14,6 @@ import SectionHowItWorks from './sectionHowItWorks';
 import SectionStats from './sectionStats';
 import SectionPatientStories from './sectionPatientStories';
 import SectionCoverageStrip from './sectionCoverageStrip';
-// NOTE: `sectionBook.tsx`, `sectionApp.tsx`, and `sectionOurServices.*` are
-// unused on the home page. Flag for removal once stakeholders confirm no
-// rollback is needed. Do not silently delete.
 
 interface GeneralHomeOneProps {
   doctors: Doctor[];

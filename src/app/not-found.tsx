@@ -7,7 +7,7 @@ export default function NotFound() {
       <div className="container py-5">
         <div className={`mx-auto text-center ${styles.inner}`}>
           <div className={`d-inline-flex align-items-center justify-content-center rounded-circle mb-3 ${styles.iconWrapper}`}>
-            <i className="isax isax-danger" aria-hidden="true"></i>
+            <i className="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
           </div>
           <h1 className={`fw-bold mb-3 ${styles.heading}`}>Page Not Found</h1>
           <p className={`text-muted mb-4 ${styles.body}`}>
@@ -26,3 +26,4 @@ export default function NotFound() {
     </main>
   );
 }
+

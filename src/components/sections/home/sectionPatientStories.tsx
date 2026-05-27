@@ -167,7 +167,7 @@ const SectionPatientStories: React.FC = () => {
                 }}
                 aria-label={t('prev')}
               >
-                <i className="feather-arrow-left" aria-hidden="true" />
+                <i className="fa-solid fa-arrow-left" aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -179,7 +179,7 @@ const SectionPatientStories: React.FC = () => {
                 }}
                 aria-label={t('next')}
               >
-                <i className="feather-arrow-right" aria-hidden="true" />
+                <i className="fa-solid fa-arrow-right" aria-hidden="true" />
               </button>
 
               <div className={styles.dots} role="tablist" aria-label={t('title')}>
@@ -210,3 +210,4 @@ const SectionPatientStories: React.FC = () => {
 };
 
 export default SectionPatientStories;
+

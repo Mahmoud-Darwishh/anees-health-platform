@@ -510,7 +510,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'overview',
       label: t('nav.overview'),
-      icon: 'feather-grid',
+      icon: 'fa-solid fa-grip',
       content: (
         <>
           <section className={styles.metricsGrid} aria-label={t('summaryLabel')}>
@@ -588,7 +588,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'profile',
       label: t('nav.profile'),
-      icon: 'feather-user',
+      icon: 'fa-solid fa-user',
       content: (
         <PortalSectionCard
           className={styles.panelCard}
@@ -608,7 +608,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'visits',
       label: t('nav.visits'),
-      icon: 'feather-calendar',
+      icon: 'fa-solid fa-calendar-days',
       count: patient.visits.length,
       content: (() => {
         type VisitRow = (typeof patient.visits)[number];
@@ -696,7 +696,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'medical',
       label: t('nav.medical'),
-      icon: 'feather-activity',
+      icon: 'fa-solid fa-heart-pulse',
       count: activeMedicationCount,
       content: (
         <PortalSectionCard
@@ -808,7 +808,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'labs',
       label: t('nav.labs'),
-      icon: 'feather-file-text',
+      icon: 'fa-solid fa-file-lines',
       count: totalDocuments + patient.labOrders.length + patient.imagingOrders.length,
       content: (
         <PortalSectionCard
@@ -872,7 +872,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
                 href={`/${locale}/portal/documents/${doc.id}`}
                 className={styles.documentLink}
               >
-                <i className="feather-file-text" aria-hidden="true" />
+                <i className="fa-solid fa-file-lines" aria-hidden="true" />
                 <span>{doc.title}</span>
               </Link>,
               doc.category,
@@ -897,7 +897,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'financial',
       label: t('nav.financial'),
-      icon: 'feather-credit-card',
+      icon: 'fa-solid fa-credit-card',
       count: outstandingInvoices.length,
       content: (
         <PortalSectionCard
@@ -964,7 +964,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
     {
       id: 'care',
       label: t('nav.care'),
-      icon: 'feather-shield',
+      icon: 'fa-solid fa-shield-halved',
       count: patient.careTasks.filter((t) => t.status === 'open' || t.status === 'in_progress').length + patient.physioSessionReports.length,
       content: (
         <PortalSectionCard

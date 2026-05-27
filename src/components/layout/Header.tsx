@@ -216,7 +216,7 @@ const Header = () => {
                   aria-label={t('common.search')}
                   aria-expanded={searchField}
                 >
-                  <i className="feather-search" />
+                  <i className="fa-solid fa-magnifying-glass" />
                 </button>
                 <div
                   className={
@@ -251,7 +251,7 @@ const Header = () => {
                   aria-label={altLocaleLabel}
                   onClick={onHandleLinkClick}
                 >
-                  <i className="feather-globe" />
+                  <i className="fa-solid fa-globe" />
                   <span className="header-lang-btn__label">{altLocaleLabel}</span>
                 </Link>
               </li>
@@ -267,7 +267,7 @@ const Header = () => {
                       aria-expanded={userMenuOpen}
                       aria-label={t('header.myPortal')}
                     >
-                      <i className="feather-user" />
+                      <i className="fa-solid fa-user" />
                       <span className="header-user-pill__name">
                         {session.user.name?.split(' ').slice(0, 2).join(' ') || t('header.myPortal')}
                       </span>
@@ -281,7 +281,7 @@ const Header = () => {
                             href={`/${locale}/portal`}
                             onClick={() => { setUserMenuOpen(false); onHandleLinkClick(); }}
                           >
-                            <i className="feather-layout me-2" />{t('header.myPortal')}
+                            <i className="fa-solid fa-table-cells-large me-2" />{t('header.myPortal')}
                           </Link>
                         </li>
                         <li><hr className="dropdown-divider" /></li>
@@ -291,7 +291,7 @@ const Header = () => {
                             className="dropdown-item text-danger"
                             onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: `/${locale}` }); }}
                           >
-                            <i className="feather-log-out me-2" />{t('auth.signout')}
+                            <i className="fa-solid fa-right-from-bracket me-2" />{t('auth.signout')}
                           </button>
                         </li>
                       </ul>
@@ -305,7 +305,7 @@ const Header = () => {
                       onClick={onHandleLinkClick}
                       aria-label={t('header.login')}
                     >
-                      <i className="feather-user" />
+                      <i className="fa-solid fa-user" />
                       <span className="header-login-pill__label">{t('header.login')}</span>
                     </Link>
                   </li>
@@ -320,7 +320,7 @@ const Header = () => {
                   onClick={onHandleLinkClick}
                   aria-label={t('header.bookNow')}
                 >
-                  <i className="isax isax-calendar-1" />
+                  <i className="fa-solid fa-calendar-days" />
                   <span className="header-book-cta__label">{t('header.bookNow')}</span>
                 </Link>
               </li>
@@ -367,19 +367,19 @@ const Header = () => {
           <ul className="mobile-drawer__nav">
             <li className={isActiveLink(`/${locale}`) ? 'active' : ''}>
               <Link href={`/${locale}`} onClick={onHandleLinkClick}>
-                <i className="feather-home" />
+                <i className="fa-solid fa-house" />
                 <span>{t('nav.home')}</span>
               </Link>
             </li>
             <li className={isActiveLink(`/${locale}/about-us`) ? 'active' : ''}>
               <Link href={`/${locale}/about-us`} onClick={onHandleLinkClick}>
-                <i className="feather-info" />
+                <i className="fa-solid fa-circle-info" />
                 <span>{t('nav.about_us')}</span>
               </Link>
             </li>
             <li className={isActiveLink(`/${locale}/doctors`) ? 'active' : ''}>
               <Link href={`/${locale}/doctors`} onClick={onHandleLinkClick}>
-                <i className="feather-users" />
+                <i className="fa-solid fa-users" />
                 <span>{t('nav.doctors')}</span>
               </Link>
             </li>
@@ -396,20 +396,20 @@ const Header = () => {
                 onClick={(e) => toggleSubmenu(e, 'services')}
                 aria-expanded={!!openSubmenus.services}
               >
-                <i className="feather-grid" />
+                <i className="fa-solid fa-grip" />
                 <span>{t('nav.services')}</span>
                 <i className="fas fa-chevron-down mobile-drawer__chevron" aria-hidden="true" />
               </button>
               <ul className="mobile-drawer__submenu">
                 <li>
                   <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
-                    <i className="feather-map-pin" />
+                    <i className="fa-solid fa-location-dot" />
                     <span>{t('nav.coverage')}</span>
                   </Link>
                 </li>
                 <li>
                   <Link href={`/${locale}/booking`} onClick={onHandleLinkClick}>
-                    <i className="isax isax-calendar-1" />
+                    <i className="fa-solid fa-calendar-days" />
                     <span>{t('header.bookNow')}</span>
                   </Link>
                 </li>
@@ -418,7 +418,7 @@ const Header = () => {
 
             <li className={isActiveLink(`/${locale}/contact-us`) ? 'active' : ''}>
               <Link href={`/${locale}/contact-us`} onClick={onHandleLinkClick}>
-                <i className="feather-phone" />
+                <i className="fa-solid fa-phone" />
                 <span>{t('nav.contact_us')}</span>
               </Link>
             </li>
@@ -433,7 +433,7 @@ const Header = () => {
                 className="mobile-drawer__lang"
                 onClick={onHandleLinkClick}
               >
-                <i className="feather-globe" />
+                <i className="fa-solid fa-globe" />
                 <span>{altLocaleLabel}</span>
               </Link>
             </li>
@@ -442,7 +442,7 @@ const Header = () => {
               <>
                 <li>
                   <Link href={`/${locale}/portal`} onClick={onHandleLinkClick}>
-                    <i className="feather-layout" />
+                    <i className="fa-solid fa-table-cells-large" />
                     <span>{t('header.myPortal')}</span>
                   </Link>
                 </li>
@@ -452,7 +452,7 @@ const Header = () => {
                     className="mobile-drawer__signout"
                     onClick={() => { onHandleCloseMenu(); signOut({ callbackUrl: `/${locale}` }); }}
                   >
-                    <i className="feather-log-out" />
+                    <i className="fa-solid fa-right-from-bracket" />
                     <span>{t('auth.signout')}</span>
                   </button>
                 </li>
@@ -466,7 +466,7 @@ const Header = () => {
                   className="mobile-drawer__login"
                   onClick={onHandleLinkClick}
                 >
-                  <i className="feather-user" />
+                  <i className="fa-solid fa-user" />
                   <span>{t('header.login')}</span>
                 </Link>
               </li>
@@ -480,7 +480,7 @@ const Header = () => {
             className="mobile-drawer__cta-primary"
             onClick={onHandleLinkClick}
           >
-            <i className="isax isax-calendar-1" />
+            <i className="fa-solid fa-calendar-days" />
             <span>{t('header.bookNow')}</span>
           </Link>
           <Link
@@ -488,7 +488,7 @@ const Header = () => {
             className="mobile-drawer__cta-secondary"
             onClick={onHandleLinkClick}
           >
-            <i className="feather-map-pin" />
+            <i className="fa-solid fa-location-dot" />
             <span>{t('nav.coverage')}</span>
           </Link>
         </div>
@@ -498,3 +498,4 @@ const Header = () => {
 };
 
 export default Header;
+

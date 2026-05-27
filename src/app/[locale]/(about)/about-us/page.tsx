@@ -119,7 +119,7 @@ export default function AboutUsPage() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <i className="feather-message-circle" aria-hidden="true" />
+                <i className="fa-solid fa-comment-dots" aria-hidden="true" />
                 {t('hero_cta_primary')}
               </a>
               <Link href={`/${locale}/contact-us`} className={styles.btnGhost}>
@@ -129,7 +129,7 @@ export default function AboutUsPage() {
 
             <div className={styles.heroFoundedChip}>
               <span className={styles.heroFoundedChip__pin} aria-hidden="true">
-                <i className="feather-shield" />
+                <i className="fa-solid fa-shield-halved" />
               </span>
               <span className={styles.heroFoundedChip__text}>
                 <span className={styles.heroFoundedChip__label}>{t('hero_founded_label')}</span>
@@ -143,7 +143,7 @@ export default function AboutUsPage() {
         <Reveal as="section" className={styles.trust} aria-label={t('trust_aria')}>
           <div className="container">
             <div className={styles.trustInner}>
-              <i className="feather-shield" aria-hidden="true" />
+              <i className="fa-solid fa-shield-halved" aria-hidden="true" />
               <span>
                 <span className={styles.trustLicensingLabel}>{t('trust_licensing_label')}</span>
                 <span className={styles.trustLicensingText}>{t('trust_licensing_text')}</span>
@@ -205,7 +205,7 @@ export default function AboutUsPage() {
               {notDo.map((n) => (
                 <article key={n.title} className={styles.notDoCard}>
                   <span className={styles.notDoMark} aria-hidden="true">
-                    <i className="feather-x" />
+                    <i className="fa-solid fa-xmark" />
                   </span>
                   <h3 className={styles.notDoTitle}>{n.title}</h3>
                   <p className={styles.notDoText}>{n.text}</p>
@@ -251,7 +251,7 @@ export default function AboutUsPage() {
               </div>
               <Link href={`/${locale}/coverage`} className={styles.coverageLink}>
                 {t('coverage_link')}
-                <i className="feather-arrow-right" aria-hidden="true" />
+                <i className="fa-solid fa-arrow-right" aria-hidden="true" />
               </Link>
             </article>
           </div>
@@ -277,7 +277,7 @@ export default function AboutUsPage() {
             <div className={styles.bandGrid}>
               <Link href={`/${locale}/privacy-policy`} className={styles.bandCard}>
                 <span className={styles.bandIcon} aria-hidden="true">
-                  <i className="feather-lock" />
+                  <i className="fa-solid fa-lock" />
                 </span>
                 <div className={styles.bandBody}>
                   <span className={styles.bandLabel}>{t('privacy_label')}</span>
@@ -285,7 +285,7 @@ export default function AboutUsPage() {
                   <p className={styles.bandText}>{t('privacy_text')}</p>
                   <span className={styles.bandLink}>
                     {t('privacy_link')}
-                    <i className="feather-arrow-right" aria-hidden="true" />
+                    <i className="fa-solid fa-arrow-right" aria-hidden="true" />
                   </span>
                 </div>
               </Link>
@@ -295,7 +295,7 @@ export default function AboutUsPage() {
                 className={styles.bandCard}
               >
                 <span className={styles.bandIcon} aria-hidden="true">
-                  <i className="feather-briefcase" />
+                  <i className="fa-solid fa-briefcase" />
                 </span>
                 <div className={styles.bandBody}>
                   <span className={styles.bandLabel}>{t('careers_label')}</span>
@@ -303,7 +303,7 @@ export default function AboutUsPage() {
                   <p className={styles.bandText}>{t('careers_text')}</p>
                   <span className={styles.bandLink}>
                     {t('careers_link')}
-                    <i className="feather-arrow-right" aria-hidden="true" />
+                    <i className="fa-solid fa-arrow-right" aria-hidden="true" />
                   </span>
                 </div>
               </a>
@@ -326,7 +326,7 @@ export default function AboutUsPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <i className="feather-message-circle" aria-hidden="true" />
+                  <i className="fa-solid fa-comment-dots" aria-hidden="true" />
                   {t('cta_primary')}
                 </a>
                 <Link href={`/${locale}/contact-us`} className={styles.btnOutlineLight}>

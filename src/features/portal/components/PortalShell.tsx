@@ -128,7 +128,7 @@ export function PortalShell({
             aria-label={switchLocaleLabel}
             prefetch={false}
           >
-            <i className="feather-globe" aria-hidden="true" />
+            <i className="fa-solid fa-globe" aria-hidden="true" />
             <span>{switchLocaleLabel}</span>
           </Link>
 
@@ -171,7 +171,7 @@ export function PortalShell({
           <div className={styles.sidebarFooter}>
             <ExportPdfButton label={exportPdfLabel} className={styles.exportBtn} />
             <Link href={homeHref} className={styles.homeBtn}>
-              <i className="feather-home" aria-hidden="true" />
+              <i className="fa-solid fa-house" aria-hidden="true" />
               <span>{homeLabel}</span>
             </Link>
           </div>
@@ -220,3 +220,4 @@ export function PortalShell({
     </div>
   );
 }
+

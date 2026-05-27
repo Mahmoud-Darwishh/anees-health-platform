@@ -45,7 +45,7 @@ function ServiceCard({ service, isExpanded, onToggle, t, locale }: ServiceCardPr
             <p className={styles.serviceShortDesc}>{shortDesc}</p>
           </div>
           <div className={styles.expandIndicator}>
-            <i className="isax isax-arrow-down-1" aria-hidden="true"></i>
+            <i className="fa-solid fa-arrow-down" aria-hidden="true"></i>
           </div>
         </div>
       </button>
@@ -154,11 +154,11 @@ export default function ServicesPageContent({ services }: ServicesPageContentPro
             <div className={styles.ctaButtons}>
               <Link href={`/${locale}/booking`} className={styles.btnPrimary}>
                 {t('home.servicesPage.cta.primaryButton')}
-                <i className="isax isax-calendar-1" aria-hidden="true"></i>
+                <i className="fa-solid fa-calendar-days" aria-hidden="true"></i>
               </Link>
               <Link href={`/${locale}/contact`} className={styles.btnSecondary}>
                 {t('home.servicesPage.cta.secondaryButton')}
-                <i className="isax isax-messages-1" aria-hidden="true"></i>
+                <i className="fa-solid fa-comments" aria-hidden="true"></i>
               </Link>
             </div>
           </div>

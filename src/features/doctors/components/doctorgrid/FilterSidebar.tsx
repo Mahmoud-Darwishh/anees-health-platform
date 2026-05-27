@@ -102,7 +102,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 autoComplete="off"
               />
               <span>
-                <i className="isax isax-search-normal-1" />
+                <i className="fa-solid fa-magnifying-glass" />
               </span>
             </div>
           </div>
@@ -597,3 +597,4 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
 };
 
   export default FilterSidebar;
+

@@ -44,7 +44,7 @@ const SectionFaq: React.FC = () => {
                   >
                     <span className={styles.question}>{t(qKey)}</span>
                     <span className={styles.chevron} aria-hidden="true">
-                      <i className="feather-plus" />
+                      <i className="fa-solid fa-plus" />
                     </span>
                   </button>
                 </h3>
@@ -69,3 +69,4 @@ const SectionFaq: React.FC = () => {
 };
 
 export default SectionFaq;
+

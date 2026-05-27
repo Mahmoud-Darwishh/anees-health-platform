@@ -136,7 +136,7 @@ const SectionPackages: React.FC = () => {
               <p className={styles.sanadTagline}>{sanad.tagline}</p>
 
               <div className={styles.sanadHero}>
-                <i className="isax isax-profile-2user" aria-hidden="true" />
+                <i className="fa-solid fa-user-group" aria-hidden="true" />
                 <span>{t('sanad_main_tagline')}</span>
               </div>
 
@@ -145,7 +145,7 @@ const SectionPackages: React.FC = () => {
               <ul className={styles.sanadFeatures}>
                 {sanad.features.map((feature, i) => (
                   <li key={i} className={styles.sanadFeature}>
-                    <i className="isax isax-tick-circle" aria-hidden="true" />
+                    <i className="fa-solid fa-circle-check" aria-hidden="true" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -183,7 +183,7 @@ const SectionPackages: React.FC = () => {
                   className={styles.sanadCta}
                   aria-label={t('sanad_cta_aria')}
                 >
-                  <i className="isax isax-calendar-tick" aria-hidden="true" />
+                  <i className="fa-solid fa-calendar-check" aria-hidden="true" />
                   {t('sanad_cta')}
                 </Link>
 
@@ -235,7 +235,7 @@ const SectionPackages: React.FC = () => {
                 <ul className={styles.packageFeatures}>
                   {pkg.features.map((feature, index) => (
                     <li key={index} className={styles.packageFeature}>
-                      <i className="isax isax-tick-circle" aria-hidden="true" />
+                      <i className="fa-solid fa-circle-check" aria-hidden="true" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -286,7 +286,7 @@ const SectionPackages: React.FC = () => {
             aria-label={t('contact_us_aria')}
           >
             {t('contact_us')}
-            <i className="feather-arrow-right" aria-hidden="true" />
+            <i className="fa-solid fa-arrow-right" aria-hidden="true" />
           </Link>
         </div>
 
@@ -296,3 +296,4 @@ const SectionPackages: React.FC = () => {
 };
 
 export default SectionPackages;
+

@@ -6,7 +6,7 @@ import { prisma } from '@/lib/db/prisma';
 
 export interface ContentServiceItem {
   code: string;       // e.g. "doctorVisits" — also the i18n key segment
-  iconClass: string;  // e.g. "isax isax-health"
+  iconClass: string;  // e.g. "fa-solid fa-heart-pulse"
   landingSlug: string | null; // e.g. "doctor-at-home" or null
 }
 
@@ -18,3 +18,4 @@ export async function getContentServices(): Promise<ContentServiceItem[]> {
   });
   return rows;
 }
+

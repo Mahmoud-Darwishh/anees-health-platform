@@ -23,13 +23,13 @@ export default function RelatedLinks({ locale, title, links }: RelatedLinksProps
     : 'Quick paths to continue your care journey with confidence.';
 
   const linkIcon = (href: string) => {
-    if (href.includes('/booking')) return 'isax-calendar-1';
-    if (href.includes('/doctors')) return 'isax-profile-2user';
-    if (href.includes('/specialties')) return 'isax-category';
-    if (href.includes('/services')) return 'isax-health';
-    if (href.includes('/coverage')) return 'isax-location';
-    if (href.includes('/contact')) return 'isax-message-question';
-    return 'isax-arrow-right-3';
+    if (href.includes('/booking')) return 'fa-solid fa-calendar-days';
+    if (href.includes('/doctors')) return 'fa-solid fa-user-group';
+    if (href.includes('/specialties')) return 'fa-solid fa-layer-group';
+    if (href.includes('/services')) return 'fa-solid fa-heart-pulse';
+    if (href.includes('/coverage')) return 'fa-solid fa-location-dot';
+    if (href.includes('/contact')) return 'fa-solid fa-circle-question';
+    return 'fa-solid fa-arrow-right';
   };
 
   return (
@@ -52,10 +52,10 @@ export default function RelatedLinks({ locale, title, links }: RelatedLinksProps
                 <li key={link.href}>
                   <Link href={link.href} className={styles.relatedLinkItem}>
                     <span className={styles.linkStart}>
-                      <i className={`isax ${linkIcon(link.href)}`} aria-hidden="true"></i>
+                      <i className={linkIcon(link.href)} aria-hidden="true"></i>
                       <span>{link.label}</span>
                     </span>
-                    <i className="isax isax-arrow-right-3" aria-hidden="true"></i>
+                    <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
                   </Link>
                 </li>
               ))}

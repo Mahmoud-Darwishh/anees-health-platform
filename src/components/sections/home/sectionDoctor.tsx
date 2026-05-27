@@ -181,7 +181,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                 scheduleResume();
               }}
             >
-              <i className="feather-chevron-left" aria-hidden="true" />
+              <i className="fa-solid fa-chevron-left" aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -192,7 +192,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                 scheduleResume();
               }}
             >
-              <i className="feather-chevron-right" aria-hidden="true" />
+              <i className="fa-solid fa-chevron-right" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -202,5 +202,6 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
 };
 
 export default SectionDoctor;
+
 
 
