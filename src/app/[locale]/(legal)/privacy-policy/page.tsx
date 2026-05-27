@@ -10,6 +10,7 @@ import {
   renderJsonLd,
 } from '@/lib/seo/jsonld';
 import { site, type SupportedLocale } from '@/lib/seo/site';
+import LucideIcon from '@/components/common/LucideIcon';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -233,7 +234,7 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 <div className="alert alert-info mt-4" role="alert">
-                  <i className="fas fa-info-circle me-2"></i>
+                  <LucideIcon iconClass="fas fa-info-circle me-2"></LucideIcon>
                   <strong>{t('important_label')}</strong> {t('important_text')}
                 </div>
               </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import LucideIcon from '@/components/common/LucideIcon';
 
 interface CoverageCheckFormProps {
   locale: string;
@@ -100,7 +101,7 @@ export default function CoverageCheckForm({ locale }: CoverageCheckFormProps) {
               disabled={loading}
               aria-label={t('get_current_location')}
             >
-              <i className="fas fa-location-crosshairs me-2" aria-hidden="true"></i>
+              <LucideIcon iconClass="fas fa-location-crosshairs me-2" aria-hidden="true"></LucideIcon>
               {t('get_current_location')}
             </button>
           </div>
@@ -158,7 +159,7 @@ export default function CoverageCheckForm({ locale }: CoverageCheckFormProps) {
             </>
           ) : (
             <>
-              <i className="fas fa-search me-2" aria-hidden="true"></i>
+              <LucideIcon iconClass="fas fa-search me-2" aria-hidden="true"></LucideIcon>
               {t('check_coverage')}
             </>
           )}
@@ -167,7 +168,7 @@ export default function CoverageCheckForm({ locale }: CoverageCheckFormProps) {
 
       {error && (
         <div className="alert alert-danger mt-4" role="alert">
-          <i className="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
+          <LucideIcon iconClass="fas fa-exclamation-circle me-2" aria-hidden="true"></LucideIcon>
           {error}
         </div>
       )}
@@ -180,12 +181,12 @@ export default function CoverageCheckForm({ locale }: CoverageCheckFormProps) {
           role="alert"
         >
           <div className="d-flex align-items-start">
-            <i
-              className={`fas ${
+            <LucideIcon
+              iconClass={`fas ${
                 result.covered ? 'fa-check-circle' : 'fa-times-circle'
               } me-3 mt-1 fs-4`}
               aria-hidden="true"
-            ></i>
+            ></LucideIcon>
             <div>
               <h5 className="alert-heading mb-2">
                 {result.covered ? t('covered_title') : t('not_covered_title')}

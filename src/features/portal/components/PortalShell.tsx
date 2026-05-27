@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ExportPdfButton } from './ExportPdfButton';
 import styles from './PortalShell.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 export type PortalSectionItem = {
   /** Stable URL-safe id used in `#hash` and as React key. */
@@ -128,7 +129,7 @@ export function PortalShell({
             aria-label={switchLocaleLabel}
             prefetch={false}
           >
-            <i className="fa-solid fa-globe" aria-hidden="true" />
+            <LucideIcon iconClass="fa-solid fa-globe" aria-hidden="true" />
             <span>{switchLocaleLabel}</span>
           </Link>
 
@@ -154,7 +155,7 @@ export function PortalShell({
                 >
                   {section.icon ? (
                     <span className={styles.navIcon} aria-hidden="true">
-                      <i className={section.icon} />
+                      <LucideIcon iconClass={section.icon} />
                     </span>
                   ) : null}
                   <span className={styles.navLabel}>{section.label}</span>
@@ -171,7 +172,7 @@ export function PortalShell({
           <div className={styles.sidebarFooter}>
             <ExportPdfButton label={exportPdfLabel} className={styles.exportBtn} />
             <Link href={homeHref} className={styles.homeBtn}>
-              <i className="fa-solid fa-house" aria-hidden="true" />
+              <LucideIcon iconClass="fa-solid fa-house" aria-hidden="true" />
               <span>{homeLabel}</span>
             </Link>
           </div>

@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
 import { useCarouselAutoplay } from '@/hooks/useCarouselAutoplay';
 import styles from './sectionPatientStories.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 // NOTE: The quotes in `home.patientStories.items` are placeholder content
 // approved for launch staging. Replace with real, consented patient/family
@@ -167,7 +168,7 @@ const SectionPatientStories: React.FC = () => {
                 }}
                 aria-label={t('prev')}
               >
-                <i className="fa-solid fa-arrow-left" aria-hidden="true" />
+                <LucideIcon iconClass="fa-solid fa-arrow-left" aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -179,7 +180,7 @@ const SectionPatientStories: React.FC = () => {
                 }}
                 aria-label={t('next')}
               >
-                <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+                <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true" />
               </button>
 
               <div className={styles.dots} role="tablist" aria-label={t('title')}>

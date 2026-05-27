@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
 import styles from './sectionCoverageStrip.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 const SectionCoverageStrip: React.FC = () => {
   const t = useTranslations('home.coverageStrip');
@@ -13,7 +14,7 @@ const SectionCoverageStrip: React.FC = () => {
       <div className="container">
         <div className={styles.band}>
           <span className={styles.iconWrap} aria-hidden="true">
-            <i className="fa-solid fa-location-dot" />
+            <LucideIcon iconClass="fa-solid fa-location-dot" />
           </span>
 
           <div className={styles.text}>
@@ -26,7 +27,7 @@ const SectionCoverageStrip: React.FC = () => {
 
           <Link href={`/${locale}/coverage`} className={styles.cta}>
             {t('cta')}
-            <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+            <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true" />
           </Link>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
 import styles from './contact-us.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type ServiceKey =
   | 'doctor'
@@ -170,7 +171,7 @@ export default function ContactForm() {
         disabled={submitting}
         aria-label={t('form_submit_aria')}
       >
-        <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+        <LucideIcon iconClass="fa-brands fa-whatsapp" aria-hidden="true" />
         <span>{t('form_submit')}</span>
       </button>
 

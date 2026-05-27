@@ -2,6 +2,7 @@
 
 import React, { useCallback, useId, useMemo, useState } from 'react';
 import type { FilterState } from './types';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type MessageValues = Record<string, string | number>;
 
@@ -102,7 +103,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 autoComplete="off"
               />
               <span>
-                <i className="fa-solid fa-magnifying-glass" />
+                <LucideIcon iconClass="fa-solid fa-magnifying-glass" />
               </span>
             </div>
           </div>
@@ -123,7 +124,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.speciality')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -218,7 +219,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.gender')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -281,7 +282,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.price')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -336,7 +337,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.experience')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -429,7 +430,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.channel')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -491,7 +492,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.language')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -546,7 +547,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   <h5>{tg('filters.rating')}</h5>
                   <div className="ms-auto">
                     <span>
-                      <i className="fas fa-chevron-down" />
+                      <LucideIcon iconClass="fas fa-chevron-down" />
                     </span>
                   </div>
                 </div>
@@ -579,7 +580,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                         <label className="form-check-label" htmlFor={ratingId}>
                           <span>
                             {Array.from({ length: r }).map((_, i) => (
-                              <i key={i} className="fa-solid fa-star text-orange me-1" />
+                              <LucideIcon key={i} iconClass="fa-solid fa-star text-orange me-1" />
                             ))}
                           </span>
                           {` ${tg('filters.stars_up', { count: r })}`}

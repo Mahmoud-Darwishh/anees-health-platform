@@ -15,6 +15,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import styles from './portal.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -872,7 +873,7 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
                 href={`/${locale}/portal/documents/${doc.id}`}
                 className={styles.documentLink}
               >
-                <i className="fa-solid fa-file-lines" aria-hidden="true" />
+                <LucideIcon iconClass="fa-solid fa-file-lines" aria-hidden="true" />
                 <span>{doc.title}</span>
               </Link>,
               doc.category,

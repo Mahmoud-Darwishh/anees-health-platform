@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
@@ -12,6 +12,7 @@ import { FilterSidebar } from './FilterSidebar';
 import { Pagination } from './Pagination';
 import type { Doctor, FilterState, SortOrder } from './types';
 import { getChannels, getLanguages, uniqueSorted } from './utils';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type MessageValues = Record<string, string | number>;
 
@@ -361,7 +362,7 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
                       onClick={() => setShowMobileFilters(true)}
                       aria-label="Open filters"
                     >
-                      <i className="fas fa-sliders-h me-2"></i>
+                      <LucideIcon iconClass="fas fa-sliders-h me-2"></LucideIcon>
                       {tg('filters.title')}
                     </button>
 

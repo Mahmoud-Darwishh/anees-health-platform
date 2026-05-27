@@ -8,6 +8,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import CoverageCheckForm from '@/features/coverage/components/CoverageCheckForm';
+import LucideIcon from '@/components/common/LucideIcon';
 
 interface CoveragePageContentProps {
   locale: string;
@@ -60,7 +61,7 @@ export default function CoveragePageContent({ locale }: CoveragePageContentProps
                   <div className="step-icon mb-3">
                     <div className="icon-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
                          style={{ width: '80px', height: '80px' }}>
-                      <i className="fas fa-map-location-dot fs-2" aria-hidden="true"></i>
+                      <LucideIcon iconClass="fas fa-map-location-dot fs-2" aria-hidden="true"></LucideIcon>
                     </div>
                   </div>
                   <h3 className="step-title h5 mb-3">{t('how_step_1_title')}</h3>
@@ -73,7 +74,7 @@ export default function CoveragePageContent({ locale }: CoveragePageContentProps
                   <div className="step-icon mb-3">
                     <div className="icon-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
                          style={{ width: '80px', height: '80px' }}>
-                      <i className="fas fa-keyboard fs-2" aria-hidden="true"></i>
+                      <LucideIcon iconClass="fas fa-keyboard fs-2" aria-hidden="true"></LucideIcon>
                     </div>
                   </div>
                   <h3 className="step-title h5 mb-3">{t('how_step_2_title')}</h3>
@@ -86,7 +87,7 @@ export default function CoveragePageContent({ locale }: CoveragePageContentProps
                   <div className="step-icon mb-3">
                     <div className="icon-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
                          style={{ width: '80px', height: '80px' }}>
-                      <i className="fas fa-check-circle fs-2" aria-hidden="true"></i>
+                      <LucideIcon iconClass="fas fa-check-circle fs-2" aria-hidden="true"></LucideIcon>
                     </div>
                   </div>
                   <h3 className="step-title h5 mb-3">{t('how_step_3_title')}</h3>

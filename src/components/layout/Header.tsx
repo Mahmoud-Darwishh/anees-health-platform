@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import { useSession, signOut } from 'next-auth/react';
+import LucideIcon from '@/components/common/LucideIcon';
 
 const Header = () => {
   const t = useTranslations();
@@ -181,7 +182,7 @@ const Header = () => {
                     role="button"
                     aria-haspopup="true"
                   >
-                    {t('nav.services')} <i className="fas fa-chevron-down" />
+                    {t('nav.services')} <LucideIcon iconClass="fas fa-chevron-down" />
                   </Link>
                   <ul className="submenu">
                     <li>
@@ -216,7 +217,7 @@ const Header = () => {
                   aria-label={t('common.search')}
                   aria-expanded={searchField}
                 >
-                  <i className="fa-solid fa-magnifying-glass" />
+                  <LucideIcon iconClass="fa-solid fa-magnifying-glass" />
                 </button>
                 <div
                   className={
@@ -251,7 +252,7 @@ const Header = () => {
                   aria-label={altLocaleLabel}
                   onClick={onHandleLinkClick}
                 >
-                  <i className="fa-solid fa-globe" />
+                  <LucideIcon iconClass="fa-solid fa-globe" />
                   <span className="header-lang-btn__label">{altLocaleLabel}</span>
                 </Link>
               </li>
@@ -267,11 +268,11 @@ const Header = () => {
                       aria-expanded={userMenuOpen}
                       aria-label={t('header.myPortal')}
                     >
-                      <i className="fa-solid fa-user" />
+                      <LucideIcon iconClass="fa-solid fa-user" />
                       <span className="header-user-pill__name">
                         {session.user.name?.split(' ').slice(0, 2).join(' ') || t('header.myPortal')}
                       </span>
-                      <i className="fas fa-chevron-down header-user-pill__caret" />
+                      <LucideIcon iconClass="fas fa-chevron-down header-user-pill__caret" />
                     </button>
                     {userMenuOpen && (
                       <ul className="dropdown-menu show header-user-menu">
@@ -281,7 +282,7 @@ const Header = () => {
                             href={`/${locale}/portal`}
                             onClick={() => { setUserMenuOpen(false); onHandleLinkClick(); }}
                           >
-                            <i className="fa-solid fa-table-cells-large me-2" />{t('header.myPortal')}
+                            <LucideIcon iconClass="fa-solid fa-table-cells-large me-2" />{t('header.myPortal')}
                           </Link>
                         </li>
                         <li><hr className="dropdown-divider" /></li>
@@ -291,7 +292,7 @@ const Header = () => {
                             className="dropdown-item text-danger"
                             onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: `/${locale}` }); }}
                           >
-                            <i className="fa-solid fa-right-from-bracket me-2" />{t('auth.signout')}
+                            <LucideIcon iconClass="fa-solid fa-right-from-bracket me-2" />{t('auth.signout')}
                           </button>
                         </li>
                       </ul>
@@ -305,7 +306,7 @@ const Header = () => {
                       onClick={onHandleLinkClick}
                       aria-label={t('header.login')}
                     >
-                      <i className="fa-solid fa-user" />
+                      <LucideIcon iconClass="fa-solid fa-user" />
                       <span className="header-login-pill__label">{t('header.login')}</span>
                     </Link>
                   </li>
@@ -320,7 +321,7 @@ const Header = () => {
                   onClick={onHandleLinkClick}
                   aria-label={t('header.bookNow')}
                 >
-                  <i className="fa-solid fa-calendar-days" />
+                  <LucideIcon iconClass="fa-solid fa-calendar-days" />
                   <span className="header-book-cta__label">{t('header.bookNow')}</span>
                 </Link>
               </li>
@@ -359,7 +360,7 @@ const Header = () => {
             onClick={onHandleCloseMenu}
             aria-label="Close menu"
           >
-            <i className="fas fa-times" aria-hidden="true" />
+            <LucideIcon iconClass="fas fa-times" aria-hidden="true" />
           </button>
         </div>
 
@@ -367,19 +368,19 @@ const Header = () => {
           <ul className="mobile-drawer__nav">
             <li className={isActiveLink(`/${locale}`) ? 'active' : ''}>
               <Link href={`/${locale}`} onClick={onHandleLinkClick}>
-                <i className="fa-solid fa-house" />
+                <LucideIcon iconClass="fa-solid fa-house" />
                 <span>{t('nav.home')}</span>
               </Link>
             </li>
             <li className={isActiveLink(`/${locale}/about-us`) ? 'active' : ''}>
               <Link href={`/${locale}/about-us`} onClick={onHandleLinkClick}>
-                <i className="fa-solid fa-circle-info" />
+                <LucideIcon iconClass="fa-solid fa-circle-info" />
                 <span>{t('nav.about_us')}</span>
               </Link>
             </li>
             <li className={isActiveLink(`/${locale}/doctors`) ? 'active' : ''}>
               <Link href={`/${locale}/doctors`} onClick={onHandleLinkClick}>
-                <i className="fa-solid fa-users" />
+                <LucideIcon iconClass="fa-solid fa-users" />
                 <span>{t('nav.doctors')}</span>
               </Link>
             </li>
@@ -396,20 +397,20 @@ const Header = () => {
                 onClick={(e) => toggleSubmenu(e, 'services')}
                 aria-expanded={!!openSubmenus.services}
               >
-                <i className="fa-solid fa-grip" />
+                <LucideIcon iconClass="fa-solid fa-grip" />
                 <span>{t('nav.services')}</span>
-                <i className="fas fa-chevron-down mobile-drawer__chevron" aria-hidden="true" />
+                <LucideIcon iconClass="fas fa-chevron-down mobile-drawer__chevron" aria-hidden="true" />
               </button>
               <ul className="mobile-drawer__submenu">
                 <li>
                   <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
-                    <i className="fa-solid fa-location-dot" />
+                    <LucideIcon iconClass="fa-solid fa-location-dot" />
                     <span>{t('nav.coverage')}</span>
                   </Link>
                 </li>
                 <li>
                   <Link href={`/${locale}/booking`} onClick={onHandleLinkClick}>
-                    <i className="fa-solid fa-calendar-days" />
+                    <LucideIcon iconClass="fa-solid fa-calendar-days" />
                     <span>{t('header.bookNow')}</span>
                   </Link>
                 </li>
@@ -418,7 +419,7 @@ const Header = () => {
 
             <li className={isActiveLink(`/${locale}/contact-us`) ? 'active' : ''}>
               <Link href={`/${locale}/contact-us`} onClick={onHandleLinkClick}>
-                <i className="fa-solid fa-phone" />
+                <LucideIcon iconClass="fa-solid fa-phone" />
                 <span>{t('nav.contact_us')}</span>
               </Link>
             </li>
@@ -433,7 +434,7 @@ const Header = () => {
                 className="mobile-drawer__lang"
                 onClick={onHandleLinkClick}
               >
-                <i className="fa-solid fa-globe" />
+                <LucideIcon iconClass="fa-solid fa-globe" />
                 <span>{altLocaleLabel}</span>
               </Link>
             </li>
@@ -442,7 +443,7 @@ const Header = () => {
               <>
                 <li>
                   <Link href={`/${locale}/portal`} onClick={onHandleLinkClick}>
-                    <i className="fa-solid fa-table-cells-large" />
+                    <LucideIcon iconClass="fa-solid fa-table-cells-large" />
                     <span>{t('header.myPortal')}</span>
                   </Link>
                 </li>
@@ -452,7 +453,7 @@ const Header = () => {
                     className="mobile-drawer__signout"
                     onClick={() => { onHandleCloseMenu(); signOut({ callbackUrl: `/${locale}` }); }}
                   >
-                    <i className="fa-solid fa-right-from-bracket" />
+                    <LucideIcon iconClass="fa-solid fa-right-from-bracket" />
                     <span>{t('auth.signout')}</span>
                   </button>
                 </li>
@@ -466,7 +467,7 @@ const Header = () => {
                   className="mobile-drawer__login"
                   onClick={onHandleLinkClick}
                 >
-                  <i className="fa-solid fa-user" />
+                  <LucideIcon iconClass="fa-solid fa-user" />
                   <span>{t('header.login')}</span>
                 </Link>
               </li>
@@ -480,7 +481,7 @@ const Header = () => {
             className="mobile-drawer__cta-primary"
             onClick={onHandleLinkClick}
           >
-            <i className="fa-solid fa-calendar-days" />
+            <LucideIcon iconClass="fa-solid fa-calendar-days" />
             <span>{t('header.bookNow')}</span>
           </Link>
           <Link
@@ -488,7 +489,7 @@ const Header = () => {
             className="mobile-drawer__cta-secondary"
             onClick={onHandleLinkClick}
           >
-            <i className="fa-solid fa-location-dot" />
+            <LucideIcon iconClass="fa-solid fa-location-dot" />
             <span>{t('nav.coverage')}</span>
           </Link>
         </div>

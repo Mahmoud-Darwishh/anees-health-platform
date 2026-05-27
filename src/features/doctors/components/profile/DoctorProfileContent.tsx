@@ -7,6 +7,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Doctor } from '@/lib/models/doctor.types';
+import LucideIcon from '@/components/common/LucideIcon';
 
 interface DoctorProfileContentProps {
   doctor: Doctor;
@@ -156,20 +157,20 @@ export default function DoctorProfileContent({
                   {/* Inline meta row: verified + availability + location + languages */}
                   <div className="info-inline">
                     <span className="status-pill verified">
-                      <i className="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                      <LucideIcon iconClass="fa-solid fa-shield-halved" aria-hidden="true"></LucideIcon>
                       {isArabic ? 'موثق' : 'Verified'}
                     </span>
                     <span className="status-pill availability">
-                      <i className="fa-solid fa-heart-pulse" aria-hidden="true"></i>
+                      <LucideIcon iconClass="fa-solid fa-heart-pulse" aria-hidden="true"></LucideIcon>
                       {doctor.availabilityStatus}
                     </span>
                     <div className="location-chip">
-                      <i className="fa-solid fa-location-dot"></i>
+                      <LucideIcon iconClass="fa-solid fa-location-dot"></LucideIcon>
                       <span>{doctor.location}</span>
                     </div>
                     {doctor.languages.length > 0 && (
                       <div className="languages-list">
-                        <i className="fa-solid fa-globe"></i>
+                        <LucideIcon iconClass="fa-solid fa-globe"></LucideIcon>
                         <span>{doctor.languages.join(', ')}</span>
                       </div>
                     )}
@@ -198,7 +199,7 @@ export default function DoctorProfileContent({
                   {/* CTA Buttons */}
                   <div className="cta-buttons">
                     <Link href={`/${locale}/booking`} className="btn btn-primary btn-lg">
-                      <i className="fa-solid fa-calendar-days"></i>
+                      <LucideIcon iconClass="fa-solid fa-calendar-days"></LucideIcon>
                       {labels.bookNow}
                     </Link>
                     <button
@@ -208,7 +209,7 @@ export default function DoctorProfileContent({
                       aria-disabled="true"
                       title={isArabic ? 'التواصل غير متاح حالياً' : 'Contact is currently unavailable'}
                     >
-                      <i className="fa-solid fa-message"></i>
+                      <LucideIcon iconClass="fa-solid fa-message"></LucideIcon>
                       {labels.contact}
                     </button>
                   </div>
@@ -251,7 +252,7 @@ export default function DoctorProfileContent({
             {/* Telemedicine */}
             <div className="service-card">
               <div className="service-icon">
-                <i className="fa-solid fa-video"></i>
+                <LucideIcon iconClass="fa-solid fa-video"></LucideIcon>
               </div>
               <h3>{labels.telemedicine}</h3>
               <p
@@ -269,7 +270,7 @@ export default function DoctorProfileContent({
             {/* Home Visit */}
             <div className="service-card">
               <div className="service-icon">
-                <i className="fa-solid fa-house"></i>
+                <LucideIcon iconClass="fa-solid fa-house"></LucideIcon>
               </div>
               <h3>{labels.homeVisit}</h3>
               <p
@@ -287,7 +288,7 @@ export default function DoctorProfileContent({
             {/* Clinic Visit */}
             <div className="service-card">
               <div className="service-icon">
-                <i className="fa-solid fa-hospital"></i>
+                <LucideIcon iconClass="fa-solid fa-hospital"></LucideIcon>
               </div>
               <h3>{labels.clinicVisit}</h3>
               <p
@@ -319,7 +320,7 @@ export default function DoctorProfileContent({
                   {doctor.education.map((edu, idx) => (
                     <div key={idx} className="education-item">
                       <div className="edu-marker">
-                        <i className="fa-solid fa-award"></i>
+                        <LucideIcon iconClass="fa-solid fa-award"></LucideIcon>
                       </div>
                       <div className="edu-content">
                         <h4 className="degree">{edu.degree}</h4>
@@ -339,7 +340,7 @@ export default function DoctorProfileContent({
                 <div className="certifications-items">
                   {doctor.certifications.map((cert, idx) => (
                     <div key={idx} className="certification-item">
-                      <i className="fa-solid fa-shield-halved"></i>
+                      <LucideIcon iconClass="fa-solid fa-shield-halved"></LucideIcon>
                       <span>{cert}</span>
                     </div>
                   ))}
@@ -359,7 +360,7 @@ export default function DoctorProfileContent({
               <div className="network-list" aria-label={labels.clinics}>
                 {hospitalsAndClinics.map((item) => (
                   <span key={item} className="network-item">
-                    <i className="fa-solid fa-hospital"></i>
+                    <LucideIcon iconClass="fa-solid fa-hospital"></LucideIcon>
                     {item}
                   </span>
                 ))}
@@ -375,11 +376,11 @@ export default function DoctorProfileContent({
                   </div>
                   <div className="clinic-details">
                     <p className="clinic-location">
-                      <i className="fa-solid fa-location-dot"></i>
+                      <LucideIcon iconClass="fa-solid fa-location-dot"></LucideIcon>
                       {clinic.address}
                     </p>
                     <p className="clinic-hours">
-                      <i className="fa-solid fa-clock"></i>
+                      <LucideIcon iconClass="fa-solid fa-clock"></LucideIcon>
                       {clinic.hours}
                     </p>
                   </div>
@@ -399,7 +400,7 @@ export default function DoctorProfileContent({
             <div className="coverage-areas">
               {doctor.areaCoverage.map((area, idx) => (
                 <span key={idx} className="area-badge">
-                  <i className="fa-solid fa-location-dot"></i>
+                  <LucideIcon iconClass="fa-solid fa-location-dot"></LucideIcon>
                   {area}
                 </span>
               ))}
@@ -419,7 +420,7 @@ export default function DoctorProfileContent({
                   <div className="testimonial-header">
                     <div className="stars">
                       {Array.from({ length: Math.floor(testimonial.rating) }).map((_, i) => (
-                        <i key={i} className="fa-solid fa-star"></i>
+                        <LucideIcon key={i} iconClass="fa-solid fa-star"></LucideIcon>
                       ))}
                     </div>
                     <span className="rating-number">{testimonial.rating}/5</span>
@@ -442,7 +443,7 @@ export default function DoctorProfileContent({
                 <div className="faq-question-row">
                   <h3 className="faq-question">{item.question}</h3>
                   <span className="faq-icon" aria-hidden="true">
-                    <i className="fa-solid fa-message-question"></i>
+                    <LucideIcon iconClass="fa-solid fa-message-question"></LucideIcon>
                   </span>
                 </div>
                 <p className="faq-answer">{item.answer}</p>
@@ -457,7 +458,7 @@ export default function DoctorProfileContent({
         <div className="container">
           <div className="chat-coming-soon">
             <div className="chat-icon">
-              <i className="fa-solid fa-message"></i>
+              <LucideIcon iconClass="fa-solid fa-message"></LucideIcon>
             </div>
             <div>
               <h3>{isArabic ? 'الدردشة قادمة قريباً' : 'Chat Coming Soon'}</h3>

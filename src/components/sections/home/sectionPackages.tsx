@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
 import { useCarouselAutoplay } from '@/hooks/useCarouselAutoplay';
 import styles from './sectionPackages.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type PackageData = {
   tagline?: string;
@@ -136,7 +137,7 @@ const SectionPackages: React.FC = () => {
               <p className={styles.sanadTagline}>{sanad.tagline}</p>
 
               <div className={styles.sanadHero}>
-                <i className="fa-solid fa-user-group" aria-hidden="true" />
+                <LucideIcon iconClass="fa-solid fa-user-group" aria-hidden="true" />
                 <span>{t('sanad_main_tagline')}</span>
               </div>
 
@@ -145,7 +146,7 @@ const SectionPackages: React.FC = () => {
               <ul className={styles.sanadFeatures}>
                 {sanad.features.map((feature, i) => (
                   <li key={i} className={styles.sanadFeature}>
-                    <i className="fa-solid fa-circle-check" aria-hidden="true" />
+                    <LucideIcon iconClass="fa-solid fa-circle-check" aria-hidden="true" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -183,7 +184,7 @@ const SectionPackages: React.FC = () => {
                   className={styles.sanadCta}
                   aria-label={t('sanad_cta_aria')}
                 >
-                  <i className="fa-solid fa-calendar-check" aria-hidden="true" />
+                  <LucideIcon iconClass="fa-solid fa-calendar-check" aria-hidden="true" />
                   {t('sanad_cta')}
                 </Link>
 
@@ -235,7 +236,7 @@ const SectionPackages: React.FC = () => {
                 <ul className={styles.packageFeatures}>
                   {pkg.features.map((feature, index) => (
                     <li key={index} className={styles.packageFeature}>
-                      <i className="fa-solid fa-circle-check" aria-hidden="true" />
+                      <LucideIcon iconClass="fa-solid fa-circle-check" aria-hidden="true" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -286,7 +287,7 @@ const SectionPackages: React.FC = () => {
             aria-label={t('contact_us_aria')}
           >
             {t('contact_us')}
-            <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+            <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true" />
           </Link>
         </div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import styles from './PortalShell.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type Props = {
   label: string;
@@ -18,7 +19,7 @@ export function ExportPdfButton({ label, className }: Props) {
       className={className ?? styles.exportBtn}
       onClick={() => window.print()}
     >
-      <i className="fa-solid fa-download" aria-hidden="true" />
+      <LucideIcon iconClass="fa-solid fa-download" aria-hidden="true" />
       <span>{label}</span>
     </button>
   );

@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import portalStyles from '../../portal.module.scss';
 import styles from './document.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -65,7 +66,7 @@ export default async function PortalDocumentPage({ params }: Props) {
     <div className={portalStyles.page}>
       <div className={`${portalStyles.shell} ${styles.shell}`}>
         <Link href={`/${locale}/portal#labs`} className={styles.backLink}>
-          <i className="fa-solid fa-arrow-left" aria-hidden="true" />
+          <LucideIcon iconClass="fa-solid fa-arrow-left" aria-hidden="true" />
           <span>{t('documents.backToLabs')}</span>
         </Link>
 
@@ -119,17 +120,17 @@ export default async function PortalDocumentPage({ params }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <i className="fa-solid fa-up-right-from-square" aria-hidden="true" />
+                  <LucideIcon iconClass="fa-solid fa-up-right-from-square" aria-hidden="true" />
                   <span>{t('documents.openFile')}</span>
                 </a>
                 <a className={styles.openBtn} href={downloadHref}>
-                  <i className="fa-solid fa-download" aria-hidden="true" />
+                  <LucideIcon iconClass="fa-solid fa-download" aria-hidden="true" />
                   <span>{t('documents.download')}</span>
                 </a>
               </>
             ) : (
               <span className={styles.disabledBtn}>
-                <i className="fa-solid fa-clock" aria-hidden="true" />
+                <LucideIcon iconClass="fa-solid fa-clock" aria-hidden="true" />
                 <span>{t('documents.awaitingUpload')}</span>
               </span>
             )}

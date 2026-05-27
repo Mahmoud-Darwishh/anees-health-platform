@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import LucideIcon from '@/components/common/LucideIcon';
 
 const HomeBanner: React.FC = () => {
     const t = useTranslations();
@@ -80,12 +81,12 @@ const HomeBanner: React.FC = () => {
                             rel="noopener noreferrer"
                             className="btn-banner-primary"
                         >
-                            <i className="fa-solid fa-comment-dots" aria-hidden="true" />
+                            <LucideIcon iconClass="fa-solid fa-comment-dots" aria-hidden="true" />
                             <span>{t('home.banner.chatWithDoctor')}</span>
-                            <i className="fa-solid fa-arrow-right btn-banner-primary__arrow" aria-hidden="true" />
+                            <LucideIcon iconClass="fa-solid fa-arrow-right btn-banner-primary__arrow" aria-hidden="true" />
                         </a>
                         <a href="#packages" className="btn-banner-secondary">
-                            <i className="fa-solid fa-box-open" aria-hidden="true" />
+                            <LucideIcon iconClass="fa-solid fa-box-open" aria-hidden="true" />
                             <span>{t('home.banner.viewPackages')}</span>
                         </a>
                     </div>
@@ -104,12 +105,12 @@ const HomeBanner: React.FC = () => {
                         </span>
                         <span className="banner-trust-strip__divider" aria-hidden="true" />
                         <span className="banner-trust-strip__item">
-                            <i className="fa-solid fa-shield-halved" aria-hidden="true" />
+                            <LucideIcon iconClass="fa-solid fa-shield-halved" aria-hidden="true" />
                             {t('home.banner.licensed_verified')}
                         </span>
                         <span className="banner-trust-strip__divider" aria-hidden="true" />
                         <span className="banner-trust-strip__item">
-                            <i className="fa-solid fa-user-group" aria-hidden="true" />
+                            <LucideIcon iconClass="fa-solid fa-user-group" aria-hidden="true" />
                             {t('home.banner.dedicated_team')}
                         </span>
                     </div>
@@ -125,7 +126,7 @@ const HomeBanner: React.FC = () => {
                                     className={`service-pill${service.featured ? ' service-pill--featured' : ''}`}
                                     role="listitem"
                                 >
-                                    <i className={service.icon} aria-hidden="true" />
+                                    <LucideIcon iconClass={service.icon} aria-hidden="true" />
                                     <span>{service.label}</span>
                                     {service.badge && (
                                         <span className="pill-badge" aria-label={service.badge}>

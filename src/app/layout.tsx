@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import { locales } from '@/i18n/request';
-import LazyStylesheet from '@/components/common/LazyStylesheet';
 import { buildSiteMetadata } from '@/lib/seo/metadata';
 import { site } from '@/lib/seo/site';
 
@@ -85,11 +84,6 @@ export default function RootLayout({
         </noscript>
       </head>
       <body>
-        {/* Font Awesome — non-critical, decorative; lazy-loaded from client */}
-        <LazyStylesheet
-          id="fa-stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
         {children}
 
         {/* Microsoft Clarity */}

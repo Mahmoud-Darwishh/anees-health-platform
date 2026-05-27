@@ -10,6 +10,7 @@ import {
   renderJsonLd,
 } from '@/lib/seo/jsonld';
 import { site, type SupportedLocale } from '@/lib/seo/site';
+import LucideIcon from '@/components/common/LucideIcon';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -350,7 +351,7 @@ export default function TermsAndConditionsPage() {
 
                 {/* Important notice */}
                 <div className="alert alert-warning mt-4" role="alert">
-                  <i className="fas fa-exclamation-triangle me-2"></i>
+                  <LucideIcon iconClass="fas fa-exclamation-triangle me-2"></LucideIcon>
                   <strong>{t('important_notice_label')}</strong> {t('important_notice_text')}
                 </div>
 

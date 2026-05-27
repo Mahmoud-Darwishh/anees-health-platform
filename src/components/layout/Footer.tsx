@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import styles from './Footer.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 /**
  * Site-wide public footer.
@@ -47,7 +48,7 @@ const Footer = () => {
                     rel="noopener noreferrer"
                   >
                     <span className="visually-hidden">{t('footer.social_facebook')}</span>
-                    <i className="fa-brands fa-facebook-f" aria-hidden="true" />
+                    <LucideIcon iconClass="fa-brands fa-facebook-f" aria-hidden="true" />
                   </a>
                 </li>
                 <li>
@@ -58,7 +59,7 @@ const Footer = () => {
                     rel="noopener noreferrer"
                   >
                     <span className="visually-hidden">{t('footer.social_instagram')}</span>
-                    <i className="fa-brands fa-instagram" aria-hidden="true" />
+                    <LucideIcon iconClass="fa-brands fa-instagram" aria-hidden="true" />
                   </a>
                 </li>
                 <li>
@@ -69,7 +70,7 @@ const Footer = () => {
                     rel="noopener noreferrer"
                   >
                     <span className="visually-hidden">{t('footer.social_tiktok')}</span>
-                    <i className="fa-brands fa-tiktok" aria-hidden="true" />
+                    <LucideIcon iconClass="fa-brands fa-tiktok" aria-hidden="true" />
                   </a>
                 </li>
                 <li>
@@ -80,7 +81,7 @@ const Footer = () => {
                     rel="noopener noreferrer"
                   >
                     <span className="visually-hidden">{t('footer.social_linkedin')}</span>
-                    <i className="fa-brands fa-linkedin-in" aria-hidden="true" />
+                    <LucideIcon iconClass="fa-brands fa-linkedin-in" aria-hidden="true" />
                   </a>
                 </li>
               </ul>
@@ -146,7 +147,7 @@ const Footer = () => {
               <ul className={styles.contactList}>
                 <li className={styles.contactItem}>
                   <span className={styles.contactIcon} aria-hidden="true">
-                    <i className="fa-solid fa-phone" />
+                    <LucideIcon iconClass="fa-solid fa-phone" />
                   </span>
                   <div className={styles.contactBody}>
                     <a href="tel:+201270558620" dir="ltr">+20 127 055 8620</a>
@@ -155,7 +156,7 @@ const Footer = () => {
                 </li>
                 <li className={styles.contactItem}>
                   <span className={styles.contactIcon} aria-hidden="true">
-                    <i className="fa-solid fa-envelope" />
+                    <LucideIcon iconClass="fa-solid fa-envelope" />
                   </span>
                   <div className={styles.contactBody}>
                     <a href="mailto:info@aneeshealth.com">info@aneeshealth.com</a>
@@ -163,7 +164,7 @@ const Footer = () => {
                 </li>
                 <li className={styles.contactItem}>
                   <span className={styles.contactIcon} aria-hidden="true">
-                    <i className="fa-solid fa-location-dot" />
+                    <LucideIcon iconClass="fa-solid fa-location-dot" />
                   </span>
                   <div className={styles.contactBody}>
                     <span className={styles.contactLabel}>{t('footer.admin_office')}</span>

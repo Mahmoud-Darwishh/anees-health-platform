@@ -4,6 +4,7 @@ import React, { useId, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
 import styles from './sectionFaq.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 const QUESTION_KEYS = ['q1', 'q2', 'q3', 'q4', 'q5'] as const;
 const ANSWER_KEYS = ['a1', 'a2', 'a3', 'a4', 'a5'] as const;
@@ -44,7 +45,7 @@ const SectionFaq: React.FC = () => {
                   >
                     <span className={styles.question}>{t(qKey)}</span>
                     <span className={styles.chevron} aria-hidden="true">
-                      <i className="fa-solid fa-plus" />
+                      <LucideIcon iconClass="fa-solid fa-plus" />
                     </span>
                   </button>
                 </h3>

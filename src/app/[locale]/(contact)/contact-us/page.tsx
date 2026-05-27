@@ -9,6 +9,7 @@ import type { SupportedLocale } from '@/lib/seo/site';
 import { buildWhatsAppUrl } from '@/lib/utils/whatsapp';
 import ContactForm from './contact-form';
 import styles from './contact-us.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -57,7 +58,7 @@ export default function ContactUsPage() {
                 className={styles.heroCtaPrimary}
                 aria-label={t('cta_whatsapp_aria')}
               >
-                <i className="fa-brands fa-whatsapp" aria-hidden="true" />
+                <LucideIcon iconClass="fa-brands fa-whatsapp" aria-hidden="true" />
                 <span>{t('cta_whatsapp')}</span>
               </a>
               <a
@@ -65,13 +66,13 @@ export default function ContactUsPage() {
                 className={styles.heroCtaCall}
                 aria-label={t('cta_call_aria')}
               >
-                <i className="fa-solid fa-phone" aria-hidden="true" />
+                <LucideIcon iconClass="fa-solid fa-phone" aria-hidden="true" />
                 <span>{t('cta_call')}</span>
               </a>
             </div>
 
             <p className={styles.heroResponseNote}>
-              <i className="fa-solid fa-circle-check" aria-hidden="true" />
+              <LucideIcon iconClass="fa-solid fa-circle-check" aria-hidden="true" />
               {t('hero_response_note')}
             </p>
           </div>
@@ -88,7 +89,7 @@ export default function ContactUsPage() {
 
               <div className={styles.infoBlock}>
                 <div className={styles.infoIcon} aria-hidden="true">
-                  <i className="fa-solid fa-location-dot" />
+                  <LucideIcon iconClass="fa-solid fa-location-dot" />
                 </div>
                 <div className={styles.infoBody}>
                   <p className={styles.infoLabel}>{t('address_label')}</p>
@@ -102,7 +103,7 @@ export default function ContactUsPage() {
                 aria-label={`${t('phone_label')}: ${t('phone_text')}`}
               >
                 <div className={styles.infoIcon} aria-hidden="true">
-                  <i className="fa-solid fa-phone" />
+                  <LucideIcon iconClass="fa-solid fa-phone" />
                 </div>
                 <div className={styles.infoBody}>
                   <p className={styles.infoLabel}>{t('phone_label')}</p>
@@ -116,7 +117,7 @@ export default function ContactUsPage() {
                 aria-label={`${t('email_label')}: ${t('email_text')}`}
               >
                 <div className={styles.infoIcon} aria-hidden="true">
-                  <i className="fa-solid fa-message" />
+                  <LucideIcon iconClass="fa-solid fa-message" />
                 </div>
                 <div className={styles.infoBody}>
                   <p className={styles.infoLabel}>{t('email_label')}</p>
@@ -126,7 +127,7 @@ export default function ContactUsPage() {
 
               <div className={styles.hours}>
                 <h3 className={styles.hoursTitle}>
-                  <i className="fa-solid fa-clock" aria-hidden="true" />
+                  <LucideIcon iconClass="fa-solid fa-clock" aria-hidden="true" />
                   <span>{t('hours_title')}</span>
                 </h3>
                 <div className={styles.hoursRow}>

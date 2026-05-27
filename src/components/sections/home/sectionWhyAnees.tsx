@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
+import LucideIcon from '@/components/common/LucideIcon';
 import styles from './sectionWhyAnees.module.scss';
 
 type Tile = {
@@ -28,7 +29,7 @@ const SectionWhyAnees: React.FC = () => {
           {items.map((item, i) => (
             <article key={i} className={styles.tile}>
               <span className={styles.tileIcon} aria-hidden="true">
-                <i className={item.icon} />
+                <LucideIcon iconClass={item.icon} />
               </span>
               <h3 className={styles.tileTitle}>{item.title}</h3>
               <p className={styles.tileDesc}>{item.desc}</p>

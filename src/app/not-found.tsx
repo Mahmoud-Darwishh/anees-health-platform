@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import styles from './not-found.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 export default function NotFound() {
   return (
@@ -7,7 +8,7 @@ export default function NotFound() {
       <div className="container py-5">
         <div className={`mx-auto text-center ${styles.inner}`}>
           <div className={`d-inline-flex align-items-center justify-content-center rounded-circle mb-3 ${styles.iconWrapper}`}>
-            <i className="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+            <LucideIcon iconClass="fa-solid fa-circle-exclamation" aria-hidden="true"></LucideIcon>
           </div>
           <h1 className={`fw-bold mb-3 ${styles.heading}`}>Page Not Found</h1>
           <p className={`text-muted mb-4 ${styles.body}`}>

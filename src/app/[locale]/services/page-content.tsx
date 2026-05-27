@@ -9,6 +9,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb';
 import styles from './services.module.scss';
 import type { ContentServiceItem } from '@/lib/api/content-services';
 import { STATS } from './constants';
+import LucideIcon from '@/components/common/LucideIcon';
 
 interface ServiceCardProps {
   service: ContentServiceItem;
@@ -38,14 +39,14 @@ function ServiceCard({ service, isExpanded, onToggle, t, locale }: ServiceCardPr
       >
         <div className={styles.serviceHeader}>
           <div className={styles.serviceIcon}>
-            <i className={service.iconClass} aria-hidden="true"></i>
+            <LucideIcon iconClass={service.iconClass} aria-hidden="true"></LucideIcon>
           </div>
           <div className={styles.serviceInfo}>
             <h3 className={styles.serviceTitle}>{title}</h3>
             <p className={styles.serviceShortDesc}>{shortDesc}</p>
           </div>
           <div className={styles.expandIndicator}>
-            <i className="fa-solid fa-arrow-down" aria-hidden="true"></i>
+            <LucideIcon iconClass="fa-solid fa-arrow-down" aria-hidden="true"></LucideIcon>
           </div>
         </div>
       </button>
@@ -154,11 +155,11 @@ export default function ServicesPageContent({ services }: ServicesPageContentPro
             <div className={styles.ctaButtons}>
               <Link href={`/${locale}/booking`} className={styles.btnPrimary}>
                 {t('home.servicesPage.cta.primaryButton')}
-                <i className="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                <LucideIcon iconClass="fa-solid fa-calendar-days" aria-hidden="true"></LucideIcon>
               </Link>
               <Link href={`/${locale}/contact`} className={styles.btnSecondary}>
                 {t('home.servicesPage.cta.secondaryButton')}
-                <i className="fa-solid fa-comments" aria-hidden="true"></i>
+                <LucideIcon iconClass="fa-solid fa-comments" aria-hidden="true"></LucideIcon>
               </Link>
             </div>
           </div>

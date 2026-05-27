@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { memo } from 'react';
 import type { Doctor } from './types';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type MessageValues = Record<string, string | number>;
 
@@ -59,7 +60,7 @@ export const DoctorCard = memo(function DoctorCard({
             />
             <div className="verified-badge-overlay position-absolute top-0 end-0 m-2">
               <span className="badge rounded-pill bg-primary text-white">
-                <i className="fa-solid fa-shield-halved me-1"></i>
+                <LucideIcon iconClass="fa-solid fa-shield-halved me-1"></LucideIcon>
                 {tg('card.verified')}
               </span>
             </div>
@@ -84,19 +85,19 @@ export const DoctorCard = memo(function DoctorCard({
 
               <div className="doctor-meta mb-2" aria-label={tg('filters.rating')}>
                 <span className="meta-item meta-item-rating">
-                  <i className="fa-solid fa-star" aria-hidden="true"></i>
+                  <LucideIcon iconClass="fa-solid fa-star" aria-hidden="true"></LucideIcon>
                   {doctor.rating}
                 </span>
                 {estimatedReviews > 0 && (
                   <span className="meta-item meta-item-reviews">
-                    <i className="fa-solid fa-message-1" aria-hidden="true"></i>
+                    <LucideIcon iconClass="fa-solid fa-message-1" aria-hidden="true"></LucideIcon>
                     {tg('card.from_reviews', { count: `${estimatedReviews}+` })}
                   </span>
                 )}
               </div>
 
               <p className="experience-badge text-muted fs-13 mb-2">
-                <i className="fa-solid fa-calendar-days me-1"></i>
+                <LucideIcon iconClass="fa-solid fa-calendar-days me-1"></LucideIcon>
                 {doctor.experienceYears}+ {tg('card.yrs_exp')}
               </p>
 
@@ -114,6 +115,7 @@ export const DoctorCard = memo(function DoctorCard({
                           video: { icon: 'fa-video', label: tg('channels.video') },
                           chat: { icon: 'fa-message', label: tg('channels.chat') },
                           home: { icon: 'fa-home', label: tg('channels.home') },
+                          physio: { icon: 'fa-dumbbell', label: tg('channels.physio') },
                           clinic: { icon: 'fa-hospital', label: tg('card.clinic_visit') },
                         };
 
@@ -122,10 +124,15 @@ export const DoctorCard = memo(function DoctorCard({
                           { pattern: /فيديو|مرئي|فديو/i, key: 'video' },
                           { pattern: /دردشة|محادثة|شات/i, key: 'chat' },
                           { pattern: /منزل|منزلي|زيارة منزلية/i, key: 'home' },
+                          { pattern: /علاج\s*طبيعي|فيزيو/i, key: 'physio' },
                           { pattern: /عيادة|مركز|كشف/i, key: 'clinic' },
                         ];
 
                         let resolvedKey: keyof typeof channelMap | undefined = channelMap[normalized] ? (normalized as keyof typeof channelMap) : undefined;
+
+                        if (!resolvedKey && /(physio|physiotherapy|physical\s*therapy)/i.test(normalized)) {
+                          resolvedKey = 'physio';
+                        }
 
                         if (!resolvedKey) {
                           for (const matcher of arabicMatchers) {
@@ -147,7 +154,7 @@ export const DoctorCard = memo(function DoctorCard({
                             title={service.label}
                             aria-label={service.label}
                           >
-                            <i className={`fa-solid ${service.icon}`} aria-hidden="true"></i>
+                            <LucideIcon iconClass={`fa-solid ${service.icon}`} aria-hidden="true"></LucideIcon>
                             <span className="chip-label">{service.label}</span>
                           </span>
                         );
@@ -177,13 +184,13 @@ export const DoctorCard = memo(function DoctorCard({
               Location section intentionally hidden for a cleaner professional card style.
               Restore by uncommenting this block.
               <div className="location-section d-flex align-items-center mb-3">
-                <i className="fa-solid fa-location-dot me-2 text-muted"></i>
+                <LucideIcon iconClass="fa-solid fa-location-dot me-2 text-muted"></LucideIcon>
                 <p className="text-muted fs-13 mb-0">{doctor.location}</p>
               </div>
               */}
 
               <div className="profile-hint d-inline-flex align-items-center gap-2">
-                <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true"></LucideIcon>
                 <span>{tg('card.view_profile')}</span>
               </div>
 
@@ -194,7 +201,7 @@ export const DoctorCard = memo(function DoctorCard({
                 href={profileHref}
                 className="btn btn-sm btn-primary w-100 rounded-pill"
               >
-                <i className="fa-solid fa-calendar-days me-2"></i>
+                <LucideIcon iconClass="fa-solid fa-calendar-days me-2"></LucideIcon>
                 {tg('card.book')}
               </Link>
               */}

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import styles from './RelatedLinks.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 export interface RelatedLinkItem {
   href: string;
@@ -52,10 +53,10 @@ export default function RelatedLinks({ locale, title, links }: RelatedLinksProps
                 <li key={link.href}>
                   <Link href={link.href} className={styles.relatedLinkItem}>
                     <span className={styles.linkStart}>
-                      <i className={linkIcon(link.href)} aria-hidden="true"></i>
+                      <LucideIcon iconClass={linkIcon(link.href)} aria-hidden="true"></LucideIcon>
                       <span>{link.label}</span>
                     </span>
-                    <i className="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true"></LucideIcon>
                   </Link>
                 </li>
               ))}

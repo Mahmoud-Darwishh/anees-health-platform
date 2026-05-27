@@ -10,6 +10,7 @@ import type { Doctor } from "@/features/doctors/components/doctorgrid/types";
 import { Reveal } from "@/components/common/Reveal";
 import { useCarouselAutoplay } from "@/hooks/useCarouselAutoplay";
 import styles from "./sectionDoctor.module.scss";
+import LucideIcon from '@/components/common/LucideIcon';
 
 // react-slick is ~40 KB min+gz and the Doctor section is below the fold.
 // Defer it (and its CSS) until the route actually renders the carousel.
@@ -181,7 +182,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                 scheduleResume();
               }}
             >
-              <i className="fa-solid fa-chevron-left" aria-hidden="true" />
+              <LucideIcon iconClass="fa-solid fa-chevron-left" aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -192,7 +193,7 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
                 scheduleResume();
               }}
             >
-              <i className="fa-solid fa-chevron-right" aria-hidden="true" />
+              <LucideIcon iconClass="fa-solid fa-chevron-right" aria-hidden="true" />
             </button>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import styles from './not-found.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type Locale = 'en' | 'ar';
 
@@ -36,7 +37,7 @@ export default function LocaleNotFound() {
         <div
           className={`d-inline-flex align-items-center justify-content-center rounded-circle mb-3 ${styles.iconWrapper}`}
         >
-          <i className="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+          <LucideIcon iconClass="fa-solid fa-circle-exclamation" aria-hidden="true"></LucideIcon>
         </div>
         <h1 className={`fw-bold mb-3 ${styles.heading}`}>{t.title}</h1>
         <p className={`text-muted mb-4 ${styles.body}`}>{t.message}</p>

@@ -510,7 +510,8 @@
       "channels": {
         "home": "Home Visit",
         "video": "Video Call",
-        "chat": "Chat"
+        "chat": "Chat",
+        "physio": "Physiotherapy"
       },
       "sort": {
         "label": "Sort",

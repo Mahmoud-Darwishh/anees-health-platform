@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
 import styles from './sectionHowItWorks.module.scss';
+import LucideIcon from '@/components/common/LucideIcon';
 
 type Step = {
   number: string;
@@ -42,13 +43,13 @@ const SectionHowItWorks: React.FC = () => {
                 {step.number}
               </span>
               <span className={styles.stepIcon} aria-hidden="true">
-                <i className={step.icon} />
+                <LucideIcon iconClass={step.icon} />
               </span>
               <h3 className={styles.stepTitle}>{step.title}</h3>
               <p className={styles.stepDesc}>{step.desc}</p>
               {i < steps.length - 1 && (
                 <span className={styles.connector} aria-hidden="true">
-                  <i className="fa-solid fa-arrow-right" />
+                  <LucideIcon iconClass="fa-solid fa-arrow-right" />
                 </span>
               )}
             </li>
@@ -62,7 +63,7 @@ const SectionHowItWorks: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <i className="fa-solid fa-comment-dots" aria-hidden="true" />
+            <LucideIcon iconClass="fa-solid fa-comment-dots" aria-hidden="true" />
             {t('cta')}
           </a>
           <Link href={`/${locale}#packages`} className={styles.ctaSecondary}>
