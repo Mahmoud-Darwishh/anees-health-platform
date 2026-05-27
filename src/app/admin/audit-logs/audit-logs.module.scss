@@ -86,9 +86,8 @@
   }
 
   th {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
     color: #5d7690;
     background: #f7fbff;
     font-weight: 600;
@@ -132,7 +131,7 @@
 
 .diffField {
   color: #173f67 !important;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -165,10 +164,9 @@
 
 .mobileKicker {
   color: #5d7690 !important;
-  font-size: 0.66rem !important;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 700;
+  font-size: 0.72rem !important;
+  letter-spacing: 0.03em;
+  font-weight: 600;
 }
 
 @media (max-width: 767px) {

@@ -1,6 +1,6 @@
 @use "sass:color";
 // Base Font
-$font-size-base: 14px;
+$font-size-base: 16px;
 $font-size-sm: $font-size-base * .875;
 $font-size-lg: $font-size-base * 1.25;
 $font-weight-lighter: lighter;
@@ -12,7 +12,7 @@ $font-weight-bold: 700;
 $font-weight-bolder: bolder;
 
 // Font Family
-$font-family-primary: "Inter", sans-serif;
+$font-family-primary: var(--font-sans);
 $font-awesome: "Fontawesome";
 $font-iconsax: 'iconsax';
 

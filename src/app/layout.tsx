@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Sans_Arabic, Inter } from 'next/font/google';
 import Script from 'next/script';
 import { locales } from '@/i18n/request';
 import { buildSiteMetadata } from '@/lib/seo/metadata';
@@ -8,9 +8,15 @@ import { site } from '@/lib/seo/site';
 const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
-  preload: false,
   display: 'swap',
   variable: '--font-inter',
+});
+
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-ibm-plex-sans-arabic',
 });
 
 /**
@@ -45,7 +51,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" dir="ltr" className={inter.variable} data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      dir="ltr"
+      className={`${inter.variable} ${ibmPlexSansArabic.variable}`}
+      data-scroll-behavior="smooth"
+    >
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -60,10 +71,8 @@ export default function RootLayout({
         {/* Connection warm-up for render-critical and third-party origins */}
         <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
         <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-        <link rel="dns-prefetch" href="//chatling.ai" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://chatling.ai" crossOrigin="anonymous" />
 
         {/* Bootstrap (render-critical for shared grid/utilities) */}
         <link
@@ -96,22 +105,6 @@ export default function RootLayout({
             })(window, document, "clarity", "script", "u69yeirgmi");
           `}
         </Script>
-
-        {/* Chatling */}
-        <Script id="chatling-script" strategy="lazyOnload">
-          {`
-            window.chtlConfig = { chatbotId: "9941775766" };
-            (function () {
-              var s = document.createElement('script');
-              s.async = true;
-              s.id = 'chtl-script';
-              s.setAttribute('data-id', '9941775766');
-              s.src = 'https://chatling.ai/js/embed.js';
-              document.body.appendChild(s);
-            })();
-          `}
-        </Script>
-
         {/* Meta Pixel */}
         <Script id="facebook-pixel" strategy="lazyOnload">
           {`

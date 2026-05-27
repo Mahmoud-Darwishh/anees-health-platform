@@ -88,6 +88,19 @@ export default async function LocaleLayout({
         <MobileBottomNav />
         <PwaInstallPrompt />
       </div>
+      <Script id="chatling-script" strategy="lazyOnload">
+        {`
+          window.chtlConfig = { chatbotId: "9941775766" };
+          (function () {
+            var s = document.createElement('script');
+            s.async = true;
+            s.id = 'chtl-script';
+            s.setAttribute('data-id', '9941775766');
+            s.src = 'https://chatling.ai/js/embed.js';
+            document.body.appendChild(s);
+          })();
+        `}
+      </Script>
       {/* Bootstrap JS */}
       <Script
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"

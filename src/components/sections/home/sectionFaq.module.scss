@@ -47,7 +47,7 @@
   font-weight: $font-weight-semibold;
   color: $brand-dark-blue;
   letter-spacing: -0.025em;
-  line-height: 1.2;
+  line-height: 1.28;
   margin: 0;
 
   @include respond-below(custom991) {
@@ -113,9 +113,9 @@
 .question {
   flex: 1;
   font-size: 17px;
-  font-weight: $font-weight-semibold;
+  font-weight: $font-weight-medium;
   color: $brand-dark-blue;
-  line-height: 1.5;
+  line-height: 1.62;
   letter-spacing: -0.005em;
   transition: color 0.2s ease;
 
@@ -169,5 +169,5 @@
   margin: 0;
   font-size: 15px;
   color: #5a6573;
-  line-height: 1.75;
+  line-height: 1.86;
 }

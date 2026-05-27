@@ -64,11 +64,88 @@ body {
   // `clip` (not `hidden`) prevents horizontal overflow without creating a
   // scroll container — which would break `position: sticky` on the header.
   overflow-x: clip;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  --font-sans: var(--font-sans-en);
+  --font-body-line-height-current: var(--font-body-line-height);
+  font-family: var(--font-sans);
+  font-size: var(--font-body-size-mobile);
+  line-height: var(--font-body-line-height-current);
+  font-weight: var(--font-weight-regular);
+  color: variables.$text-color;
+  text-rendering: optimizeLegibility;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: var(--font-body-size-tablet);
+  }
+}
+
+@media (min-width: 992px) {
+  body {
+    font-size: var(--font-body-size-desktop);
+  }
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+select,
+textarea {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+p,
+li,
+dt,
+dd,
+blockquote {
+  line-height: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.18;
+  color: variables.$title-color;
+  text-wrap: balance;
+}
+
+[lang='ar'] {
+  --font-sans: var(--font-sans-ar);
+  --font-body-line-height-current: var(--font-body-line-height-ar);
+  font-family: var(--font-sans);
+  line-height: var(--font-body-line-height-current);
+}
+
+[lang='ar'] h1,
+[lang='ar'] h2,
+[lang='ar'] h3,
+[lang='ar'] h4,
+[lang='ar'] h5,
+[lang='ar'] h6 {
+  line-height: 1.3;
 }
 
 #main-content:focus {
@@ -115,6 +192,16 @@ a {
 
 :root {
   --color-brand-dark-blue: #{variables.$brand-dark-blue};
+  --font-sans-en: var(--font-inter), 'Inter', 'Segoe UI', sans-serif;
+  --font-sans-ar: var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic', 'Tahoma', sans-serif;
+  --font-body-size-mobile: 1rem;
+  --font-body-size-tablet: 1.0625rem;
+  --font-body-size-desktop: 1.125rem;
+  --font-body-line-height: 1.72;
+  --font-body-line-height-ar: 1.98;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
   --reveal-duration: 0.30s;
   --reveal-ease: cubic-bezier(0.22, 0.7, 0.3, 1);
   --reveal-distance: 12px;

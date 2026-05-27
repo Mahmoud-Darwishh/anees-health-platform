@@ -8,7 +8,7 @@
   display: grid;
   grid-template-columns: 62px 280px minmax(0, 1fr);
   background: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-family: var(--font-sans);
 }
 
 .overlay {
@@ -103,10 +103,9 @@
 
   span {
     color: #1a4a77;
-    font-size: 0.76rem;
+    font-size: 0.79rem;
     font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 }
 
@@ -143,15 +142,14 @@
   align-items: center;
   justify-content: center;
   color: #1b4f78;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 0.95rem;
 }
 
 .profileLabel {
   margin: 0;
-  font-size: 0.64rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
   color: #5d7892;
 }
 
@@ -163,8 +161,8 @@
   background: #eef5fc;
   color: #1b4f78;
   border: 1px solid #cadef0;
-  padding: 0.16rem 0.48rem;
-  font-size: 0.7rem;
+  padding: 0.22rem 0.58rem;
+  font-size: 0.74rem;
   font-weight: 600;
 }
 
@@ -175,10 +173,9 @@
 
   span {
     color: #5f7b96;
-    font-size: 0.68rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   input {
@@ -204,10 +201,9 @@
 .sectionTitle {
   margin: 0 0 0.5rem;
   color: #66829c;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .navList {
@@ -250,12 +246,12 @@
   border-radius: 999px;
   background: #174b78;
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0.36rem;
+  padding: 0 0.42rem;
 }
 
 .noResults {
@@ -289,7 +285,7 @@
     color: #143a60;
     font-size: 1.34rem;
     font-weight: 600;
-    line-height: 1.15;
+    line-height: 1.24;
   }
 
   p {
@@ -297,6 +293,7 @@
     color: #5a748f;
     font-size: 0.92rem;
     font-weight: 400;
+    line-height: 1.62;
   }
 }
 
@@ -329,8 +326,8 @@
   background: #ffffff;
   color: #1e507d;
   text-decoration: none;
-  padding: 0.2rem 0.58rem;
-  font-size: 0.72rem;
+  padding: 0.26rem 0.68rem;
+  font-size: 0.76rem;
   font-weight: 600;
 }
 
@@ -338,7 +335,8 @@
   margin: 0.44rem 0 0;
   color: #0f385d !important;
   font-size: 0.98rem !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
+  line-height: 1.58;
 }
 
 .mobileMenuButton {
@@ -358,11 +356,10 @@
   border: 1px solid #c7d9eb;
   background: #edf5fd;
   color: #1f4f7b;
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.16rem 0.44rem;
+  letter-spacing: 0.03em;
+  padding: 0.22rem 0.54rem;
 }
 
 .metaText {
@@ -420,7 +417,7 @@
     margin: 0;
     color: #2f5678;
     font-size: 0.82rem;
-    line-height: 1.45;
+    line-height: 1.62;
   }
 }
 
@@ -446,7 +443,7 @@
     color: #153d63;
     font-size: 1.2rem;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.3;
   }
 
   span {

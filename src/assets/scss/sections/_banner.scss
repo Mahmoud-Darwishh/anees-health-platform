@@ -121,8 +121,8 @@
 // ── Headline ──────────────────────────────────────────────────────────────────
 .banner-title {
   font-size: clamp(2rem, 4.2vw, 3.25rem);
-  font-weight: 700;
-  line-height: 1.12;
+  font-weight: 600;
+  line-height: 1.18;
   letter-spacing: -0.02em;
   color: #132c4d;
   margin: 0;
@@ -139,7 +139,7 @@
 // ── Subtitle ──────────────────────────────────────────────────────────────────
 .banner-subtitle {
   font-size: clamp(0.95rem, 1.3vw, 1.1rem);
-  line-height: 1.55;
+  line-height: 1.72;
   color: #5a6b80;
   margin: 0;
   max-width: 56ch;

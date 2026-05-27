@@ -57,9 +57,8 @@
 
   span {
     color: #6c869f;
-    font-size: 0.74rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
     font-weight: 600;
   }
 
@@ -103,11 +102,10 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 0.25rem 0.68rem;
-  font-size: 0.74rem;
+  padding: 0.3rem 0.76rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .riskCritical {
@@ -143,7 +141,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  line-height: 1.2;
+  line-height: 1.34;
 }
 
 .tabLink {
@@ -175,7 +173,7 @@
     margin: 0.34rem 0 0;
     color: #5d7892;
     font-size: 0.82rem;
-    line-height: 1.48;
+    line-height: 1.62;
   }
 }
 
@@ -197,10 +195,9 @@
   dt {
     margin: 0;
     color: #68829c;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.02em;
+    font-weight: 600;
   }
 
   dd {
@@ -208,7 +205,7 @@
     color: #1e507c;
     font-size: 0.84rem;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.56;
   }
 }
 
@@ -239,7 +236,7 @@
     margin: 0.18rem 0 0;
     color: #56718c;
     font-size: 0.78rem;
-    line-height: 1.48;
+    line-height: 1.62;
   }
 }
 
@@ -248,11 +245,10 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 0.14rem 0.5rem;
-  font-size: 0.67rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  padding: 0.2rem 0.58rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .layerActive {
@@ -277,11 +273,14 @@
     margin: 0;
     color: $brand-dark-blue;
     font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.24;
   }
 
   p {
     margin: 0.2rem 0 0;
     color: #5e7590;
+    line-height: 1.6;
   }
 }
 
@@ -295,10 +294,9 @@
 .kicker {
   margin: 0;
   color: #6b8098;
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  font-weight: 600;
 }
 
 .navLink {
@@ -308,7 +306,7 @@
   color: #204f7a;
   text-decoration: none;
   padding: 0.48rem 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .primaryLinkBtn,
@@ -318,7 +316,7 @@
   justify-content: center;
   border-radius: 9px;
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.55rem 0.75rem;
 }
 
@@ -413,7 +411,7 @@
       margin: 0;
       color: #244869;
       font-size: 0.82rem;
-      line-height: 1.5;
+      line-height: 1.64;
       white-space: pre-wrap;
     }
   }
@@ -426,15 +424,14 @@
   background: #edf5ff;
   border: 1px solid #c9daf1;
   color: #27527c;
-  padding: 0.15rem 0.45rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  padding: 0.22rem 0.54rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .timelineTitle {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .timelineSubtitle {
@@ -545,11 +542,10 @@
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 0.18rem 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .draftBadge {
@@ -573,10 +569,9 @@
 .noteSubhead {
   margin: 0 0 0.35rem;
   color: #4b6a87;
-  font-size: 0.76rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 .inlineList {
@@ -610,7 +605,7 @@
   color: #1f4f7b;
   border-radius: 8px;
   padding: 0.42rem 0.58rem;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.72rem;
 }
 
@@ -661,7 +656,7 @@
   color: #9d2737;
   border-radius: 9px;
   padding: 0.45rem 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.76rem;
 }
 
@@ -697,6 +692,7 @@
     strong {
       color: #163d64;
       font-size: 0.78rem;
+      font-weight: 600;
     }
 
     span {
@@ -709,7 +705,7 @@
       margin: 0.12rem 0 0;
       color: #244869;
       font-size: 0.74rem;
-      line-height: 1.4;
+      line-height: 1.56;
       white-space: normal;
       display: -webkit-box;
       -webkit-line-clamp: 2;

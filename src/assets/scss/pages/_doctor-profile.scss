@@ -104,10 +104,10 @@ $gray-light: #f0f2f5;
 
   .doctor-name-display {
     font-size: 2rem;
-    font-weight: 700;
+    font-weight: 600;
     color: $text-dark;
     margin-bottom: 0.35rem;
-    line-height: 1.15;
+    line-height: 1.22;
 
     @media (max-width: 768px) {
       font-size: 1.35rem;
@@ -398,8 +398,8 @@ $gray-light: #f0f2f5;
 
   .about-content {
     .bio-text {
-      font-size: 0.95rem;
-      line-height: 1.8;
+      font-size: 1rem;
+      line-height: 1.92;
       color: $text-muted;
       max-width: 900px;
       padding: 1.5rem;
@@ -466,14 +466,15 @@ $gray-light: #f0f2f5;
 
     h3 {
       font-size: 1.2rem;
-      font-weight: 700;
+      font-weight: 600;
       color: $text-dark;
       margin-bottom: 0.75rem;
+      line-height: 1.42;
     }
 
     .service-price {
       font-size: 1.5rem;
-      font-weight: 800;
+      font-weight: 700;
       color: $primary;
       margin-bottom: 0.35rem;
 
@@ -504,7 +505,7 @@ $gray-light: #f0f2f5;
 
     .block-title {
       font-size: 1rem;
-      font-weight: 700;
+      font-weight: 600;
       color: $text-dark;
       margin-bottom: 1.1rem;
       display: flex;
@@ -548,10 +549,11 @@ $gray-light: #f0f2f5;
       flex: 1;
 
       .degree {
-        font-weight: 700;
+        font-weight: 600;
         color: $text-dark;
         margin-bottom: 0.15rem;
         font-size: 1rem;
+        line-height: 1.5;
       }
 
       .university {
@@ -664,9 +666,10 @@ $gray-light: #f0f2f5;
 
       h3 {
         font-size: 1.1rem;
-        font-weight: 700;
+        font-weight: 600;
         color: $text-dark;
         margin: 0;
+        line-height: 1.42;
       }
 
       .slots-badge {
@@ -796,7 +799,7 @@ $gray-light: #f0f2f5;
       font-style: italic;
       color: $text-muted;
       margin-bottom: 1rem;
-      line-height: 1.6;
+      line-height: 1.78;
     }
 
     .testimonial-author {
@@ -883,7 +886,7 @@ $gray-light: #f0f2f5;
 
   .section-title {
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 600;
     color: $text-dark;
     margin-bottom: 1.5rem;
     position: relative;
@@ -936,10 +939,10 @@ $gray-light: #f0f2f5;
 
   .faq-question {
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0;
     color: $text-dark;
-    line-height: 1.5;
+    line-height: 1.62;
   }
 
   .faq-icon {
@@ -979,7 +982,7 @@ $gray-light: #f0f2f5;
 
     h2 {
       font-size: 2rem;
-      font-weight: 800;
+      font-weight: 600;
       margin-bottom: 1rem;
       color: $white;
 
@@ -993,6 +996,7 @@ $gray-light: #f0f2f5;
       margin-bottom: 1.5rem;
       color: rgba($white, 0.95);
       max-width: 600px;
+      line-height: 1.72;
       margin-left: auto;
       margin-right: auto;
     }

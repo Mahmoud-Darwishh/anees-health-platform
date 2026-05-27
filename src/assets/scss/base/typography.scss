@@ -2,10 +2,10 @@
 @use "../utils/variables";
 
 
-// Inter is loaded via next/font in root layout — no Google Fonts @import needed
+// Fonts are loaded via next/font in the root layout and switched per locale.
 
-$__body__font__family: var(--font-inter), 'Inter', sans-serif;
-$home_ten__font__family: var(--font-inter), 'Inter', sans-serif;
+$__body__font__family: var(--font-sans);
+$home_ten__font__family: var(--font-sans);
 $feather__font__family:"feather";
 $fontawesome__family: "Font Awesome 5 Free";
 
@@ -16,7 +16,7 @@ $__medium:500;
 $regular:400;
 $light:300;
 
-$__body__font__size:0.9375rem;
+$__body__font__size:1rem;
 $__menu__font__size:16px;
 $__button__font__size:18px;
 $__font__size__6:6px;
@@ -54,22 +54,25 @@ $__font__size__62:62px;
 $__font__size__76:76px;
 
 h1{
-	font-weight:variables.$normal;
+	font-weight:variables.$font-weight-medium;
 	font-size:$font__size__40;
+	line-height: 1.18;
 	@include mixins.respond-below(md){
 		font-size:$font__size__26 + 1;
 	}
 }
 h2{
-	font-weight:variables.$normal;
+	font-weight:variables.$font-weight-medium;
 	font-size:$font__size__30;
+	line-height: 1.2;
 	@include mixins.respond-below(md){
 		font-size:$font__size__22 + 1;
 	}
 }
 h3{
-	font-weight:variables.$normal;
+	font-weight:variables.$font-weight-medium;
 	font-size:$font__size__24;
+	line-height: 1.24;
 	@include mixins.respond-below(custom1023){
 		font-size:$font__size__20;
 	}
@@ -78,8 +81,9 @@ h3{
 	}
 }
 h4{
-	font-weight:variables.$normal;
+	font-weight:variables.$font-weight-medium;
 	font-size:$font__size__18;
+	line-height: 1.28;
 	@include mixins.respond-below(custom1023){
 		font-size:$font__size__18;
 	}
@@ -88,15 +92,17 @@ h4{
 	}
 }
 h5{
-	font-weight:variables.$normal;
+	font-weight:variables.$font-weight-medium;
 	font-size:$font__size__18 + 1;
+	line-height: 1.32;
 	@include mixins.respond-below(custom1023){
 		font-size:$font__size__18;
 	}
 }
 h6{
-	font-weight:variables.$normal;
+	font-weight:variables.$font-weight-medium;
 	font-size:$font__size__18;
+	line-height: 1.36;
 	@include mixins.respond-below(custom1023){
 		font-size:$font__size__16;
 	}

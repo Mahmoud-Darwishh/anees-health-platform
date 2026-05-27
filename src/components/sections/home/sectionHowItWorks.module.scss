@@ -47,7 +47,7 @@
   font-weight: $font-weight-semibold;
   color: $brand-dark-blue;
   letter-spacing: -0.025em;
-  line-height: 1.2;
+  line-height: 1.28;
   margin: 0 0 16px;
 
   @include respond-below(custom991) {
@@ -62,7 +62,7 @@
 .subtitle {
   font-size: 16px;
   color: #6a7585;
-  line-height: 1.6;
+  line-height: 1.75;
   margin: 0;
 }
 
@@ -154,17 +154,17 @@
 
 .stepTitle {
   font-size: 19px;
-  font-weight: $font-weight-semibold;
+  font-weight: $font-weight-medium;
   color: $brand-dark-blue;
   margin: 0 0 10px;
-  line-height: 1.4;
+  line-height: 1.48;
   letter-spacing: -0.01em;
 }
 
 .stepDesc {
   font-size: 15px;
   color: #6a7585;
-  line-height: 1.65;
+  line-height: 1.78;
   margin: 0;
   max-width: 260px;
 
