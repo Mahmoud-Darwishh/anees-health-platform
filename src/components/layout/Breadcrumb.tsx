@@ -13,7 +13,7 @@ type BreadcrumbProps = {
 
 const Breadcrumb = ({ items, title }: BreadcrumbProps) => {
   return (
-    <div className="breadcrumb-bar overflow-visible">
+    <div className="breadcrumb-bar">
       <div className="container">
         <div className="row align-items-center inner-banner">
           <div className="col-12 text-center">
@@ -39,21 +39,6 @@ const Breadcrumb = ({ items, title }: BreadcrumbProps) => {
             </nav>
           </div>
         </div>
-      </div>
-
-      <div className="breadcrumb-bg">
-        <img
-          src="/assets/img/bg/breadcrumb-icon.png"
-          alt=""
-          aria-hidden="true"
-          className="breadcrumb-bg-03"
-        />
-        <img
-          src="/assets/img/bg/breadcrumb-icon.png"
-          alt=""
-          aria-hidden="true"
-          className="breadcrumb-bg-04"
-        />
       </div>
     </div>
   );

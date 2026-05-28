@@ -1,238 +1,140 @@
-# Complete Medplum Setup Guide (CLI or GitHub)
+# Medplum Handover: Where We Are, What Is Done, What Is Next
 
-This is the exact execution plan for your stack:
+Last updated: 2026-05-27
 
-- Frontend: Next.js on Vercel
-- EHR backend: Medplum on Hostinger VPS (Ubuntu 24.04)
-- Database: PostgreSQL
-- Edge security: Cloudflare
-- Auth: Google OAuth
+This file is the full plain-English status for your current Medplum + Anees platform setup.
 
-## 0. What You Must Decide First
+## 1) Short Answer
 
-1. Medplum domain (example: `medplum.yourdomain.com`)
-2. Server access method (SSH key is required)
-3. PostgreSQL host (same VPS or managed)
-4. Whether to run with Docker Compose (recommended) or direct Node
+- Yes, you can keep building UI locally on localhost.
+- No, UI editing does not require creating a booking.
+- Booking was only used to verify the backend sync path to Medplum.
 
-## 1. VPS Preparation (run on Ubuntu 24.04)
+## 2) Current Architecture
 
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y git curl unzip ca-certificates gnupg lsb-release ufw fail2ban
+- Main app (Next.js): Vercel deployment and local dev.
+- Medplum server: self-hosted on Hostinger VPS.
+- Medplum app UI: self-hosted on VPS.
+- Public domains:
+  - https://medplum.aneeshealth.com (Medplum app)
+  - https://api.medplum.aneeshealth.com (Medplum API)
 
-# Firewall
-sudo ufw allow OpenSSH
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw --force enable
+## 3) What Was Completed
 
-# Optional: lock SSH password auth (recommended)
-# sudo nano /etc/ssh/sshd_config
-#   PasswordAuthentication no
-#   PubkeyAuthentication yes
-# sudo systemctl restart ssh
-```
+### VPS and Medplum
 
-## 2. Choose One Bootstrap Path
+- Medplum built from source and running.
+- Server health endpoint confirmed working.
+- Public HTTPS routing configured and working for both subdomains.
+- TLS certificates issued and active.
+- reCAPTCHA issue handled (register no longer blocked by invalid key setup).
+- Process persistence added using systemd services:
+  - medplum-server.service
+  - medplum-app.service
 
-### Option A: CLI bootstrap
+### Application Code (this repo)
 
-```bash
-cd /opt
-sudo npm init medplum
-```
+- Added Medplum server-side client integration.
+- Added patient helper methods for Medplum reads and upsert.
+- Wired booking-create API route to upsert patient in Medplum.
+- Build and type-check pass.
 
-### Option B: GitHub clone bootstrap
+Files involved:
 
-```bash
-cd /opt
-sudo git clone https://github.com/medplum/medplum.git
-cd medplum
-```
+- src/lib/medplum/client.ts
+- src/lib/medplum/config.ts
+- src/lib/medplum/patients.ts
+- src/app/api/bookings/create/route.ts
+- package.json
 
-Use one option only.
+## 4) What Works Right Now
 
-## 3. Install Docker Engine + Compose Plugin
+- Local UI edits and preview work as usual with npm run dev.
+- Production app can authenticate to Medplum when env vars are set correctly.
+- New booking flow can sync patient data to Medplum (non-blocking if Medplum is down).
 
-```bash
-sudo apt-get remove -y docker.io docker-doc docker-compose podman-docker containerd runc || true
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+## 5) What Is Not Finished Yet
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+- Not all patient-related flows are synced to Medplum yet (only booking create path is wired).
+- No dedicated test endpoint yet for quick Medplum connectivity checks.
+- Migration baseline between existing local patient records and Medplum is still pending.
 
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-```
+## 6) Required Action Now (Important)
 
-## 4. PostgreSQL for Medplum
+The ClientApplication secret was exposed in chat history. Treat it as compromised.
 
-If Postgres is on the VPS:
+Do this now:
 
-```bash
-sudo apt install -y postgresql postgresql-contrib
-sudo -u postgres psql
-```
+1. Rotate Medplum ClientApplication secret.
+2. Update Vercel env vars with the new secret.
+3. Redeploy.
 
-Inside psql:
+Required Vercel env vars:
 
-```sql
-CREATE ROLE medplum_user WITH LOGIN PASSWORD 'CHANGE_ME_STRONG_PASSWORD';
-CREATE DATABASE medplum_db OWNER medplum_user;
-\q
-```
+- MEDPLUM_BASE_URL
+- MEDPLUM_CLIENT_ID
+- MEDPLUM_CLIENT_SECRET
 
-## 5. Medplum Environment File
+Set them in all environments you use (Production, Preview, Development).
 
-Create a server env file (do not commit secrets):
+## 7) How To Work Day To Day (UI and coding)
 
-```bash
-sudo mkdir -p /opt/medplum-deploy
-sudo nano /opt/medplum-deploy/.env
-```
+For UI changes:
 
-Minimum values:
+1. npm run dev
+2. Open http://localhost:3000/en
+3. Edit files and refresh browser
 
-```env
-MEDPLUM_BASE_URL=https://medplum.yourdomain.com
-POSTGRES_URL=postgresql://medplum_user:CHANGE_ME_STRONG_PASSWORD@127.0.0.1:5432/medplum_db
+No booking required for pure UI/design changes.
 
-GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
+## 8) How To Verify Medplum Integration
 
-# Add Medplum-required JWT/signing/session secrets from official docs.
-```
+Choose one:
 
-## 6. Cloudflare Setup (must do in dashboard)
-
-1. Add proxied DNS A record: `medplum.yourdomain.com` -> VPS public IP.
-2. SSL/TLS mode: Full (strict).
-3. Enable WAF managed rules.
-4. Add rate limiting rules:
-- strict for auth/token endpoints
-- moderate for FHIR search endpoints
-5. Add Bot Fight mode / bot controls.
-
-## 7. Reverse Proxy + TLS
-
-Use Nginx on VPS:
-
-```bash
-sudo apt install -y nginx
-sudo systemctl enable nginx
-sudo systemctl start nginx
-```
-
-Create config:
-
-```bash
-sudo nano /etc/nginx/sites-available/medplum
-```
-
-Template:
-
-```nginx
-server {
-  listen 80;
-  server_name medplum.yourdomain.com;
-
-  location / {
-    proxy_pass http://127.0.0.1:8103;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-  }
-}
-```
-
-Enable site:
-
-```bash
-sudo ln -s /etc/nginx/sites-available/medplum /etc/nginx/sites-enabled/medplum
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-Cloudflare will terminate TLS at edge; keep origin locked down.
-
-## 8. Run Medplum
-
-Run with your chosen bootstrap output and env file.
-
-If using Docker Compose:
-
-```bash
-cd /opt/medplum
-# adjust compose files to use /opt/medplum-deploy/.env
-docker compose up -d
-```
+- Option A: Normal app flow (create a test booking)
+- Option B: Trigger the API route directly (Postman/curl) to avoid UI clicking
 
 Then verify:
 
-```bash
-curl -I https://medplum.yourdomain.com
-curl https://medplum.yourdomain.com/.well-known/openid-configuration
-```
+1. Check deployment logs for warnings.
+2. In Medplum UI, find patient by phone or identifier.
+3. Confirm identifier system/value exists and data matches.
 
-## 9. Backup (encrypted, automated)
+Expected identifier system used by code:
 
-Create script:
+- https://anees.health/fhir/identifier/patient-code
 
-```bash
-sudo nano /opt/medplum-deploy/backup-medplum.sh
-chmod +x /opt/medplum-deploy/backup-medplum.sh
-```
+## 9) Safe Failure Behavior
 
-Script template:
+Booking creation is intentionally non-blocking for Medplum sync.
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-TS=$(date +%F-%H%M)
-OUT=/opt/medplum-deploy/backups
-mkdir -p "$OUT"
-pg_dump "postgresql://medplum_user:CHANGE_ME_STRONG_PASSWORD@127.0.0.1:5432/medplum_db" | gzip > "$OUT/medplum-$TS.sql.gz"
-# Optional: encrypt with gpg and upload to object storage
-find "$OUT" -type f -mtime +30 -delete
-```
+Meaning:
 
-Add cron:
+- Booking can still succeed if Medplum sync fails.
+- Failures are logged as warnings so user experience is not broken.
 
-```bash
-crontab -e
-# daily at 2:30 AM
-30 2 * * * /opt/medplum-deploy/backup-medplum.sh >> /var/log/medplum-backup.log 2>&1
-```
+## 10) Immediate Next Steps (Recommended Order)
 
-## 10. Monitoring
+1. Rotate Medplum secret and update Vercel env.
+2. Redeploy and run one end-to-end sync test.
+3. Add Medplum sync in patient register flow.
+4. Add Medplum sync/lookup in payment webhook flow if needed.
+5. Add dedicated health/test endpoint for Medplum connectivity.
+6. Plan migration baseline for existing patients.
 
-Minimum stack:
+## 11) Quick Troubleshooting
 
-- Uptime checks (HTTP 200 on Medplum URL)
-- CPU/RAM/disk alerts
-- Postgres connection and storage alerts
-- Cloudflare security event alerts
+If sync does not appear in Medplum:
 
-## 11. Connect Next.js App to Medplum
+1. Verify Vercel env values exist in the correct environment.
+2. Confirm new deployment happened after env update.
+3. Confirm api.medplum.aneeshealth.com is reachable.
+4. Check Vercel function logs for booking create route.
+5. Re-check client id/secret and rotate again if uncertain.
 
-This repo already has starting utilities:
+## 12) Notes For Future You
 
-- `src/lib/medplum/config.ts`
-- `src/lib/medplum/fhir-extensions.ts`
-- `src/lib/medplum/care-plans.ts`
-
-Use these next to build server-side API routes that read/write FHIR resources.
-
-## 12. Immediate Manual Tasks You Must Do
-
-1. Create Google OAuth app credentials and add callback URLs.
-2. Create real Medplum secrets and place them in VPS env file.
-3. Configure Cloudflare DNS + WAF + rate limiting.
-4. Run first restore test from backup to validate disaster recovery.
+- Use localhost for UI work.
+- Use API/integration tests for Medplum behavior.
+- Keep Medplum secret server-side only.
+- Never put Medplum secret in client code.

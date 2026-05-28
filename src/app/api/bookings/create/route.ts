@@ -11,6 +11,8 @@ import {
 import { getBookingPrices } from '@/lib/api/pricing';
 import { validatePromocode, claimPromocodeWithinTx } from '@/lib/api/promocode';
 import { prisma } from '@/lib/db/prisma';
+import { upsertMedplumPatient } from '@/lib/medplum/patients';
+import { logger } from '@/lib/utils/app-logger';
 import { resolveCorsHeaders } from '@/lib/utils/cors';
 import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
 
@@ -152,27 +154,43 @@ export async function POST(request: NextRequest) {
     const userAgent = clip(request.headers.get('user-agent'), MAX.userAgent);
 
     const normalizedPhone = `${countryCode}${phoneNumber}`;
-    const booking = await prisma.$transaction(async (tx) => {
+    const { booking, patient } = await prisma.$transaction(async (tx) => {
       const existingPatient = await tx.patient.findFirst({
         where: { phone: normalizedPhone },
         orderBy: { createdAt: 'desc' },
       });
 
-      if (existingPatient) {
-        await tx.patient.update({
-          where: { id: existingPatient.id },
-          data: { fullName, status: 'active' },
-        });
-      } else {
-        await tx.patient.create({
-          data: {
-            code: buildPatientCode(),
-            fullName,
-            phone: normalizedPhone,
-            status: 'new',
-          },
-        });
-      }
+      const patient = existingPatient
+        ? await tx.patient.update({
+            where: { id: existingPatient.id },
+            data: { fullName, status: 'active' },
+            select: {
+              id: true,
+              code: true,
+              fullName: true,
+              phone: true,
+              gender: true,
+              dateOfBirth: true,
+              nationalId: true,
+            },
+          })
+        : await tx.patient.create({
+            data: {
+              code: buildPatientCode(),
+              fullName,
+              phone: normalizedPhone,
+              status: 'new',
+            },
+            select: {
+              id: true,
+              code: true,
+              fullName: true,
+              phone: true,
+              gender: true,
+              dateOfBirth: true,
+              nationalId: true,
+            },
+          });
 
       // Re-claim promocode atomically to defend against races on usage limits
       if (promoId) {
@@ -183,7 +201,7 @@ export async function POST(request: NextRequest) {
       }
 
       // TODO(audit): wire when auth lands — emit AuditLog row for booking create
-      return tx.onlineBooking.create({
+      const booking = await tx.onlineBooking.create({
         data: {
           bookingRef,
           fullName,
@@ -203,7 +221,26 @@ export async function POST(request: NextRequest) {
           userAgent,
         },
       });
+
+      return { booking, patient };
     });
+
+    try {
+      await upsertMedplumPatient({
+        code: patient.code,
+        fullName: patient.fullName,
+        phone: patient.phone,
+        gender: patient.gender,
+        dateOfBirth: patient.dateOfBirth,
+        nationalId: patient.nationalId,
+      });
+    } catch (error) {
+      logger.warn('Booking created but Medplum patient sync failed', {
+        bookingRef: booking.bookingRef,
+        patientId: patient.id,
+        error: error instanceof Error ? error.message : 'unknown',
+      });
+    }
 
     return NextResponse.json(
       {
