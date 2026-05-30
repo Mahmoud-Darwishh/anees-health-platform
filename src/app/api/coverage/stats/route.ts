@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getCoverageStats } from '@/lib/utils/logger';
 
 /**
@@ -7,7 +7,7 @@ import { getCoverageStats } from '@/lib/utils/logger';
  * 
  * @route GET /api/coverage/stats
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const stats = await getCoverageStats();
     

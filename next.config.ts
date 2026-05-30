@@ -22,6 +22,12 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Keep close to app-level 10 MB upload cap while allowing multipart overhead.
+      bodySizeLimit: '12mb',
+    },
+  },
   // Image optimization for WebP and AVIF formats
   images: {
     formats: ['image/avif', 'image/webp'],

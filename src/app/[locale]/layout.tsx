@@ -47,7 +47,7 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
   const t = await getTranslations({ locale, namespace: 'common' });
     const direction = locale === 'ar' ? 'rtl' : 'ltr';
   const seoLocale: SupportedLocale = locale === 'ar' ? 'ar' : 'en';

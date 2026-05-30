@@ -95,7 +95,7 @@ function buildBaseMetadata(input: CommonInput): Metadata {
  * Per-route metadata overrides this.
  */
 export function buildSiteMetadata(): Metadata {
-  const title = 'Anees Health — Home Healthcare in Egypt | Doctor & Nurse Home Visits';
+  const title = 'Anees Health — Home Healthcare in Egypt';
   const description =
     'Anees Health is Egypt’s home healthcare platform. Book licensed doctor home visits, home nursing, home physiotherapy, lab tests at home, and chronic-care coordination across Greater Cairo. Bilingual (EN/AR), licensed clinicians, transparent pricing.';
   return {
@@ -158,12 +158,12 @@ export function buildSiteMetadata(): Metadata {
 
 export function buildHomeMetadata(locale: SupportedLocale): Metadata {
   const en = {
-    title: 'Anees Health — Home Healthcare in Egypt | Doctor & Nurse Home Visits',
+    title: 'Anees Health — Home Healthcare in Egypt',
     description:
       'Book licensed doctor home visits, home nursing, home physiotherapy, and lab tests at home across Greater Cairo. Egypt’s home healthcare platform — transparent pricing, bilingual coordinators, same-day visits.',
   };
   const ar = {
-    title: 'أنيس هيلث — رعاية صحية منزلية في مصر | زيارات أطباء وممرضين',
+    title: 'أنيس هيلث — رعاية صحية منزلية في مصر',
     description:
       'احجز زيارات أطباء وتمريضاً وعلاجاً طبيعياً وتحاليل في المنزل في القاهرة الكبرى. منصة الرعاية الصحية المنزلية في مصر — أسعار شفافة، منسقون باللغتين، زيارات في نفس اليوم.',
   };
@@ -184,7 +184,7 @@ export function buildHomeMetadata(locale: SupportedLocale): Metadata {
 export function buildDoctorsMetadata(locale: SupportedLocale): Metadata {
   const copy = locale === 'ar'
     ? {
-        title: 'أطباء أنيس هيلث للزيارات المنزلية | أطباء مرخصون في مصر',
+        title: 'أطباء أنيس هيلث للزيارات المنزلية',
         description: 'تصفح أطباء أنيس هيلث المرخصين للزيارات المنزلية والاستشارات في القاهرة الكبرى. تخصصات متعددة، رعاية في المنزل، حجز فوري.',
       }
     : {

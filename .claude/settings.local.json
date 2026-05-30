@@ -12,7 +12,10 @@
       "Bash(npx prisma *)",
       "Bash(taskkill //F //IM node.exe)",
       "Bash(node -e \"const m = require\\('./messages/en.json'\\); console.log\\(JSON.stringify\\(m.auth?.signout, null, 2\\)\\); console.log\\(JSON.stringify\\(Object.keys\\(m.auth || {}\\), null, 2\\)\\)\")",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(node scripts/create-admin-staff.mjs 2>&1)",
+      "Bash(ls -la src/app/\\\\[locale\\\\]/portal/)",
+      "Bash(find src/features/ehr -type f)"
     ],
     "additionalDirectories": [
       "c:\\Users\\madyo\\Desktop\\Anees NXTJS\\anees-health-platform\\src\\app\\[locale]\\payment\\mock"

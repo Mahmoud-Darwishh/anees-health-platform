@@ -1,33 +1,18 @@
 import { AuditAction, Prisma } from '@prisma/client';
 import { prisma } from './prisma';
 
+// Clinical records now live in Medplum (FHIR), which keeps its own server-side
+// audit trail. This Postgres audit extension covers the operational/finance
+// tables that still mutate in this app.
 const AUDITED_MODELS = new Set([
   'Patient',
+  'OnlineBooking',
   'Visit',
-  'MedicalHistory',
-  'Allergy',
-  'Medication',
-  'Diagnosis',
-  'VitalSigns',
-  'ProgressNote',
-  'ProgressNoteAddendum',
-  'Document',
-  'PhysioSessionReport',
-  'PhysioAttendanceProof',
-  'NurseDailyReport',
-  'CareTeamMessage',
-  'CareCallRoutingTicket',
-  'AiTriageCase',
-  'PatientCaregiver',
-  'PatientSocialHistory',
-  'VaccinationRecord',
-  'PatientRiskFlag',
-  'CareTask',
-  'LabOrder',
-  'ImagingOrder',
-  'NursingOrder',
-  'PhysioOrder',
-  'MedicationOrder',
+  'CarePlan',
+  'Invoice',
+  'Payment',
+  'Staff',
+  'User',
 ]);
 
 function safeJson(value: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {

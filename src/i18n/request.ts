@@ -4,13 +4,16 @@ import { notFound } from 'next/navigation';
 // List of supported locales
 export const locales = ['en', 'ar'] as const;
 export type Locale = (typeof locales)[number];
+export const defaultLocale: Locale = 'en';
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  // This typically corresponds to the `[locale]` segment
-  const locale = await requestLocale;
+  // This typically corresponds to the `[locale]` segment.
+  // In dev, requestLocale can be undefined during middleware churn/HMR.
+  const incomingLocale = await requestLocale;
+  const locale = incomingLocale ?? defaultLocale;
 
   // Validate that the incoming `locale` parameter is valid
-  if (!locale || !locales.includes(locale as Locale)) {
+  if (!locales.includes(locale as Locale)) {
     notFound();
   }
 

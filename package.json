@@ -10,7 +10,14 @@
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:status": "prisma migrate status",
+    "db:migrate:baseline": "node scripts/prisma/create-baseline-migration.mjs",
+    "db:push": "node scripts/prisma/db-push-unsafe.mjs",
+    "db:push:unsafe": "prisma db push",
+    "deploy:preflight": "node scripts/deploy/preflight.mjs",
+    "ci:migration-guard": "node scripts/ci/check-prisma-migration-guard.mjs",
+    "test:integration:caregiver-consent": "ts-node -P scripts/tests/tsconfig.integration.json scripts/tests/caregiver-consent.integration.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "seo:links": "node scripts/seo-link-audit.mjs",
@@ -40,7 +47,8 @@
     "sass": "^1.96.0",
     "slick-carousel": "^1.8.1",
     "ts-node": "^10.9.2",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

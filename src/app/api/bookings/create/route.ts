@@ -172,6 +172,7 @@ export async function POST(request: NextRequest) {
               gender: true,
               dateOfBirth: true,
               nationalId: true,
+              medplumPatientId: true,
             },
           })
         : await tx.patient.create({
@@ -189,6 +190,7 @@ export async function POST(request: NextRequest) {
               gender: true,
               dateOfBirth: true,
               nationalId: true,
+              medplumPatientId: true,
             },
           });
 
@@ -226,14 +228,24 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      await upsertMedplumPatient({
+      const synced = await upsertMedplumPatient({
         code: patient.code,
         fullName: patient.fullName,
         phone: patient.phone,
         gender: patient.gender,
         dateOfBirth: patient.dateOfBirth,
         nationalId: patient.nationalId,
+        medplumPatientId: patient.medplumPatientId,
       });
+
+      // Persist the Medplum id so future syncs read-by-id instead of searching.
+      if (synced.id && synced.id !== patient.medplumPatientId) {
+        // TODO(audit): wire when auth lands — emit AuditLog row for medplum link
+        await prisma.patient.update({
+          where: { id: patient.id },
+          data: { medplumPatientId: synced.id },
+        });
+      }
     } catch (error) {
       logger.warn('Booking created but Medplum patient sync failed', {
         bookingRef: booking.bookingRef,

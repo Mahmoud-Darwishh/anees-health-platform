@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations, useLocale } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   BookingFormState,
   getPackageEntry,
@@ -24,6 +24,7 @@ interface PromoState {
   code: string | null;
   discount: number;
   finalAmount: number;
+  baseAmount: number;
   errorKey: string | null;
 }
 
@@ -32,22 +33,18 @@ const INITIAL_PROMO: PromoState = {
   code: null,
   discount: 0,
   finalAmount: 0,
+  baseAmount: 0,
   errorKey: null,
 };
 
-export default function BookingSummary({
-  formState,
-  totalPrice,
-  isSubmitting,
-  specialties,
-  onPromocodeChange,
-}: BookingSummaryProps) {
+export default function BookingSummary(props: BookingSummaryProps) {
+  const { formState, totalPrice, isSubmitting, onPromocodeChange } = props;
   const t = useTranslations('booking');
   const locale = useLocale();
   const numberLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
   const [promoInput, setPromoInput] = useState('');
   const [promo, setPromo] = useState<PromoState>(INITIAL_PROMO);
-  const lastBaseRef = useRef<number>(totalPrice);
+  const isPromoApplied = promo.status === 'applied' && promo.baseAmount === totalPrice;
 
   const getVisitTypeLabel = () => {
     if (!formState.visitType) return '';
@@ -69,19 +66,17 @@ export default function BookingSummary({
 
   const hasServiceSelection = !!formState.visitType;
 
-  // Auto-clear applied promo when totalPrice changes (form edits invalidate it)
+  // Keep parent totals in sync when a previously applied promo becomes stale.
   useEffect(() => {
-    if (promo.status === 'applied' && lastBaseRef.current !== totalPrice) {
-      setPromo(INITIAL_PROMO);
+    if (promo.status === 'applied' && !isPromoApplied) {
       onPromocodeChange?.(null, 0, totalPrice);
     }
-    lastBaseRef.current = totalPrice;
-  }, [totalPrice, promo.status, onPromocodeChange]);
+  }, [promo.status, isPromoApplied, onPromocodeChange, totalPrice]);
 
   const applyPromocode = useCallback(async () => {
     const code = promoInput.trim().toUpperCase();
     if (!code || totalPrice <= 0) return;
-    setPromo({ status: 'loading', code: null, discount: 0, finalAmount: 0, errorKey: null });
+    setPromo({ status: 'loading', code: null, discount: 0, finalAmount: 0, baseAmount: 0, errorKey: null });
     try {
       const res = await fetch('/api/bookings/promocode/validate', {
         method: 'POST',
@@ -95,6 +90,7 @@ export default function BookingSummary({
           code: data.code,
           discount: Number(data.discount) || 0,
           finalAmount: Number(data.finalAmount) || totalPrice,
+          baseAmount: totalPrice,
           errorKey: null,
         };
         setPromo(next);
@@ -106,12 +102,13 @@ export default function BookingSummary({
           code: null,
           discount: 0,
           finalAmount: 0,
+          baseAmount: 0,
           errorKey: data?.error || 'invalid',
         });
         onPromocodeChange?.(null, 0, totalPrice);
       }
     } catch {
-      setPromo({ status: 'error', code: null, discount: 0, finalAmount: 0, errorKey: 'invalid' });
+      setPromo({ status: 'error', code: null, discount: 0, finalAmount: 0, baseAmount: 0, errorKey: 'invalid' });
       onPromocodeChange?.(null, 0, totalPrice);
     }
   }, [promoInput, totalPrice, onPromocodeChange]);
@@ -122,7 +119,7 @@ export default function BookingSummary({
     onPromocodeChange?.(null, 0, totalPrice);
   }, [onPromocodeChange, totalPrice]);
 
-  const finalTotal = promo.status === 'applied' ? promo.finalAmount : totalPrice;
+  const finalTotal = isPromoApplied ? promo.finalAmount : totalPrice;
   const formatMoney = (value: number) => value.toLocaleString(numberLocale);
 
   const handleWhatsAppClick = () => {
@@ -166,7 +163,7 @@ export default function BookingSummary({
                   <label htmlFor="promocode" className={styles.promoLabel}>
                     🎟️ {t('promocode.label')}
                   </label>
-                  {promo.status === 'applied' ? (
+                  {isPromoApplied ? (
                     <div className={styles.promoInputWrapper}>
                       <span className={styles.promoChip}>✓ {promo.code}</span>
                       <button
@@ -208,7 +205,7 @@ export default function BookingSummary({
                       </button>
                     </div>
                   )}
-                  {promo.status === 'applied' && (
+                  {isPromoApplied && (
                     <span className={`${styles.promoStatus} ${styles.promoStatusOk}`}>
                       {t('promocode.applied', { code: promo.code ?? '' })}
                     </span>
@@ -222,7 +219,7 @@ export default function BookingSummary({
               )}
 
               {/* Discount line */}
-              {promo.status === 'applied' && promo.discount > 0 && (
+              {isPromoApplied && promo.discount > 0 && (
                 <div className={`${styles.pricingRow} ${styles.discountRow}`}>
                   <span className={styles.pricingLabel}>
                     {t('promocode.discount')} ({promo.code})
@@ -238,7 +235,7 @@ export default function BookingSummary({
               <div className={styles.priceBox}>
                 <span className={styles.priceLabel}>{t('summary.totalPrice')}</span>
                 <span className={styles.priceValue}>
-                  {promo.status === 'applied' && promo.discount > 0 && (
+                  {isPromoApplied && promo.discount > 0 && (
                     <span className={styles.strikethrough}>{formatMoney(totalPrice)}</span>
                   )}
                   {formatMoney(finalTotal)}

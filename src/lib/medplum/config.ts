@@ -23,7 +23,3 @@ export function getMedplumConfig(): MedplumConfig {
     scopes: process.env.MEDPLUM_SCOPES?.trim() || 'openid profile email offline_access',
   };
 }
-
-export function getMedplumProjectId(): string {
-  return required('MEDPLUM_PROJECT_ID');
-}

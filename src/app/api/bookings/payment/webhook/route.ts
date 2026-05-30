@@ -8,6 +8,9 @@ import {
   maskWhatsAppChatId,
 } from '@/lib/auth/wapilot';
 import { buildPaymentConfirmationMessage } from '@/lib/utils/booking-whatsapp';
+import { upsertMedplumPatient } from '@/lib/medplum/patients';
+import { createProgramCarePlan } from '@/lib/medplum/care-plans';
+import type { CareProgramCode } from '@/lib/medplum/fhir-extensions';
 
 export async function POST(request: NextRequest) {
   // ── Parse body ─────────────────────────────────────────────────────────────
@@ -58,6 +61,8 @@ export async function POST(request: NextRequest) {
             fullName: true,
             countryCode: true,
             phoneNumber: true,
+            visitType: true,
+            packageType: true,
             amountEgp: true,
             discountEgp: true,
             promocodeCode: true,
@@ -204,6 +209,54 @@ export async function POST(request: NextRequest) {
               // Never let messaging crash the webhook
               console.error('[Webhook] Confirmation send threw for', booking.bookingRef, err);
             }
+          }
+          // ── Non-blocking Medplum sync + CarePlan ───────────────────────────
+          // Mirror the patient into Medplum and, for paid package bookings,
+          // open the matching program CarePlan. Never block the webhook on
+          // Medplum — Kashier retries would duplicate Invoices/Payments.
+          try {
+            const medplumPatient = await prisma.patient.findFirst({
+              where: { phone: normalizedPhone },
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                code: true,
+                fullName: true,
+                phone: true,
+                gender: true,
+                dateOfBirth: true,
+                nationalId: true,
+                medplumPatientId: true,
+              },
+            });
+
+            if (medplumPatient) {
+              const synced = await upsertMedplumPatient({
+                code: medplumPatient.code,
+                fullName: medplumPatient.fullName,
+                phone: medplumPatient.phone,
+                gender: medplumPatient.gender,
+                dateOfBirth: medplumPatient.dateOfBirth,
+                nationalId: medplumPatient.nationalId,
+                medplumPatientId: medplumPatient.medplumPatientId,
+              });
+
+              if (synced.id && synced.id !== medplumPatient.medplumPatientId) {
+                await prisma.patient.update({
+                  where: { id: medplumPatient.id },
+                  data: { medplumPatientId: synced.id },
+                });
+              }
+
+              if (booking.visitType === 'package' && booking.packageType && synced.id) {
+                await createProgramCarePlan({
+                  medplumPatientId: synced.id,
+                  program: booking.packageType as CareProgramCode,
+                });
+              }
+            }
+          } catch (err) {
+            console.error('[Webhook] Medplum sync/CarePlan failed for', booking.bookingRef, err);
           }
         } else {
           await prisma.$transaction(async (tx) => {

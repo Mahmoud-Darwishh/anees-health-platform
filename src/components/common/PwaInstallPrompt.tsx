@@ -54,7 +54,6 @@ function ShareIcon() {
 
 export default function PwaInstallPrompt() {
   const t = useTranslations('pwa');
-  const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [isIos] = useState<boolean>(() => detectIos());
   const [isSafari] = useState<boolean>(() => detectSafari());
@@ -69,18 +68,14 @@ export default function PwaInstallPrompt() {
     setStatusMessage,
   } = usePwaManager();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Auto-show after 2.5 s once conditions are ready
   useEffect(() => {
-    if (!mounted || isInstalled || wasDismissedRecently()) return;
+    if (isInstalled || wasDismissedRecently()) return;
     const shouldShow = isIos || canInstall || hasUpdate;
     if (!shouldShow) return;
     const timer = setTimeout(() => setVisible(true), 2500);
     return () => clearTimeout(timer);
-  }, [mounted, isInstalled, canInstall, hasUpdate, isIos]);
+  }, [isInstalled, canInstall, hasUpdate, isIos]);
 
   const dismiss = () => {
     setVisible(false);
@@ -100,7 +95,7 @@ export default function PwaInstallPrompt() {
     setVisible(false);
   };
 
-  if (!mounted || !visible) return null;
+  if (!visible) return null;
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={t('title')}>

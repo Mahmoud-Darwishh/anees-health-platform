@@ -33,8 +33,16 @@ export default auth((req: NextAuthRequest) => {
     return NextResponse.next();
   }
 
+  // ── Admin shell (English-only, no locale prefix) ─────────────────────────
+  // Staff-authenticated only. Unauthenticated visitors are sent to the staff
+  // login. The layout re-checks the session server-side as defence in depth.
   if (pathname.startsWith('/admin')) {
-    return NextResponse.redirect(new URL(`/${DEFAULT_LOCALE}`, req.url));
+    if (!session?.user?.staffId) {
+      const loginUrl = new URL(`/${DEFAULT_LOCALE}/auth/login`, req.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
   }
 
   // ── Public locale routes ─────────────────────────────────────────────────

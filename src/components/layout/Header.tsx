@@ -110,10 +110,11 @@ const Header = () => {
 
   // Close everything on route change
   useEffect(() => {
-    onHandleCloseMenu();
-    setUserMenuOpen(false);
-    setSearchField(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    queueMicrotask(() => {
+      onHandleCloseMenu();
+      setUserMenuOpen(false);
+      setSearchField(false);
+    });
   }, [pathname, locale]);
 
   const altLocale = locale === 'en' ? 'ar' : 'en';
@@ -276,6 +277,28 @@ const Header = () => {
                     </button>
                     {userMenuOpen && (
                       <ul className="dropdown-menu show header-user-menu">
+                        {session.user.role === 'patient' && (
+                          <li>
+                            <Link
+                              href={`/${locale}/portal`}
+                              className="dropdown-item"
+                              onClick={() => setUserMenuOpen(false)}
+                            >
+                              <LucideIcon iconClass="fa-solid fa-user-doctor me-2" />{t('header.myPortal')}
+                            </Link>
+                          </li>
+                        )}
+                        {session.user.role === 'staff' && (
+                          <li>
+                            <Link
+                              href="/admin/patients"
+                              className="dropdown-item"
+                              onClick={() => setUserMenuOpen(false)}
+                            >
+                              <LucideIcon iconClass="fa-solid fa-shield-halved me-2" />{t('header.admin')}
+                            </Link>
+                          </li>
+                        )}
                         <li>
                           <button
                             type="button"

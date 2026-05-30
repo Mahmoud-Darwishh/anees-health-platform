@@ -1,9 +1,8 @@
 import 'server-only';
 
 import { getMedplumClient } from './client';
+import { MEDPLUM_CODE_SYSTEMS } from './constants';
 import { EgyptianExtensions } from './fhir-extensions';
-
-const ANEES_PATIENT_CODE_SYSTEM = 'https://anees.health/fhir/identifier/patient-code';
 
 type FhirAdministrativeGender = 'male' | 'female' | 'other' | 'unknown';
 
@@ -39,6 +38,8 @@ type SyncMedplumPatientInput = {
   gender?: string | null;
   dateOfBirth?: Date | string | null;
   nationalId?: string | null;
+  /** Previously stored Medplum Patient id, if we already synced this patient. */
+  medplumPatientId?: string | null;
 };
 
 function toFhirGender(value?: string | null): FhirAdministrativeGender | undefined {
@@ -76,7 +77,7 @@ function buildMedplumPatientResource(input: SyncMedplumPatientInput): MedplumPat
     active: true,
     identifier: [
       {
-        system: ANEES_PATIENT_CODE_SYSTEM,
+        system: MEDPLUM_CODE_SYSTEMS.patientCode,
         value: input.code,
       },
     ],
@@ -125,21 +126,42 @@ export async function getMedplumPatient(patientId: string) {
   return medplum.readResource('Patient', patientId);
 }
 
-export async function upsertMedplumPatient(input: SyncMedplumPatientInput) {
+export async function upsertMedplumPatient(
+  input: SyncMedplumPatientInput,
+): Promise<MedplumPatientResource> {
   const medplum = await getMedplumClient();
+
+  // Prefer a direct read by stored Medplum id (idempotent, no search round-trip).
+  if (input.medplumPatientId) {
+    try {
+      const byId = (await medplum.readResource(
+        'Patient',
+        input.medplumPatientId,
+      )) as MedplumPatientResource;
+      const nextPatient = buildMedplumPatientResource(input);
+      return (await medplum.updateResource({
+        ...byId,
+        ...nextPatient,
+        id: byId.id,
+      } as never)) as MedplumPatientResource;
+    } catch {
+      // Stored id no longer resolves (e.g. project reset) — fall back to identifier search.
+    }
+  }
+
   const existing = await medplum.searchOne('Patient', {
-    identifier: `${ANEES_PATIENT_CODE_SYSTEM}|${input.code}`,
+    identifier: `${MEDPLUM_CODE_SYSTEMS.patientCode}|${input.code}`,
   });
 
   const nextPatient = buildMedplumPatientResource(input);
 
   if (existing?.id) {
-    return medplum.updateResource({
+    return (await medplum.updateResource({
       ...existing,
       ...nextPatient,
       id: existing.id,
-    } as never);
+    } as never)) as MedplumPatientResource;
   }
 
-  return medplum.createResource(nextPatient as never);
+  return (await medplum.createResource(nextPatient as never)) as MedplumPatientResource;
 }

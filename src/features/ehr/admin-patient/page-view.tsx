@@ -1,0 +1,1478 @@
+import Link from 'next/link';
+import type { AdminPatientDetailData, AdminPatientFlash } from './types';
+import { ANEES_PATIENT_CODE_SYSTEM } from './constants';
+import {
+  appointmentTypeLabel,
+  encounterStatusLabel,
+  encounterVisitType,
+  reportCode,
+  reportComponentText,
+  Row,
+  taskDueDate,
+  taskPriorityLabel,
+  taskStatusLabel,
+  taskTitle,
+} from './helpers';
+import {
+  assignCareTeamMemberAction,
+  createAllergyAction,
+  createAssessmentAction,
+  createAppointmentAction,
+  createCareTaskAction,
+  createClinicalNoteDraftAction,
+  createCommunicationAction,
+  createDiagnosticReportAction,
+  createDocumentAction,
+  deleteDocumentAction,
+  createEscalationAction,
+  createConditionAction,
+  createLabOrderAction,
+  createMedicationAction,
+  createNursingReportAction,
+  createPhysioReportAction,
+  recordVisitAction,
+  recordVitalsAction,
+  signClinicalNoteAction,
+  upsertCaregiverConsentAction,
+  unassignCareTeamMemberAction,
+  updateCareTaskStatusAction,
+} from './actions';
+
+export type AdminWorkspaceTab =
+  | 'overview'
+  | 'clinical'
+  | 'documents'
+  | 'labs'
+  | 'assessments'
+  | 'consent'
+  | 'visits'
+  | 'vitals'
+  | 'notes'
+  | 'care-team'
+  | 'coordination'
+  | 'scheduling'
+  | 'tasks'
+  | 'reports';
+
+const ADMIN_WORKSPACE_TAB_LIST: Array<{ id: AdminWorkspaceTab; label: string }> = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'clinical', label: 'Clinical' },
+  { id: 'documents', label: 'Documents' },
+  { id: 'labs', label: 'Labs & Imaging' },
+  { id: 'assessments', label: 'Assessments' },
+  { id: 'consent', label: 'Consent' },
+  { id: 'visits', label: 'Visits' },
+  { id: 'vitals', label: 'Vitals' },
+  { id: 'notes', label: 'Notes' },
+  { id: 'care-team', label: 'Care Team' },
+  { id: 'coordination', label: 'Coordination' },
+  { id: 'scheduling', label: 'Scheduling' },
+  { id: 'tasks', label: 'Tasks' },
+  { id: 'reports', label: 'Reports' },
+];
+
+function resolveAdminWorkspaceTab(rawTab?: string): AdminWorkspaceTab {
+  const found = ADMIN_WORKSPACE_TAB_LIST.find((tab) => tab.id === rawTab);
+  return found?.id ?? 'overview';
+}
+
+function communicationCategoryLabel(category: string): string {
+  switch (category) {
+    case 'clinical-update':
+      return 'Clinical update';
+    case 'handoff':
+      return 'Handoff';
+    case 'escalation':
+      return 'Escalation';
+    default:
+      return category;
+  }
+}
+
+function appointmentStatusLabel(status: string): string {
+  switch (status) {
+    case 'booked':
+      return 'Booked';
+    case 'fulfilled':
+      return 'Fulfilled';
+    case 'cancelled':
+      return 'Cancelled';
+    case 'pending':
+      return 'Pending';
+    default:
+      return status;
+  }
+}
+
+export function AdminPatientDetailView({
+  data,
+  flash,
+  activeTab,
+}: {
+  data: AdminPatientDetailData;
+  flash: AdminPatientFlash | null;
+  activeTab?: string;
+}) {
+  const {
+    patient,
+    localPatient,
+    error,
+    encounters,
+    encountersError,
+    vitals,
+    vitalsError,
+    clinicalNotes,
+    clinicalNotesError,
+    careTeam,
+    careTeamError,
+    assignableStaff,
+    tasks,
+    tasksError,
+    careReports,
+    careReportsError,
+    conditions,
+    conditionsError,
+    allergies,
+    allergiesError,
+    medications,
+    medicationsError,
+    documents,
+    documentsError,
+    labOrders,
+    labOrdersError,
+    labResults,
+    labResultsError,
+    assessments,
+    assessmentsError,
+    communications,
+    communicationsError,
+    appointments,
+    appointmentsError,
+    caregiverConsents,
+    caregiverConsentsError,
+  } = data;
+
+  const careTeamMembers = careTeam?.participant ?? [];
+
+  const code = patient?.identifier?.find(
+    (i: { system?: string; value?: string }) => i.system === ANEES_PATIENT_CODE_SYSTEM,
+  )?.value;
+  const phone = patient?.telecom?.find(
+    (t: { system?: string; value?: string }) => t.system === 'phone',
+  )?.value;
+  const currentTab = resolveAdminWorkspaceTab(activeTab);
+  const isTab = (...tabs: AdminWorkspaceTab[]): boolean => tabs.includes(currentTab);
+  const escalationTasks = tasks.filter((task) => task.code?.coding?.[0]?.code === 'escalation');
+  const clinicalDepthStats = [
+    { key: 'conditions', label: 'Conditions', value: conditions.length },
+    { key: 'allergies', label: 'Allergies', value: allergies.length },
+    { key: 'medications', label: 'Current medications', value: medications.filter((medication) => medication.status === 'active').length },
+    { key: 'documents', label: 'Documents', value: documents.length },
+    { key: 'labs', label: 'Labs', value: labOrders.length + labResults.length },
+    { key: 'assessments', label: 'Assessments', value: assessments.length },
+  ] as const;
+  const clinicalDepthTotal = clinicalDepthStats.reduce((sum, item) => sum + item.value, 0);
+  const clinicalDepthActiveDomains = clinicalDepthStats.filter((item) => item.value > 0).length;
+  const clinicalDepthCoveragePct = Math.round((clinicalDepthActiveDomains / clinicalDepthStats.length) * 100);
+  const clinicalDepthSegments = clinicalDepthStats.map((item) => {
+    const widthPct = clinicalDepthTotal > 0
+      ? (item.value / clinicalDepthTotal) * 100
+      : 100 / clinicalDepthStats.length;
+
+    const sharePct = clinicalDepthTotal > 0
+      ? Math.round((item.value / clinicalDepthTotal) * 100)
+      : 0;
+
+    return {
+      ...item,
+      widthPct,
+      sharePct,
+    };
+  });
+
+  const tabHref = (tab: AdminWorkspaceTab): string => {
+    if (!patient?.id) {
+      return '/admin/patients';
+    }
+    return `/admin/patients/${patient.id}?tab=${tab}`;
+  };
+
+  return (
+    <div>
+      <div className="anees-banner anees-banner-head mb-3 d-flex justify-content-between align-items-center">
+        <div>
+          <p className="mb-1 small opacity-75">Anees EHR · Patient Workspace</p>
+          <h1 className="h5 mb-0">{patient?.name?.[0]?.text ?? 'Patient profile'}</h1>
+          <p className="small mb-0 mt-1 text-muted">Unified workspace for structured documentation, care coordination, and clinical continuity.</p>
+        </div>
+        <span className="anees-chip">Case-scoped access active</span>
+      </div>
+
+      <div className="mb-3 d-flex flex-wrap gap-2 align-items-center anees-page-links">
+        <Link href="/admin/patients" className="btn btn-sm btn-outline-primary">
+          ← Back to patients
+        </Link>
+        <Link href="/en" className="btn btn-sm btn-outline-secondary">
+          Back to home
+        </Link>
+      </div>
+
+      {flash && (
+        <div className={`alert ${flash.type === 'success' ? 'alert-success' : 'alert-danger'}`} role="alert">
+          {flash.message}
+        </div>
+      )}
+
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          Could not load patient: {error}
+        </div>
+      )}
+
+      {patient && (
+        <div className="d-grid gap-3">
+          <div className="card bg-white">
+            <div className="card-body py-2 anees-tab-card-body">
+              <div className="anees-tab-nav-wrap">
+                <div className="anees-tab-nav" role="tablist" aria-label="Patient workspace navigation">
+                  {ADMIN_WORKSPACE_TAB_LIST.map((tab) => {
+                    const isActive = currentTab === tab.id;
+
+                    return (
+                      <Link
+                        key={tab.id}
+                        href={tabHref(tab.id)}
+                        className={`anees-tab-link ${isActive ? 'is-active' : ''}`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {tab.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {isTab('overview') && (
+          <div className="card bg-white">
+            <div className="card-header">
+              <h2 className="h6 mb-0 d-flex align-items-center gap-2">
+                Patient header
+                {careTeamMembers.length > 0 && <span className="anees-chip">{careTeamMembers.length} care team members</span>}
+              </h2>
+            </div>
+            <div className="card-body">
+              <Row label="Medplum ID" value={patient.id} />
+              <Row label="Patient code" value={code} />
+              <Row label="Phone" value={phone} />
+              <Row label="Gender" value={patient.gender} />
+              <Row label="Birth date" value={patient.birthDate} />
+              <Row label="Active" value={patient.active ? 'Yes' : 'No'} />
+            </div>
+          </div>
+          )}
+
+          {isTab('overview') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Clinical depth</h2>
+              <span className="text-muted small">Problems, allergies, meds, docs, labs, and assessments</span>
+            </div>
+            <div className="card-body">
+              <div className="anees-clinical-dashboard">
+                <section className="anees-clinical-overview" aria-label="Clinical dashboard summary">
+                  <div className="anees-clinical-overview-top">
+                    <div>
+                      <span className="anees-clinical-overview-label">Tracked records</span>
+                      <div className="anees-clinical-overview-value">{clinicalDepthTotal}</div>
+                    </div>
+                    <div className="anees-clinical-overview-meta">
+                      <span>{clinicalDepthActiveDomains}/{clinicalDepthStats.length} domains active</span>
+                      <span>{clinicalDepthCoveragePct}% coverage</span>
+                    </div>
+                  </div>
+
+                  <div className="anees-clinical-distribution" role="img" aria-label="Clinical records distribution by domain">
+                    {clinicalDepthSegments.map((item) => (
+                      <span
+                        key={item.key}
+                        className="anees-clinical-distribution-segment"
+                        title={`${item.label}: ${item.value}`}
+                        style={{ width: `${item.widthPct}%` }}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                <div className="anees-clinical-grid">
+                  {clinicalDepthSegments.map((item) => (
+                    <article key={item.key} className="anees-clinical-metric" data-tone={item.key}>
+                      <div className="anees-clinical-metric-head">
+                        <span className="anees-clinical-label">{item.label}</span>
+                        <span className="anees-clinical-value">{item.value}</span>
+                      </div>
+                      <div className="anees-clinical-metric-meta">
+                        <span>{item.sharePct}% of tracked</span>
+                        <span className={`anees-clinical-state ${item.value > 0 ? 'is-ready' : 'is-empty'}`}>
+                          {item.value > 0 ? 'Recorded' : 'No entries'}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
+          {isTab('clinical') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Problem list</h2>
+              <span className="text-muted small">{conditions.length} records</span>
+            </div>
+            <div className="card-body">
+              <form action={createConditionAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-6">
+                  <label htmlFor="conditionLabel" className="form-label">Problem title</label>
+                  <input id="conditionLabel" name="conditionLabel" className="form-control" placeholder="Type 2 diabetes" required />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="conditionCode" className="form-label">ICD-10 code</label>
+                  <input id="conditionCode" name="conditionCode" className="form-control" placeholder="E11.9" />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="conditionOnsetDate" className="form-label">Onset</label>
+                  <input id="conditionOnsetDate" name="conditionOnsetDate" type="date" className="form-control" />
+                </div>
+                <div className="col-12">
+                  <label htmlFor="conditionNote" className="form-label">Notes</label>
+                  <textarea id="conditionNote" name="conditionNote" className="form-control" rows={2} placeholder="Clinical notes or status context" dir="auto" />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Add problem</button>
+                </div>
+              </form>
+              {conditionsError && <div className="alert alert-warning" role="alert">Could not load problems: {conditionsError}</div>}
+              {!conditionsError && conditions.length === 0 && <div className="alert alert-info mb-0" role="alert">No problems recorded yet.</div>}
+              {!conditionsError && conditions.length > 0 && (
+                <div className="table-responsive anees-documents-table-wrap">
+                  <table className="table table-sm align-middle mb-0 anees-documents-table">
+                    <thead><tr><th>Problem</th><th>Status</th><th>Onset</th><th>Notes</th></tr></thead>
+                    <tbody>
+                      {conditions.map((condition) => (
+                        <tr key={condition.id}>
+                          <td>
+                            <div className="fw-semibold">{condition.label}</div>
+                            <div className="text-muted small">{condition.code ?? '—'}</div>
+                          </td>
+                          <td className="text-capitalize">{condition.status}</td>
+                          <td>{condition.onset ? new Date(condition.onset).toLocaleDateString('en-GB') : '—'}</td>
+                          <td className="text-muted small">{condition.note ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('clinical') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Allergies</h2>
+              <span className="text-muted small">{allergies.length} records</span>
+            </div>
+            <div className="card-body">
+              <form action={createAllergyAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-6">
+                  <label htmlFor="allergen" className="form-label">Allergen</label>
+                  <input id="allergen" name="allergen" className="form-control" placeholder="Penicillin" required />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="allergySeverity" className="form-label">Severity</label>
+                  <select id="allergySeverity" name="allergySeverity" className="form-select" defaultValue="">
+                    <option value="">Unknown</option>
+                    <option value="mild">Mild</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="severe">Severe</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="allergyOnsetDate" className="form-label">Onset</label>
+                  <input id="allergyOnsetDate" name="allergyOnsetDate" type="date" className="form-control" />
+                </div>
+                <div className="col-md-12">
+                  <label htmlFor="allergyReaction" className="form-label">Reaction</label>
+                  <input id="allergyReaction" name="allergyReaction" className="form-control" placeholder="Rash and itching" />
+                </div>
+                <div className="col-12">
+                  <label htmlFor="allergyNote" className="form-label">Notes</label>
+                  <textarea id="allergyNote" name="allergyNote" className="form-control" rows={2} placeholder="Additional details" dir="auto" />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Add allergy</button>
+                </div>
+              </form>
+              {allergiesError && <div className="alert alert-warning" role="alert">Could not load allergies: {allergiesError}</div>}
+              {!allergiesError && allergies.length === 0 && <div className="alert alert-info mb-0" role="alert">No allergies recorded yet.</div>}
+              {!allergiesError && allergies.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Allergen</th><th>Reaction</th><th>Severity</th><th>Status</th></tr></thead>
+                    <tbody>
+                      {allergies.map((allergy) => (
+                        <tr key={allergy.id}>
+                          <td>
+                            <div className="fw-semibold">{allergy.allergen}</div>
+                            <div className="text-muted small">{allergy.onset ? new Date(allergy.onset).toLocaleDateString('en-GB') : '—'}</div>
+                          </td>
+                          <td>{allergy.reaction ?? '—'}</td>
+                          <td className="text-capitalize">{allergy.severity ?? '—'}</td>
+                          <td className="text-capitalize">{allergy.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('clinical') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Medications</h2>
+              <span className="text-muted small">{medications.length} records</span>
+            </div>
+            <div className="card-body">
+              <form action={createMedicationAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-6">
+                  <label htmlFor="medicationName" className="form-label">Medication name</label>
+                  <input id="medicationName" name="medicationName" className="form-control" placeholder="Amlodipine" required />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="medicationStatus" className="form-label">Status</label>
+                  <select id="medicationStatus" name="medicationStatus" className="form-select" defaultValue="active">
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="stopped">Stopped</option>
+                    <option value="on-hold">On hold</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="startDate" className="form-label">Start date</label>
+                  <input id="startDate" name="startDate" type="date" className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="dosageText" className="form-label">Dosage</label>
+                  <input id="dosageText" name="dosageText" className="form-control" placeholder="5 mg once daily" />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="routeText" className="form-label">Route</label>
+                  <input id="routeText" name="routeText" className="form-control" placeholder="Oral" />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="frequencyText" className="form-label">Frequency</label>
+                  <input id="frequencyText" name="frequencyText" className="form-control" placeholder="Once daily" />
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="endDate" className="form-label">End date</label>
+                  <input id="endDate" name="endDate" type="date" className="form-control" />
+                </div>
+                <div className="col-12">
+                  <label htmlFor="medicationNote" className="form-label">Notes</label>
+                  <textarea id="medicationNote" name="medicationNote" className="form-control" rows={2} placeholder="Medication context or monitoring notes" dir="auto" />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Add medication</button>
+                </div>
+              </form>
+              {medicationsError && <div className="alert alert-warning" role="alert">Could not load medications: {medicationsError}</div>}
+              {!medicationsError && medications.length === 0 && <div className="alert alert-info mb-0" role="alert">No medications recorded yet.</div>}
+              {!medicationsError && medications.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Medication</th><th>Status</th><th>Dosage</th><th>Start / End</th></tr></thead>
+                    <tbody>
+                      {medications.map((medication) => (
+                        <tr key={medication.id}>
+                          <td>
+                            <div className="fw-semibold">{medication.medication}</div>
+                            <div className="text-muted small">{medication.note ?? '—'}</div>
+                          </td>
+                          <td className="text-capitalize">{medication.status}</td>
+                          <td>
+                            <div>{medication.dosage ?? '—'}</div>
+                            <div className="text-muted small">{medication.route ?? '—'} {medication.frequency ? `· ${medication.frequency}` : ''}</div>
+                          </td>
+                          <td className="text-muted small">{medication.start ? new Date(medication.start).toLocaleDateString('en-GB') : '—'} {medication.end ? `→ ${new Date(medication.end).toLocaleDateString('en-GB')}` : ''}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('documents') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Documents and files</h2>
+              <span className="text-muted small">{documents.length} records</span>
+            </div>
+            <div className="card-body">
+              <form action={createDocumentAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-5">
+                  <label htmlFor="documentTitle" className="form-label">Document title</label>
+                  <input id="documentTitle" name="documentTitle" className="form-control" placeholder="MRI report" required />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="documentCategory" className="form-label">Category</label>
+                  <select id="documentCategory" name="documentCategory" className="form-select" defaultValue="report">
+                    <option value="report">Report</option>
+                    <option value="lab">Lab</option>
+                    <option value="imaging">Imaging</option>
+                    <option value="insurance">Insurance</option>
+                    <option value="consent">Consent</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="documentFile" className="form-label">File</label>
+                  <input id="documentFile" name="documentFile" type="file" className="form-control" required />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="documentDate" className="form-label">Document date</label>
+                  <input id="documentDate" name="documentDate" type="date" className="form-control" />
+                </div>
+                <div className="col-12">
+                  <label htmlFor="documentNote" className="form-label">Notes</label>
+                  <textarea id="documentNote" name="documentNote" className="form-control" rows={2} placeholder="What this file contains or why it matters" dir="auto" />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Upload document</button>
+                </div>
+              </form>
+
+              {documentsError && <div className="alert alert-warning" role="alert">Could not load documents: {documentsError}</div>}
+              {!documentsError && documents.length === 0 && <div className="alert alert-info mb-0" role="alert">No documents uploaded yet.</div>}
+              {!documentsError && documents.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0 anees-documents-table">
+                    <thead><tr><th>Title</th><th>Category</th><th>Type</th><th>Date</th><th className="text-end">Action</th></tr></thead>
+                    <tbody>
+                      {documents.map((document) => (
+                        <tr key={document.id} className="anees-doc-row">
+                          <td className="anees-doc-col-title" data-label="Title">
+                            <div className="fw-semibold">{document.title}</div>
+                            <div className="text-muted small">{document.author ?? '—'}</div>
+                          </td>
+                          <td className="text-capitalize anees-doc-col-category" data-label="Category">{document.category}</td>
+                          <td className="text-muted small anees-doc-col-type" data-label="Type">{document.contentType ?? '—'}</td>
+                          <td className="anees-doc-col-date" data-label="Date">{document.createdAt ? new Date(document.createdAt).toLocaleString('en-GB') : '—'}</td>
+                          <td className="text-end anees-doc-actions" data-label="Actions">
+                            <div className="d-inline-flex gap-2 anees-doc-actions-wrap">
+                              <a className="btn btn-sm btn-outline-secondary" href={`/api/ehr/documents/${document.id}?disposition=inline`} target="_blank" rel="noopener noreferrer">View</a>
+                              <a className="btn btn-sm btn-outline-primary" href={`/api/ehr/documents/${document.id}`}>Download</a>
+                              <form action={deleteDocumentAction} className="d-inline">
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="documentId" value={document.id} />
+                                <button type="submit" className="btn btn-sm btn-outline-danger">Delete</button>
+                              </form>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('labs') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Labs and imaging</h2>
+              <span className="text-muted small">{labOrders.length} orders · {labResults.length} results</span>
+            </div>
+            <div className="card-body">
+              <div className="row g-4 mb-3">
+                <div className="col-lg-6">
+                  <h3 className="h6">New order</h3>
+                  <form action={createLabOrderAction} className="row g-3">
+                    <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                    <div className="col-md-6"><label htmlFor="labOrderTitle" className="form-label">Order title</label><input id="labOrderTitle" name="labOrderTitle" className="form-control" placeholder="CBC with differential" required /></div>
+                    <div className="col-md-3"><label htmlFor="labOrderCategory" className="form-label">Category</label><select id="labOrderCategory" name="labOrderCategory" className="form-select" defaultValue="lab"><option value="lab">Lab</option><option value="imaging">Imaging</option><option value="other">Other</option></select></div>
+                    <div className="col-md-3"><label htmlFor="labOrderDate" className="form-label">Requested on</label><input id="labOrderDate" name="labOrderDate" type="date" className="form-control" /></div>
+                    <div className="col-md-6"><label htmlFor="labOrderCode" className="form-label">Code</label><input id="labOrderCode" name="labOrderCode" className="form-control" placeholder="CBC" /></div>
+                    <div className="col-12"><label htmlFor="labOrderNote" className="form-label">Notes</label><textarea id="labOrderNote" name="labOrderNote" className="form-control" rows={2} dir="auto" /></div>
+                    <div className="col-12"><button type="submit" className="btn btn-primary">Save lab order</button></div>
+                  </form>
+                </div>
+
+                <div className="col-lg-6">
+                  <h3 className="h6">New result</h3>
+                  <form action={createDiagnosticReportAction} className="row g-3">
+                    <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                    <div className="col-md-6"><label htmlFor="diagnosticTitle" className="form-label">Report title</label><input id="diagnosticTitle" name="diagnosticTitle" className="form-control" placeholder="CT abdomen report" required /></div>
+                    <div className="col-md-3"><label htmlFor="diagnosticCategory" className="form-label">Category</label><select id="diagnosticCategory" name="diagnosticCategory" className="form-select" defaultValue="lab"><option value="lab">Lab</option><option value="imaging">Imaging</option><option value="other">Other</option></select></div>
+                    <div className="col-md-3"><label htmlFor="diagnosticStatus" className="form-label">Status</label><select id="diagnosticStatus" name="diagnosticStatus" className="form-select" defaultValue="final"><option value="preliminary">Preliminary</option><option value="final">Final</option><option value="amended">Amended</option><option value="corrected">Corrected</option><option value="appended">Appended</option></select></div>
+                    <div className="col-md-4"><label htmlFor="diagnosticIssuedOn" className="form-label">Issued on</label><input id="diagnosticIssuedOn" name="diagnosticIssuedOn" type="date" className="form-control" /></div>
+                    <div className="col-md-4"><label htmlFor="diagnosticEffectiveOn" className="form-label">Effective on</label><input id="diagnosticEffectiveOn" name="diagnosticEffectiveOn" type="date" className="form-control" /></div>
+                    <div className="col-md-4"><label htmlFor="linkedLabOrderId" className="form-label">Linked order id</label><input id="linkedLabOrderId" name="linkedLabOrderId" className="form-control" placeholder="Optional" /></div>
+                    <div className="col-12"><label htmlFor="diagnosticConclusion" className="form-label">Conclusion</label><textarea id="diagnosticConclusion" name="diagnosticConclusion" className="form-control" rows={2} dir="auto" /></div>
+                    <div className="col-12"><label htmlFor="diagnosticNote" className="form-label">Notes</label><textarea id="diagnosticNote" name="diagnosticNote" className="form-control" rows={2} dir="auto" /></div>
+                    <div className="col-12"><button type="submit" className="btn btn-primary">Save result</button></div>
+                  </form>
+                </div>
+              </div>
+
+              <div className="row g-4">
+                <div className="col-lg-6">
+                  <h3 className="h6">Orders</h3>
+                  {labOrdersError && <div className="alert alert-warning" role="alert">Could not load lab orders: {labOrdersError}</div>}
+                  {!labOrdersError && labOrders.length === 0 && <div className="alert alert-info mb-0" role="alert">No lab or imaging orders yet.</div>}
+                  {!labOrdersError && labOrders.length > 0 && (
+                    <div className="table-responsive">
+                      <table className="table table-sm align-middle mb-0">
+                        <thead><tr><th>Title</th><th>Status</th><th>Category</th><th>Ordered</th></tr></thead>
+                        <tbody>
+                          {labOrders.map((order) => (
+                            <tr key={order.id}>
+                              <td>
+                                <div className="fw-semibold">{order.title}</div>
+                                <div className="text-muted small">{order.note ?? '—'}</div>
+                              </td>
+                              <td className="text-capitalize">{order.status}</td>
+                              <td className="text-capitalize">{order.category ?? '—'}</td>
+                              <td>{order.authoredOn ? new Date(order.authoredOn).toLocaleString('en-GB') : '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                <div className="col-lg-6">
+                  <h3 className="h6">Results</h3>
+                  {labResultsError && <div className="alert alert-warning" role="alert">Could not load diagnostic reports: {labResultsError}</div>}
+                  {!labResultsError && labResults.length === 0 && <div className="alert alert-info mb-0" role="alert">No lab or imaging results yet.</div>}
+                  {!labResultsError && labResults.length > 0 && (
+                    <div className="table-responsive">
+                      <table className="table table-sm align-middle mb-0">
+                        <thead><tr><th>Title</th><th>Status</th><th>Conclusion</th><th>Date</th></tr></thead>
+                        <tbody>
+                          {labResults.map((result) => (
+                            <tr key={result.id}>
+                              <td>
+                                <div className="fw-semibold">{result.title}</div>
+                                <div className="text-muted small">{result.performer ?? '—'}</div>
+                              </td>
+                              <td className="text-capitalize">{result.status}</td>
+                              <td>{result.conclusion ?? '—'}</td>
+                              <td>{result.issued ? new Date(result.issued).toLocaleString('en-GB') : result.effective ? new Date(result.effective).toLocaleString('en-GB') : '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
+
+          {isTab('assessments') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Assessments</h2>
+              <span className="text-muted small">{assessments.length} records</span>
+            </div>
+            <div className="card-body">
+              <form action={createAssessmentAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-5"><label htmlFor="assessmentTitle" className="form-label">Assessment title</label><input id="assessmentTitle" name="assessmentTitle" className="form-control" placeholder="Mobility review" required /></div>
+                <div className="col-md-3"><label htmlFor="assessmentType" className="form-label">Type</label><select id="assessmentType" name="assessmentType" className="form-select" defaultValue="other"><option value="functional">Functional</option><option value="mobility">Mobility</option><option value="pain">Pain</option><option value="other">Other</option></select></div>
+                <div className="col-md-2"><label htmlFor="assessmentScore" className="form-label">Score</label><input id="assessmentScore" name="assessmentScore" type="number" step="1" min="0" max="100" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="assessmentEncounterId" className="form-label">Visit</label><select id="assessmentEncounterId" name="assessmentEncounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.id}</option>))}</select></div>
+                <div className="col-12"><label htmlFor="assessmentSummary" className="form-label">Summary</label><textarea id="assessmentSummary" name="assessmentSummary" className="form-control" rows={3} placeholder="Findings, limitations, and advice" dir="auto" required /></div>
+                <div className="col-12"><label htmlFor="assessmentNote" className="form-label">Notes</label><textarea id="assessmentNote" name="assessmentNote" className="form-control" rows={2} placeholder="Optional follow-up details" dir="auto" /></div>
+                <div className="col-12"><button type="submit" className="btn btn-primary">Save assessment</button></div>
+              </form>
+
+              {assessmentsError && <div className="alert alert-warning" role="alert">Could not load assessments: {assessmentsError}</div>}
+              {!assessmentsError && assessments.length === 0 && <div className="alert alert-info mb-0" role="alert">No assessments recorded yet.</div>}
+              {!assessmentsError && assessments.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Title</th><th>Type</th><th>Score</th><th>Summary</th></tr></thead>
+                    <tbody>
+                      {assessments.map((assessment) => (
+                        <tr key={assessment.id}>
+                          <td>
+                            <div className="fw-semibold">{assessment.title}</div>
+                            <div className="text-muted small">{assessment.author ?? '—'}</div>
+                          </td>
+                          <td className="text-capitalize">{assessment.type}</td>
+                          <td>{assessment.score ?? '—'}</td>
+                          <td className="text-muted small">{assessment.summary ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('consent') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Caregiver portal consent</h2>
+              <span className="text-muted small">{caregiverConsents.length} consent records</span>
+            </div>
+            <div className="card-body">
+              <form action={upsertCaregiverConsentAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <input type="hidden" name="consentId" value={caregiverConsents[0]?.id ?? ''} />
+                <input type="hidden" name="consentVersionId" value={caregiverConsents[0]?.versionId ?? ''} />
+
+                <div className="col-md-6">
+                  <label htmlFor="caregiver-phone" className="form-label">Caregiver phone</label>
+                  <input
+                    id="caregiver-phone"
+                    name="caregiverPhone"
+                    type="text"
+                    className="form-control"
+                    defaultValue={caregiverConsents[0]?.caregiverPhone ?? localPatient?.primaryCaregiverPhone ?? ''}
+                    placeholder="+2010..."
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label htmlFor="caregiver-email" className="form-label">Caregiver email</label>
+                  <input
+                    id="caregiver-email"
+                    name="caregiverEmail"
+                    type="email"
+                    className="form-control"
+                    defaultValue={caregiverConsents[0]?.caregiverEmail ?? localPatient?.primaryCaregiverEmail ?? ''}
+                    placeholder="caregiver@example.com"
+                  />
+                </div>
+
+                <div className="col-md-4">
+                  <label htmlFor="consent-decision" className="form-label">Consent decision</label>
+                  <select
+                    id="consent-decision"
+                    name="decision"
+                    className="form-select"
+                    defaultValue={caregiverConsents[0]?.decision ?? 'allow'}
+                    required
+                  >
+                    <option value="allow">Allow</option>
+                    <option value="deny">Deny</option>
+                  </select>
+                </div>
+
+                <div className="col-md-8">
+                  <label className="form-label d-block">Shared portal scopes</label>
+                  <div className="d-flex flex-wrap gap-3">
+                    <div className="form-check"><input id="scope-profile" className="form-check-input" type="checkbox" name="scopeProfile" value="true" defaultChecked={caregiverConsents[0]?.scopes.includes('profile') ?? true} /><label htmlFor="scope-profile" className="form-check-label">Profile</label></div>
+                    <div className="form-check"><input id="scope-visits" className="form-check-input" type="checkbox" name="scopeVisits" value="true" defaultChecked={caregiverConsents[0]?.scopes.includes('visits') ?? true} /><label htmlFor="scope-visits" className="form-check-label">Visits</label></div>
+                    <div className="form-check"><input id="scope-vitals" className="form-check-input" type="checkbox" name="scopeVitals" value="true" defaultChecked={caregiverConsents[0]?.scopes.includes('vitals') ?? false} /><label htmlFor="scope-vitals" className="form-check-label">Vitals</label></div>
+                    <div className="form-check"><input id="scope-notes" className="form-check-input" type="checkbox" name="scopeNotes" value="true" defaultChecked={caregiverConsents[0]?.scopes.includes('notes') ?? false} /><label htmlFor="scope-notes" className="form-check-label">Notes</label></div>
+                    <div className="form-check"><input id="scope-tasks" className="form-check-input" type="checkbox" name="scopeTasks" value="true" defaultChecked={caregiverConsents[0]?.scopes.includes('tasks') ?? false} /><label htmlFor="scope-tasks" className="form-check-label">Tasks</label></div>
+                  </div>
+                </div>
+
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Save caregiver consent</button>
+                </div>
+              </form>
+
+              {caregiverConsentsError && <div className="alert alert-warning" role="alert">Could not load caregiver consents: {caregiverConsentsError}</div>}
+              {!caregiverConsentsError && caregiverConsents.length === 0 && <div className="alert alert-info mb-0" role="alert">No caregiver consent configured yet for this patient.</div>}
+              {!caregiverConsentsError && caregiverConsents.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Decision</th><th>Caregiver</th><th>Scopes</th><th>Updated</th></tr></thead>
+                    <tbody>
+                      {caregiverConsents.map((consent) => (
+                        <tr key={consent.id}>
+                          <td className="text-capitalize">{consent.decision}</td>
+                          <td>{consent.caregiverPhone ?? consent.caregiverEmail ?? '—'}</td>
+                          <td>{consent.scopes.length > 0 ? consent.scopes.join(', ') : '—'}</td>
+                          <td>{consent.updatedAt ? new Date(consent.updatedAt).toLocaleString('en-GB') : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('visits') && (
+          <div className="card bg-white">
+            <div className="card-header">
+              <h2 className="h6 mb-0">Record a visit</h2>
+            </div>
+            <div className="card-body">
+              <form action={recordVisitAction} className="row g-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+
+                <div className="col-md-4">
+                  <label htmlFor="visit-status" className="form-label">Status</label>
+                  <select id="visit-status" name="status" className="form-select" defaultValue="planned" required>
+                    <option value="planned">Scheduled</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label htmlFor="visit-type" className="form-label">Visit type</label>
+                  <select id="visit-type" name="visitType" className="form-select" defaultValue="in_home" required>
+                    <option value="in_home">In-home</option>
+                    <option value="clinic">Clinic</option>
+                    <option value="virtual">Virtual</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label htmlFor="visit-start-at" className="form-label">Date and time</label>
+                  <input id="visit-start-at" name="startAt" type="datetime-local" className="form-control" required />
+                </div>
+
+                <div className="col-12">
+                  <label htmlFor="visit-notes" className="form-label">Notes</label>
+                  <textarea id="visit-notes" name="notes" className="form-control" rows={3} placeholder="Optional clinical context" dir="auto" />
+                </div>
+
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Save visit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          )}
+
+          {isTab('visits') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Visits</h2>
+              <span className="text-muted small">{encounters.length} records</span>
+            </div>
+            <div className="card-body">
+              {encountersError && <div className="alert alert-warning" role="alert">Could not load visits: {encountersError}</div>}
+              {!encountersError && encounters.length === 0 && <div className="alert alert-info mb-0" role="alert">No visits are recorded yet.</div>}
+              {encounters.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Type</th>
+                        <th>Recorded by</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {encounters.map((encounter) => (
+                        <tr key={encounter.id}>
+                          <td>{encounter.period?.start ? new Date(encounter.period.start).toLocaleString('en-GB') : '—'}</td>
+                          <td>{encounterStatusLabel(encounter.status)}</td>
+                          <td className="text-capitalize">{encounterVisitType(encounter)}</td>
+                          <td>{encounter.participant?.[0]?.individual?.display ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('vitals') && (
+          <div className="card bg-white">
+            <div className="card-header">
+              <h2 className="h6 mb-0">Record vitals</h2>
+            </div>
+            <div className="card-body">
+              <form action={recordVitalsAction} className="row g-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-4">
+                  <label htmlFor="vitals-encounter" className="form-label">Linked visit</label>
+                  <select id="vitals-encounter" name="encounterId" className="form-select" defaultValue="">
+                    <option value="">None</option>
+                    {encounters.map((encounter) => (
+                      <option key={encounter.id} value={encounter.id}>
+                        {encounter.period?.start ? new Date(encounter.period.start).toLocaleString('en-GB') : encounter.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="vitals-recorded-at" className="form-label">Recorded at</label>
+                  <input id="vitals-recorded-at" name="recordedAt" type="datetime-local" className="form-control" required />
+                </div>
+                <div className="col-md-2"><label htmlFor="vitals-systolic" className="form-label">Systolic</label><input id="vitals-systolic" name="systolicBp" type="number" min="40" max="280" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="vitals-diastolic" className="form-label">Diastolic</label><input id="vitals-diastolic" name="diastolicBp" type="number" min="20" max="180" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="vitals-hr" className="form-label">HR</label><input id="vitals-hr" name="heartRate" type="number" min="20" max="240" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="vitals-spo2" className="form-label">SpO2</label><input id="vitals-spo2" name="spo2Pct" type="number" min="40" max="100" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="vitals-temp" className="form-label">Temp C</label><input id="vitals-temp" name="temperatureC" type="number" step="0.1" min="30" max="45" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="vitals-weight" className="form-label">Weight kg</label><input id="vitals-weight" name="weightKg" type="number" step="0.1" min="1" max="300" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="vitals-glucose" className="form-label">Glucose mg/dL</label><input id="vitals-glucose" name="glucoseMgDl" type="number" min="20" max="600" className="form-control" /></div>
+                <div className="col-12"><button type="submit" className="btn btn-primary">Save vitals</button></div>
+              </form>
+            </div>
+          </div>
+          )}
+
+          {isTab('vitals') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Recent vitals</h2>
+              <span className="text-muted small">{vitals.length} rows</span>
+            </div>
+            <div className="card-body">
+              {vitalsError && <div className="alert alert-warning" role="alert">Could not load vitals: {vitalsError}</div>}
+              {!vitalsError && vitals.length === 0 && <div className="alert alert-info mb-0" role="alert">No vitals are recorded yet.</div>}
+              {vitals.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Recorded</th><th>BP</th><th>HR</th><th>SpO2</th><th>Temp</th><th>Weight</th><th>Glucose</th></tr></thead>
+                    <tbody>
+                      {vitals.map((row, index) => (
+                        <tr key={`${row.measuredAt}-${index}`}>
+                          <td>{new Date(row.measuredAt).toLocaleString('en-GB')}</td>
+                          <td>{row.systolicBp && row.diastolicBp ? `${row.systolicBp}/${row.diastolicBp}` : '—'}</td>
+                          <td>{row.heartRate ?? '—'}</td>
+                          <td>{row.spo2Pct ?? '—'}</td>
+                          <td>{row.temperatureC ?? '—'}</td>
+                          <td>{row.weightKg ?? '—'}</td>
+                          <td>{row.glucoseMgDl ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('notes') && (
+          <div className="card bg-white">
+            <div className="card-header"><h2 className="h6 mb-0">Clinical notes</h2></div>
+            <div className="card-body">
+              <form action={createClinicalNoteDraftAction} className="row g-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-4"><label htmlFor="note-encounter" className="form-label">Linked visit</label><select id="note-encounter" name="encounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.period?.start ? new Date(encounter.period.start).toLocaleString('en-GB') : encounter.id}</option>))}</select></div>
+                <div className="col-md-8"><label htmlFor="note-title" className="form-label">Title</label><input id="note-title" name="noteTitle" type="text" className="form-control" placeholder="Visit assessment" /></div>
+                <div className="col-12"><label htmlFor="note-body" className="form-label">Note body</label><textarea id="note-body" name="noteBody" className="form-control" rows={4} placeholder="Clinical findings, plan, and follow up" dir="auto" required /></div>
+                <div className="col-12"><button type="submit" className="btn btn-primary">Save draft note</button></div>
+              </form>
+            </div>
+          </div>
+          )}
+
+          {isTab('notes') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center"><h2 className="h6 mb-0">Notes timeline</h2><span className="text-muted small">{clinicalNotes.length} notes</span></div>
+            <div className="card-body">
+              {clinicalNotesError && <div className="alert alert-warning" role="alert">Could not load notes: {clinicalNotesError}</div>}
+              {!clinicalNotesError && clinicalNotes.length === 0 && <div className="alert alert-info mb-0" role="alert">No notes recorded yet.</div>}
+              {clinicalNotes.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Date</th><th>Title</th><th>Status</th><th>Author</th><th className="text-end">Action</th></tr></thead>
+                    <tbody>
+                      {clinicalNotes.map((note) => (
+                        <tr key={note.id}>
+                          <td>{new Date(note.date).toLocaleString('en-GB')}</td>
+                          <td><div className="fw-semibold">{note.title}</div><div className="text-muted small">{note.body || '—'}</div></td>
+                          <td className="text-capitalize">{note.status}</td>
+                          <td>{note.author ?? '—'}</td>
+                          <td className="text-end">
+                            {note.status === 'preliminary' ? (
+                              <form action={signClinicalNoteAction}>
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="compositionId" value={note.id} />
+                                <input type="hidden" name="noteVersionId" value={note.versionId ?? ''} />
+                                <button type="submit" className="btn btn-sm btn-outline-success">Sign off</button>
+                              </form>
+                            ) : (
+                              <span className="badge text-bg-success">Signed</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('care-team') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center"><h2 className="h6 mb-0">Care team assignment</h2><span className="text-muted small">{careTeamMembers.length} assigned</span></div>
+            <div className="card-body">
+              {careTeamError && <div className="alert alert-warning" role="alert">Could not load care team: {careTeamError}</div>}
+              <form action={assignCareTeamMemberAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <input type="hidden" name="careTeamVersionId" value={careTeam?.meta?.versionId ?? ''} />
+                <div className="col-md-9"><label htmlFor="care-team-staff" className="form-label">Assign staff member</label><select id="care-team-staff" name="staffId" className="form-select" required defaultValue=""><option value="" disabled>Select staff...</option>{assignableStaff.map((staff) => (<option key={staff.id} value={staff.id}>{staff.name} · {staff.role}</option>))}</select></div>
+                <div className="col-md-3 d-flex align-items-end"><button type="submit" className="btn btn-primary w-100">Assign</button></div>
+              </form>
+
+              {careTeamMembers.length === 0 ? (
+                <div className="alert alert-info mb-0" role="alert">No care team members assigned yet.</div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Staff</th><th>Role</th><th className="text-end">Action</th></tr></thead>
+                    <tbody>
+                      {careTeamMembers.map((member, index) => {
+                        const practitionerReference = member.member?.reference ?? '';
+                        const role = member.role?.[0]?.coding?.[0]?.display ?? member.role?.[0]?.coding?.[0]?.code ?? '—';
+                        return (
+                          <tr key={`${practitionerReference}-${index}`}>
+                            <td>{member.member?.display ?? (practitionerReference || '—')}</td>
+                            <td className="text-capitalize">{role}</td>
+                            <td className="text-end">
+                              {practitionerReference ? (
+                                <form action={unassignCareTeamMemberAction}>
+                                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                  <input type="hidden" name="practitionerReference" value={practitionerReference} />
+                                  <input type="hidden" name="careTeamVersionId" value={careTeam?.meta?.versionId ?? ''} />
+                                  <button type="submit" className="btn btn-sm btn-outline-danger">Unassign</button>
+                                </form>
+                              ) : (
+                                '—'
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('coordination') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Clinical communication thread</h2>
+              <span className="text-muted small">{communications.length} messages</span>
+            </div>
+            <div className="card-body">
+              <form action={createCommunicationAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-3">
+                  <label htmlFor="communicationCategory" className="form-label">Category</label>
+                  <select id="communicationCategory" name="communicationCategory" className="form-select" defaultValue="clinical-update">
+                    <option value="clinical-update">Clinical update</option>
+                    <option value="handoff">Handoff</option>
+                    <option value="escalation">Escalation</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="communicationPriority" className="form-label">Priority</label>
+                  <select id="communicationPriority" name="communicationPriority" className="form-select" defaultValue="routine">
+                    <option value="routine">Routine</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="asap">ASAP</option>
+                    <option value="stat">STAT</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="communicationRecipientStaffId" className="form-label">Assign to</label>
+                  <select id="communicationRecipientStaffId" name="communicationRecipientStaffId" className="form-select" defaultValue="">
+                    <option value="">Any assigned team</option>
+                    {assignableStaff.map((staff) => (
+                      <option key={staff.id} value={staff.id}>
+                        {staff.name} · {staff.role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="communicationEncounterId" className="form-label">Related visit</label>
+                  <select id="communicationEncounterId" name="communicationEncounterId" className="form-select" defaultValue="">
+                    <option value="">None</option>
+                    {encounters.map((encounter) => (
+                      <option key={encounter.id} value={encounter.id}>
+                        {encounter.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-12">
+                  <label htmlFor="communicationMessage" className="form-label">Message</label>
+                  <textarea
+                    id="communicationMessage"
+                    name="communicationMessage"
+                    className="form-control"
+                    rows={3}
+                    placeholder="Clinical update, handoff context, or escalation instruction"
+                    dir="auto"
+                    required
+                  />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Send communication</button>
+                </div>
+              </form>
+
+              {communicationsError && <div className="alert alert-warning" role="alert">Could not load communications: {communicationsError}</div>}
+              {!communicationsError && communications.length === 0 && <div className="alert alert-info mb-0" role="alert">No communications logged yet.</div>}
+              {!communicationsError && communications.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Sent</th><th>Category</th><th>Priority</th><th>Message</th><th>From</th><th>To</th></tr></thead>
+                    <tbody>
+                      {communications.map((communication) => (
+                        <tr key={communication.id}>
+                          <td>{communication.sentAt ? new Date(communication.sentAt).toLocaleString('en-GB') : '—'}</td>
+                          <td>{communicationCategoryLabel(communication.category)}</td>
+                          <td>{taskPriorityLabel(communication.priority)}</td>
+                          <td className="text-muted small">{communication.message}</td>
+                          <td>{communication.sender ?? '—'}</td>
+                          <td>{communication.recipient ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('coordination') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Escalation workflow</h2>
+              <span className="text-muted small">{escalationTasks.length} active escalations</span>
+            </div>
+            <div className="card-body">
+              <form action={createEscalationAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-4">
+                  <label htmlFor="escalationTitle" className="form-label">Escalation title</label>
+                  <input id="escalationTitle" name="escalationTitle" className="form-control" placeholder="Respiratory deterioration" required />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="escalationPriority" className="form-label">Priority</label>
+                  <select id="escalationPriority" name="escalationPriority" className="form-select" defaultValue="urgent">
+                    <option value="routine">Routine</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="asap">ASAP</option>
+                    <option value="stat">STAT</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="escalationOwnerStaffId" className="form-label">Owner</label>
+                  <select id="escalationOwnerStaffId" name="escalationOwnerStaffId" className="form-select" defaultValue="">
+                    <option value="">Unassigned</option>
+                    {assignableStaff.map((staff) => (
+                      <option key={staff.id} value={staff.id}>
+                        {staff.name} · {staff.role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-2">
+                  <label htmlFor="escalationDueDate" className="form-label">Target date</label>
+                  <input id="escalationDueDate" name="escalationDueDate" type="date" className="form-control" />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="escalationEncounterId" className="form-label">Related visit</label>
+                  <select id="escalationEncounterId" name="escalationEncounterId" className="form-select" defaultValue="">
+                    <option value="">None</option>
+                    {encounters.map((encounter) => (
+                      <option key={encounter.id} value={encounter.id}>
+                        {encounter.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-12">
+                  <label htmlFor="escalationSummary" className="form-label">Escalation summary</label>
+                  <textarea
+                    id="escalationSummary"
+                    name="escalationSummary"
+                    className="form-control"
+                    rows={3}
+                    placeholder="Concise escalation context, risk signal, and required next action"
+                    dir="auto"
+                    required
+                  />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Create escalation</button>
+                </div>
+              </form>
+
+              {tasksError && <div className="alert alert-warning" role="alert">Could not load escalation tasks: {tasksError}</div>}
+              {!tasksError && escalationTasks.length === 0 && <div className="alert alert-info mb-0" role="alert">No escalation tasks yet.</div>}
+              {!tasksError && escalationTasks.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Escalation</th><th>Status</th><th>Priority</th><th>Due</th><th>Owner</th></tr></thead>
+                    <tbody>
+                      {escalationTasks.map((task) => (
+                        <tr key={task.id}>
+                          <td>
+                            <div className="fw-semibold">{taskTitle(task)}</div>
+                            <div className="text-muted small">{task.description ?? '—'}</div>
+                          </td>
+                          <td>{taskStatusLabel(task.status)}</td>
+                          <td>{taskPriorityLabel(task.priority)}</td>
+                          <td>{taskDueDate(task)}</td>
+                          <td>{task.owner?.display ?? task.owner?.reference ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('scheduling') && (
+          <div className="card bg-white">
+            <div className="card-header">
+              <h2 className="h6 mb-0">Schedule appointment</h2>
+            </div>
+            <div className="card-body">
+              <form action={createAppointmentAction} className="row g-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-3">
+                  <label htmlFor="appointmentStart" className="form-label">Start</label>
+                  <input id="appointmentStart" name="appointmentStart" type="datetime-local" className="form-control" required />
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="appointmentEnd" className="form-label">End</label>
+                  <input id="appointmentEnd" name="appointmentEnd" type="datetime-local" className="form-control" required />
+                </div>
+                <div className="col-md-2">
+                  <label htmlFor="appointmentType" className="form-label">Type</label>
+                  <select id="appointmentType" name="appointmentType" className="form-select" defaultValue="in_home">
+                    <option value="in_home">In-home</option>
+                    <option value="clinic">Clinic</option>
+                    <option value="virtual">Virtual</option>
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="appointmentOwnerStaffId" className="form-label">Assigned clinician</label>
+                  <select id="appointmentOwnerStaffId" name="appointmentOwnerStaffId" className="form-select" defaultValue="">
+                    <option value="">Not assigned</option>
+                    {assignableStaff.map((staff) => (
+                      <option key={staff.id} value={staff.id}>
+                        {staff.name} · {staff.role}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-12">
+                  <label htmlFor="appointmentNote" className="form-label">Visit note</label>
+                  <textarea id="appointmentNote" name="appointmentNote" rows={2} className="form-control" placeholder="Scheduling context or care objective" dir="auto" />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-primary">Schedule appointment</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          )}
+
+          {isTab('scheduling') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Appointment timeline</h2>
+              <span className="text-muted small">{appointments.length} appointments</span>
+            </div>
+            <div className="card-body">
+              {appointmentsError && <div className="alert alert-warning" role="alert">Could not load appointments: {appointmentsError}</div>}
+              {!appointmentsError && appointments.length === 0 && <div className="alert alert-info mb-0" role="alert">No appointments scheduled yet.</div>}
+              {!appointmentsError && appointments.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Start</th><th>End</th><th>Status</th><th>Type</th><th>Assigned</th><th>Notes</th></tr></thead>
+                    <tbody>
+                      {appointments.map((appointment) => (
+                        <tr key={appointment.id}>
+                          <td>{appointment.start ? new Date(appointment.start).toLocaleString('en-GB') : '—'}</td>
+                          <td>{appointment.end ? new Date(appointment.end).toLocaleString('en-GB') : '—'}</td>
+                          <td>{appointmentStatusLabel(appointment.status)}</td>
+                          <td>{appointmentTypeLabel(appointment.type)}</td>
+                          <td>{appointment.assignedTo ?? '—'}</td>
+                          <td className="text-muted small">{appointment.description ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('tasks') && (
+          <div className="card bg-white">
+            <div className="card-header"><h2 className="h6 mb-0">Care tasks</h2></div>
+            <div className="card-body">
+              <form action={createCareTaskAction} className="row g-3 mb-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-4"><label htmlFor="task-title" className="form-label">Task title</label><input id="task-title" name="taskTitle" type="text" className="form-control" required placeholder="Lab follow-up" /></div>
+                <div className="col-md-4"><label htmlFor="task-description" className="form-label">Description</label><input id="task-description" name="taskDescription" type="text" className="form-control" placeholder="Call family and confirm lab slot" /></div>
+                <div className="col-md-2"><label htmlFor="task-due-date" className="form-label">Due date</label><input id="task-due-date" name="taskDueDate" type="date" className="form-control" /></div>
+                <div className="col-md-2"><label htmlFor="task-encounter" className="form-label">Visit</label><select id="task-encounter" name="encounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.id}</option>))}</select></div>
+                <div className="col-12"><button type="submit" className="btn btn-primary">Create task</button></div>
+              </form>
+
+              {tasksError && <div className="alert alert-warning" role="alert">Could not load tasks: {tasksError}</div>}
+              {!tasksError && tasks.length === 0 && <div className="alert alert-info mb-0" role="alert">No care tasks yet.</div>}
+              {tasks.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Task</th><th>Status</th><th>Due</th><th className="text-end">Update</th></tr></thead>
+                    <tbody>
+                      {tasks.map((task) => (
+                        <tr key={task.id}>
+                          <td><div className="fw-semibold">{taskTitle(task)}</div><div className="text-muted small">{task.description ?? '—'}</div></td>
+                          <td>{taskStatusLabel(task.status)}</td>
+                          <td>{taskDueDate(task)}</td>
+                          <td className="text-end">
+                            <form action={updateCareTaskStatusAction} className="d-inline-flex gap-2">
+                              <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                              <input type="hidden" name="taskId" value={task.id ?? ''} />
+                              <input type="hidden" name="nextStatus" value="in-progress" />
+                              <input type="hidden" name="taskVersionId" value={task.meta?.versionId ?? ''} />
+                              <button type="submit" className="btn btn-sm btn-outline-primary">Start</button>
+                            </form>
+                            <form action={updateCareTaskStatusAction} className="d-inline-flex gap-2 ms-2">
+                              <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                              <input type="hidden" name="taskId" value={task.id ?? ''} />
+                              <input type="hidden" name="nextStatus" value="completed" />
+                              <input type="hidden" name="taskVersionId" value={task.meta?.versionId ?? ''} />
+                              <button type="submit" className="btn btn-sm btn-outline-success">Done</button>
+                            </form>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('reports') && (
+          <div className="card bg-white">
+            <div className="card-header"><h2 className="h6 mb-0">Nursing and physiotherapy reports</h2></div>
+            <div className="card-body">
+              <div className="row g-4">
+                <div className="col-lg-6">
+                  <h3 className="h6">Nursing daily report</h3>
+                  <form action={createNursingReportAction} className="row g-2">
+                    <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                    <div className="col-12"><label htmlFor="nursing-encounter" className="form-label">Linked visit</label><select id="nursing-encounter" name="encounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.id}</option>))}</select></div>
+                    <div className="col-12"><label htmlFor="nursing-summary" className="form-label">Condition summary</label><input id="nursing-summary" name="conditionSummary" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="nursing-escalation" className="form-label">Escalation needed</label><select id="nursing-escalation" name="escalationNeeded" className="form-select" defaultValue=""><option value="">Not set</option><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    <div className="col-12"><label htmlFor="nursing-followup" className="form-label">Follow-up plan</label><input id="nursing-followup" name="followUpPlan" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="nursing-note" className="form-label">Clinical note</label><textarea id="nursing-note" name="noteBody" rows={3} className="form-control" dir="auto" required /></div>
+                    <div className="col-12"><button type="submit" className="btn btn-primary">Save nursing report</button></div>
+                  </form>
+                </div>
+
+                <div className="col-lg-6">
+                  <h3 className="h6">Physiotherapy session report</h3>
+                  <form action={createPhysioReportAction} className="row g-2">
+                    <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                    <div className="col-12"><label htmlFor="physio-encounter" className="form-label">Linked visit</label><select id="physio-encounter" name="encounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.id}</option>))}</select></div>
+                    <div className="col-12"><label htmlFor="physio-interventions" className="form-label">Interventions</label><input id="physio-interventions" name="interventions" className="form-control" /></div>
+                    <div className="col-6"><label htmlFor="physio-pain-before" className="form-label">Pain before</label><input id="physio-pain-before" name="painBefore" type="number" min="0" max="10" className="form-control" /></div>
+                    <div className="col-6"><label htmlFor="physio-pain-after" className="form-label">Pain after</label><input id="physio-pain-after" name="painAfter" type="number" min="0" max="10" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="physio-response" className="form-label">Response summary</label><input id="physio-response" name="responseSummary" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="physio-home-plan" className="form-label">Home plan</label><input id="physio-home-plan" name="homePlan" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="physio-note" className="form-label">Clinical note</label><textarea id="physio-note" name="noteBody" rows={3} className="form-control" dir="auto" required /></div>
+                    <div className="col-12"><button type="submit" className="btn btn-primary">Save physio report</button></div>
+                  </form>
+                </div>
+              </div>
+
+              <hr className="my-4" />
+
+              {careReportsError && <div className="alert alert-warning" role="alert">Could not load care reports: {careReportsError}</div>}
+              {!careReportsError && careReports.length === 0 && <div className="alert alert-info mb-0" role="alert">No nursing or physio reports yet.</div>}
+              {careReports.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Date</th><th>Type</th><th>Summary</th><th>Details</th><th>By</th></tr></thead>
+                    <tbody>
+                      {careReports.map((report) => {
+                        const codeValue = reportCode(report);
+                        const isNursing = codeValue === 'nursing-daily-report';
+                        const label = isNursing ? 'Nursing' : codeValue === 'physio-session-report' ? 'Physio' : codeValue;
+                        const summary = isNursing ? reportComponentText(report, 'condition-summary') : reportComponentText(report, 'interventions');
+                        const details = isNursing
+                          ? reportComponentText(report, 'follow-up-plan')
+                          : [
+                              `Pain ${reportComponentText(report, 'pain-before') ?? '—'} -> ${reportComponentText(report, 'pain-after') ?? '—'}`,
+                              reportComponentText(report, 'response-summary') ?? null,
+                            ]
+                              .filter(Boolean)
+                              .join(' | ');
+
+                        return (
+                          <tr key={report.id}>
+                            <td>{report.effectiveDateTime ? new Date(report.effectiveDateTime).toLocaleString('en-GB') : '—'}</td>
+                            <td>{label}</td>
+                            <td>{summary ?? report.note?.[0]?.text ?? '—'}</td>
+                            <td>{details || '—'}</td>
+                            <td>{report.performer?.[0]?.display ?? '—'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,214 @@
+import 'server-only';
+
+import { EgyptianExtensions } from '@/lib/medplum/fhir-extensions';
+import { getMedplumClient } from '@/lib/medplum/client';
+import { MEDPLUM_CODE_SYSTEMS } from '@/lib/medplum/constants';
+
+type FhirReference = {
+  reference?: string;
+  display?: string;
+};
+
+type MedplumClinicalNoteResource = {
+  resourceType: 'Composition';
+  id?: string;
+  meta?: {
+    versionId?: string;
+  };
+  status: 'preliminary' | 'final' | 'amended' | 'entered-in-error';
+  type: {
+    coding: Array<{
+      system?: string;
+      code?: string;
+      display?: string;
+    }>;
+  };
+  subject: FhirReference;
+  encounter?: FhirReference;
+  date: string;
+  author: FhirReference[];
+  title: string;
+  section: Array<{
+    title?: string;
+    text?: {
+      status?: 'generated';
+      div?: string;
+    };
+  }>;
+  extension?: Array<{
+    url: string;
+    valueString?: string;
+  }>;
+};
+
+export type CreateClinicalNoteDraftInput = {
+  patientId: string;
+  encounterId?: string | null;
+  title?: string | null;
+  noteBody: string;
+  authorReference?: string | null;
+  authorDisplay?: string | null;
+  recordedAt?: Date;
+};
+
+export type ClinicalNoteItem = {
+  id: string;
+  versionId?: string | null;
+  status: 'preliminary' | 'final' | 'amended' | 'entered-in-error';
+  title: string;
+  body: string;
+  date: string;
+  author?: string | null;
+  encounterId?: string | null;
+};
+
+function escapeHtml(input: string): string {
+  return input
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function toNarrativeDiv(noteBody: string): string {
+  const lines = noteBody
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const html = lines.length > 0 ? lines.map((line) => `<p>${escapeHtml(line)}</p>`).join('') : '<p></p>';
+  return `<div xmlns=\"http://www.w3.org/1999/xhtml\">${html}</div>`;
+}
+
+function extractNoteBody(resource: MedplumClinicalNoteResource): string {
+  const extValue = resource.extension?.find((entry) => entry.url === EgyptianExtensions.clinicalNoteText)?.valueString;
+  if (extValue) return extValue;
+
+  const div = resource.section?.[0]?.text?.div;
+  if (!div) return '';
+
+  return div
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export async function createClinicalNoteDraft(
+  input: CreateClinicalNoteDraftInput,
+): Promise<MedplumClinicalNoteResource> {
+  const medplum = await getMedplumClient();
+
+  const resource: MedplumClinicalNoteResource = {
+    resourceType: 'Composition',
+    status: 'preliminary',
+    type: {
+      coding: [
+        {
+          system: MEDPLUM_CODE_SYSTEMS.clinicalNoteType,
+          code: 'clinical-note',
+          display: 'Clinical Note',
+        },
+      ],
+    },
+    subject: { reference: `Patient/${input.patientId}` },
+    encounter: input.encounterId ? { reference: `Encounter/${input.encounterId}` } : undefined,
+    date: (input.recordedAt ?? new Date()).toISOString(),
+    author: [
+      {
+        reference: input.authorReference ?? undefined,
+        display: input.authorDisplay ?? undefined,
+      },
+    ],
+    title: input.title?.trim() || 'Clinical Note',
+    section: [
+      {
+        title: 'Assessment',
+        text: {
+          status: 'generated',
+          div: toNarrativeDiv(input.noteBody),
+        },
+      },
+    ],
+    extension: [
+      {
+        url: EgyptianExtensions.clinicalNoteText,
+        valueString: input.noteBody,
+      },
+    ],
+  };
+
+  return (await medplum.createResource(resource as never)) as MedplumClinicalNoteResource;
+}
+
+export async function signClinicalNote(
+  compositionId: string,
+  signedBy?: { authorReference?: string | null; authorDisplay?: string | null },
+  options?: { expectedVersionId?: string | null },
+): Promise<MedplumClinicalNoteResource> {
+  const medplum = await getMedplumClient();
+
+  const existing = (await medplum.readResource('Composition', compositionId)) as MedplumClinicalNoteResource;
+
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('Clinical note was updated by another user. Please refresh and try again.');
+  }
+
+  if (existing.status === 'final') {
+    return existing;
+  }
+
+  const signedAt = new Date().toISOString();
+
+  return (await medplum.updateResource({
+    ...existing,
+    status: 'final',
+    date: signedAt,
+    author: [
+      {
+        reference: signedBy?.authorReference ?? existing.author?.[0]?.reference,
+        display: signedBy?.authorDisplay ?? existing.author?.[0]?.display,
+      },
+    ],
+    extension: [
+      ...(existing.extension ?? []),
+      {
+        url: EgyptianExtensions.clinicalNoteSignedAt,
+        valueString: signedAt,
+      },
+    ],
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as MedplumClinicalNoteResource;
+}
+
+export async function listPatientClinicalNotes(
+  patientId: string,
+  count = 40,
+  options?: { signedOnly?: boolean },
+): Promise<ClinicalNoteItem[]> {
+  const medplum = await getMedplumClient();
+  const resources = (await medplum.searchResources('Composition', {
+    subject: `Patient/${patientId}`,
+    _count: String(count),
+    _sort: '-date',
+  })) as MedplumClinicalNoteResource[];
+
+  const notes = resources
+    .filter((resource) => (options?.signedOnly ? resource.status === 'final' : true))
+    .map((resource) => ({
+      id: resource.id ?? '',
+      versionId: resource.meta?.versionId ?? null,
+      status: resource.status,
+      title: resource.title ?? 'Clinical Note',
+      body: extractNoteBody(resource),
+      date: resource.date,
+      author: resource.author?.[0]?.display ?? null,
+      encounterId: resource.encounter?.reference?.replace('Encounter/', '') ?? null,
+    }))
+    .filter((note) => note.id);
+
+  return notes;
+}

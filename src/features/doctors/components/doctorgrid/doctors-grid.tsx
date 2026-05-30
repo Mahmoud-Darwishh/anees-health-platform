@@ -11,7 +11,7 @@ import { DoctorCard } from './DoctorCard';
 import { FilterSidebar } from './FilterSidebar';
 import { Pagination } from './Pagination';
 import type { Doctor, FilterState, SortOrder } from './types';
-import { getChannels, getLanguages, uniqueSorted } from './utils';
+import { uniqueSorted } from './utils';
 import LucideIcon from '@/components/common/LucideIcon';
 
 type MessageValues = Record<string, string | number>;
@@ -65,7 +65,6 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   });
 
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
-  const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const doctorsPerPage = 12;
 
@@ -97,7 +96,6 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
 
   const handleFilterChange = useCallback((updates: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...updates }));
-    setCurrentPage(1);
     replacePageInUrl(1);
     setShowMobileFilters(false);
   }, [replacePageInUrl]);
@@ -114,19 +112,12 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
       searchText: '',
       locationText: '',
     });
-    setCurrentPage(1);
     replacePageInUrl(1);
     setSortOrder('none');
     setShowMobileFilters(false);
   }, [maxPrice, minPrice, replacePageInUrl]);
 
-  const handleSearch = useCallback(() => {
-    setCurrentPage(1);
-    replacePageInUrl(1);
-  }, [replacePageInUrl]);
-
   const handlePageChange = useCallback((newPage: number) => {
-    setCurrentPage(newPage);
     replacePageInUrl(newPage);
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -232,27 +223,15 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
 
   // Paginate
   const totalPages = Math.ceil(filteredAndSorted.length / doctorsPerPage);
+  const rawPage = Number(searchParams.get('page') || '1');
+  const safeFromUrl = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+  const currentPage = Math.min(safeFromUrl, Math.max(1, totalPages || 1));
 
   useEffect(() => {
-    const raw = Number(searchParams.get('page') || '1');
-    const safeFromUrl = Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 1;
-    const maxPage = Math.max(1, totalPages || 1);
-    const nextPage = Math.min(safeFromUrl, maxPage);
-
-    if (nextPage !== currentPage) {
-      setCurrentPage(nextPage);
+    if (safeFromUrl !== currentPage) {
+      replacePageInUrl(currentPage);
     }
-  }, [searchParams, totalPages, currentPage]);
-
-  useEffect(() => {
-    if (totalPages <= 0) {
-      return;
-    }
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-      replacePageInUrl(totalPages);
-    }
-  }, [currentPage, totalPages, replacePageInUrl]);
+  }, [safeFromUrl, currentPage, replacePageInUrl]);
 
   const startIndex = (currentPage - 1) * doctorsPerPage;
   const currentDoctors = filteredAndSorted.slice(
@@ -263,7 +242,6 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   const handleSortChange = useCallback(
     (nextSort: SortOrder) => {
       setSortOrder(nextSort);
-      setCurrentPage(1);
       replacePageInUrl(1);
     },
     [replacePageInUrl]

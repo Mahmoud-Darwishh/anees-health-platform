@@ -13,7 +13,10 @@ export default function LoginForm() {
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || `/${locale}`;
+  const rawCallbackUrl = searchParams.get('callbackUrl');
+  const safeCallbackUrl = rawCallbackUrl?.startsWith('/') ? rawCallbackUrl : null;
+  const patientDefaultUrl = `/${locale}/portal`;
+  const staffDefaultUrl = '/admin/patients';
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -26,11 +29,13 @@ export default function LoginForm() {
     setError('');
     setLoading(true);
 
-    const result = await signIn('patient-credentials', {
-      identifier: identifier.trim(),
-      password,
-      redirect: false,
-    });
+    const trimmed = identifier.trim();
+    // An email identifier is a staff login; phone / case-id is a patient login.
+    const isStaff = trimmed.includes('@');
+
+    const result = isStaff
+      ? await signIn('staff-credentials', { email: trimmed, password, redirect: false })
+      : await signIn('patient-credentials', { identifier: trimmed, password, redirect: false });
 
     setLoading(false);
 
@@ -39,13 +44,14 @@ export default function LoginForm() {
       return;
     }
 
-    router.push(callbackUrl);
+    const destination = safeCallbackUrl ?? (isStaff ? staffDefaultUrl : patientDefaultUrl);
+    router.push(destination);
     router.refresh();
   }
 
   async function handleGoogle() {
     setGoogleLoading(true);
-    await signIn('google', { callbackUrl });
+    await signIn('google', { callbackUrl: safeCallbackUrl ?? patientDefaultUrl });
   }
 
   return (

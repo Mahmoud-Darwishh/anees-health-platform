@@ -71,6 +71,8 @@
     "linkAccountCta": "Link My Account",
     "notFoundTitle": "Patient profile not found",
     "notFoundText": "We could not find a patient profile for this account. Please contact support.",
+    "caregiverAccessBadge": "Caregiver view (consent-scoped)",
+    "consentRestricted": "This section is not shared with this caregiver profile by the current patient consent.",
     "goHomeCta": "Go to Home",
     "summary": {
       "totalVisits": "Total Visits",
@@ -82,6 +84,43 @@
       "labReports": "Lab Reports",
       "latestBp": "Latest BP"
     },
+    "clinicalDepthTitle": "Clinical Depth",
+    "clinicalDepthSubtitle": "Problems, allergies, medications, documents, labs, and assessments.",
+    "problemsTitle": "Problems",
+    "problemTitle": "Problem",
+    "problemStatus": "Status",
+    "problemOnset": "Onset",
+    "allergiesTitle": "Allergies",
+    "allergenLabel": "Allergen",
+    "allergyReaction": "Reaction",
+    "allergySeverity": "Severity",
+    "medicationsTitle": "Medications",
+    "medicationLabel": "Medication",
+    "medicationStatus": "Status",
+    "medicationDose": "Dose and route",
+    "documentsTitle": "Documents",
+    "documentLabel": "Document",
+    "documentCategory": "Category",
+    "documentDate": "Date",
+    "documentAction": "Action",
+    "documentView": "View",
+    "documentDownload": "Download",
+    "labsTitle": "Labs and Imaging",
+    "labsOrdersTitle": "Orders",
+    "labsResultsTitle": "Results",
+    "labsOrdersSuffix": "orders",
+    "labsResultsSuffix": "results",
+    "assessmentsTitle": "Assessments",
+    "assessmentLabel": "Assessment",
+    "assessmentType": "Type",
+    "assessmentScore": "Score",
+    "assessmentSummary": "Summary",
+    "carePlanTitle": "Plan",
+    "carePlanStatus": "Status",
+    "carePlanRecordedAt": "Recorded",
+    "carePlanDetails": "Details",
+    "careTeamMember": "Member",
+    "careTeamRole": "Role",
     "portableSummary": {
       "title": "Portable Clinical Snapshot",
       "description": "Open a concise, hospital-friendly summary of diagnoses, medications, allergies, notes, and recent visits.",
@@ -157,7 +196,9 @@
       "exportPdf": "Export as PDF"
     },
     "brand": {
-      "logoAlt": "Anees Health"
+      "logoAlt": "Anees Health",
+      "loyaltyMessage": "Built on continuity, safety, and trust",
+      "supportMessage": "Anees provides a secure, structured view of your care journey, follow-up plans, and clinical updates."
     },
     "overview": {
       "chartsLabel": "Patient overview charts",
@@ -217,6 +258,8 @@
       "flag": "Risk Flag",
       "emptyFlags": "No active risk flags."
     },
+    "careTeamTitle": "Care Team",
+    "engagementTitle": "Next Appointment",
     "medicalHistory": {
       "title": "Medical History",
       "empty": "No medical history records are available yet.",

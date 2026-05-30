@@ -6,6 +6,8 @@ export const EgyptianExtensions = {
   district: `${ANEES_FHIR_EXTENSION_BASE}/district`,
   caregiverRelationshipDetail: `${ANEES_FHIR_EXTENSION_BASE}/caregiver-relationship-detail`,
   careProgram: `${ANEES_FHIR_EXTENSION_BASE}/care-program`,
+  clinicalNoteText: `${ANEES_FHIR_EXTENSION_BASE}/clinical-note-text`,
+  clinicalNoteSignedAt: `${ANEES_FHIR_EXTENSION_BASE}/clinical-note-signed-at`,
 } as const;
 
 export type CareProgramCode = 'sanad' | 'haraka' | 'wai' | 'amal';

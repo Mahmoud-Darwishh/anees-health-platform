@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from './offline.module.scss';
 import RetryButton from './RetryButton';
 
@@ -52,7 +53,7 @@ export default function OfflinePage() {
 
         <div className={styles.actions}>
           <RetryButton />
-          <a href="/" className={styles.homeLink}>
+          <Link href="/" className={styles.homeLink}>
             <svg
               width="14"
               height="14"
@@ -68,7 +69,7 @@ export default function OfflinePage() {
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
             Go Home / الصفحة الرئيسية
-          </a>
+          </Link>
         </div>
 
         <p className={styles.hint} lang="en">

@@ -1,0 +1,722 @@
+@use '@/assets/scss/utils/variables' as *;
+
+.anees-admin-shell {
+  --anees-surface: #fffefb;
+  --anees-surface-soft: #fcfaf5;
+  --anees-ink: #132c4d;
+  --anees-ink-muted: #526276;
+  --anees-accent: #a68341;
+  --anees-accent-strong: #8f6f34;
+  --anees-border: rgba(19, 44, 77, 0.12);
+  --anees-radius-card: 16px;
+  --anees-radius-control: 12px;
+  --anees-radius-pill: 12px;
+  --anees-shadow-soft: 0 10px 24px rgba(19, 44, 77, 0.07);
+  --anees-space-1: 0.35rem;
+  --anees-space-2: 0.55rem;
+  --anees-space-3: 0.75rem;
+  --anees-space-4: 0.95rem;
+  --anees-space-5: 1.2rem;
+  --anees-space-6: 1.5rem;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 520px at -8% -18%, rgba(166, 131, 65, 0.09), transparent 62%),
+    radial-gradient(1000px 460px at 102% 0%, rgba(19, 44, 77, 0.08), transparent 60%),
+    #f7f3e8;
+}
+
+.anees-admin-navbar {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--anees-border);
+  box-shadow: 0 8px 18px rgba(19, 44, 77, 0.06);
+  min-height: 72px;
+}
+
+.anees-admin-brand {
+  color: #132c4d !important;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.anees-admin-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+}
+
+.anees-admin-brand-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid rgba(19, 44, 77, 0.14);
+  padding: 0.2rem;
+}
+
+.anees-admin-brand-copy {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  line-height: 1.2;
+}
+
+.anees-admin-brand-title {
+  font-size: 0.95rem;
+  color: #132c4d;
+  font-weight: 700;
+}
+
+.anees-admin-brand-subtitle {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5a6675;
+}
+
+.anees-admin-meta {
+  color: var(--anees-ink-muted) !important;
+  border: 1px solid rgba(19, 44, 77, 0.18);
+  border-radius: var(--anees-radius-pill);
+  padding: 0.22rem 0.62rem;
+  background: #ffffff;
+}
+
+.anees-admin-navbar-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.anees-admin-home-link {
+  border-color: rgba(19, 44, 77, 0.2) !important;
+  color: #233b5a !important;
+  background: #fff !important;
+}
+
+.anees-mobile-patient-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.anees-mobile-patient-card {
+  border: 1px solid var(--anees-border);
+  border-radius: var(--anees-radius-card);
+  background: var(--anees-surface);
+  padding: 0.95rem;
+  box-shadow: var(--anees-shadow-soft);
+}
+
+.anees-mobile-kv {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  padding: 0.18rem 0;
+}
+
+.anees-mobile-kv-label {
+  color: #5d6570;
+}
+
+.anees-mobile-kv-value {
+  color: #132c4d;
+  font-weight: 600;
+  text-align: end;
+}
+
+.anees-admin-page {
+  > .card,
+  > .alert {
+    margin-bottom: var(--anees-space-4);
+  }
+
+  .card {
+    border: 1px solid var(--anees-border);
+    border-radius: var(--anees-radius-card);
+    box-shadow: var(--anees-shadow-soft);
+    background: var(--anees-surface);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: linear-gradient(180deg, #fdfaf2 0%, #f9f3e6 100%);
+    border-bottom: 1px solid var(--anees-border);
+    color: var(--anees-ink);
+    font-weight: 600;
+    padding: var(--anees-space-3) var(--anees-space-5);
+  }
+
+  .card-body {
+    padding: var(--anees-space-5);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--anees-accent) 0%, #98793b 100%);
+    border-color: var(--anees-accent);
+    box-shadow: 0 8px 16px rgba(166, 131, 65, 0.2);
+  }
+
+  .btn-primary:hover,
+  .btn-primary:focus {
+    border-color: var(--anees-accent-strong);
+    background: linear-gradient(135deg, var(--anees-accent-strong) 0%, #7d632f 100%);
+  }
+
+  .btn-outline-primary {
+    border-color: var(--anees-accent);
+    color: var(--anees-accent);
+  }
+
+  .btn-outline-primary:hover {
+    background: var(--anees-accent);
+    color: #fff;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: var(--anees-radius-control);
+    border-color: rgba(19, 44, 77, 0.18);
+    padding: 0.56rem 0.74rem;
+
+    &:focus {
+      border-color: rgba(166, 131, 65, 0.5);
+      box-shadow: 0 0 0 0.2rem rgba(166, 131, 65, 0.14);
+    }
+  }
+
+  textarea.form-control {
+    min-height: 86px;
+  }
+
+  .table thead th {
+    color: #132c4d;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.66rem 0.68rem;
+  }
+
+  .table tbody td {
+    color: #233b5a;
+    padding: 0.64rem 0.68rem;
+  }
+
+  .table-responsive {
+    border-radius: var(--anees-radius-control);
+    border: 1px solid var(--anees-border);
+    background: #fff;
+  }
+
+  .anees-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.22rem 0.58rem;
+    border-radius: var(--anees-radius-pill);
+    font-size: 0.74rem;
+    font-weight: 600;
+    background: #f4ecdc;
+    color: #745724;
+    border: 1px solid rgba(166, 131, 65, 0.25);
+  }
+
+  .anees-banner {
+    border-radius: var(--anees-radius-card);
+    background: linear-gradient(135deg, #132c4d 0%, #1f436f 68%, #31567f 100%);
+    color: #eef4fb;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 1.15rem 1.25rem;
+    box-shadow: 0 14px 28px rgba(19, 44, 77, 0.2);
+  }
+
+  .anees-banner .text-muted {
+    color: rgba(233, 240, 249, 0.84) !important;
+  }
+
+  .anees-banner .anees-chip {
+    background: rgba(244, 236, 220, 0.16);
+    color: #f7efe0;
+    border-color: rgba(244, 236, 220, 0.36);
+  }
+
+  .anees-tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.58rem;
+    padding-block: 0.12rem;
+    scroll-padding-inline: 0.25rem;
+  }
+
+  .anees-tab-nav-wrap {
+    width: 100%;
+  }
+
+  .anees-tab-card-body {
+    padding-block: 0.56rem;
+  }
+
+  .anees-tab-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.38rem 0.82rem;
+    border-radius: var(--anees-radius-pill);
+    border: 1px solid rgba(19, 44, 77, 0.16);
+    background: #ffffff;
+    color: #284262;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    min-height: 38px;
+
+    &:hover {
+      border-color: rgba(166, 131, 65, 0.45);
+      color: #132c4d;
+    }
+
+    &.is-active {
+      border-color: #a68341;
+      background: #f4ecdc;
+      color: #6f5321;
+    }
+  }
+
+  .anees-page-links {
+    .btn {
+      min-width: 148px;
+    }
+  }
+
+  .anees-doc-actions-wrap {
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .anees-doc-actions {
+    min-width: 232px;
+  }
+
+  .table.anees-documents-table {
+    min-width: 620px;
+  }
+
+  .anees-clinical-dashboard {
+    display: grid;
+    gap: 0.86rem;
+  }
+
+  .anees-clinical-overview {
+    border: 1px solid var(--anees-border);
+    border-radius: var(--anees-radius-control);
+    background: linear-gradient(180deg, #ffffff 0%, #fbf8f2 100%);
+    padding: 0.94rem 1rem;
+    display: grid;
+    gap: 0.72rem;
+  }
+
+  .anees-clinical-overview-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.72rem;
+    flex-wrap: wrap;
+  }
+
+  .anees-clinical-overview-label {
+    display: block;
+    color: #5a687b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+
+  .anees-clinical-overview-value {
+    color: var(--anees-ink);
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .anees-clinical-overview-meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.42rem;
+  }
+
+  .anees-clinical-overview-meta span {
+    border: 1px solid var(--anees-border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: #4f5f74;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.48rem;
+    line-height: 1.25;
+  }
+
+  .anees-clinical-distribution {
+    height: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    background: #edf1f6;
+  }
+
+  .anees-clinical-distribution-segment {
+    height: 100%;
+    background: linear-gradient(90deg, #a68341 0%, #c4a25d 100%);
+  }
+
+  .anees-clinical-distribution-segment:nth-child(even) {
+    opacity: 0.74;
+  }
+
+  .anees-clinical-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.72rem;
+  }
+
+  .anees-clinical-metric {
+    border: 1px solid var(--anees-border);
+    border-radius: var(--anees-radius-control);
+    background: #ffffff;
+    padding: 0.78rem 0.86rem;
+    min-height: 96px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .anees-clinical-metric-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.52rem;
+  }
+
+  .anees-clinical-label {
+    color: #415065;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .anees-clinical-value {
+    color: var(--anees-ink);
+    font-size: 1.46rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .anees-clinical-metric-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+    color: #5a687b;
+    font-size: 0.71rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .anees-clinical-state {
+    border-radius: 9px;
+    border: 1px solid var(--anees-border);
+    background: #fff;
+    padding: 0.12rem 0.42rem;
+    white-space: nowrap;
+  }
+
+  .anees-clinical-state.is-empty {
+    opacity: 0.85;
+  }
+
+  .form-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.36rem;
+    margin-bottom: 0.38rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  // Show required fields with asterisk marker.
+  div:has(> .form-label + :is(input, select, textarea)[required]) > .form-label::after {
+    content: '*';
+    color: #b42318;
+    font-weight: 800;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .anees-admin-navbar {
+    gap: 0.65rem;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .anees-admin-meta {
+    display: inline-flex;
+    line-height: 1.35;
+  }
+
+  .anees-admin-page {
+    .anees-clinical-dashboard {
+      gap: 0.86rem;
+    }
+
+    .anees-clinical-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .anees-banner {
+      gap: 0.8rem;
+      align-items: flex-start !important;
+      flex-direction: column;
+    }
+
+    .anees-page-links {
+      width: 100%;
+
+      .btn {
+        flex: 1 1 auto;
+      }
+    }
+  }
+
+}
+
+@media (max-width: 767.98px) {
+  .anees-admin-brand {
+    font-size: 1.04rem;
+  }
+
+  .anees-admin-brand-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .anees-admin-brand-title {
+    font-size: 0.9rem;
+  }
+
+  .anees-admin-brand-subtitle {
+    display: none;
+  }
+
+  .anees-admin-navbar-right {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .anees-admin-home-link {
+    font-size: 0.78rem;
+    padding-inline: 0.65rem;
+  }
+
+  .anees-admin-page {
+    .anees-clinical-grid {
+      grid-template-columns: 1fr;
+      gap: 0.66rem;
+    }
+
+    .anees-clinical-overview {
+      padding: 0.8rem 0.82rem;
+    }
+
+    .anees-clinical-overview-value {
+      font-size: 1.72rem;
+    }
+
+    .anees-clinical-overview-meta {
+      width: 100%;
+    }
+
+    .anees-clinical-overview-meta span {
+      flex: 1 1 auto;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .anees-banner-head {
+      padding: 1rem;
+
+      h1 {
+        font-size: 1.5rem;
+        line-height: 1.25;
+      }
+
+      p.small {
+        font-size: 0.98rem;
+        line-height: 1.55;
+        max-width: 38ch;
+      }
+    }
+
+    .card-header {
+      padding: 0.7rem 0.82rem;
+
+      &.d-flex {
+        gap: 0.5rem;
+        align-items: center !important;
+      }
+    }
+
+    .card-body {
+      padding: 0.9rem;
+    }
+
+    .anees-tab-card-body {
+      padding: 0.44rem 0.44rem 0.2rem;
+    }
+
+    .anees-tab-nav-wrap {
+      width: calc(100% + 0.1rem);
+      margin-inline: -0.05rem;
+      padding-inline: 0.05rem;
+    }
+
+    .anees-tab-nav {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0.26rem 0.28rem 0.8rem;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      overscroll-behavior-x: contain;
+      touch-action: pan-x;
+      scrollbar-width: thin;
+      gap: 0.62rem;
+    }
+
+    .anees-tab-nav::-webkit-scrollbar {
+      height: 7px;
+    }
+
+    .anees-tab-nav::-webkit-scrollbar-thumb {
+      background: rgba(19, 44, 77, 0.28);
+      border-radius: 8px;
+    }
+
+    .anees-tab-link {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      min-height: 42px;
+      scroll-snap-align: start;
+      font-size: 0.82rem;
+      line-height: 1.2;
+      padding: 0.48rem 0.95rem;
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+      min-width: 680px;
+    }
+
+    .table.anees-documents-table {
+      min-width: 100%;
+    }
+
+    .anees-doc-actions {
+      min-width: 160px;
+    }
+
+    .anees-doc-actions-wrap {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+
+      .btn,
+      form {
+        width: 100%;
+      }
+    }
+
+    .btn,
+    .form-control,
+    .form-select {
+      min-height: 38px;
+    }
+
+    .table.anees-documents-table {
+      border: 0;
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100%;
+      }
+
+      tbody {
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      tr.anees-doc-row {
+        border: 1px solid var(--anees-border);
+        border-radius: var(--anees-radius-control);
+        background: #fff;
+        padding: 0.65rem 0.72rem;
+        box-shadow: 0 6px 14px rgba(19, 44, 77, 0.06);
+      }
+
+      tr.anees-doc-row td {
+        border: 0;
+        padding: 0.34rem 0;
+        display: grid;
+        grid-template-columns: minmax(88px, 34%) 1fr;
+        align-items: start;
+        column-gap: 0.65rem;
+      }
+
+      tr.anees-doc-row td::before {
+        content: attr(data-label);
+        font-size: 0.68rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #5f6c7f;
+        font-weight: 700;
+      }
+
+      td.anees-doc-col-title {
+        display: block;
+      }
+
+      td.anees-doc-col-title::before {
+        display: block;
+        margin-bottom: 0.24rem;
+      }
+
+      td.anees-doc-actions {
+        display: block;
+        text-align: start !important;
+      }
+
+      td.anees-doc-actions::before {
+        display: block;
+        margin-bottom: 0.34rem;
+      }
+
+      .anees-doc-actions-wrap {
+        width: 100%;
+      }
+    }
+  }
+}
