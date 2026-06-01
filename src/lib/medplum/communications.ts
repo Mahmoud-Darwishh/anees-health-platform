@@ -28,7 +28,7 @@ export type MedplumCommunicationResource = {
 
 export type CommunicationSummary = {
   id: string;
-  category: 'clinical-update' | 'handoff' | 'escalation' | 'other';
+  category: 'clinical-update' | 'handoff' | 'escalation' | 'incident' | 'other';
   status: string;
   priority: 'routine' | 'urgent' | 'asap' | 'stat' | null;
   sentAt: string | null;
@@ -41,7 +41,7 @@ export type CommunicationSummary = {
 type CreatePatientCommunicationInput = {
   patientId: string;
   encounterId?: string | null;
-  category: 'clinical-update' | 'handoff' | 'escalation';
+  category: 'clinical-update' | 'handoff' | 'escalation' | 'incident';
   priority?: 'routine' | 'urgent' | 'asap' | 'stat' | null;
   message: string;
   senderReference: string;
@@ -59,6 +59,8 @@ function toCategoryLabel(category: CreatePatientCommunicationInput['category']):
       return 'Handoff';
     case 'escalation':
       return 'Escalation';
+    case 'incident':
+      return 'Incident';
     default:
       return 'Clinical Update';
   }
@@ -66,7 +68,7 @@ function toCategoryLabel(category: CreatePatientCommunicationInput['category']):
 
 function toCategoryCode(communication: MedplumCommunicationResource): CommunicationSummary['category'] {
   const code = communication.category?.[0]?.coding?.[0]?.code;
-  if (code === 'clinical-update' || code === 'handoff' || code === 'escalation') {
+  if (code === 'clinical-update' || code === 'handoff' || code === 'escalation' || code === 'incident') {
     return code;
   }
   return 'other';

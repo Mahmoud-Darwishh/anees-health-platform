@@ -189,6 +189,12 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
   const greetingLine = `${greeting} ${firstName}`;
   const loyaltyMessage = t('brand.loyaltyMessage');
   const supportMessage = t('brand.supportMessage');
+  const addressLine = ownRecord.patient.addressDetail ?? ownRecord.medplumPatient?.address?.[0]?.line?.[0] ?? ownRecord.medplumPatient?.address?.[0]?.text ?? null;
+  const addressLandmark = ownRecord.patient.landmark ?? ownRecord.medplumPatient?.address?.[0]?.line?.[1] ?? null;
+  const addressMapUrl = ownRecord.patient.addressMapUrl ?? ownRecord.medplumPatient?.address?.[0]?.extension?.find((extension: { url: string; valueUrl?: string }) => extension.url.includes('address-map-url'))?.valueUrl ?? null;
+  const emergencyContactName = ownRecord.patient.emergencyContactName ?? ownRecord.medplumPatient?.contact?.[0]?.name?.text ?? null;
+  const emergencyContactPhone = ownRecord.patient.emergencyContactPhone ?? ownRecord.medplumPatient?.contact?.[0]?.telecom?.find((telecom: { system?: string; value?: string }) => telecom.system === 'phone')?.value ?? null;
+  const emergencyContactRelation = ownRecord.patient.emergencyContactRelation ?? ownRecord.medplumPatient?.contact?.[0]?.relationship?.[0]?.text ?? null;
 
   if (!medplumPatientId) {
     return (
@@ -270,6 +276,29 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
             <div className="col-md-4">
               <div className="text-muted small">{t('profile.phone')}</div>
               <div className={styles.metaValue}>{ownRecord.patient.phone}</div>
+            </div>
+          </div>
+
+          <div className="row g-3 mt-2">
+            <div className="col-12 col-lg-6">
+              <div className="border rounded-3 p-3 h-100">
+                <div className="text-muted small">{t('profile.address')}</div>
+                <div className={styles.metaValue}>{addressLine ?? '—'}</div>
+                <div className="small text-muted mt-1">{addressLandmark ?? '—'}</div>
+                {addressMapUrl ? (
+                  <a href={addressMapUrl} target="_blank" rel="noreferrer" className="small d-inline-block mt-2">
+                    Open map
+                  </a>
+                ) : null}
+              </div>
+            </div>
+            <div className="col-12 col-lg-6">
+              <div className="border rounded-3 p-3 h-100">
+                <div className="text-muted small">{t('profile.caregiver')}</div>
+                <div className={styles.metaValue}>{emergencyContactName ?? '—'}</div>
+                <div className="small text-muted mt-1">{emergencyContactRelation ?? '—'}</div>
+                <div className="small text-muted mt-1">{emergencyContactPhone ?? '—'}</div>
+              </div>
             </div>
           </div>
         </div>

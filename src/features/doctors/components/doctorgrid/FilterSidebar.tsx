@@ -11,10 +11,7 @@ interface FilterSidebarProps {
   onFilterChange: (updates: Partial<FilterState>) => void;
   onClearAll: () => void;
   specialities: string[];
-  channels: string[];
   languages: string[];
-  minPrice: number;
-  maxPrice: number;
   tg: (key: string, values?: MessageValues) => string;
   idPrefix?: string;
 }
@@ -24,10 +21,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onFilterChange,
   onClearAll,
   specialities,
-  channels,
   languages,
-  minPrice,
-  maxPrice,
   tg,
   idPrefix,
 }) => {
@@ -47,16 +41,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       collapse1: withPrefix('collapse1'),
       heading2: withPrefix('heading2'),
       collapse2: withPrefix('collapse2'),
-      heading4: withPrefix('heading4'),
-      collapse4: withPrefix('collapse4'),
       heading5: withPrefix('heading5'),
       collapse5: withPrefix('collapse5'),
-      heading7: withPrefix('heading7'),
-      collapse7: withPrefix('collapse7'),
       heading8: withPrefix('heading8'),
       collapse8: withPrefix('collapse8'),
-      heading9: withPrefix('heading9'),
-      collapse9: withPrefix('collapse9'),
     }),
     [withPrefix]
   );
@@ -71,8 +59,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
       : [...currentArray, value];
     onFilterChange({ [key]: newArray });
   };
-
-  const ratingOptions = [5, 4, 3, 2, 1];
 
   return (
       <div className="card filter-lists">
@@ -268,61 +254,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </div>
           </div>
 
-          {/* Pricing Filter */}
-          <div className="accordion-item border-bottom">
-            <div className="accordion-header" id={accordion.heading4}>
-              <div
-                className="accordion-button"
-                data-bs-toggle="collapse"
-                data-bs-target={`#${accordion.collapse4}`}
-                aria-controls={accordion.collapse4}
-                role="button"
-              >
-                <div className="d-flex align-items-center w-100">
-                  <h5>{tg('filters.price')}</h5>
-                  <div className="ms-auto">
-                    <span>
-                      <LucideIcon iconClass="fas fa-chevron-down" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              id={accordion.collapse4}
-              className="accordion-collapse show"
-              aria-labelledby={accordion.heading4}
-              data-bs-parent={`#${accordion.parent}`}
-            >
-              <div className="accordion-body pt-3">
-                {!isNaN(minPrice) && !isNaN(maxPrice) && minPrice !== maxPrice ? (
-                  <>
-                    <div className="filter-range">
-                      <input
-                        type="range"
-                        className="form-range"
-                        min={minPrice}
-                        max={maxPrice}
-                        value={filters.priceRange[1]}
-                        aria-label={tg('filters.range')}
-                        onChange={(e) =>
-                          onFilterChange({
-                            priceRange: [minPrice, parseInt(e.target.value, 10)],
-                          })
-                        }
-                      />
-                    </div>
-                    <p className="mb-0">
-                      {tg('filters.range')}: {minPrice} - {filters.priceRange[1]} EGP
-                    </p>
-                  </>
-                ) : (
-                  <p className="mb-0 text-muted">{tg('filters.price')} data loading...</p>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Experience Filter */}
           <div className="accordion-item border-bottom">
             <div className="accordion-header" id={accordion.heading5}>
@@ -416,68 +347,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </div>
           </div>
 
-          {/* Consultation Type Filter */}
-          <div className="accordion-item border-bottom">
-            <div className="accordion-header" id={accordion.heading7}>
-              <div
-                className="accordion-button"
-                data-bs-toggle="collapse"
-                data-bs-target={`#${accordion.collapse7}`}
-                aria-controls={accordion.collapse7}
-                role="button"
-              >
-                <div className="d-flex align-items-center w-100">
-                  <h5>{tg('filters.channel')}</h5>
-                  <div className="ms-auto">
-                    <span>
-                      <LucideIcon iconClass="fas fa-chevron-down" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              id={accordion.collapse7}
-              className="accordion-collapse show"
-              aria-labelledby={accordion.heading7}
-              data-bs-parent={`#${accordion.parent}`}
-            >
-              <div className="accordion-body pt-3">
-                {channels.map((id, idx) => {
-                  const labelMap: Record<string, string> = {
-                    Home: tg('channels.home'),
-                    video: tg('channels.video'),
-                    chat: tg('channels.chat'),
-                    clinic: tg('card.clinic_visit'),
-                  };
-                  const label = labelMap[id] || id;
-                  const channelId = withPrefix(`channel-${sanitizeForId(id)}-${idx}`);
-                  return (
-                    <div
-                      className="d-flex align-items-center justify-content-between mb-2"
-                      key={`${id}-${idx}`}
-                    >
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id={channelId}
-                          name="channel"
-                          aria-label={label}
-                          checked={filters.selectedChannels.includes(id)}
-                          onChange={() => toggleArrayFilter('selectedChannels', id)}
-                        />
-                        <label className="form-check-label" htmlFor={channelId}>
-                          {label}
-                        </label>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
           {/* Languages Filter */}
           <div className="accordion-item border-bottom">
             <div className="accordion-header" id={accordion.heading8}>
@@ -533,65 +402,6 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             </div>
           </div>
 
-          {/* Rating Filter */}
-          <div className="accordion-item">
-            <div className="accordion-header" id={accordion.heading9}>
-              <div
-                className="accordion-button"
-                data-bs-toggle="collapse"
-                data-bs-target={`#${accordion.collapse9}`}
-                aria-controls={accordion.collapse9}
-                role="button"
-              >
-                <div className="d-flex align-items-center w-100">
-                  <h5>{tg('filters.rating')}</h5>
-                  <div className="ms-auto">
-                    <span>
-                      <LucideIcon iconClass="fas fa-chevron-down" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              id={accordion.collapse9}
-              className="accordion-collapse show"
-              aria-labelledby={accordion.heading9}
-              data-bs-parent={`#${accordion.parent}`}
-            >
-              <div className="accordion-body pt-3">
-                {ratingOptions.map((r) => {
-                  const ratingId = withPrefix(`rating-${r}`);
-                  return (
-                    <div
-                      className="d-flex align-items-center justify-content-between mb-2"
-                      key={`rating-${r}`}
-                    >
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id={ratingId}
-                          name="rating"
-                          aria-label={tg('filters.stars_up', { count: r })}
-                          checked={filters.selectedRatings.includes(r)}
-                          onChange={() => toggleArrayFilter('selectedRatings', r)}
-                        />
-                        <label className="form-check-label" htmlFor={ratingId}>
-                          <span>
-                            {Array.from({ length: r }).map((_, i) => (
-                              <LucideIcon key={i} iconClass="fa-solid fa-star text-orange me-1" />
-                            ))}
-                          </span>
-                          {` ${tg('filters.stars_up', { count: r })}`}
-                        </label>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
   );

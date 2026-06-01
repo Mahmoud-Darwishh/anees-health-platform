@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
+  const canOpenNurseDashboard =
+    user?.staffRole === 'nurse' || user?.staffRole === 'admin' || user?.staffRole === 'superadmin';
 
   // Defence in depth — proxy.ts already gates /admin, but never trust it alone.
   if (!isStaff(user)) {
@@ -32,6 +34,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </span>
           </span>
         </Link>
+        <div className="d-inline-flex align-items-center gap-2 ms-2">
+          <Link href="/admin/patients" className="btn btn-sm btn-outline-secondary">
+            Patients
+          </Link>
+          <Link href="/admin/escalations" className="btn btn-sm btn-outline-secondary">
+            Escalations
+          </Link>
+          {canOpenNurseDashboard ? (
+            <Link href="/admin/nursing/dashboard" className="btn btn-sm btn-outline-secondary">
+              Nurse Dashboard
+            </Link>
+          ) : null}
+        </div>
         <div className="anees-admin-navbar-right">
           <Link href="/en" className="btn btn-sm btn-outline-secondary anees-admin-home-link">
             Back to home

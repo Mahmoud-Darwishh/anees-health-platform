@@ -172,6 +172,13 @@ enum DnrStatus {
   unknown
 }
 
+enum NurseShiftAssignmentStatus {
+  scheduled
+  in_progress
+  completed
+  cancelled
+}
+
 // ============================================================================
 // LOOKUP TABLES
 // ============================================================================
@@ -318,6 +325,9 @@ model Patient {
   gpsLatitude      Decimal?      @db.Decimal(10, 7)
   gpsLongitude     Decimal?      @db.Decimal(10, 7)
   addressMapUrl    String?
+  handoffGeofenceRadiusMeters Int?
+  temporarilyAwayUntil DateTime?
+  temporarilyAwayNote String?
   emergencyContactName String?
   emergencyContactPhone String?
   emergencyContactRelation String?
@@ -343,6 +353,7 @@ model Patient {
   carePlans      CarePlan[]
   invoices       Invoice[]
   payments       Payment[]
+  nurseShiftAssignments NurseShiftAssignment[]
   userAccount    User?
 
   @@index([familyId])
@@ -712,6 +723,8 @@ model Staff {
   updatedAt   DateTime    @updatedAt
 
   provider               Provider? @relation("StaffProviderLink", fields: [providerId], references: [id])
+  primaryNurseAssignments NurseShiftAssignment[] @relation("PrimaryNurseAssignments")
+  incomingNurseAssignments NurseShiftAssignment[] @relation("IncomingNurseAssignments")
   userAccount            User?
 
   @@index([email])
@@ -719,6 +732,31 @@ model Staff {
   @@index([providerId])
   @@index([medplumPractitionerId])
   @@map("staff")
+}
+
+model NurseShiftAssignment {
+  id                  String  @id @default(cuid())
+  patientId           String
+  primaryNurseStaffId String
+  shiftStartAt        DateTime
+  shiftEndAt          DateTime
+  status              NurseShiftAssignmentStatus @default(scheduled)
+  incomingNurseStaffId String?
+  acknowledgedAt      DateTime?
+  escalationTaskId    String?
+  notes               String?
+  createdByStaffId    String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  patient        Patient @relation(fields: [patientId], references: [id])
+  primaryNurse   Staff   @relation("PrimaryNurseAssignments", fields: [primaryNurseStaffId], references: [id])
+  incomingNurse  Staff?  @relation("IncomingNurseAssignments", fields: [incomingNurseStaffId], references: [id])
+
+  @@index([patientId, shiftStartAt])
+  @@index([primaryNurseStaffId, shiftStartAt])
+  @@index([incomingNurseStaffId, acknowledgedAt])
+  @@map("nurse_shift_assignments")
 }
 
 // ============================================================================

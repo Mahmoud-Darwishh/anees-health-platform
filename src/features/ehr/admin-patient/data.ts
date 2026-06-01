@@ -11,6 +11,7 @@ import { listPatientCaregiverPortalConsents } from '@/lib/medplum/consents';
 import { listPatientConditions } from '@/lib/medplum/conditions';
 import { listPatientAllergies } from '@/lib/medplum/allergies';
 import { listPatientMedications } from '@/lib/medplum/medications';
+import { listMedicationAdministrationRecords } from '@/lib/medplum/medication-administrations';
 import { listPatientDocuments } from '@/lib/medplum/documents';
 import { listPatientLabOrders, listPatientDiagnosticReports } from '@/lib/medplum/labs';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
@@ -27,6 +28,7 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
 
   if (!user?.staffId || !user.staffRole) {
     return {
+      staffRole: null,
       patient: null,
       localPatient: null,
       error: 'Unauthorized',
@@ -49,6 +51,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       allergiesError: null,
       medications: [],
       medicationsError: null,
+      medicationAdministrations: [],
+      medicationAdministrationsError: null,
       documents: [],
       documentsError: null,
       labOrders: [],
@@ -61,6 +65,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       communicationsError: null,
       appointments: [],
       appointmentsError: null,
+      nurseShiftAssignments: [],
+      nurseShiftAssignmentsError: null,
       caregiverConsents: [],
       caregiverConsentsError: null,
     };
@@ -91,6 +97,7 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
 
   if (!patient?.id) {
     return {
+      staffRole: user.staffRole,
       patient: null,
       localPatient: null,
       error,
@@ -113,6 +120,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       allergiesError: null,
       medications: [],
       medicationsError: null,
+      medicationAdministrations: [],
+      medicationAdministrationsError: null,
       documents: [],
       documentsError: null,
       labOrders: [],
@@ -125,6 +134,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       communicationsError: null,
       appointments: [],
       appointmentsError: null,
+      nurseShiftAssignments: [],
+      nurseShiftAssignmentsError: null,
       caregiverConsents: [],
       caregiverConsentsError: null,
     };
@@ -135,8 +146,17 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     select: {
       id: true,
       code: true,
+      addressDetail: true,
+      landmark: true,
+      addressMapUrl: true,
+      handoffGeofenceRadiusMeters: true,
+      temporarilyAwayUntil: true,
+      temporarilyAwayNote: true,
       primaryCaregiverPhone: true,
       primaryCaregiverEmail: true,
+      emergencyContactName: true,
+      emergencyContactPhone: true,
+      emergencyContactRelation: true,
     },
   });
 
@@ -166,12 +186,14 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     conditionsResult,
     allergiesResult,
     medicationsResult,
+    medicationAdministrationsResult,
     documentsResult,
     labOrdersResult,
     labResultsResult,
     assessmentsResult,
     communicationsResult,
     appointmentsResult,
+    nurseShiftAssignmentsResult,
     staffRows,
     consentsResult,
     localPatientResult,
@@ -186,20 +208,62 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       listPatientConditions(patient.id, 80),
       listPatientAllergies(patient.id, 40),
       listPatientMedications(patient.id, 80),
+      listMedicationAdministrationRecords(patient.id, 120),
       listPatientDocuments(patient.id, 40),
       listPatientLabOrders(patient.id, 30),
       listPatientDiagnosticReports(patient.id, 30),
       listPatientAssessments(patient.id, 40),
       listPatientCommunications(patient.id, 80),
       listPatientAppointments(patient.id, 40),
+      prisma.nurseShiftAssignment.findMany({
+        where: {
+          patient: {
+            medplumPatientId: patient.id,
+          },
+        },
+        orderBy: {
+          shiftStartAt: 'desc',
+        },
+        take: 50,
+        select: {
+          id: true,
+          shiftStartAt: true,
+          shiftEndAt: true,
+          status: true,
+          primaryNurseStaffId: true,
+          incomingNurseStaffId: true,
+          acknowledgedAt: true,
+          escalationTaskId: true,
+          notes: true,
+          primaryNurse: {
+            select: {
+              name: true,
+            },
+          },
+          incomingNurse: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      }),
       staffPromise,
       listPatientCaregiverPortalConsents(patient.id),
       localPatientPromise,
     ]);
 
   return {
+    staffRole: user.staffRole,
     patient,
-    localPatient: localPatientResult.status === 'fulfilled' ? localPatientResult.value : null,
+    localPatient:
+      localPatientResult.status === 'fulfilled' && localPatientResult.value
+        ? {
+            ...localPatientResult.value,
+            temporarilyAwayUntil: localPatientResult.value.temporarilyAwayUntil
+              ? localPatientResult.value.temporarilyAwayUntil.toISOString()
+              : null,
+          }
+        : null,
     error,
     encounters: encountersResult.status === 'fulfilled' ? encountersResult.value : [],
     encountersError:
@@ -268,6 +332,16 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
           ? medicationsResult.reason.message
           : 'Failed to load patient medications from Medplum'
         : null,
+    medicationAdministrations:
+      medicationAdministrationsResult.status === 'fulfilled'
+        ? medicationAdministrationsResult.value
+        : [],
+    medicationAdministrationsError:
+      medicationAdministrationsResult.status === 'rejected'
+        ? medicationAdministrationsResult.reason instanceof Error
+          ? medicationAdministrationsResult.reason.message
+          : 'Failed to load medication administration records from Medplum'
+        : null,
     documents: documentsResult.status === 'fulfilled' ? documentsResult.value : [],
     documentsError:
       documentsResult.status === 'rejected'
@@ -309,6 +383,28 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
         ? appointmentsResult.reason instanceof Error
           ? appointmentsResult.reason.message
           : 'Failed to load patient appointments from Medplum'
+        : null,
+    nurseShiftAssignments:
+      nurseShiftAssignmentsResult.status === 'fulfilled'
+        ? nurseShiftAssignmentsResult.value.map((assignment) => ({
+            id: assignment.id,
+            shiftStartAt: assignment.shiftStartAt.toISOString(),
+            shiftEndAt: assignment.shiftEndAt.toISOString(),
+            status: assignment.status,
+            primaryNurseName: assignment.primaryNurse.name,
+            primaryNurseStaffId: assignment.primaryNurseStaffId,
+            incomingNurseName: assignment.incomingNurse?.name ?? null,
+            incomingNurseStaffId: assignment.incomingNurseStaffId ?? null,
+            acknowledgedAt: assignment.acknowledgedAt?.toISOString() ?? null,
+            escalationTaskId: assignment.escalationTaskId ?? null,
+            notes: assignment.notes ?? null,
+          }))
+        : [],
+    nurseShiftAssignmentsError:
+      nurseShiftAssignmentsResult.status === 'rejected'
+        ? nurseShiftAssignmentsResult.reason instanceof Error
+          ? nurseShiftAssignmentsResult.reason.message
+          : 'Failed to load shift roster'
         : null,
     caregiverConsents: consentsResult.status === 'fulfilled' ? consentsResult.value : [],
     caregiverConsentsError:

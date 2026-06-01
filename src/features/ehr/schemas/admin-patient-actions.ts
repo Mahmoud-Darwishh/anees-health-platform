@@ -7,6 +7,15 @@ const optionalTrimmedString = z
   .or(z.literal(''))
   .transform((value) => (value ? value : undefined));
 
+const optionalHttpsUrl = z
+  .union([z.string(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value === null || value === undefined) return undefined;
+    const trimmed = String(value).trim();
+    return trimmed || undefined;
+  })
+  .refine((value) => !value || /^https:\/\//i.test(value), 'Location link must start with https://');
+
 const optionalNumber = z
   .union([z.string(), z.null(), z.undefined()])
   .transform((value) => {
@@ -17,6 +26,38 @@ const optionalNumber = z
     return Number.isFinite(parsed) ? parsed : Number.NaN;
   })
   .refine((value) => value === null || Number.isFinite(value), 'Invalid number value');
+
+const requiredLatitude = z
+  .union([z.string(), z.number(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value === null || value === undefined) return Number.NaN;
+    const parsed = Number(String(value).trim());
+    return Number.isFinite(parsed) ? parsed : Number.NaN;
+  })
+  .refine((value) => Number.isFinite(value), 'Current latitude is required')
+  .refine((value) => value >= -90 && value <= 90, 'Latitude must be between -90 and 90');
+
+const requiredLongitude = z
+  .union([z.string(), z.number(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value === null || value === undefined) return Number.NaN;
+    const parsed = Number(String(value).trim());
+    return Number.isFinite(parsed) ? parsed : Number.NaN;
+  })
+  .refine((value) => Number.isFinite(value), 'Current longitude is required')
+  .refine((value) => value >= -180 && value <= 180, 'Longitude must be between -180 and 180');
+
+const optionalAccuracyMeters = z
+  .union([z.string(), z.number(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value === null || value === undefined) return null;
+    const trimmed = String(value).trim();
+    if (!trimmed) return null;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : Number.NaN;
+  })
+  .refine((value) => value === null || Number.isFinite(value), 'Invalid location accuracy value')
+  .refine((value) => value === null || value >= 0, 'Location accuracy must be positive');
 
 const optionalDate = z
   .union([z.string(), z.null(), z.undefined()])
@@ -73,6 +114,7 @@ export const recordVitalsSchema = z
     glucoseMgDl: optionalNumber,
     weightKg: optionalNumber,
     spo2Pct: optionalNumber,
+    painScore: optionalNumber,
   })
   .refine(
     (input) =>
@@ -90,8 +132,13 @@ export const recordVitalsSchema = z
         input.glucoseMgDl,
         input.weightKg,
         input.spo2Pct,
+        input.painScore,
       ].some((value) => value !== null),
     'Provide at least one vital value.',
+  )
+  .refine(
+    (input) => input.painScore === null || (input.painScore >= 0 && input.painScore <= 10),
+    'Pain score must be between 0 and 10.',
   );
 
 export const createClinicalNoteSchema = z.object({
@@ -146,6 +193,36 @@ export const createNursingReportSchema = z.object({
   followUpPlan: optionalTrimmedString,
 });
 
+export const createNursingShiftHandoffSchema = z
+  .object({
+    medplumPatientId: requiredPatientId,
+    encounterId: optionalTrimmedString,
+    shiftStartAt: requiredDate,
+    shiftEndAt: requiredDate,
+    patientStatusSummary: z.string().trim().min(1, 'Patient status summary is required'),
+    pendingTasksSummary: z.string().trim().min(1, 'Pending tasks summary is required'),
+    medicationSafetySummary: z.string().trim().min(1, 'Medication safety summary is required'),
+    escalationStatus: z.enum(['none', 'active', 'resolved']).default('none'),
+    nextShiftFocus: z.string().trim().min(1, 'Next shift focus is required'),
+    handoffNote: z.string().trim().min(1, 'Clinical handoff note is required'),
+    handoffLatitude: requiredLatitude,
+    handoffLongitude: requiredLongitude,
+    handoffAccuracyMeters: optionalAccuracyMeters,
+    handoffConfirmed: z
+      .union([z.string(), z.null(), z.undefined()])
+      .transform((value) => String(value ?? '').trim().toLowerCase())
+      .refine((value) => value === 'true' || value === 'on' || value === 'yes', 'You must confirm the handoff attestation before submit.'),
+  })
+  .superRefine((input, ctx) => {
+    if (input.shiftEndAt <= input.shiftStartAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['shiftEndAt'],
+        message: 'Shift end must be later than shift start.',
+      });
+    }
+  });
+
 export const createPhysioReportSchema = z.object({
   medplumPatientId: requiredPatientId,
   encounterId: optionalTrimmedString,
@@ -184,6 +261,18 @@ export const createMedicationSchema = z.object({
   startDate: optionalDate,
   endDate: optionalDate,
   medicationNote: optionalTrimmedString,
+});
+
+export const createMedicationAdministrationSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  medicationStatementId: optionalTrimmedString,
+  medicationName: z.string().trim().min(1, 'Medication name is required'),
+  encounterId: optionalTrimmedString,
+  administrationStatus: z.enum(['given', 'refused', 'held']).default('given'),
+  scheduledAt: optionalDate,
+  administeredAt: requiredDate,
+  administrationReason: optionalTrimmedString,
+  administrationNote: optionalTrimmedString,
 });
 
 export const createDocumentSchema = z.object({
@@ -232,12 +321,58 @@ export const createAssessmentSchema = z.object({
 
 export const createCommunicationSchema = z.object({
   medplumPatientId: requiredPatientId,
-  communicationCategory: z.enum(['clinical-update', 'handoff', 'escalation']).default('clinical-update'),
+  communicationCategory: z.enum(['clinical-update', 'handoff', 'escalation', 'incident']).default('clinical-update'),
   communicationPriority: z.enum(['routine', 'urgent', 'asap', 'stat']).default('routine'),
   communicationMessage: z.string().trim().min(1, 'Message is required'),
   communicationRecipientStaffId: optionalTrimmedString,
   communicationEncounterId: optionalTrimmedString,
   linkedTaskId: optionalTrimmedString,
+});
+
+export const createIncidentReportSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  encounterId: optionalTrimmedString,
+  incidentType: z.enum(['fall', 'med_error', 'pressure_injury', 'equipment_failure', 'near_miss', 'other']),
+  incidentSeverity: z.enum(['routine', 'urgent', 'asap', 'stat']).default('urgent'),
+  incidentSummary: z.string().trim().min(1, 'Incident summary is required'),
+  incidentActionsTaken: optionalTrimmedString,
+  incidentEscalationNeeded: optionalBoolean,
+});
+
+export const createNurseShiftAssignmentSchema = z
+  .object({
+    medplumPatientId: requiredPatientId,
+    primaryNurseStaffId: z.string().trim().min(1, 'Primary nurse is required'),
+    shiftStartAt: requiredDate,
+    shiftEndAt: requiredDate,
+    shiftNotes: optionalTrimmedString,
+  })
+  .superRefine((input, ctx) => {
+    if (input.shiftEndAt <= input.shiftStartAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['shiftEndAt'],
+        message: 'Shift end must be later than shift start.',
+      });
+    }
+  });
+
+export const acknowledgeIncomingNurseSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  assignmentId: z.string().trim().min(1, 'Shift assignment id is required'),
+  incomingNurseStaffId: optionalTrimmedString,
+  acknowledgedAt: requiredDate,
+  acknowledgementNote: optionalTrimmedString,
+});
+
+export const updatePatientGeoPolicySchema = z.object({
+  medplumPatientId: requiredPatientId,
+  handoffGeofenceRadiusMeters: optionalNumber.refine(
+    (value) => value === null || (value >= 50 && value <= 5000),
+    'Geofence radius must be between 50 and 5000 meters.',
+  ),
+  temporarilyAwayUntil: optionalDate,
+  temporarilyAwayNote: optionalTrimmedString,
 });
 
 export const createEscalationSchema = z.object({
@@ -268,6 +403,17 @@ export const createAppointmentSchema = z
       });
     }
   });
+
+export const updatePatientDemographicsSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  patientVersionId: optionalTrimmedString,
+  addressDetail: optionalTrimmedString,
+  landmark: optionalTrimmedString,
+  addressMapUrl: optionalHttpsUrl,
+  emergencyContactName: optionalTrimmedString,
+  emergencyContactPhone: optionalTrimmedString,
+  emergencyContactRelation: optionalTrimmedString,
+});
 
 export const upsertCaregiverConsentSchema = z
   .object({
@@ -340,6 +486,7 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     glucoseMgDl: formData.get('glucoseMgDl'),
     weightKg: formData.get('weightKg'),
     spo2Pct: formData.get('spo2Pct'),
+    painScore: formData.get('painScore'),
     noteTitle: formData.get('noteTitle'),
     noteBody: formData.get('noteBody'),
     compositionId: formData.get('compositionId'),
@@ -356,6 +503,18 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     conditionSummary: formData.get('conditionSummary'),
     escalationNeeded: formData.get('escalationNeeded'),
     followUpPlan: formData.get('followUpPlan'),
+    shiftStartAt: formData.get('shiftStartAt'),
+    shiftEndAt: formData.get('shiftEndAt'),
+    patientStatusSummary: formData.get('patientStatusSummary'),
+    pendingTasksSummary: formData.get('pendingTasksSummary'),
+    medicationSafetySummary: formData.get('medicationSafetySummary'),
+    escalationStatus: formData.get('escalationStatus'),
+    nextShiftFocus: formData.get('nextShiftFocus'),
+    handoffNote: formData.get('handoffNote'),
+    handoffLatitude: formData.get('handoffLatitude'),
+    handoffLongitude: formData.get('handoffLongitude'),
+    handoffAccuracyMeters: formData.get('handoffAccuracyMeters'),
+    handoffConfirmed: formData.get('handoffConfirmed'),
     interventions: formData.get('interventions'),
     painBefore: formData.get('painBefore'),
     painAfter: formData.get('painAfter'),
@@ -378,6 +537,12 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     startDate: formData.get('startDate'),
     endDate: formData.get('endDate'),
     medicationNote: formData.get('medicationNote'),
+    medicationStatementId: formData.get('medicationStatementId'),
+    administrationStatus: formData.get('administrationStatus'),
+    scheduledAt: formData.get('scheduledAt'),
+    administeredAt: formData.get('administeredAt'),
+    administrationReason: formData.get('administrationReason'),
+    administrationNote: formData.get('administrationNote'),
     documentTitle: formData.get('documentTitle'),
     documentId: formData.get('documentId'),
     documentCategory: formData.get('documentCategory'),
@@ -408,6 +573,11 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     communicationRecipientStaffId: formData.get('communicationRecipientStaffId'),
     communicationEncounterId: formData.get('communicationEncounterId'),
     linkedTaskId: formData.get('linkedTaskId'),
+    incidentType: formData.get('incidentType'),
+    incidentSeverity: formData.get('incidentSeverity'),
+    incidentSummary: formData.get('incidentSummary'),
+    incidentActionsTaken: formData.get('incidentActionsTaken'),
+    incidentEscalationNeeded: formData.get('incidentEscalationNeeded'),
     escalationTitle: formData.get('escalationTitle'),
     escalationSummary: formData.get('escalationSummary'),
     escalationPriority: formData.get('escalationPriority'),
@@ -419,6 +589,19 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     appointmentType: formData.get('appointmentType'),
     appointmentNote: formData.get('appointmentNote'),
     appointmentOwnerStaffId: formData.get('appointmentOwnerStaffId'),
+    primaryNurseStaffId: formData.get('primaryNurseStaffId'),
+    shiftNotes: formData.get('shiftNotes'),
+    assignmentId: formData.get('assignmentId'),
+    incomingNurseStaffId: formData.get('incomingNurseStaffId'),
+    acknowledgedAt: formData.get('acknowledgedAt'),
+    acknowledgementNote: formData.get('acknowledgementNote'),
+    handoffGeofenceRadiusMeters: formData.get('handoffGeofenceRadiusMeters'),
+    temporarilyAwayUntil: formData.get('temporarilyAwayUntil'),
+    temporarilyAwayNote: formData.get('temporarilyAwayNote'),
+    patientVersionId: formData.get('patientVersionId'),
+    addressDetail: formData.get('addressDetail'),
+    landmark: formData.get('landmark'),
+    addressMapUrl: formData.get('addressMapUrl'),
     consentId: formData.get('consentId'),
     consentVersionId: formData.get('consentVersionId'),
     caregiverPhone: formData.get('caregiverPhone'),

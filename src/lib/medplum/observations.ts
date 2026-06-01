@@ -71,6 +71,7 @@ export type CreateVitalObservationsInput = {
   glucoseMgDl?: number | null;
   weightKg?: number | null;
   spo2Pct?: number | null;
+  painScore?: number | null;
 };
 
 export type NormalizedVitalsRow = {
@@ -84,6 +85,7 @@ export type NormalizedVitalsRow = {
   glucoseMgDl?: number | null;
   weightKg?: number | null;
   spo2Pct?: number | null;
+  painScore?: number | null;
 };
 
 function baseObservation(input: CreateVitalObservationsInput): Pick<MedplumObservationResource, 'status' | 'category' | 'subject' | 'encounter' | 'performer' | 'effectiveDateTime'> {
@@ -228,6 +230,24 @@ export async function createVitalObservations(
     });
   }
 
+  if (typeof input.painScore === 'number') {
+    resources.push({
+      resourceType: 'Observation',
+      ...common,
+      code: {
+        coding: [
+          {
+            system: MEDPLUM_CODE_SYSTEMS.loinc,
+            code: '72514-3',
+            display: 'Pain severity - 0-10 verbal numeric rating [Score] - Reported',
+          },
+        ],
+        text: 'Pain score',
+      },
+      valueQuantity: quantity(input.painScore, 'score', '{score}'),
+    });
+  }
+
   if (resources.length === 0) {
     return [];
   }
@@ -313,6 +333,7 @@ export async function listRecentPatientVitals(patientId: string, count = 25): Pr
     if (code === '2339-0') row.glucoseMgDl = parseNumeric(observation.valueQuantity);
     if (code === '29463-7') row.weightKg = parseNumeric(observation.valueQuantity);
     if (code === '59408-5') row.spo2Pct = parseNumeric(observation.valueQuantity);
+    if (code === '72514-3') row.painScore = parseNumeric(observation.valueQuantity);
   }
 
   return [...rows.values()]

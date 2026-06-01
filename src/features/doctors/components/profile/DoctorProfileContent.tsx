@@ -5,9 +5,9 @@
  */
 
 import Image from 'next/image';
-import Link from 'next/link';
 import type { Doctor } from '@/lib/models/doctor.types';
 import LucideIcon from '@/components/common/LucideIcon';
+import { getDoctorSpecialityLabel } from '@/lib/utils/doctor-speciality';
 
 interface DoctorProfileContentProps {
   doctor: Doctor;
@@ -19,56 +19,23 @@ export default function DoctorProfileContent({
   locale,
 }: DoctorProfileContentProps) {
   const isArabic = locale === 'ar';
+  const normalizedSpeciality = getDoctorSpecialityLabel(doctor.speciality, locale);
   const city = doctor.location.split(',')[0]?.trim() || doctor.location;
   const hospitalsAndClinics =
     Array.isArray(doctor['Hospitals and Clinics']) && doctor['Hospitals and Clinics'].length > 0
       ? doctor['Hospitals and Clinics']
       : doctor.clinics;
 
-  const isUnavailableValue = (value: string | undefined | null) => {
-    const normalized = String(value ?? '')
-      .trim()
-      .toLowerCase();
-
-    return (
-      !normalized ||
-      normalized === 'n/a' ||
-      normalized === 'na' ||
-      normalized === '-' ||
-      normalized === '--' ||
-      normalized === 'not available' ||
-      normalized === 'not specified' ||
-      normalized === 'غير متاح'
-    );
-  };
-
-  const hasAnyVisiblePrice =
-    !isUnavailableValue(doctor.pricing.telemedicine) ||
-    !isUnavailableValue(doctor.pricing.homeVisit) ||
-    !isUnavailableValue(doctor.pricing.clinicVisit);
-
-  const formatPrice = (value: string) => {
-    if (isUnavailableValue(value)) {
-      return isArabic ? 'السعر غير متاح' : 'Price unavailable';
-    }
-
-    return value;
-  };
-
-  // Always render numerals in English for consistency across locales
-  const formatNumberEn = (value: number | string) =>
-    typeof value === 'number' ? value.toLocaleString('en-US') : value;
+  const teamChannels = Array.isArray(doctor.channels) ? doctor.channels : [];
+  const serviceChannels = teamChannels.length > 0 ? teamChannels : ['home', 'video', 'clinic'];
 
   const labels = {
     about: isArabic ? 'نبذة عن الطبيب' : 'About',
-    experience: isArabic ? 'الخبرة' : 'Experience',
-    yearsExp: isArabic ? 'سنوات خبرة' : 'Years Experience',
-    patients: isArabic ? 'مرضى' : 'Patients',
-    successRate: isArabic ? 'نسبة النجاح' : 'Success Rate',
-    services: isArabic ? 'الخدمات والأسعار' : 'Services & Pricing',
+    yearsExp: isArabic ? 'سنوات خبرة' : 'Years of Experience',
+    services: isArabic ? 'خيارات الرعاية المتاحة' : 'Available Care Options',
     servicesNote: isArabic
-      ? 'قد تختلف الأسعار حسب الحالة ونوع الخدمة.'
-      : 'Pricing can vary based on case complexity and service type.',
+      ? 'يتم تعيين الطبيب المناسب حسب الحالة، ولا يتم الحجز مع طبيب محدد.'
+      : 'The most suitable clinician is assigned based on the case. Booking is not with a specific doctor.',
     telemedicine: isArabic ? 'استشارة عن بُعد' : 'Telemedicine',
     homeVisit: isArabic ? 'زيارة منزلية' : 'Home Visit',
     clinicVisit: isArabic ? 'زيارة العيادة' : 'Clinic Visit',
@@ -76,46 +43,45 @@ export default function DoctorProfileContent({
     educationHeading: isArabic ? 'التعليم' : 'Education',
     certifications: isArabic ? 'الشهادات' : 'Certifications',
     clinics: isArabic ? 'المستشفيات والعيادات' : 'Hospitals and Clinics',
-    reviews: isArabic ? 'آراء المرضى' : 'Patient Reviews',
-    availability: isArabic ? 'التوفر' : 'Availability',
-    bookNow: isArabic ? 'احجز الآن' : 'Book Now',
-    contact: isArabic ? 'تواصل' : 'Contact',
-    languages: isArabic ? 'اللغات' : 'Languages',
     areas: isArabic ? 'مناطق التغطية' : 'Coverage Areas',
-    overview: isArabic ? 'لماذا هذا الطبيب على أنيس' : 'Why book this doctor on Anees',
+    overview: isArabic ? 'الدور الطبي ضمن فريق أنيس' : 'Clinical Role in the Anees Team',
     overviewBody: isArabic
-      ? `${doctor.doctorName} يقدم خدمات ${doctor.speciality} عبر أنيس مع إمكانية الزيارات المنزلية والاستشارات الطبية. إذا كنت تبحث عن ${doctor.speciality} في ${city} أو عن طبيب في البيت من خلال أنيس، فهذه الصفحة توفر معلومات الخبرة والخدمات والمناطق المغطاة وروابط الحجز المباشر.`
-      : `${doctor.doctorName} provides ${doctor.speciality} care through Anees with home visits and medical consultations. If someone is searching for a ${doctor.speciality} doctor in ${city} or a doctor-at-home on Anees, this page gives the experience, service options, coverage areas, and direct booking access.`,
+      ? `${doctor.doctorName} عضو في فريق ${normalizedSpeciality} لدى أنيس ويشارك في تقديم الرعاية المنزلية المتخصصة في ${city} والمناطق المغطاة. يتم توجيه كل حالة للعضو الأنسب من الفريق حسب الاحتياج الطبي.`
+      : `${doctor.doctorName} is part of Anees ${normalizedSpeciality} team, supporting specialized home healthcare across ${city} and covered areas. Each case is matched with the most suitable team member based on clinical need.`,
     faq: isArabic ? 'أسئلة شائعة' : 'Frequently asked questions',
   };
 
   const faqItems = isArabic
     ? [
         {
-          question: `هل يقدم ${doctor.doctorName} زيارات منزلية عبر أنيس؟`,
-          answer: `نعم، تعرض هذه الصفحة خدمات ${doctor.doctorName} عبر أنيس بما في ذلك الزيارة المنزلية حسب التوفر وخيارات الحجز الموضحة أعلاه.`,
+          question: `هل يمكنني طلب ${doctor.doctorName} بالاسم؟`,
+          answer:
+            'لا، أنيس يعمل بنموذج فريق طبي. يتم إسناد الحالة للعضو الأنسب حسب نوع الحالة ومكانها وتوافر الفريق.',
         },
         {
-          question: `ما تخصص ${doctor.doctorName} في ${city}؟`,
-          answer: `${doctor.doctorName} متخصص في ${doctor.speciality} ويقدم رعاية طبية عبر أنيس للمرضى في ${city} والمناطق المغطاة المذكورة في الصفحة.`,
+          question: `ما دور ${doctor.doctorName} داخل الفريق؟`,
+          answer: `${doctor.doctorName} يعمل ضمن فريق ${normalizedSpeciality} لتقديم الرعاية المنزلية المتخصصة في ${city} والمناطق المغطاة.`,
         },
         {
-          question: `كيف أحجز مع ${doctor.doctorName} على أنيس؟`,
-          answer: `يمكنك استخدام زر الحجز في هذه الصفحة للوصول إلى رحلة الحجز على أنيس وطلب الزيارة أو الاستشارة المناسبة.`,
+          question: 'كيف يتم بدء الخدمة؟',
+          answer:
+            'ابدأ طلب الخدمة عبر رحلة الحجز العامة في أنيس، ثم يقوم الفريق الطبي بتحديد مقدم الرعاية الأنسب لحالتك.',
         },
       ]
     : [
         {
-          question: `Does ${doctor.doctorName} offer home visits on Anees?`,
-          answer: `Yes. This page lists ${doctor.doctorName}'s services on Anees, including home visit availability when offered and the booking options shown above.`,
+          question: `Can I book ${doctor.doctorName} directly?`,
+          answer:
+            'No. Anees operates with a team-based model. Cases are assigned to the most suitable clinician based on needs, location, and availability.',
         },
         {
-          question: `What specialty does ${doctor.doctorName} provide in ${city}?`,
-          answer: `${doctor.doctorName} specializes in ${doctor.speciality} and provides care through Anees for patients in ${city} and the covered areas listed on this page.`,
+          question: `What is ${doctor.doctorName}'s role in ${city}?`,
+          answer: `${doctor.doctorName} contributes to the Anees ${normalizedSpeciality} team serving patients across ${city} and listed coverage areas.`,
         },
         {
-          question: `How do I book ${doctor.doctorName} on Anees?`,
-          answer: `Use the booking button on this page to start the Anees booking flow and request the most suitable consultation or home visit option.`,
+          question: 'How do I start care with Anees?',
+          answer:
+            'Use the general Anees booking journey, and the clinical team will assign the right team member for your case.',
         },
       ];
 
@@ -151,7 +117,7 @@ export default function DoctorProfileContent({
 
                   <div className="doctor-titles">
                     <p className="professional-title">{doctor.professionalTitle}</p>
-                    <p className="specialty-badge">{doctor.speciality}</p>
+                    <p className="specialty-badge">{normalizedSpeciality}</p>
                   </div>
 
                   {/* Inline meta row: verified + availability + location + languages */}
@@ -176,42 +142,11 @@ export default function DoctorProfileContent({
                     )}
                   </div>
 
-                  {/* Key Stats */}
                   <div className="stats-row">
                     <div className="stat-box">
-                      <div className="stat-value">{formatNumberEn(doctor.rating)}</div>
-                      <div className="stat-label">⭐ {isArabic ? 'تقييم' : 'Rating'}</div>
-                    </div>
-                    <div className="stat-box">
-                      <div className="stat-value">{formatNumberEn(doctor.experienceYears)}+</div>
+                      <div className="stat-value">{doctor.experienceYears}+</div>
                       <div className="stat-label">{labels.yearsExp}</div>
                     </div>
-                    <div className="stat-box">
-                      <div className="stat-value">{doctor.totalPatients}</div>
-                      <div className="stat-label">{labels.patients}</div>
-                    </div>
-                    <div className="stat-box">
-                      <div className="stat-value">{doctor.successRate}</div>
-                      <div className="stat-label">{labels.successRate}</div>
-                    </div>
-                  </div>
-
-                  {/* CTA Buttons */}
-                  <div className="cta-buttons">
-                    <Link href={`/${locale}/booking`} className="btn btn-primary btn-lg">
-                      <LucideIcon iconClass="fa-solid fa-calendar-days"></LucideIcon>
-                      {labels.bookNow}
-                    </Link>
-                    <button
-                      type="button"
-                      className="btn btn-outline-primary btn-lg disabled"
-                      disabled
-                      aria-disabled="true"
-                      title={isArabic ? 'التواصل غير متاح حالياً' : 'Contact is currently unavailable'}
-                    >
-                      <LucideIcon iconClass="fa-solid fa-message"></LucideIcon>
-                      {labels.contact}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -241,67 +176,58 @@ export default function DoctorProfileContent({
         </div>
       </section>
 
-      {/* ======= SERVICES & PRICING ======= */}
+      {/* ======= CARE OPTIONS ======= */}
       <section className="doctor-services py-4">
         <div className="container">
           <h2 className="section-title">{labels.services}</h2>
-          {!hasAnyVisiblePrice && (
-            <p className="section-note">{labels.servicesNote}</p>
-          )}
+          <p className="section-note">{labels.servicesNote}</p>
           <div className="services-grid">
-            {/* Telemedicine */}
-            <div className="service-card">
-              <div className="service-icon">
-                <LucideIcon iconClass="fa-solid fa-video"></LucideIcon>
-              </div>
-              <h3>{labels.telemedicine}</h3>
-              <p
-                className={`service-price ${
-                  isUnavailableValue(doctor.pricing.telemedicine) ? 'is-unavailable' : ''
-                }`}
-              >
-                {formatPrice(doctor.pricing.telemedicine)}
-              </p>
-              <p className="service-desc">
-                {isArabic ? 'استشارة آمنة من المنزل' : 'Secure online consultation'}
-              </p>
-            </div>
+            {serviceChannels.map((channel, idx) => {
+              const normalized = String(channel).trim().toLowerCase();
+              const isVideo = /video|فيديو|مرئي|فديو/i.test(normalized);
+              const isChat = /chat|شات|دردشة|محادثة/i.test(normalized);
+              const isHome = /home|منزل|منزلي|زيارة\s*منزل/i.test(normalized);
+              const isPhysio = /physio|physiotherapy|rehab|علاج\s*طبيعي|تأهيل/i.test(normalized);
+              const isClinic = /clinic|عيادة|مركز|hospital|مستشفى/i.test(normalized);
 
-            {/* Home Visit */}
-            <div className="service-card">
-              <div className="service-icon">
-                <LucideIcon iconClass="fa-solid fa-house"></LucideIcon>
-              </div>
-              <h3>{labels.homeVisit}</h3>
-              <p
-                className={`service-price ${
-                  isUnavailableValue(doctor.pricing.homeVisit) ? 'is-unavailable' : ''
-                }`}
-              >
-                {formatPrice(doctor.pricing.homeVisit)}
-              </p>
-              <p className="service-desc">
-                {isArabic ? 'زيارة منزلية مريحة' : 'Convenient home visit'}
-              </p>
-            </div>
+              const iconClass = isVideo
+                ? 'fa-solid fa-video'
+                : isChat
+                  ? 'fa-solid fa-message'
+                  : isHome
+                    ? 'fa-solid fa-house'
+                    : isPhysio
+                      ? 'fa-solid fa-dumbbell'
+                      : isClinic
+                        ? 'fa-solid fa-hospital'
+                      : 'fa-solid fa-hospital';
 
-            {/* Clinic Visit */}
-            <div className="service-card">
-              <div className="service-icon">
-                <LucideIcon iconClass="fa-solid fa-hospital"></LucideIcon>
-              </div>
-              <h3>{labels.clinicVisit}</h3>
-              <p
-                className={`service-price ${
-                  isUnavailableValue(doctor.pricing.clinicVisit) ? 'is-unavailable' : ''
-                }`}
-              >
-                {formatPrice(doctor.pricing.clinicVisit)}
-              </p>
-              <p className="service-desc">
-                {isArabic ? 'زيارة متخصصة في العيادة' : 'Specialized clinic visit'}
-              </p>
-            </div>
+              const label = isVideo
+                ? labels.telemedicine
+                : isHome
+                  ? labels.homeVisit
+                  : isPhysio
+                    ? (isArabic ? 'العلاج الطبيعي والتأهيل' : 'Physio and Rehab')
+                    : isClinic
+                      ? labels.clinicVisit
+                    : isChat
+                      ? (isArabic ? 'متابعة رقمية' : 'Digital Follow-up')
+                      : String(channel);
+
+              return (
+                <div key={`${channel}-${idx}`} className="service-card">
+                  <div className="service-icon">
+                    <LucideIcon iconClass={iconClass}></LucideIcon>
+                  </div>
+                  <h3>{label}</h3>
+                  <p className="service-desc">
+                    {isArabic
+                      ? 'ضمن نموذج الرعاية المنزلية المعتمد في أنيس'
+                      : 'Provided as part of Anees home healthcare model'}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -409,31 +335,6 @@ export default function DoctorProfileContent({
         </section>
       )}
 
-      {/* ======= TESTIMONIALS ======= */}
-      {doctor.testimonials.length > 0 && (
-        <section className="doctor-testimonials py-3">
-          <div className="container">
-            <h2 className="section-title">{labels.reviews}</h2>
-            <div className="testimonials-grid">
-              {doctor.testimonials.map((testimonial, idx) => (
-                <div key={idx} className="testimonial-card">
-                  <div className="testimonial-header">
-                    <div className="stars">
-                      {Array.from({ length: Math.floor(testimonial.rating) }).map((_, i) => (
-                        <LucideIcon key={i} iconClass="fa-solid fa-star"></LucideIcon>
-                      ))}
-                    </div>
-                    <span className="rating-number">{testimonial.rating}/5</span>
-                  </div>
-                  <p className="testimonial-text">&quot;{testimonial.text}&quot;</p>
-                  <p className="testimonial-author">— {testimonial.name}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="doctor-faq py-3">
         <div className="container">
           <h2 className="section-title">{labels.faq}</h2>
@@ -449,28 +350,6 @@ export default function DoctorProfileContent({
                 <p className="faq-answer">{item.answer}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ======= CHAT COMING SOON ======= */}
-      <section className="doctor-chat py-3">
-        <div className="container">
-          <div className="chat-coming-soon">
-            <div className="chat-icon">
-              <LucideIcon iconClass="fa-solid fa-message"></LucideIcon>
-            </div>
-            <div>
-              <h3>{isArabic ? 'الدردشة قادمة قريباً' : 'Chat Coming Soon'}</h3>
-              <p>
-                {isArabic
-                  ? 'نعمل على إطلاق دردشة آمنة مع الأطباء قريباً.'
-                  : 'We are launching secure chat with doctors soon.'}
-              </p>
-            </div>
-            <span className="status-pill muted">
-              {isArabic ? 'قيد التطوير' : 'In development'}
-            </span>
           </div>
         </div>
       </section>

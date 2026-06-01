@@ -1,10 +1,12 @@
+import type { ReactNode } from 'react';
+
 import type { AssignableStaff } from './types';
 
-export function Row({ label, value }: { label: string; value?: string | null }) {
+export function Row({ label, value }: { label: string; value?: ReactNode }) {
   return (
     <div className="row border-bottom py-2">
       <div className="col-4 text-muted small">{label}</div>
-      <div className="col-8">{value || '—'}</div>
+      <div className="col-8">{value ?? '—'}</div>
     </div>
   );
 }

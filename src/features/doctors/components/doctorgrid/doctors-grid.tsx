@@ -13,6 +13,7 @@ import { Pagination } from './Pagination';
 import type { Doctor, FilterState, SortOrder } from './types';
 import { uniqueSorted } from './utils';
 import LucideIcon from '@/components/common/LucideIcon';
+import { getDoctorSpecialityLabel } from '@/lib/utils/doctor-speciality';
 
 type MessageValues = Record<string, string | number>;
 
@@ -31,21 +32,14 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   useReveal(wrapperRef, [locale]);
 
-  // Calculate min and max prices from doctors with fallback values
-  const prices = doctors
-    .map((d) => parseInt(d.consultationFee.replace(/\D/g, '')))
-    .filter((price) => !isNaN(price) && price > 0);
-  
-  const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
-  const maxPrice = prices.length > 0 ? Math.max(...prices) : 10000;
+  const localeForSpeciality = locale === 'ar' ? 'ar' : 'en';
 
   const specialities = useMemo(
-    () => uniqueSorted(doctors.map((doctor) => doctor.speciality)),
-    [doctors]
-  );
-  const channels = useMemo(
-    () => uniqueSorted(doctors.flatMap((d) => d.channels)),
-    [doctors]
+    () =>
+      uniqueSorted(
+        doctors.map((doctor) => getDoctorSpecialityLabel(doctor.speciality, localeForSpeciality))
+      ),
+    [doctors, localeForSpeciality]
   );
   const languages = useMemo(
     () => uniqueSorted(doctors.flatMap((d) => d.languages)),
@@ -54,14 +48,10 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
 
   const [filters, setFilters] = useState<FilterState>({
     selectedSpecialities: [],
-    selectedChannels: [],
     selectedGenders: [],
     selectedLanguages: [],
     selectedExperience: [],
-    priceRange: [minPrice, maxPrice],
-    selectedRatings: [],
     searchText: '',
-    locationText: '',
   });
 
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
@@ -83,15 +73,9 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   );
 
   const deferredSearchText = useDeferredValue(filters.searchText);
-  const deferredLocationText = useDeferredValue(filters.locationText);
-
   const normalizedSearch = useMemo(
     () => deferredSearchText.trim().toLowerCase(),
     [deferredSearchText]
-  );
-  const normalizedLocation = useMemo(
-    () => deferredLocationText.trim().toLowerCase(),
-    [deferredLocationText]
   );
 
   const handleFilterChange = useCallback((updates: Partial<FilterState>) => {
@@ -103,19 +87,15 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   const handleClearAll = useCallback(() => {
     setFilters({
       selectedSpecialities: [],
-      selectedChannels: [],
       selectedGenders: [],
       selectedLanguages: [],
       selectedExperience: [],
-      priceRange: [minPrice, maxPrice],
-      selectedRatings: [],
       searchText: '',
-      locationText: '',
     });
     replacePageInUrl(1);
     setSortOrder('none');
     setShowMobileFilters(false);
-  }, [maxPrice, minPrice, replacePageInUrl]);
+  }, [replacePageInUrl]);
 
   const handlePageChange = useCallback((newPage: number) => {
     replacePageInUrl(newPage);
@@ -131,15 +111,10 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
       if (
         normalizedSearch &&
         !doctor.doctorName.toLowerCase().includes(normalizedSearch) &&
-        !doctor.speciality.toLowerCase().includes(normalizedSearch)
-      ) {
-        return false;
-      }
-
-      // Location filter
-      if (
-        normalizedLocation &&
-        !doctor.location.toLowerCase().includes(normalizedLocation)
+        !doctor.speciality.toLowerCase().includes(normalizedSearch) &&
+        !getDoctorSpecialityLabel(doctor.speciality, localeForSpeciality)
+          .toLowerCase()
+          .includes(normalizedSearch)
       ) {
         return false;
       }
@@ -147,7 +122,9 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
       // Speciality filter
       if (
         filters.selectedSpecialities.length > 0 &&
-        !filters.selectedSpecialities.includes(doctor.speciality)
+        !filters.selectedSpecialities.includes(
+          getDoctorSpecialityLabel(doctor.speciality, localeForSpeciality)
+        )
       ) {
         return false;
       }
@@ -158,14 +135,6 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
         !filters.selectedGenders.includes(doctor.gender)
       ) {
         return false;
-      }
-
-      // Channel filter
-      if (filters.selectedChannels.length > 0) {
-        const hasChannel = doctor.channels.some((ch) =>
-          filters.selectedChannels.includes(ch)
-        );
-        if (!hasChannel) return false;
       }
 
       // Language filter
@@ -184,38 +153,16 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
         if (!hasExperience) return false;
       }
 
-      // Price range filter
-      const fee = parseInt(doctor.consultationFee.replace(/\D/g, ''));
-      if (fee < filters.priceRange[0] || fee > filters.priceRange[1]) {
-        return false;
-      }
-
-      // Rating filter
-      if (filters.selectedRatings.length > 0) {
-        const hasRating = filters.selectedRatings.some(
-          (rating) => doctor.rating >= rating
-        );
-        if (!hasRating) return false;
-      }
-
       return true;
     });
-  }, [doctors, filters, normalizedLocation, normalizedSearch]);
+  }, [doctors, filters, localeForSpeciality, normalizedSearch]);
 
   // Sort doctors
   const filteredAndSorted = useMemo(() => {
     const sorted = [...filteredDoctors];
-    if (sortOrder === 'low') {
+    if (sortOrder === 'experience') {
       sorted.sort(
-        (a, b) =>
-          parseInt(a.consultationFee.replace(/\D/g, '')) -
-          parseInt(b.consultationFee.replace(/\D/g, ''))
-      );
-    } else if (sortOrder === 'high') {
-      sorted.sort(
-        (a, b) =>
-          parseInt(b.consultationFee.replace(/\D/g, '')) -
-          parseInt(a.consultationFee.replace(/\D/g, ''))
+        (a, b) => b.experienceYears - a.experienceYears
       );
     }
     return sorted;
@@ -271,10 +218,7 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
                 onFilterChange={handleFilterChange}
                 onClearAll={handleClearAll}
                 specialities={specialities}
-                channels={channels}
                 languages={languages}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
                 tg={tg}
               />
             </div>
@@ -308,10 +252,7 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
                   onFilterChange={handleFilterChange}
                   onClearAll={handleClearAll}
                   specialities={specialities}
-                  channels={channels}
                   languages={languages}
-                  minPrice={minPrice}
-                  maxPrice={maxPrice}
                   tg={tg}
                 />
               </div>
@@ -322,7 +263,7 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
               <div className="row align-items-center mb-4">
                 <div className="col-md-6 col-12">
                   <div className="mb-3 mb-md-0">
-                    <h3>
+                    <h3 className="results-count-heading">
                       {t.rich('doctorGrid.results.showing', {
                         current: currentDoctors.length,
                         total: filteredAndSorted.length,
@@ -353,10 +294,8 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
                       >
                         <span className="me-2">{tg('sort.label')}:</span>
                         <span>
-                          {sortOrder === 'low'
-                            ? tg('sort.priceAsc')
-                            : sortOrder === 'high'
-                            ? tg('sort.priceDesc')
+                          {sortOrder === 'experience'
+                            ? tg('sort.experienceDesc')
                             : tg('sort.relevance')}
                         </span>
                       </button>
@@ -374,18 +313,9 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
                           <button
                             type="button"
                             className="dropdown-item"
-                            onClick={() => handleSortChange('low')}
+                            onClick={() => handleSortChange('experience')}
                           >
-                            {tg('sort.priceAsc')}
-                          </button>
-                        </li>
-                        <li>
-                          <button
-                            type="button"
-                            className="dropdown-item"
-                            onClick={() => handleSortChange('high')}
-                          >
-                            {tg('sort.priceDesc')}
+                            {tg('sort.experienceDesc')}
                           </button>
                         </li>
                       </ul>

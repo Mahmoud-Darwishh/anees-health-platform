@@ -4,6 +4,7 @@ export const EgyptianExtensions = {
   nationalId: `${ANEES_FHIR_EXTENSION_BASE}/national-id`,
   governorate: `${ANEES_FHIR_EXTENSION_BASE}/governorate`,
   district: `${ANEES_FHIR_EXTENSION_BASE}/district`,
+  addressMapUrl: `${ANEES_FHIR_EXTENSION_BASE}/address-map-url`,
   caregiverRelationshipDetail: `${ANEES_FHIR_EXTENSION_BASE}/caregiver-relationship-detail`,
   careProgram: `${ANEES_FHIR_EXTENSION_BASE}/care-program`,
   clinicalNoteText: `${ANEES_FHIR_EXTENSION_BASE}/clinical-note-text`,

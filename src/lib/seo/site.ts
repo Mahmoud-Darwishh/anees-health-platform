@@ -68,7 +68,7 @@ export const site = {
     {
       name: 'Dr. Mahmoud Darwish',
       nameAr: 'الدكتور محمود درويش',
-      slug: 'dr-mahmoud-darwish',
+      slug: 'mahmoud-darwish',
       jobTitle: { en: 'Co-Founder', ar: 'مؤسس مشارك' },
     },
     {

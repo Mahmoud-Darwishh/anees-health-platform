@@ -13,6 +13,7 @@ export type MedplumTaskResource = {
   id?: string;
   meta?: {
     versionId?: string;
+    lastUpdated?: string;
   };
   status:
     | 'draft'
@@ -43,6 +44,66 @@ export type MedplumTaskResource = {
     end?: string;
   };
 };
+
+export type EscalationTaskSummary = {
+  id: string;
+  versionId: string | null;
+  status: MedplumTaskResource['status'];
+  priority: MedplumTaskResource['priority'] | null;
+  title: string;
+  description: string | null;
+  patientReference: string | null;
+  patientId: string | null;
+  encounterId: string | null;
+  ownerReference: string | null;
+  ownerDisplay: string | null;
+  dueAt: string | null;
+  authoredOn: string | null;
+  lastUpdated: string | null;
+};
+
+type ListEscalationTasksOptions = {
+  count?: number;
+  ownerReference?: string | null;
+  statuses?: Array<MedplumTaskResource['status']>;
+};
+
+function extractReferenceId(reference?: string): string | null {
+  if (!reference) {
+    return null;
+  }
+
+  const parts = reference.split('/');
+  const id = parts[parts.length - 1]?.trim();
+  return id || null;
+}
+
+function taskCode(task: MedplumTaskResource): string | null {
+  return task.code?.coding?.[0]?.code ?? null;
+}
+
+function mapEscalationTaskSummary(task: MedplumTaskResource): EscalationTaskSummary | null {
+  if (!task.id) {
+    return null;
+  }
+
+  return {
+    id: task.id,
+    versionId: task.meta?.versionId ?? null,
+    status: task.status,
+    priority: task.priority ?? null,
+    title: task.code?.text ?? task.code?.coding?.[0]?.display ?? 'Escalation',
+    description: task.description ?? null,
+    patientReference: task.for?.reference ?? null,
+    patientId: extractReferenceId(task.for?.reference),
+    encounterId: extractReferenceId(task.encounter?.reference),
+    ownerReference: task.owner?.reference ?? null,
+    ownerDisplay: task.owner?.display ?? null,
+    dueAt: task.executionPeriod?.end ?? null,
+    authoredOn: task.authoredOn ?? null,
+    lastUpdated: task.meta?.lastUpdated ?? null,
+  };
+}
 
 export type CreatePatientTaskInput = {
   patientId: string;
@@ -95,9 +156,28 @@ export async function listPatientTasks(patientId: string, count = 50): Promise<M
   })) as MedplumTaskResource[];
 }
 
+export async function listEscalationTasks(options: ListEscalationTasksOptions = {}): Promise<EscalationTaskSummary[]> {
+  const medplum = await getMedplumClient();
+  const resources = (await medplum.searchResources('Task', {
+    code: 'escalation',
+    _count: String(options.count ?? 200),
+    _sort: '-_lastUpdated',
+  })) as MedplumTaskResource[];
+
+  const ownerReference = options.ownerReference?.trim();
+  const statusFilter = options.statuses && options.statuses.length > 0 ? new Set(options.statuses) : null;
+
+  return resources
+    .filter((task) => taskCode(task) === 'escalation')
+    .filter((task) => !ownerReference || task.owner?.reference === ownerReference)
+    .filter((task) => !statusFilter || statusFilter.has(task.status))
+    .map(mapEscalationTaskSummary)
+    .filter((task): task is EscalationTaskSummary => !!task);
+}
+
 export async function updatePatientTaskStatus(
   taskId: string,
-  status: 'requested' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled',
+  status: 'requested' | 'accepted' | 'in-progress' | 'on-hold' | 'completed' | 'cancelled',
   options?: { expectedVersionId?: string | null },
 ): Promise<MedplumTaskResource> {
   const medplum = await getMedplumClient();

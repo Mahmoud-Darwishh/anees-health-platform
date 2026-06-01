@@ -96,6 +96,12 @@ export async function getOwnPatientRecord() {
       dateOfBirth: true,
       status: true,
       medplumPatientId: true,
+      addressDetail: true,
+      landmark: true,
+      addressMapUrl: true,
+      emergencyContactName: true,
+      emergencyContactPhone: true,
+      emergencyContactRelation: true,
     },
   });
 

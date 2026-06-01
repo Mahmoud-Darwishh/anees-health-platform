@@ -1,4 +1,5 @@
 import type { getMedplumPatient } from '@/lib/medplum/patients';
+import type { StaffRole } from '@prisma/client';
 import type { listPatientEncounters } from '@/lib/medplum/encounters';
 import type { listRecentPatientVitals } from '@/lib/medplum/observations';
 import type { listPatientClinicalNotes } from '@/lib/medplum/clinical-notes';
@@ -9,6 +10,7 @@ import type { PortalConsentSummary } from '@/lib/medplum/consents';
 import type { AllergySummary } from '@/lib/medplum/allergies';
 import type { ConditionSummary } from '@/lib/medplum/conditions';
 import type { MedicationSummary } from '@/lib/medplum/medications';
+import type { MedicationAdministrationSummary } from '@/lib/medplum/medication-administrations';
 import type { DocumentSummary } from '@/lib/medplum/documents';
 import type { LabOrderSummary, LabResultSummary } from '@/lib/medplum/labs';
 import type { AssessmentSummary } from '@/lib/medplum/assessments';
@@ -28,12 +30,22 @@ export type AdminPatientFlash = {
 };
 
 export type AdminPatientDetailData = {
+  staffRole: StaffRole | null;
   patient: Awaited<ReturnType<typeof getMedplumPatient>> | null;
   localPatient: {
     id: string;
     code: string;
+    addressDetail: string | null;
+    landmark: string | null;
+    addressMapUrl: string | null;
+    handoffGeofenceRadiusMeters: number | null;
+    temporarilyAwayUntil: string | null;
+    temporarilyAwayNote: string | null;
     primaryCaregiverPhone: string | null;
     primaryCaregiverEmail: string | null;
+    emergencyContactName: string | null;
+    emergencyContactPhone: string | null;
+    emergencyContactRelation: string | null;
   } | null;
   error: string | null;
   encounters: Awaited<ReturnType<typeof listPatientEncounters>>;
@@ -55,6 +67,8 @@ export type AdminPatientDetailData = {
   allergiesError: string | null;
   medications: MedicationSummary[];
   medicationsError: string | null;
+  medicationAdministrations: MedicationAdministrationSummary[];
+  medicationAdministrationsError: string | null;
   documents: DocumentSummary[];
   documentsError: string | null;
   labOrders: LabOrderSummary[];
@@ -67,6 +81,20 @@ export type AdminPatientDetailData = {
   communicationsError: string | null;
   appointments: AppointmentSummary[];
   appointmentsError: string | null;
+  nurseShiftAssignments: Array<{
+    id: string;
+    shiftStartAt: string;
+    shiftEndAt: string;
+    status: string;
+    primaryNurseName: string;
+    primaryNurseStaffId: string;
+    incomingNurseName: string | null;
+    incomingNurseStaffId: string | null;
+    acknowledgedAt: string | null;
+    escalationTaskId: string | null;
+    notes: string | null;
+  }>;
+  nurseShiftAssignmentsError: string | null;
   caregiverConsents: PortalConsentSummary[];
   caregiverConsentsError: string | null;
 };

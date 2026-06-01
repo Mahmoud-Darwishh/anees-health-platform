@@ -19,6 +19,7 @@
     "ci:migration-guard": "node scripts/ci/check-prisma-migration-guard.mjs",
     "test:integration:caregiver-consent": "ts-node -P scripts/tests/tsconfig.integration.json scripts/tests/caregiver-consent.integration.ts",
     "db:seed": "prisma db seed",
+    "db:seed:doctors": "node scripts/prisma/seed-doctors.mjs",
     "db:studio": "prisma studio",
     "seo:links": "node scripts/seo-link-audit.mjs",
     "seo:backlinks": "node scripts/backlink-quality-audit.mjs",

@@ -52,6 +52,30 @@ export type CreatePhysioReportInput = CreateBaseReportInput & {
   homePlan?: string | null;
 };
 
+export type CreateNursingShiftHandoffInput = CreateBaseReportInput & {
+  shiftStartAt: Date;
+  shiftEndAt: Date;
+  patientStatusSummary: string;
+  pendingTasksSummary: string;
+  medicationSafetySummary: string;
+  escalationStatus: 'none' | 'active' | 'resolved';
+  nextShiftFocus: string;
+  handoffLatitude: number;
+  handoffLongitude: number;
+  handoffAccuracyMeters?: number | null;
+  distanceFromPatientMeters: number;
+  withinPatientRadius: boolean;
+  handoffAttestation: string;
+};
+
+export type NursingHandoffPerformerSummary = {
+  id: string;
+  effectiveDateTime: string | null;
+  withinPatientRadius: boolean | null;
+  distanceFromPatientMeters: number | null;
+  incomingNurseAcknowledgedAt: string | null;
+};
+
 function baseReport(input: CreateBaseReportInput): Omit<CareReportResource, 'resourceType' | 'code' | 'component'> {
   return {
     status: 'final',
@@ -228,6 +252,246 @@ export async function createPhysioSessionReport(input: CreatePhysioReportInput):
         : undefined,
     ].filter(Boolean) as NonNullable<CareReportResource['component']>,
   } as never)) as CareReportResource;
+}
+
+export async function createNursingShiftHandoffReport(input: CreateNursingShiftHandoffInput): Promise<CareReportResource> {
+  const medplum = await getMedplumClient();
+
+  return (await medplum.createResource({
+    resourceType: 'Observation',
+    ...baseReport(input),
+    code: {
+      coding: [
+        {
+          system: MEDPLUM_CODE_SYSTEMS.reportType,
+          code: 'nursing-shift-handoff',
+          display: 'Nursing Shift Handoff',
+        },
+      ],
+      text: 'Nursing Shift Handoff',
+    },
+    component: [
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'shift-start-at',
+              display: 'Shift Start Time',
+            },
+          ],
+        },
+        valueString: input.shiftStartAt.toISOString(),
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'shift-end-at',
+              display: 'Shift End Time',
+            },
+          ],
+        },
+        valueString: input.shiftEndAt.toISOString(),
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'patient-status-summary',
+              display: 'Patient Status Summary',
+            },
+          ],
+        },
+        valueString: input.patientStatusSummary,
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'pending-tasks-summary',
+              display: 'Pending Tasks Summary',
+            },
+          ],
+        },
+        valueString: input.pendingTasksSummary,
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'medication-safety-summary',
+              display: 'Medication Safety Summary',
+            },
+          ],
+        },
+        valueString: input.medicationSafetySummary,
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'escalation-status',
+              display: 'Escalation Status',
+            },
+          ],
+        },
+        valueString: input.escalationStatus,
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'next-shift-focus',
+              display: 'Next Shift Focus',
+            },
+          ],
+        },
+        valueString: input.nextShiftFocus,
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'handoff-latitude',
+              display: 'Handoff Latitude',
+            },
+          ],
+        },
+        valueString: String(input.handoffLatitude),
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'handoff-longitude',
+              display: 'Handoff Longitude',
+            },
+          ],
+        },
+        valueString: String(input.handoffLongitude),
+      },
+      typeof input.handoffAccuracyMeters === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'handoff-location-accuracy-m',
+                  display: 'Handoff Location Accuracy (m)',
+                },
+              ],
+            },
+            valueString: String(Math.round(input.handoffAccuracyMeters)),
+          }
+        : undefined,
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'distance-from-patient-m',
+              display: 'Distance From Patient Location (m)',
+            },
+          ],
+        },
+        valueString: String(Math.round(input.distanceFromPatientMeters)),
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'within-patient-location-radius',
+              display: 'Within Patient Location Radius',
+            },
+          ],
+        },
+        valueString: input.withinPatientRadius ? 'yes' : 'no',
+      },
+      {
+        code: {
+          coding: [
+            {
+              system: MEDPLUM_CODE_SYSTEMS.reportType,
+              code: 'handoff-attestation',
+              display: 'Handoff Attestation',
+            },
+          ],
+        },
+        valueString: input.handoffAttestation,
+      },
+    ].filter(Boolean) as NonNullable<CareReportResource['component']>,
+  } as never)) as CareReportResource;
+}
+
+export function careReportCode(report: CareReportResource): string {
+  return report.code?.coding?.[0]?.code ?? 'unknown';
+}
+
+export function careReportComponentText(report: CareReportResource, code: string): string | null {
+  const component = report.component?.find((entry) => entry.code?.coding?.[0]?.code === code);
+  if (!component) return null;
+  if (typeof component.valueString === 'string' && component.valueString.trim()) return component.valueString;
+  if (typeof component.valueInteger === 'number') return String(component.valueInteger);
+  return null;
+}
+
+function mapNursingHandoffSummary(report: CareReportResource): NursingHandoffPerformerSummary | null {
+  if (!report.id) {
+    return null;
+  }
+
+  const withinRadiusRaw = careReportComponentText(report, 'within-patient-location-radius');
+  const distanceRaw = careReportComponentText(report, 'distance-from-patient-m');
+  const acknowledgedAt = careReportComponentText(report, 'incoming-nurse-acknowledged-at');
+
+  return {
+    id: report.id,
+    effectiveDateTime: report.effectiveDateTime ?? null,
+    withinPatientRadius:
+      withinRadiusRaw === null
+        ? null
+        : withinRadiusRaw.toLowerCase() === 'yes'
+          ? true
+          : withinRadiusRaw.toLowerCase() === 'no'
+            ? false
+            : null,
+    distanceFromPatientMeters: distanceRaw ? Number(distanceRaw) : null,
+    incomingNurseAcknowledgedAt: acknowledgedAt,
+  };
+}
+
+export async function listNursingShiftHandoffsByPerformer(
+  performerReference: string,
+  options?: { count?: number; daysBack?: number },
+): Promise<NursingHandoffPerformerSummary[]> {
+  const medplum = await getMedplumClient();
+  const daysBack = options?.daysBack ?? 30;
+  const sinceDate = new Date();
+  sinceDate.setDate(sinceDate.getDate() - daysBack);
+  const dateParam = `ge${sinceDate.toISOString().slice(0, 10)}`;
+
+  const reports = (await medplum.searchResources('Observation', {
+    category: 'survey',
+    code: 'nursing-shift-handoff',
+    performer: performerReference,
+    date: dateParam,
+    _count: String(options?.count ?? 200),
+    _sort: '-date',
+  })) as CareReportResource[];
+
+  return reports
+    .map(mapNursingHandoffSummary)
+    .filter((item): item is NursingHandoffPerformerSummary => !!item);
 }
 
 export async function listPatientCareReports(patientId: string, count = 80): Promise<CareReportResource[]> {

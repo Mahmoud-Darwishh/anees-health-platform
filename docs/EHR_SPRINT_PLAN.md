@@ -12,7 +12,7 @@ and engineers (precise, FHIR-grounded).
 
 Anees Health is **not a booking app**. It is a **coordinated, longitudinal, home-healthcare
 operating system** — managed-care infrastructure for MENA, built to healthcare-enterprise
-standards.
+standards and designed to be **FHIR-native, HIPAA/GDPR-aligned, and compliance-by-construction**.
 
 It must function as **all of these at once**:
 
@@ -36,7 +36,7 @@ It must function as **all of these at once**:
    workflow, and org policy.
 4. **FHIR-ready interoperability** — standardized resources only; no isolated/non-standard schemas.
 5. **Compliance by construction** — immutable audit, consent, data minimization, encryption,
-   least privilege, full traceability.
+   least privilege, full traceability, retention controls, and explicit PHI handling rules.
 6. **Enterprise architecture** — modular domains, event-driven, real-time, high concurrency,
    HA/DR, multi-organization.
 
@@ -48,6 +48,10 @@ It must function as **all of these at once**:
 holds operational/booking/finance only. The staff workspace is enterprise-grade; the portal is
 live; the clinical breadth (problems, allergies, meds, labs, documents, assessments) is in;
 coordination, dispatch, and formal compliance are underway.
+
+**Compliance stance:** treat this as **compliance-ready architecture**, not a legal certification.
+HIPAA/GDPR controls must be implemented through product design, access policy, auditability, and
+operational process, then validated with legal and security review before any real PHI go-live.
 
 ### ✅ Built & verified (production-build green)
 
@@ -117,7 +121,8 @@ coordination, dispatch, and formal compliance are underway.
   `Communication`/`Task` + (Phase D2) an outbox/queue so workflows are auditable and async.
 - **Compliance by construction.** Medplum `AuditEvent` is the immutable clinical audit; consent
   via FHIR `Consent`; least-privilege everywhere; PHI never logged; signed URLs for files;
-  versioned migrations only (no `db:push` from now on).
+  versioned migrations only (no `db:push` from now on); data-retention and deletion policies are
+  explicit; every public PHI surface must be reviewed for minimum-necessary access.
 - **Interoperability-first.** Standard FHIR resources + standard code systems (LOINC, ICD-10,
   SNOMED, RxNorm) so external links are configuration, not rewrites.
 - **Scale & resilience.** Stateless app tier; parallelized + batched Medplum I/O (transaction
@@ -148,6 +153,22 @@ coordination, dispatch, and formal compliance are underway.
 | Appointment/scheduling | `Appointment` + `Slot`/`Schedule` | 🟡 helper exists; UI/flow pending |
 | Consent | `Consent` (portal scopes, allow/deny) | ✅ foundation; ABAC engine pending |
 | Organization (multi-tenant) | `Organization` | ⏳ |
+
+### Compliance baseline (best-practice target)
+- **FHIR as the canonical clinical model.** All clinical facts live in Medplum/FHIR resources;
+  Postgres is operational only.
+- **Minimum-necessary access.** Enforce RBAC + ABAC + field-level projection server-side before
+  serialization.
+- **Consent first.** Portal sharing, caregiver access, and future third-party exchange must flow
+  through explicit FHIR `Consent` and revocation-aware policy.
+- **Security controls.** MFA for staff, secret rotation, TLS everywhere, encrypted data at rest,
+  short-lived signed URLs, and environment separation.
+- **Auditability.** Use Medplum `AuditEvent` as the source of truth and keep the Postgres mirror
+  best-effort; never log PHI.
+- **Retention and deletion.** Define data retention, deletion, backup, and restore policies before
+  public PHI go-live, with legal review for HIPAA/GDPR handling.
+- **Vendor governance.** Only use vendors with suitable contractual and technical controls for PHI
+  flows, and document the BAA/DPA decision per integration.
 
 ---
 
@@ -234,7 +255,8 @@ conditions) and admin-side rich UI for each: polish in subsequent sprints._
 - ⏳ F1 ABAC engine + field-level masking (target Part IV).
 - ⏳ F2 MFA for staff; secret-rotation policy; encryption-at-rest review; data-retention policy.
 - ⏳ F3 Audit-review UI for superadmin (search `AuditEvent` by actor/resource/time).
-- ⏳ F4 Compliance gate for public PHI go-live: BAA vendors, DPL 151/2020 alignment.
+- ⏳ F4 Compliance gate for public PHI go-live: BAA/DPA vendors, DPL 151/2020 alignment,
+  legal/security sign-off, and minimum-necessary review for all PHI surfaces.
 
 ### Phase G — Telemedicine & communication (revenue line)
 Video/voice consults, secure messaging, call routing, virtual waiting rooms, AI visit summaries.
@@ -288,6 +310,7 @@ dispatch's event flow.
   `Communication` (initial note), routed to a triage queue. SLA timer counts down.
 - Handoff packet for shift change (today's events + open tasks).
 - In-app notification badge for the assigned owner; push later.
+- Detailed execution architecture and acceptance gates: see **Part XI**.
 
 **You'll see:** a nurse can flag a patient is deteriorating; doctor sees it in their queue
 within seconds; full audit trail; family-portal flag the family-portal-permitted lines.
@@ -382,3 +405,138 @@ LATER     Phase K   Multi-org, HA/DR, full test+observability   ← scale to new
 ```
 
 _This document is the master plan. Update it at the end of each phase so it always reflects reality._
+
+---
+
+## PART XI — NEXT MILESTONE EXECUTION BLUEPRINT (Sprint D1)
+
+This is the implementation-ready plan for the **next sprint**. It translates Sprint D1 from a
+theme into deliverables with clear architecture boundaries, scalable patterns, and exit criteria.
+
+### D1 milestone definition (2 weeks)
+
+**Milestone name:** D1.0 Care Coordination Core  
+**Objective:** ship audited, case-scoped, role-safe clinical messaging and escalation flow that can
+support Dispatch (Phase E) without redesign.  
+**Primary KPI:** time from escalation creation to owner visibility in queue under 5 seconds (p95,
+normal load).  
+**Secondary KPI:** 100% of escalation writes create Medplum `AuditEvent` entries and are recoverable
+from patient timeline + owner queue.
+
+### Scope (in / out)
+
+**In scope (must ship):**
+- Staff-only patient-case thread (clinical messaging) on admin patient page.
+- "Raise escalation" flow that creates both `Task` and `Communication` linked to the same case.
+- Triage queue (owner worklist) with SLA countdown and status transitions.
+- Shift handoff packet (open escalations + unresolved tasks + last 24h key events).
+- In-app notification badge for assigned owner and care team members.
+
+**Out of scope (explicitly deferred):**
+- External push/SMS/WhatsApp fanout automation (Phase D2).
+- Full ABAC policy engine (Phase F1) beyond current role + case scoping guardrails.
+- Geo/dispatch lifecycle controls (Phase E1+).
+
+### Architecture contract (scalable by design)
+
+1. **FHIR-first workflow modeling**
+- Escalation command writes `Task` as state machine anchor and `Communication` as narrative trail.
+- Both resources must reference `Patient` and (when present) active `Encounter`.
+- Use deterministic correlation key across resources (`identifier`) for idempotency and retrieval.
+
+2. **Feature boundaries (no domain leakage)**
+- `src/features/ehr/admin-patient/coordination/` for UI + actions + schemas.
+- `src/lib/medplum/communications.ts` and `src/lib/medplum/tasks.ts` hold Medplum interactions.
+- `src/lib/auth/` remains authorization gate (RBAC now, ABAC extension later).
+- Read model composition stays server-side; client receives pre-filtered data only.
+
+3. **Write-path discipline**
+- Validate every mutation with Zod at server action/API boundary.
+- Enforce role and case-scoped permission before any Medplum write.
+- Write via transactional strategy where possible; otherwise fail safely with compensating mark.
+- Audit every write through Medplum `AuditEvent`; keep Postgres mirror best-effort only.
+
+4. **Concurrency and consistency**
+- Use `If-Match` on `Task` updates (`status`, `owner`, `priority`) to prevent silent overwrites.
+- Surface merge-safe user errors for stale versions (never last-write-wins silently).
+- Read-side should tolerate partial upstream failure (`Promise.allSettled` style composition).
+
+5. **Performance envelope (D1 target)**
+- Queue and patient thread queries must be paginated from day one.
+- Use bounded date windows for timeline fetches (default 30 days, override by filter).
+- Memoize hot patient header/care-team reads per request to reduce repeated Medplum calls.
+
+### Minimal FHIR data contract for D1
+
+**Task (escalation state anchor):**
+- `Task.code`: escalation category.
+- `Task.priority`: `routine | urgent | asap | stat`.
+- `Task.status`: `requested | accepted | in-progress | completed | cancelled`.
+- `Task.owner`: assigned practitioner/practitioner role.
+- `Task.focus` or `Task.basedOn`: points to related clinical context when available.
+
+**Communication (message trail):**
+- First message is created with escalation.
+- All follow-up messages reference the same patient/case and correlation identifier.
+- Distinguish staff-internal vs portal-shareable intent with explicit flag/extension.
+
+### Delivery slices (vertical, shippable)
+
+1. **Slice A — Foundations (Days 1-3)**
+- Add schemas + typed contracts + Medplum helper methods for create/update/list.
+- Add permission guards and audit hooks for coordination actions.
+- Ship hidden feature flag path for internal verification.
+
+2. **Slice B — Escalation command path (Days 4-6)**
+- Implement "Raise escalation" from patient page.
+- Persist `Task` + initial `Communication` and return correlation-safe response.
+- Render escalation card in patient timeline.
+
+3. **Slice C — Triage queue + SLA (Days 7-9)**
+- Build owner queue filtered by role, assignment, status, priority.
+- Add SLA countdown and breach indicator.
+- Add safe transitions with optimistic concurrency handling.
+
+4. **Slice D — Handoff packet + badges (Days 10-12)**
+- Generate handoff summary for shift change.
+- Add in-app badge counts for assigned/open escalations.
+- Finalize copy and bilingual review for any user-visible text.
+
+5. **Slice E — Hardening + release (Days 13-14)**
+- Verify audit traces, permission boundaries, and failure behavior.
+- Run critical flows in staging and produce release checklist sign-off.
+
+### Security and compliance guardrails (must pass)
+
+- No PHI in logs or frontend telemetry.
+- No client-side secrets or direct Medplum credentials in browser code.
+- Mutation routes/server actions are rate-limited and CORS-reviewed where applicable.
+- Every coordination write path includes explicit audit expectation and failure handling.
+
+### Acceptance criteria (Definition of Done)
+
+1. Nurse can raise an escalation in under 3 clicks from patient page.
+2. Assigned doctor/owner sees it in queue within 5 seconds p95.
+3. Owner can accept, progress, complete, or cancel with version-safe updates.
+4. Thread shows chronological `Communication` trail tied to the same case.
+5. Handoff packet includes open escalations, unresolved tasks, and last 24h updates.
+6. Unauthorized users cannot create, read, or transition escalations outside scope.
+7. Audit evidence exists for create/update transitions in Medplum `AuditEvent`.
+8. Build/lint/typecheck pass with no new critical warnings in touched modules.
+
+### Release and rollback strategy
+
+- **Feature flag:** `coordination_v1` enabled for internal roles only first.
+- **Canary:** enable for one pilot team, then expand by role cohort.
+- **Rollback:** disable feature flag (UI), retain immutable clinical records, and pause new
+  transitions if incident is detected.
+
+### Dependencies and sequencing notes
+
+- D1 must finish before E1 queue/dispatch coupling to avoid duplicating worklist logic.
+- D2 outbox/notification fanout should consume D1 correlation identifiers, not invent new keys.
+- F1 ABAC engine should wrap D1 resources through policy adapters, not replace D1 data model.
+
+### Role playbooks
+
+- Nursing implementation playbook (scope, handoff policy, safety checks, KPI): `docs/NURSING_OPERATING_MODEL.md`.

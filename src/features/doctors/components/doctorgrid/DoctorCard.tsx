@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { memo } from 'react';
 import type { Doctor } from './types';
 import LucideIcon from '@/components/common/LucideIcon';
+import { getDoctorSpecialityLabel } from '@/lib/utils/doctor-speciality';
 
 type MessageValues = Record<string, string | number>;
 
@@ -21,20 +22,13 @@ export const DoctorCard = memo(function DoctorCard({
   useGridColumn = true,
   compactHome = false,
 }: DoctorCardProps) {
+  const localeForSpeciality = locale === 'ar' ? 'ar' : 'en';
+  const normalizedSpeciality = getDoctorSpecialityLabel(doctor.speciality, localeForSpeciality);
   // profileLink is already set to /doctors/<slug> by the data layer
   const profileHref = `/${locale}${doctor.profileLink}`;
   const summaryText = (doctor.bio || '').trim();
   const summaryPreview =
     summaryText.length > 160 ? `${summaryText.slice(0, 160).trimEnd()}...` : summaryText;
-
-  // Estimate a public-facing review volume from available doctor data for concise trust signaling.
-  const rawPatientNumber = Number(String(doctor.totalPatients || '').replace(/[^\d]/g, ''));
-  const testimonialsCount = Array.isArray(doctor.testimonials) ? doctor.testimonials.length : 0;
-  const estimatedReviews = Number.isFinite(rawPatientNumber) && rawPatientNumber > 0
-    ? Math.max(100, Math.floor(rawPatientNumber / 10))
-    : testimonialsCount > 0
-      ? Math.max(100, testimonialsCount * 25)
-      : 0;
 
   const visibleChannels = Array.isArray(doctor.channels) ? doctor.channels.slice(0, 2) : [];
   const hiddenChannelsCount = Array.isArray(doctor.channels)
@@ -72,12 +66,8 @@ export const DoctorCard = memo(function DoctorCard({
 
           <div className="card-body doctor-card-body p-0">
             {!compactHome && (
-              <div
-                className={`d-flex active-bar ${doctor.specialityColorClass || ''} align-items-center justify-content-between p-3 pb-2`}
-              >
-                <span className={`${doctor.specialityTextClass || ''} fw-medium fs-14`}>
-                  {doctor.speciality}
-                </span>
+              <div className="d-flex active-bar align-items-center px-3 pt-3 pb-2">
+                <span className="specialty-pill">{normalizedSpeciality}</span>
               </div>
             )}
 
@@ -85,26 +75,20 @@ export const DoctorCard = memo(function DoctorCard({
             <div className="doctor-info-content p-3">
               <h3 className="doctor-name mb-2">{doctor.doctorName}</h3>
               <p className="professional-title text-muted fs-13 mb-2">
-                {doctor.professionalTitle || doctor.speciality}
+                {doctor.professionalTitle || normalizedSpeciality}
               </p>
-
-              <div className="doctor-meta mb-2" aria-label={tg('filters.rating')}>
-                <span className="meta-item meta-item-rating">
-                  <LucideIcon iconClass="fa-solid fa-star" aria-hidden="true"></LucideIcon>
-                  {doctor.rating}
-                </span>
-                {!compactHome && estimatedReviews > 0 && (
-                  <span className="meta-item meta-item-reviews">
-                    <LucideIcon iconClass="fa-solid fa-message-1" aria-hidden="true"></LucideIcon>
-                    {tg('card.from_reviews', { count: `${estimatedReviews}+` })}
-                  </span>
-                )}
-              </div>
 
               <p className="experience-badge text-muted fs-13 mb-2">
                 <LucideIcon iconClass="fa-solid fa-calendar-days me-1"></LucideIcon>
                 {doctor.experienceYears}+ {tg('card.yrs_exp')}
               </p>
+
+              {!compactHome && doctor.location && (
+                <p className="experience-badge text-muted fs-13 mb-2">
+                  <LucideIcon iconClass="fa-solid fa-location-dot me-1"></LucideIcon>
+                  {doctor.location}
+                </p>
+              )}
 
               {!compactHome && summaryPreview && <p className="doctor-summary mb-3">{summaryPreview}</p>}
 
@@ -194,7 +178,7 @@ export const DoctorCard = memo(function DoctorCard({
               </div>
               */}
 
-              <div className="profile-hint d-inline-flex align-items-center gap-2">
+              <div className="profile-hint d-inline-flex align-items-center gap-2 mt-3">
                 <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true"></LucideIcon>
                 <span>{tg('card.view_profile')}</span>
               </div>
