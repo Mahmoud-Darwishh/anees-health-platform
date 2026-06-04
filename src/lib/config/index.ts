@@ -1,5 +1,6 @@
 // Configuration for API endpoints and environment variables
 // This file will be expanded as new features are added
+import { SOCIAL_PROFILES } from './social-links';
 
 export const config = {
   // API Configuration
@@ -41,13 +42,7 @@ export const config = {
 
   // Brand and social profiles used for SEO/GEO consistency
   brand: {
-    socialProfiles: [
-      'https://www.facebook.com/aneeshealthcare/',
-      'https://www.instagram.com/aneeshealth/',
-      'https://www.linkedin.com/company/aneeshealth',
-      'https://www.tiktok.com/@aneeshealth',
-      'https://www.youtube.com/@aneeshealth',
-    ],
+    socialProfiles: SOCIAL_PROFILES,
   },
 };
 

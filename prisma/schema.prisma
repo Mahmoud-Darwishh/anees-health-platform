@@ -361,6 +361,7 @@ model Patient {
   @@index([status])
   @@index([referralSourceId])
   @@index([phone])
+  @@index([deletedAt])
   @@index([nationalId])
   @@index([passportNumber])
   @@map("patients")
@@ -650,6 +651,9 @@ model OnlineBooking {
   @@index([phoneNumber])
   @@index([createdAt])
   @@index([promocodeId])
+  @@index([kashierTransactionId])
+  @@index([kashierSessionId])
+  @@index([kashierOrderId])
   @@map("online_bookings")
 }
 
@@ -756,6 +760,7 @@ model NurseShiftAssignment {
   @@index([patientId, shiftStartAt])
   @@index([primaryNurseStaffId, shiftStartAt])
   @@index([incomingNurseStaffId, acknowledgedAt])
+  @@index([escalationTaskId])
   @@map("nurse_shift_assignments")
 }
 
@@ -836,6 +841,7 @@ model AuditLog {
   changedAt     DateTime    @default(now())
 
   @@index([tableName, recordId])
+  @@index([tableName, recordId, changedAt])
   @@index([changedAt])
   @@index([changedBy])
   @@map("audit_logs")

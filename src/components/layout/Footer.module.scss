@@ -203,7 +203,12 @@ $f-easing:       cubic-bezier(0.22, 0.61, 0.36, 1);
   transition: background 0.22s $f-easing, color 0.22s $f-easing,
               border-color 0.22s $f-easing, transform 0.22s $f-easing;
 
-  i { font-size: 15px; }
+  i,
+  svg {
+    width: 15px;
+    height: 15px;
+    font-size: 15px;
+  }
 
   &:hover,
   &:focus-visible {

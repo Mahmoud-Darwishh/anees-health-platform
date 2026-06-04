@@ -148,31 +148,52 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
   const canSeeTasks = ownRecord.access.scopes.includes('tasks');
   const canSeeClinicalDepth = ownRecord.access.mode === 'patient';
 
-  const encounters = medplumPatientId && canSeeVisits
-    ? await listPatientEncounters(medplumPatientId, 20).catch(() => [])
-    : [];
-  const vitals = medplumPatientId && canSeeVitals
-    ? await listRecentPatientVitals(medplumPatientId, 20).catch(() => [])
-    : [];
-  const signedNotes = medplumPatientId && canSeeNotes
-    ? await listPatientClinicalNotes(medplumPatientId, 20, { signedOnly: true }).catch(() => [])
-    : [];
-  const activeTasks = medplumPatientId && canSeeTasks
-    ? await listPatientTasks(medplumPatientId, 25)
-        .then((tasks) => tasks.filter((task) => ['requested', 'in-progress', 'on-hold'].includes(task.status)))
-        .catch(() => [])
-    : [];
-  const carePlans = medplumPatientId ? await listPatientCarePlans(medplumPatientId, 10).catch(() => []) : [];
-  const careTeam = medplumPatientId ? await getActivePatientCareTeam(medplumPatientId).catch(() => null) : null;
+  const loadVisits = medplumPatientId && canSeeVisits && (activeTab === 'overview' || activeTab === 'visits');
+  const loadVitals = medplumPatientId && canSeeVitals && (activeTab === 'overview' || activeTab === 'vitals');
+  const loadNotes = medplumPatientId && canSeeNotes && (activeTab === 'overview' || activeTab === 'notes');
+  const loadTasks = medplumPatientId && canSeeTasks && (activeTab === 'overview' || activeTab === 'tasks');
+  const loadCare = medplumPatientId && (activeTab === 'overview' || activeTab === 'care');
+  const loadClinical = medplumPatientId && canSeeClinicalDepth && (activeTab === 'overview' || activeTab === 'clinical');
+  const loadFiles = medplumPatientId && canSeeClinicalDepth && (activeTab === 'overview' || activeTab === 'files');
+
+  const [
+    encounters,
+    vitals,
+    signedNotes,
+    activeTasks,
+    carePlans,
+    careTeam,
+    problems,
+    allergies,
+    medications,
+    documents,
+    labOrders,
+    labResults,
+    assessments,
+  ] = await Promise.all([
+    loadVisits ? listPatientEncounters(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadVitals ? listRecentPatientVitals(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadNotes
+      ? listPatientClinicalNotes(medplumPatientId, 20, { signedOnly: true }).catch(() => [])
+      : Promise.resolve([]),
+    loadTasks
+      ? listPatientTasks(medplumPatientId, 25)
+          .then((tasks) => tasks.filter((task) => ['requested', 'in-progress', 'on-hold'].includes(task.status)))
+          .catch(() => [])
+      : Promise.resolve([]),
+    loadCare ? listPatientCarePlans(medplumPatientId, 10).catch(() => []) : Promise.resolve([]),
+    loadCare ? getActivePatientCareTeam(medplumPatientId).catch(() => null) : Promise.resolve(null),
+    loadClinical ? listPatientConditions(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadClinical ? listPatientAllergies(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadClinical ? listPatientMedications(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadFiles ? listPatientDocuments(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadFiles ? listPatientLabOrders(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadFiles ? listPatientDiagnosticReports(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadClinical ? listPatientAssessments(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+  ]);
+
   const careTeamMembers = careTeam?.participant ?? [];
   const nextAppointment = encounters.find((encounter) => encounter.status === 'planned' && !!encounter.period?.start) ?? null;
-  const problems = medplumPatientId && canSeeClinicalDepth ? await listPatientConditions(medplumPatientId, 20).catch(() => []) : [];
-  const allergies = medplumPatientId && canSeeClinicalDepth ? await listPatientAllergies(medplumPatientId, 20).catch(() => []) : [];
-  const medications = medplumPatientId && canSeeClinicalDepth ? await listPatientMedications(medplumPatientId, 20).catch(() => []) : [];
-  const documents = medplumPatientId && canSeeClinicalDepth ? await listPatientDocuments(medplumPatientId, 20).catch(() => []) : [];
-  const labOrders = medplumPatientId && canSeeClinicalDepth ? await listPatientLabOrders(medplumPatientId, 20).catch(() => []) : [];
-  const labResults = medplumPatientId && canSeeClinicalDepth ? await listPatientDiagnosticReports(medplumPatientId, 20).catch(() => []) : [];
-  const assessments = medplumPatientId && canSeeClinicalDepth ? await listPatientAssessments(medplumPatientId, 20).catch(() => []) : [];
   const portalTabs: Array<{ id: PortalWorkspaceTab; label: string }> = [
     { id: 'overview', label: t('nav.overview') },
     { id: 'clinical', label: t('nav.medical') },

@@ -12,6 +12,8 @@ import { site, type SupportedLocale } from '@/lib/seo/site';
 import { getCoverageAreas } from '@/lib/seo/coverage';
 import { coverageFaqs } from '@/lib/seo/faqs';
 
+export const revalidate = 3600;
+
 export async function generateMetadata({
   params,
 }: {

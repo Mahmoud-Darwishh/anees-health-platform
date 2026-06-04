@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import styles from './Footer.module.scss';
 import LucideIcon from '@/components/common/LucideIcon';
+import SocialBrandIcon from '@/components/common/SocialBrandIcon';
+import { FOOTER_SOCIAL_LINKS } from '@/lib/config/social-links';
 
 /**
  * Site-wide public footer.
@@ -40,50 +42,24 @@ const Footer = () => {
               <p className={styles.tagline}>{tagline}</p>
 
               <ul className={styles.socials} aria-label={t('footer.follow_us')}>
-                <li>
-                  <a
-                    href="https://www.facebook.com/aneeshealthcare/"
-                    className={styles.socialBtn}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="visually-hidden">{t('footer.social_facebook')}</span>
-                    <LucideIcon iconClass="fa-brands fa-facebook-f" aria-hidden="true" />
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.instagram.com/aneeshealth/"
-                    className={styles.socialBtn}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="visually-hidden">{t('footer.social_instagram')}</span>
-                    <LucideIcon iconClass="fa-brands fa-instagram" aria-hidden="true" />
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.tiktok.com/@aneeshealth"
-                    className={styles.socialBtn}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="visually-hidden">{t('footer.social_tiktok')}</span>
-                    <LucideIcon iconClass="fa-brands fa-tiktok" aria-hidden="true" />
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.linkedin.com/company/aneeshealth"
-                    className={styles.socialBtn}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span className="visually-hidden">{t('footer.social_linkedin')}</span>
-                    <LucideIcon iconClass="fa-brands fa-linkedin-in" aria-hidden="true" />
-                  </a>
-                </li>
+                {FOOTER_SOCIAL_LINKS.map((social) => {
+                  const label = t(social.labelKey);
+
+                  return (
+                    <li key={social.brand}>
+                      <a
+                        href={social.href}
+                        className={styles.socialBtn}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={label}
+                      >
+                        <span className="visually-hidden">{label}</span>
+                        <SocialBrandIcon brand={social.brand} />
+                      </a>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 

@@ -12,6 +12,8 @@ import { homeFaqs } from '@/lib/seo/faqs';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 import { getDoctors } from '@/lib/api/doctors';
 
+export const revalidate = 3600;
+
 export async function generateMetadata({
   params,
 }: {
