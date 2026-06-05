@@ -22,15 +22,29 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+function resolveR2Endpoint(): string {
+  const endpoint = process.env.R2_ENDPOINT?.trim();
+  if (endpoint) {
+    return endpoint;
+  }
+
+  const accountId = process.env.R2_ACCOUNT_ID?.trim();
+  if (accountId) {
+    return `https://${accountId}.r2.cloudflarestorage.com`;
+  }
+
+  throw new Error('Missing R2 endpoint. Set R2_ENDPOINT or R2_ACCOUNT_ID.');
+}
+
 function getConfig(): R2Config {
   const provider = process.env.STORAGE_PROVIDER?.trim().toLowerCase();
-  if (provider !== 'r2') {
-    throw new Error('Cloudflare R2 storage is not enabled. Set STORAGE_PROVIDER=r2.');
+  if (provider && provider !== 'r2') {
+    throw new Error('Cloudflare R2 storage is not enabled. Set STORAGE_PROVIDER=r2 (or unset it).');
   }
 
   return {
     bucket: getRequiredEnv('R2_BUCKET'),
-    endpoint: getRequiredEnv('R2_ENDPOINT'),
+    endpoint: resolveR2Endpoint(),
     accessKeyId: getRequiredEnv('R2_ACCESS_KEY_ID'),
     secretAccessKey: getRequiredEnv('R2_SECRET_ACCESS_KEY'),
   };
