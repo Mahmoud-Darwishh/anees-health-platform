@@ -256,6 +256,31 @@ Detailed severities and playbook are in [SECURITY_ARCHITECTURE.md §10](SECURITY
 2. Check `R2_BUCKET` exists.
 3. Confirm signed-URL generation in code is using the right credentials.
 
+#### "Document upload fails with 413 and the page shows a generic load error"
+1. Confirm browser network tab shows `413 Payload Too Large` on the upload request.
+2. Increase reverse-proxy request size above the app limit (`next.config.ts` server action limit is `30mb`).
+3. On Nginx, set these directives in the TLS server block and reload:
+
+```nginx
+client_max_body_size 35M;
+proxy_request_buffering on;
+proxy_read_timeout 120s;
+
+location / {
+	proxy_pass http://127.0.0.1:3000;
+	proxy_http_version 1.1;
+	proxy_set_header Host $host;
+	proxy_set_header X-Forwarded-Host $host;
+	proxy_set_header X-Forwarded-Proto $scheme;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection "upgrade";
+}
+```
+
+4. If Cloudflare is in front, verify there is no custom WAF/body-size rule forcing a lower cap.
+5. After deploy, hard-refresh once (and clear service worker cache if stale bundles persist).
+
 #### "Medplum returns 401 on every call"
 1. The token expired — `getMedplumClient()` should auto-retry. If it doesn't:
 2. Restart the app (drops cached token).

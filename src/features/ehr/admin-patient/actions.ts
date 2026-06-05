@@ -108,7 +108,7 @@ import {
 import { toCareTeamRole } from './helpers';
 import { setAdminPatientFlash } from './flash';
 
-const MAX_DOCUMENT_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MiB
+const MAX_DOCUMENT_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MiB
 const NURSING_HANDOFF_DEFAULT_RADIUS_METERS = 500;
 const NURSING_HANDOFF_MAX_ACCURACY_METERS = 150;
 const VISIT_GEOFENCE_DEFAULT_RADIUS_METERS = 150;
@@ -2954,7 +2954,7 @@ export async function createDocumentAction(formData: FormData): Promise<void> {
     }
 
     if (file.size > MAX_DOCUMENT_UPLOAD_BYTES) {
-      throw new Error('Document is too large. Maximum allowed size is 10 MB.');
+      throw new Error('Document is too large. Maximum allowed size is 25 MB.');
     }
 
     const uploaded = await createPatientDocument({

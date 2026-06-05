@@ -63,6 +63,9 @@ import {
   getWorkspaceTabsForRole,
 } from './role-scope';
 import { NursingHandoffLocationCapture } from './NursingHandoffLocationCapture';
+import { DocumentFileInput } from './DocumentFileInput';
+
+const MAX_DOCUMENT_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 export type AdminWorkspaceTab =
   | 'overview'
@@ -1003,7 +1006,12 @@ export function AdminPatientDetailView({
                 </div>
                 <div className="col-md-4">
                   <label htmlFor="documentFile" className="form-label">File</label>
-                  <input id="documentFile" name="documentFile" type="file" className="form-control" required />
+                  <DocumentFileInput
+                    id="documentFile"
+                    name="documentFile"
+                    className="form-control"
+                    maxBytes={MAX_DOCUMENT_UPLOAD_BYTES}
+                  />
                 </div>
                 <div className="col-md-4">
                   <label htmlFor="documentDate" className="form-label">Document date</label>

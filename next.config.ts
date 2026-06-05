@@ -9,8 +9,9 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === 'development' && process.env.ENABLE_PWA_DEV !== 'true',
   register: true,
   reloadOnOnline: true,
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
+  // Avoid stale server-action payloads on authenticated dynamic routes after deploys.
+  cacheOnFrontEndNav: false,
+  aggressiveFrontEndNavCaching: false,
   customWorkerSrc: 'worker',
   workboxOptions: {
     runtimeCaching,
@@ -24,8 +25,8 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      // Keep close to app-level 10 MB upload cap while allowing multipart overhead.
-      bodySizeLimit: '12mb',
+      // Keep headroom above app-level document cap to handle multipart overhead safely.
+      bodySizeLimit: '30mb',
     },
   },
   // Image optimization for WebP and AVIF formats
