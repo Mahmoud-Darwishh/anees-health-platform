@@ -46,11 +46,15 @@ function staffRoleLabel(staffRole?: string | null): string {
       return 'Nurse';
     case 'physio':
       return 'Physiotherapist';
+    case 'physiotherapist':
+      return 'Physiotherapist';
+    case 'medical_ops':
     case 'operator':
-      return 'Operator';
+      return 'Medical Ops';
     case 'superadmin':
       return 'Super Admin';
     case 'admin':
+    case 'finance':
       return 'Admin';
     default:
       return 'Team member';
@@ -105,7 +109,7 @@ export default async function AdminPatientsPage() {
 
       {error && (
         <div className="alert alert-danger" role="alert">
-          Could not reach Medplum: {error}
+          Failed to load patient directory: {error}
         </div>
       )}
 

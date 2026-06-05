@@ -6,6 +6,28 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db/prisma';
 import type { UserRole, StaffRole } from '@prisma/client';
 
+async function writeLoginAudit(params: {
+  actorId: string;
+  actorRole: UserRole;
+  authProvider: 'patient-credentials' | 'staff-credentials' | 'google';
+}) {
+  try {
+    await prisma.auditLog.create({
+      data: {
+        tableName: params.actorRole === 'staff' ? 'staff' : 'users',
+        recordId: params.actorId,
+        action: 'login',
+        changedFields: {
+          provider: params.authProvider,
+        },
+        changedBy: `${params.actorRole}_${params.actorId}`,
+      },
+    });
+  } catch {
+    // Best-effort only; failed login audit should not block auth flow.
+  }
+}
+
 // Augment next-auth Session so session.user carries our custom fields
 declare module 'next-auth' {
   interface Session {
@@ -69,6 +91,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
 
+        await writeLoginAudit({
+          actorId: user.id,
+          actorRole: 'patient',
+          authProvider: 'patient-credentials',
+        });
+
         return {
           id: user.id,
           name: user.name,
@@ -107,6 +135,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           data: { lastLoginAt: new Date() },
         });
 
+        await writeLoginAudit({
+          actorId: staff.id,
+          actorRole: 'staff',
+          authProvider: 'staff-credentials',
+        });
+
         return {
           id: `staff_${staff.id}`,
           name: staff.name,
@@ -123,9 +157,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
 
   callbacks: {
-    async signIn({ account }) {
+    async signIn({ account, user }) {
       if (account?.provider === 'google') {
         // Default role is already 'patient' via the DB model default
+        if (user?.id) {
+          await writeLoginAudit({
+            actorId: user.id,
+            actorRole: (user.role as UserRole | undefined) ?? 'patient',
+            authProvider: 'google',
+          });
+        }
       }
       return true;
     },

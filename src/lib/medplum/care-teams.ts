@@ -31,7 +31,7 @@ export type MedplumCareTeamResource = {
 export type CareTeamMemberInput = {
   practitionerReference: string;
   display: string;
-  roleCode: 'doctor' | 'nurse' | 'physiotherapist' | 'operator' | 'admin' | 'superadmin';
+  roleCode: 'doctor' | 'nurse' | 'physiotherapist' | 'operator' | 'medical_ops' | 'admin' | 'superadmin';
 };
 
 function normalizeParticipantKey(participant: CareTeamParticipant): string | null {
@@ -44,6 +44,8 @@ function roleDisplay(roleCode: CareTeamMemberInput['roleCode']): string {
   switch (roleCode) {
     case 'physiotherapist':
       return 'Physiotherapist';
+    case 'medical_ops':
+      return 'Medical Ops';
     case 'superadmin':
       return 'Superadmin';
     default:

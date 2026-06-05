@@ -1,210 +1,98 @@
-# Anees Health Platform
+# Docs — Anees Health Platform
 
-Bilingual (English/Arabic) health-tech platform built for the MENA region, starting Egypt. Covers the public patient-facing website, online booking + payments, and an internal clinical dashboard (EHR — in progress). **Next.js 16 App Router · React 19 · TypeScript strict · Postgres + Prisma.**
+> **Audience:** anyone landing in this folder for the first time — owner, engineer, hospital partner, auditor.
+> **Last refresh:** 2026-06-05.
 
----
-
-## What's live
-
-| Area | Description |
-|---|---|
-| Public website | Bilingual (`/en`, `/ar`) marketing site — services, doctors, specialties, about, contact, legal |
-| Doctor profiles | DB-backed bilingual doctor profiles at `/[locale]/doctors/[slug]` |
-| Online booking | Multi-step booking form → Kashier payment gateway → webhook confirmation |
-| Coverage map | Leaflet map showing service areas; analytics stored in Postgres |
-| PWA | Installable, offline-capable, push notifications (VAPID via Postgres-backed subscriptions) |
-| Admin — patients | Internal patient list + view/edit at `/admin/patients` (env-guarded, auth pending) |
+This folder holds every long-form document for the platform. Read this README first; it tells you which doc to open for which question.
 
 ---
 
-## Stack
+## Where we stand in one paragraph
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js 16.1 — App Router, Turbopack dev server |
-| Language | TypeScript 5, strict mode |
-| Styling | SCSS modules + design tokens. Bootstrap 5 in admin. No Tailwind. |
-| Internationalization | `next-intl` 4.6 — `/en` and `/ar` locales, full RTL/LTR |
-| Database | Postgres + Prisma 5.22 |
-| Payments | Kashier (Egypt-native gateway) — test + live modes |
-| PWA / Push | `@ducanh2912/next-pwa` + `web-push` (VAPID) |
-| Maps | Leaflet (coverage page) |
-| Auth | **NextAuth v5 chosen — not yet installed.** `Staff` table + roles ready. |
-| File storage | **Not yet wired** — planned for EHR labs/scans/documents |
-| Validation | Hand-rolled per-route today. Zod planned. |
-| Tests | None yet — Vitest + Playwright planned |
+Anees is a production-grade bilingual (EN/AR) home-care platform serving Egypt today, with a signed hospital MOU and a planned MENA expansion. The clinical data layer is **Medplum (FHIR)**; operational + financial data is **Postgres + Prisma**; medical files live in **Cloudflare R2** behind authenticated streaming + malware scanning. The stack is **Next.js 16 + React 19 + TypeScript strict**, deployed on a self-hosted VPS (Hostinger today, OVH Bahrain in flight). Auth is **NextAuth v5** with patient-credentials + WhatsApp OTP + Google OAuth + staff-credentials, with login + logout auditing. The platform now ships four concurrent surfaces: a public marketing site, a bilingual patient portal at `/[locale]/portal`, an admin EHR + ops console at `/admin/*` for back-office staff, and a discipline-scoped clinician workspace at `/clinician/*` (physiotherapy pilot). Multi-tenancy foundations landed (Phase 1A); break-glass governance, insurance + claims schema, license gating, and a 22-state visit machine all landed in the same window.
 
 ---
 
-## Project structure
+## Pick your starting point
 
-```
-anees-health-platform/
-├── src/
-│   ├── app/
-│   │   ├── [locale]/          # Public site (/en/*, /ar/*)
-│   │   │   ├── (about)/       # /about-us
-│   │   │   ├── (contact)/     # /contact-us
-│   │   │   ├── (legal)/       # /privacy-policy, /terms-and-conditions
-│   │   │   ├── booking/       # Booking flow
-│   │   │   ├── coverage/      # Service-area map
-│   │   │   ├── doctors/       # Doctor listing + profiles
-│   │   │   ├── payment/       # Kashier redirect + result pages
-│   │   │   ├── services/      # SEO service landing pages
-│   │   │   ├── settings/pwa/  # Push notification opt-in
-│   │   │   └── specialties/   # SEO specialty landing pages
-│   │   ├── admin/             # ⚠️ Internal dashboard (env-guarded, auth pending)
-│   │   │   └── patients/      # Patient list + view/edit
-│   │   ├── api/
-│   │   │   ├── bookings/      # create · payment/initiate · payment/webhook
-│   │   │   ├── coverage/      # check + stats
-│   │   │   └── pwa/           # public-key · subscriptions · send
-│   │   └── ~offline/          # PWA offline fallback
-│   ├── features/              # Domain modules (feature-first)
-│   │   ├── booking/           # Booking form, payment gateway, result
-│   │   ├── doctors/           # Doctor grid + profile
-│   │   ├── coverage/          # Coverage form + map content
-│   │   └── pwa/               # Install prompt, notification hooks
-│   ├── components/            # App-wide shared UI
-│   │   ├── common/            # Reveal, WhatsApp button, RelatedLinks
-│   │   ├── layout/            # Header, Footer, Breadcrumb, MobileBottomNav
-│   │   └── sections/home/     # Home page section compositions
-│   ├── lib/
-│   │   ├── api/               # Server-side data access (doctors, pricing, specialties)
-│   │   ├── config/            # App config + booking pricing
-│   │   ├── db/                # Prisma singleton
-│   │   ├── models/            # Domain TypeScript types
-│   │   ├── pwa/               # DB-backed subscription store + push helpers
-│   │   ├── seo/               # Metadata + structured-data helpers
-│   │   └── utils/             # Logger, CORS, rate-limit, coverage, slug
-│   ├── hooks/                 # useReveal (scroll animation)
-│   ├── i18n/                  # next-intl request config
-│   ├── assets/scss/           # Global SCSS: base, layout, components, utils
-│   └── types/                 # Global TS types + SCSS module shim
-├── prisma/
-│   ├── schema.prisma          # Single source of truth for all DB models
-│   └── seed.ts                # Lookup tables + doctors seed
-├── messages/
-│   ├── en.json                # English translations
-│   └── ar.json                # Arabic translations
-├── worker/                    # Custom PWA service worker
-└── public/                    # Static assets, icons, legacy CSS
-```
-
----
-
-## Database models
-
-All models are in `prisma/schema.prisma`.
-
-**Operational core:** `Patient`, `Family`, `Provider`, `Visit`, `CarePlan`, `Invoice`, `Payment`, `Expense`, `ProviderPayout`
-
-**Lookups:** `Area`, `Service`, `ServiceCategory`, `ProviderRole`, `PaymentMethod`, `ExpenseCategory`, `ReferralSource`
-
-**Online funnel:** `OnlineBooking` — website booking record, converts to `Visit` on payment
-
-**Public site:** `Doctor`, `Specialty`, `ContentService`, `BookingPrice` — editable from DB, no redeploy needed
-
-**Infrastructure:** `PushSubscription`, `RateLimit`, `CoverageCheck`, `Staff`, `AuditLog`
-
-**EHR (in progress):** Patient header fields being added (`primaryCaregiverPhone`, `addressMapUrl`). Clinical schema (`MedicalHistory`, `Allergy`, `Medication`, `Diagnosis`, `VitalSigns`, `ProgressNote`) coming in the next phase.
-
----
-
-## Running locally
-
-```bash
-npm install
-npm run dev           # http://localhost:3000/en and /ar
-npm run build         # prisma generate + next build
-npm run lint
-npx tsc --noEmit      # type check only
-
-# Database
-npm run db:generate   # regenerate Prisma client after schema changes
-npm run db:push       # sync schema to DB (no migration files yet)
-npm run db:seed       # seed lookup tables + doctor profiles
-npm run db:studio     # Prisma Studio — ad-hoc data browser
-```
-
-Required in `.env.local`:
-```bash
-DATABASE_URL=postgresql://...
-
-# Payments
-KASHIER_MODE=test           # or live
-KASHIER_MERCHANT_ID=...
-KASHIER_API_KEY=...
-
-# PWA push
-NEXT_PUBLIC_VAPID_PUBLIC_KEY=...
-VAPID_PRIVATE_KEY=...
-VAPID_SUBJECT=mailto:...
-PWA_PUSH_SERVER_KEY=...
-
-# Admin dashboard (local only — do not set in production without auth)
-ENABLE_ADMIN_DASHBOARD=true
-```
-
----
-
-## Booking + Payments (Kashier)
-
-- Booking form at `/[locale]/booking` POSTs to `/api/bookings/create`
-- Payment initiated at `/api/bookings/payment/initiate` → redirects to Kashier hosted page
-- Kashier posts back to `/api/bookings/payment/webhook` (HMAC-verified)
-- Two modes: `test` (test-api.kashier.io) and `live` (api.kashier.io)
-- **Both modes reject `http://localhost`** — use a tunnel (cloudflared / ngrok) for local testing
-
----
-
-## PWA + Push Notifications
-
-- Installable PWA with locale-aware manifests (`/manifest-en.webmanifest`, `/manifest-ar.webmanifest`)
-- Offline fallback: `/~offline`
-- Push subscription endpoints: `POST /api/pwa/subscriptions`, `DELETE /api/pwa/subscriptions`
-- Public VAPID key: `GET /api/pwa/public-key`
-- Send push (server-to-all): `POST /api/pwa/send` (requires `x-pwa-server-key` header)
-- Subscriptions are persisted in Postgres (`PushSubscription` table)
-
----
-
-## Admin Dashboard — EHR (in progress)
-
-The internal clinical dashboard lives at `/admin/*`. It sits outside the `[locale]` routing (English-only, no i18n), uses Bootstrap for layout, and has **no public Header/Footer**.
-
-**Current state:** `/admin/patients` lists patients; `/admin/patients/[id]` shows and edits the patient header (name, DOB, gender, caregiver, address, maps URL).
-
-**Access guard:** The admin section returns 404 unless `ENABLE_ADMIN_DASHBOARD=true` is set in `.env.local`. This is a dev-only gate — full NextAuth v5 authentication is the next milestone before any admin feature ships to production.
-
-**EHR phasing:**
-
-| Phase | What | Status |
+| You are… | Start here | Then read |
 |---|---|---|
-| 1 | Patient header (name, caregiver, address) | 🔄 In progress |
-| 2 | Clinical schema (medical history, allergies, meds, diagnoses, vitals, progress notes) | ⏳ Next |
-| 3 | Auth (NextAuth v5) + Audit log wiring | ⏳ Unlocks production |
-| 4 | File storage (labs, scans, insurance docs) | ⏳ After auth |
-| 5 | Staff operations (attendance / shifts) | ⏳ Later |
+| The **owner**, reading docs for the first time | **[root README](../README.md)** → this file → [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) (owner action list at the top) | [CTO_STRATEGY.md](CTO_STRATEGY.md) for the long view; [EHR_NOW.md](EHR_NOW.md) for the next 12 weeks. |
+| A **new engineer** joining the team | [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) (engineering reference) → [FHIR_CATALOG.md](FHIR_CATALOG.md) → [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) | [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) for how PHI flows; [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) for the first deploy. |
+| A **hospital procurement / IT** team | [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) → [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) → [FHIR_CATALOG.md](FHIR_CATALOG.md) | [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) for the IR procedure; [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) for the access model. |
+| An **investor / advisor** | [CTO_STRATEGY.md](CTO_STRATEGY.md) (phases, hiring, risks) | [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) for compliance posture; [EHR_NOW.md](EHR_NOW.md) for execution credibility. |
+| A **physiotherapist** or clinical lead | [EHR_PHYSIO_SPEC.md](EHR_PHYSIO_SPEC.md) (the canonical product spec) | [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) for cross-discipline rules. |
+| A **clinical / compliance officer** | [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) → [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) | [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) §7 (audit). |
+| A **security auditor** | [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) → [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) | [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md), [FHIR_CATALOG.md](FHIR_CATALOG.md), then code. |
 
 ---
 
-## Conventions (brief)
+## The full doc set
 
-- `@/*` path alias → `src/*` — always use it, no `../../` across folders
-- Server components by default; `'use client'` only when interactivity is required
-- `import { prisma } from '@/lib/db/prisma'` — never `new PrismaClient()` in app code
-- SCSS `@use` only — never `@import`
-- Never log PHI; never expose secrets client-side; validate at API boundaries
+### Engineering reference
+
+| Doc | What it answers |
+|---|---|
+| [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) | "What is the stack, what's where in the repo, what conventions must I follow, what pitfalls must I know?" The canonical engineering reference. Lives at `.claude/CLAUDE.md` (outside this folder) because Claude Code reads it automatically. |
+| [FHIR_CATALOG.md](FHIR_CATALOG.md) | "Which FHIR resources do we use? Which module owns each one? What does the JSON look like? What are the Egyptian extensions?" |
+| [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) | "Who can read / write / sign what? How does case scope work? What's a break-glass override? How do field-ops state transitions behave?" |
+| [EHR_PHYSIO_SPEC.md](EHR_PHYSIO_SPEC.md) | "What is the physiotherapist workspace, end-to-end?" The deepest product spec we have. 80 KB; read the reading guide first. |
+
+### Strategy & execution
+
+| Doc | What it answers |
+|---|---|
+| [CTO_STRATEGY.md](CTO_STRATEGY.md) | "What's the 3-year plan? What phases? What's the hiring plan? What are the risks?" The long view. |
+| [EHR_NOW.md](EHR_NOW.md) | "What are we doing this sprint, this quarter? Which sprints are done, which are in flight?" The short view. Kept ruthlessly current. |
+| [SEO_GEO_STATUS.md](SEO_GEO_STATUS.md) | "What SEO / structured data is in place, what's missing, what's next on the marketing surface?" |
+
+### Compliance, security & operations (NEW — Jun 2026)
+
+| Doc | What it answers |
+|---|---|
+| [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) | "Where do we stand against HIPAA §164.308/310/312 and Egypt DPL 151/2020? What's a gap? What needs an outside lawyer? **What does the owner do this week?**" |
+| [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) | "What's the defense-in-depth picture? Edge → Identity → Application → Data → Audit → Secrets → Vuln mgmt → Incident Response. Every control points to its code." |
+| [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) | "How do we deploy? How do we rotate secrets? How do we restore from backup? What's the migration plan? What do we do at 3am when the site is on fire?" |
 
 ---
 
-## Roadmap
+## Document conventions
 
-- **Now:** Admin patient view/edit (EHR Phase 1)
-- **Next:** Full clinical schema + admin forms (EHR Phase 2) → NextAuth v5 auth + audit wiring (Phase 3) → File storage for documents (Phase 4)
-- **Later:** Staff attendance, e-prescribing primitives, telemedicine (WebRTC), chat (WebSocket), observability (Sentry + pino), Vitest + Playwright tests
+- **All docs are markdown**, GitHub-flavored.
+- **All docs cross-link** with relative paths so they work in GitHub web UI, local previewers, and inside the repo.
+- **All docs have a "Last refresh"** date at the top. If a doc lacks one, that's a doc-hygiene bug.
+- **All docs name an audience** at the top.
+- **No PHI** appears in docs — every example is synthetic.
+- **No secrets** appear in docs — env vars are described, not pasted.
+- **No marketing fluff** — docs describe what is, what's planned, and what's a gap.
 
 ---
 
-© 2026 Anees Health. All rights reserved.
+## How docs stay current
+
+- **Owner / engineering writes a doc when:** a decision is made that future-them would re-litigate without it; an outside party will ask the question; a new system or surface lands.
+- **Decisions go in [CTO_STRATEGY.md §17 Decision Log](CTO_STRATEGY.md), append-only**, dated, with a short rationale.
+- **Sprints update [EHR_NOW.md](EHR_NOW.md)** at sprint boundaries.
+- **Compliance reviews update [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) §14** quarterly.
+- **`.claude/CLAUDE.md` is refreshed after any material code change** — new module, new route, new schema model, new pitfall.
+
+---
+
+## What's missing (intentional gaps)
+
+| Doc that does NOT yet exist | Why |
+|---|---|
+| OpenAPI / Swagger spec | The public API surface is small; server actions don't need it. Will add when we publish a hospital-partner API in Phase 1. |
+| Mobile engineering brief | Mobile is months away. Will add when the Expo work starts. |
+| FHIR StructureDefinitions / ValueSets | We use base FHIR + a few Egyptian extensions ([FHIR_CATALOG.md](FHIR_CATALOG.md) §10). Formal profiles only when a hospital partner needs them for HL7 conformance. |
+| API.md (data contract for partners) | Will be created alongside the hospital-partner portal in Phase 1. |
+| Incident post-mortems | Folder will be created on first incident: `docs/incidents/YYYY-MM-DD-slug.md`. |
+
+---
+
+## See also
+
+- [Root `README.md`](../README.md) — the GitHub front door. Read this if you landed at the repo root.
+- [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) — the engineering reference.
+- [`prisma/schema.prisma`](../prisma/schema.prisma) — the authoritative DB schema.
+- [`src/lib/medplum/`](../src/lib/medplum/) — the 24 FHIR modules.

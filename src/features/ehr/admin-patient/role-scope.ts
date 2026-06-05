@@ -68,14 +68,23 @@ export function getWorkspaceTabsForRole(role: StaffRole | null): WorkspaceTab[] 
 }
 
 export function canEditDemographics(role: StaffRole | null): boolean {
-  return role === 'superadmin' || role === 'admin' || role === 'operator';
+  return role === 'superadmin' || role === 'admin' || role === 'medical_ops' || role === 'operator' || role === 'finance';
 }
 
 export function canWriteMedication(role: StaffRole | null): boolean {
   return role === 'superadmin' || role === 'admin' || role === 'doctor';
 }
 
-export function canWriteClinicalCondition(role: StaffRole | null): boolean {
+export type ClinicalConditionCategory = 'medical' | 'physical_therapy';
+
+export function canWriteClinicalCondition(
+  role: StaffRole | null,
+  category: ClinicalConditionCategory = 'medical',
+): boolean {
+  if (category === 'physical_therapy') {
+    return role === 'superadmin' || role === 'admin' || role === 'physiotherapist';
+  }
+
   return role === 'superadmin' || role === 'admin' || role === 'doctor';
 }
 

@@ -12,6 +12,10 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
+    "docs:migrate:r2": "node -r ts-node/register scripts/migrate-medplum-binaries-to-r2.ts",
+    "ehr:scan:tick": "node scripts/trigger-document-scan.cjs",
+    "goals:backfill:fhir": "node scripts/run-backfill-patient-goals-to-fhir.cjs",
+    "ehr:audit-gap": "node -r ts-node/register scripts/ehr-audit-gap-report.ts",
     "db:push": "prisma db push",
     "db:push:unsafe": "prisma db push",
     "db:seed": "prisma db seed",
@@ -23,6 +27,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
+    "@aws-sdk/client-s3": "^3.1062.0",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@medplum/core": "^5.1.13",
     "@prisma/client": "^5.22.0",

@@ -1,5 +1,5 @@
 import type { getMedplumPatient } from '@/lib/medplum/patients';
-import type { StaffRole } from '@prisma/client';
+import type { DnrStatus, StaffRole, VisitStatus } from '@prisma/client';
 import type { listPatientEncounters } from '@/lib/medplum/encounters';
 import type { listRecentPatientVitals } from '@/lib/medplum/observations';
 import type { listPatientClinicalNotes } from '@/lib/medplum/clinical-notes';
@@ -21,7 +21,7 @@ export type AssignableStaff = {
   id: string;
   name: string;
   email: string;
-  role: 'superadmin' | 'admin' | 'operator' | 'doctor' | 'physiotherapist' | 'nurse' | 'finance' | 'viewer';
+  role: StaffRole;
 };
 
 export type AdminPatientFlash = {
@@ -31,6 +31,11 @@ export type AdminPatientFlash = {
 
 export type AdminPatientDetailData = {
   staffRole: StaffRole | null;
+  restrictedAccess: {
+    hasRestrictedContent: boolean;
+    requiresReason: boolean;
+    reasonPreview: string | null;
+  };
   patient: Awaited<ReturnType<typeof getMedplumPatient>> | null;
   localPatient: {
     id: string;
@@ -46,6 +51,7 @@ export type AdminPatientDetailData = {
     emergencyContactName: string | null;
     emergencyContactPhone: string | null;
     emergencyContactRelation: string | null;
+    dnrStatus: DnrStatus | null;
   } | null;
   error: string | null;
   encounters: Awaited<ReturnType<typeof listPatientEncounters>>;
@@ -95,6 +101,46 @@ export type AdminPatientDetailData = {
     notes: string | null;
   }>;
   nurseShiftAssignmentsError: string | null;
+  localVisits: Array<{
+    id: string;
+    code: string;
+    status: VisitStatus;
+    effectiveState: string;
+    scheduledDate: string;
+    scheduledTime: string | null;
+    acknowledgedAt: string | null;
+    enRouteAt: string | null;
+    arrivedAt: string | null;
+    checkInAt: string | null;
+    checkOutAt: string | null;
+    checkInLat: string | null;
+    checkInLng: string | null;
+    checkOutLat: string | null;
+    checkOutLng: string | null;
+    checkInAccuracyM: number | null;
+    providerName: string | null;
+    transitionTimeline: Array<{
+      toState: string;
+      createdAt: string;
+      isOverride: boolean;
+      overrideMethod: string | null;
+    }>;
+  }>;
+  localVisitsError: string | null;
+  standingOrders: Array<{
+    id: string;
+    discipline: string;
+    title: string;
+    instructions: string;
+    isActive: boolean;
+    validFrom: string | null;
+    validUntil: string | null;
+    createdAt: string;
+    createdByStaffId: string;
+    lastExecutionAt: string | null;
+    executionCount: number;
+  }>;
+  standingOrdersError: string | null;
   caregiverConsents: PortalConsentSummary[];
   caregiverConsentsError: string | null;
 };

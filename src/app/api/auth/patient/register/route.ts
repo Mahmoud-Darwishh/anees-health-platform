@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
 
   const limited = await checkRateLimit(`patient-register:${ip}`, 5, 15 * 60 * 1000);
-  if (limited) {
+  if (!limited) {
     return NextResponse.json(
       { error: 'Too many registration attempts. Please wait 15 minutes.' },
       { status: 429, headers: cors }
@@ -88,7 +88,6 @@ export async function POST(request: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  // TODO(audit): wire when auth lands — patient account creation event
   const user = await prisma.user.create({
     data: {
       name: name.trim(),
@@ -98,6 +97,19 @@ export async function POST(request: NextRequest) {
       patientId: patient.id,
     },
     select: { id: true, name: true, phone: true, role: true },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      tableName: 'users',
+      recordId: user.id,
+      action: 'create',
+      changedFields: {
+        source: 'api.auth.patient.register',
+        fields: ['name', 'phone', 'role', 'patientId'],
+      },
+      changedBy: `system_ip:${ip}`,
+    },
   });
 
   return NextResponse.json(

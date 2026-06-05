@@ -1,15 +1,20 @@
 'use server';
 
+import { randomUUID } from 'crypto';
 import { revalidatePath } from 'next/cache';
-import { AuditAction, type StaffRole } from '@prisma/client';
+import { cookies } from 'next/headers';
+import { AuditAction, VisitStatus, type StaffRole } from '@prisma/client';
 import { ZodError } from 'zod';
+import { calculateCancellationFee, type DisruptionCode } from '@/lib/billing/cancellation-policy';
+import { calculatePhysioDisruptionPayout } from '@/lib/billing/physio-pay-policy';
 import { createMedplumEncounter, type MedplumEncounterStatus } from '@/lib/medplum/encounters';
 import { createVitalObservations, listRecentPatientVitals } from '@/lib/medplum/observations';
-import { createClinicalNoteDraft, signClinicalNote } from '@/lib/medplum/clinical-notes';
+import { createClinicalNoteDraft, listPatientClinicalNotes, signClinicalNote } from '@/lib/medplum/clinical-notes';
 import { ensureCachedMedplumPractitionerForStaff, ensureMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { assignStaffToPatientCareTeam, unassignStaffFromPatientCareTeam } from '@/lib/medplum/care-teams';
+import { getActivePatientCareTeam } from '@/lib/medplum/care-teams';
 import { createPatientTask, listPatientTasks, updatePatientTaskStatus } from '@/lib/medplum/tasks';
-import { createPatientCommunication } from '@/lib/medplum/communications';
+import { createPatientCommunication, listPatientCommunications } from '@/lib/medplum/communications';
 import { createPatientAppointment } from '@/lib/medplum/appointments';
 import { createMedicationAdministrationRecord } from '@/lib/medplum/medication-administrations';
 import {
@@ -27,13 +32,14 @@ import { createPatientMedication } from '@/lib/medplum/medications';
 import { createPatientDocument, deletePatientDocument } from '@/lib/medplum/documents';
 import { createPatientLabOrder, createPatientDiagnosticReport } from '@/lib/medplum/labs';
 import { createPatientAssessment } from '@/lib/medplum/assessments';
+import { listPatientAssessments } from '@/lib/medplum/assessments';
 import { updateMedplumPatientDemographics } from '@/lib/medplum/patients';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import {
   ESCALATION_SLA_ACK_MINUTES,
   NURSING_SHIFT_ACK_WINDOW_MINUTES,
 } from '@/lib/config/nursing-ops-policy';
-import { CLINICAL_WRITE_ROLES, getStaffUser } from '@/lib/auth/rbac';
+import { CLINICAL_WRITE_ROLES, canSignClinical, getStaffUser } from '@/lib/auth/rbac';
 import { evaluatePatientGeoPresence } from '@/lib/geo/presence-policy';
 import {
   evaluateVitalsThresholdBreaches,
@@ -42,8 +48,15 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import {
   assignCareTeamSchema,
+  requestRestrictedAccessSchema,
+  requestBreakGlassAccessSchema,
+  createStandingOrderSchema,
+  executeStandingOrderSchema,
+  requestDocumentDeleteApprovalSchema,
+  approveDestructiveTokenSchema,
   createCareTaskSchema,
   createClinicalNoteSchema,
+  amendClinicalNoteSchema,
   createNursingReportSchema,
   createNursingShiftHandoffSchema,
   createPhysioReportSchema,
@@ -64,6 +77,21 @@ import {
   acknowledgeIncomingNurseSchema,
   updatePatientGeoPolicySchema,
   formDataToInput,
+  acknowledgeVisitSchema,
+  startTravelSchema,
+  markArrivedSchema,
+  checkInVisitSchema,
+  checkOutVisitSchema,
+  cancelVisitByPatientSchema,
+  cancelVisitByMedOpsSchema,
+  declineVisitSchema,
+  reassignVisitSchema,
+  markRefusedAtDoorSchema,
+  markPatientNotHomeSchema,
+  divertVisitSchema,
+  interruptSessionSchema,
+  rescheduleInPlaceSchema,
+  disputeVisitSchema,
   recordVisitSchema,
   recordVitalsSchema,
   signClinicalNoteSchema,
@@ -73,20 +101,39 @@ import {
   updateCareTaskStatusSchema,
 } from '@/features/ehr/schemas/admin-patient-actions';
 import { canEditDemographics, canWriteClinicalCondition, canWriteMedication } from './role-scope';
+import {
+  ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE,
+  ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES,
+} from './constants';
 import { toCareTeamRole } from './helpers';
 import { setAdminPatientFlash } from './flash';
 
 const MAX_DOCUMENT_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MiB
 const NURSING_HANDOFF_DEFAULT_RADIUS_METERS = 500;
 const NURSING_HANDOFF_MAX_ACCURACY_METERS = 150;
+const VISIT_GEOFENCE_DEFAULT_RADIUS_METERS = 150;
+const VISIT_GEOFENCE_MAX_ACCURACY_METERS = 150;
+const VISIT_CHECKOUT_MIN_DURATION_MINUTES = 5;
+const VISIT_CHECKOUT_DISTANCE_REVIEW_METERS = 500;
+const LATE_CHECKIN_THRESHOLD_MINUTES = 15;
+const NOTE_COSIGN_SLA_HOURS = 24;
+const COSIGN_SLA_BREACH_MARKER = '[co-sign-sla-breach]';
+const LATE_CHECKIN_TASK_MARKER = '[late-checkin]';
+const VISIT_REVIEW_TASK_MARKER = '[visit-review]';
+const PHYSIO_DISCHARGE_REVIEW_MARKER = '[physio-discharge-review]';
+const RESTRICTED_OVERRIDE_WEEKLY_THRESHOLD = 5;
+const RESTRICTED_OVERRIDE_COMPLIANCE_MARKER = '[restricted-override-threshold]';
+const DOCUMENT_DELETE_APPROVAL_TTL_MINUTES = 30;
 
 const COORDINATION_WRITE_ROLES: StaffRole[] = [
   'superadmin',
   'admin',
+  'medical_ops',
   'operator',
   'doctor',
   'physiotherapist',
   'nurse',
+  'finance',
 ];
 
 const NURSING_SHIFT_WRITE_ROLES: StaffRole[] = ['superadmin', 'admin', 'nurse'];
@@ -98,6 +145,27 @@ type LocalPatientGeoPolicy = {
   temporarilyAwayUntil: Date | null;
   temporarilyAwayNote: string | null;
 };
+
+type WorkflowStateValue =
+  | 'scheduled'
+  | 'acknowledged'
+  | 'declined_by_physio'
+  | 'cancelled_by_patient'
+  | 'cancelled_by_med_ops'
+  | 'reassigned_to_other_physio'
+  | 'en_route'
+  | 'diverted_in_transit'
+  | 'arrived'
+  | 'refused_at_door'
+  | 'patient_not_home'
+  | 'checked_in'
+  | 'session_interrupted'
+  | 'rescheduled_in_place'
+  | 'checked_out'
+  | 'disputed'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show';
 
 function refreshClinicalPaths(medplumPatientId: string) {
   revalidatePath(`/admin/patients/${medplumPatientId}`);
@@ -204,6 +272,638 @@ async function getLocalPatientGeoPolicy(medplumPatientId: string): Promise<Local
   };
 }
 
+async function getWorkflowVisitOrThrow(params: {
+  visitId: string;
+  medplumPatientId: string;
+}) {
+  const visit = await prisma.visit.findUnique({
+    where: { id: params.visitId },
+    select: {
+      id: true,
+      code: true,
+      providerId: true,
+      status: true,
+      scheduledDate: true,
+      scheduledTime: true,
+      servicePriceEgp: true,
+      discountEgp: true,
+      netPriceEgp: true,
+      providerPayoutEgp: true,
+      acknowledgedAt: true,
+      enRouteAt: true,
+      arrivedAt: true,
+      checkInAt: true,
+      checkInLat: true,
+      checkInLng: true,
+      checkOutAt: true,
+      patient: {
+        select: {
+          medplumPatientId: true,
+        },
+      },
+    },
+  });
+
+  if (!visit) {
+    throw new Error('Visit record not found.');
+  }
+
+  if (visit.patient.medplumPatientId !== params.medplumPatientId) {
+    throw new Error('Visit does not belong to this patient.');
+  }
+
+  return visit;
+}
+
+function deriveWorkflowStateFromLegacy(visit: {
+  status: VisitStatus;
+  acknowledgedAt: Date | null;
+  enRouteAt: Date | null;
+  arrivedAt: Date | null;
+  checkInAt: Date | null;
+  checkOutAt: Date | null;
+}): WorkflowStateValue {
+  if (visit.status === VisitStatus.cancelled) {
+    return 'cancelled';
+  }
+  if (visit.status === VisitStatus.no_show) {
+    return 'no_show';
+  }
+  if (visit.status === VisitStatus.completed) {
+    return 'completed';
+  }
+  if (visit.checkOutAt) {
+    return 'checked_out';
+  }
+  if (visit.checkInAt) {
+    return 'checked_in';
+  }
+  if (visit.arrivedAt) {
+    return 'arrived';
+  }
+  if (visit.enRouteAt) {
+    return 'en_route';
+  }
+  if (visit.acknowledgedAt) {
+    return 'acknowledged';
+  }
+  return 'scheduled';
+}
+
+async function readCurrentWorkflowState(visit: {
+  id: string;
+  status: VisitStatus;
+  acknowledgedAt: Date | null;
+  enRouteAt: Date | null;
+  arrivedAt: Date | null;
+  checkInAt: Date | null;
+  checkOutAt: Date | null;
+}): Promise<WorkflowStateValue> {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ state: string | null }>>`
+      SELECT state::text AS state
+      FROM visits
+      WHERE id = ${visit.id}
+      LIMIT 1
+    `;
+    const raw = rows[0]?.state;
+    if (raw) {
+      return raw as WorkflowStateValue;
+    }
+  } catch {
+    // Fall back to legacy status/timestamps when state column is unavailable.
+  }
+
+  return deriveWorkflowStateFromLegacy(visit);
+}
+
+async function persistWorkflowStateTransition(params: {
+  visit: {
+    id: string;
+    status: VisitStatus;
+    acknowledgedAt: Date | null;
+    enRouteAt: Date | null;
+    arrivedAt: Date | null;
+    checkInAt: Date | null;
+    checkOutAt: Date | null;
+  };
+  toState: WorkflowStateValue;
+  changedBy: string;
+  reasonCode?: DisruptionCode | null;
+  reasonNote?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  accuracyMeters?: number | null;
+  isOverride?: boolean;
+  overrideMethod?: string | null;
+}): Promise<void> {
+  const fromState = await readCurrentWorkflowState(params.visit);
+
+  try {
+    await prisma.$executeRaw`
+      UPDATE visits
+      SET state = ${params.toState}
+      WHERE id = ${params.visit.id}
+    `;
+  } catch {
+    // Keep legacy workflow running even when state column is unavailable.
+    return;
+  }
+
+  try {
+    await prisma.$executeRaw`
+      INSERT INTO visit_state_transitions (
+        id,
+        visit_id,
+        from_state,
+        to_state,
+        actor_staff_id,
+        actor_system,
+        reason_code,
+        reason_note,
+        latitude,
+        longitude,
+        accuracy_meters,
+        is_override,
+        override_method
+      )
+      VALUES (
+        ${randomUUID()},
+        ${params.visit.id},
+        ${fromState},
+        ${params.toState},
+        ${params.changedBy},
+        false,
+        ${params.reasonCode ?? null},
+        ${params.reasonNote ?? null},
+        ${params.latitude ?? null},
+        ${params.longitude ?? null},
+        ${params.accuracyMeters ?? null},
+        ${Boolean(params.isOverride)},
+        ${params.overrideMethod ?? null}
+      )
+    `;
+  } catch {
+    // Timeline history is best-effort until schema relations are fully stabilized.
+  }
+}
+
+function parseScheduledVisitDateTime(visit: {
+  scheduledDate: Date;
+  scheduledTime: string | null;
+}): Date {
+  const base = new Date(visit.scheduledDate);
+  const scheduledTime = (visit.scheduledTime ?? '').trim();
+  if (!scheduledTime) {
+    return base;
+  }
+
+  const [hoursRaw, minutesRaw] = scheduledTime.split(':');
+  const hours = Number(hoursRaw ?? '0');
+  const minutes = Number(minutesRaw ?? '0');
+
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return base;
+  }
+
+  const scheduled = new Date(base);
+  scheduled.setHours(Math.max(0, Math.min(23, hours)), Math.max(0, Math.min(59, minutes)), 0, 0);
+  return scheduled;
+}
+
+function roundMoney(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function minutesBeforeScheduledStart(scheduledAt: Date, eventAt: Date): number | null {
+  const deltaMs = scheduledAt.getTime() - eventAt.getTime();
+  if (!Number.isFinite(deltaMs)) {
+    return null;
+  }
+  return Math.round(deltaMs / 60000);
+}
+
+async function applyDisruptionFinancials(params: {
+  visit: {
+    id: string;
+    scheduledDate: Date;
+    scheduledTime: string | null;
+    servicePriceEgp: unknown;
+    providerPayoutEgp: unknown;
+  };
+  eventAt: Date;
+  disruptionCode: DisruptionCode;
+}): Promise<void> {
+  const servicePrice = Number(params.visit.servicePriceEgp ?? 0);
+  const plannedPayout = Number(params.visit.providerPayoutEgp ?? 0);
+  const scheduledAt = parseScheduledVisitDateTime({
+    scheduledDate: params.visit.scheduledDate,
+    scheduledTime: params.visit.scheduledTime,
+  });
+
+  const { feeEgp } = calculateCancellationFee({
+    servicePriceEgp: servicePrice,
+    disruptionCode: params.disruptionCode,
+    minutesBeforeScheduledStart: minutesBeforeScheduledStart(scheduledAt, params.eventAt),
+  });
+
+  const { payoutEgp } = calculatePhysioDisruptionPayout({
+    plannedPayoutEgp: plannedPayout,
+    disruptionCode: params.disruptionCode,
+  });
+
+  const nextNetPrice = roundMoney(Math.max(servicePrice - feeEgp, 0));
+
+  await prisma.visit.update({
+    where: { id: params.visit.id },
+    data: {
+      discountEgp: feeEgp,
+      netPriceEgp: nextNetPrice,
+      providerPayoutEgp: payoutEgp,
+    },
+  });
+}
+
+function toNumber(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function haversineDistanceMeters(params: {
+  lat1: number;
+  lng1: number;
+  lat2: number;
+  lng2: number;
+}): number {
+  const r = 6371000;
+  const dLat = ((params.lat2 - params.lat1) * Math.PI) / 180;
+  const dLng = ((params.lng2 - params.lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos((params.lat1 * Math.PI) / 180)
+    * Math.cos((params.lat2 * Math.PI) / 180)
+    * Math.sin(dLng / 2)
+    * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return r * c;
+}
+
+async function hasOpenPatientTaskByMarker(params: {
+  medplumPatientId: string;
+  marker: string;
+  code: string;
+}): Promise<boolean> {
+  const tasks = await listPatientTasks(params.medplumPatientId, 120);
+  return tasks.some((task) => {
+    const open = !['completed', 'cancelled'].includes(task.status);
+    const matchesCode = task.code?.coding?.[0]?.code === params.code;
+    return open && matchesCode && (task.description ?? '').includes(params.marker);
+  });
+}
+
+async function createPatientReviewTask(params: {
+  medplumPatientId: string;
+  title: string;
+  description: string;
+  taskCode: string;
+  marker: string;
+  changedBy: string;
+  ownerReference?: string | null;
+  ownerDisplay?: string | null;
+}): Promise<void> {
+  const exists = await hasOpenPatientTaskByMarker({
+    medplumPatientId: params.medplumPatientId,
+    marker: params.marker,
+    code: params.taskCode,
+  });
+
+  if (exists) {
+    return;
+  }
+
+  const task = await createPatientTask({
+    patientId: params.medplumPatientId,
+    taskCode: params.taskCode,
+    priority: 'urgent',
+    title: params.title,
+    description: `${params.marker} ${params.description}`,
+    ownerReference: params.ownerReference ?? null,
+    ownerDisplay: params.ownerDisplay ?? null,
+  });
+
+  await writeMedplumAuditMirror({
+    tableName: 'MedplumTask',
+    recordId: task.id ?? `${params.medplumPatientId}:${Date.now()}`,
+    action: AuditAction.create,
+    changedFields: ['status', 'priority', 'code', 'description', 'for', 'owner'],
+    changedBy: params.changedBy,
+  });
+}
+
+async function maybeCreateLateCheckInTask(params: {
+  medplumPatientId: string;
+  visitId: string;
+  scheduledAt: Date;
+  checkedInAt: Date;
+  hadEnRoute: boolean;
+  changedBy: string;
+}): Promise<void> {
+  if (params.hadEnRoute) {
+    return;
+  }
+
+  const thresholdMs = LATE_CHECKIN_THRESHOLD_MINUTES * 60 * 1000;
+  if (params.checkedInAt.getTime() - params.scheduledAt.getTime() <= thresholdMs) {
+    return;
+  }
+
+  await createPatientReviewTask({
+    medplumPatientId: params.medplumPatientId,
+    taskCode: 'dispatch-review',
+    marker: `${LATE_CHECKIN_TASK_MARKER}:${params.visitId}`,
+    title: 'Late check-in review required',
+    description: `Visit ${params.visitId} checked in without an en-route ping after the ${LATE_CHECKIN_THRESHOLD_MINUTES}-minute threshold.`,
+    changedBy: params.changedBy,
+  });
+}
+
+async function assertVisitHasClinicalEvidence(params: {
+  medplumPatientId: string;
+  startedAt: Date;
+  endedAt: Date;
+}): Promise<void> {
+  const [vitals, notes, assessments] = await Promise.all([
+    listRecentPatientVitals(params.medplumPatientId, 80),
+    listPatientClinicalNotes(params.medplumPatientId, 80, { signedOnly: true }),
+    listPatientAssessments(params.medplumPatientId, 80),
+  ]);
+
+  const inWindow = (value: string | Date | null | undefined): boolean => {
+    if (!value) {
+      return false;
+    }
+    const time = new Date(value).getTime();
+    if (!Number.isFinite(time)) {
+      return false;
+    }
+    return time >= params.startedAt.getTime() && time <= params.endedAt.getTime();
+  };
+
+  const hasVitals = vitals.some((item) => inWindow(item.measuredAt));
+  const hasSignedNote = notes.some((item) => inWindow(item.date));
+  const hasAssessment = assessments.some((item) => inWindow(item.authored));
+
+  if (!hasVitals && !hasSignedNote && !hasAssessment) {
+    throw new Error('Check-out requires at least one signed clinical entry (vitals, note, or assessment) during this visit window.');
+  }
+}
+
+async function maybeCreateCheckoutReviewTasks(params: {
+  medplumPatientId: string;
+  visitId: string;
+  checkInAt: Date;
+  checkOutAt: Date;
+  checkInLat: number | null;
+  checkInLng: number | null;
+  checkOutLat: number;
+  checkOutLng: number;
+  changedBy: string;
+}): Promise<void> {
+  const durationMinutes = (params.checkOutAt.getTime() - params.checkInAt.getTime()) / (60 * 1000);
+
+  if (durationMinutes < VISIT_CHECKOUT_MIN_DURATION_MINUTES) {
+    await createPatientReviewTask({
+      medplumPatientId: params.medplumPatientId,
+      taskCode: 'visit-review',
+      marker: `${VISIT_REVIEW_TASK_MARKER}:short:${params.visitId}`,
+      title: 'Short visit duration review',
+      description: `Visit ${params.visitId} was completed in ${durationMinutes.toFixed(1)} minutes (< ${VISIT_CHECKOUT_MIN_DURATION_MINUTES} minutes).`,
+      changedBy: params.changedBy,
+    });
+  }
+
+  if (params.checkInLat === null || params.checkInLng === null) {
+    return;
+  }
+
+  const displacement = haversineDistanceMeters({
+    lat1: params.checkInLat,
+    lng1: params.checkInLng,
+    lat2: params.checkOutLat,
+    lng2: params.checkOutLng,
+  });
+
+  if (displacement > VISIT_CHECKOUT_DISTANCE_REVIEW_METERS) {
+    await createPatientReviewTask({
+      medplumPatientId: params.medplumPatientId,
+      taskCode: 'visit-review',
+      marker: `${VISIT_REVIEW_TASK_MARKER}:distance:${params.visitId}`,
+      title: 'Check-out location variance review',
+      description: `Visit ${params.visitId} check-out location differed from check-in by ${Math.round(displacement)}m (> ${VISIT_CHECKOUT_DISTANCE_REVIEW_METERS}m).`,
+      changedBy: params.changedBy,
+    });
+  }
+}
+
+async function writeVisitWorkflowAudit(params: {
+  visitId: string;
+  changedBy: string;
+  changedFields: string[];
+}) {
+  // TODO(audit): centralize when extension is wired.
+  await prisma.auditLog.create({
+    data: {
+      tableName: 'visits',
+      recordId: params.visitId,
+      action: AuditAction.update,
+      changedFields: params.changedFields,
+      changedBy: params.changedBy,
+    },
+  });
+}
+
+function detectCoSignFlags(text: string): string[] {
+  const normalized = text.toLowerCase();
+  const flags: Array<{ key: string; patterns: string[] }> = [
+    { key: 'fall_event', patterns: ['fall', 'slip'] },
+    { key: 'med_error', patterns: ['med error', 'medication error'] },
+    { key: 'controlled_substance', patterns: ['controlled substance', 'narcotic', 'opioid'] },
+    { key: 'refusal_of_care', patterns: ['refusal of care', 'refused care'] },
+  ];
+
+  return flags.filter((flag) => flag.patterns.some((pattern) => normalized.includes(pattern))).map((flag) => flag.key);
+}
+
+function detectPhysioRedFlags(text: string): string[] {
+  const normalized = text.toLowerCase();
+  const flags: Array<{ key: string; patterns: string[] }> = [
+    { key: 'possible_dvt', patterns: ['calf swelling', 'calf redness', 'calf pain', 'unilateral swelling'] },
+    { key: 'possible_cauda_equina', patterns: ['saddle anesthesia', 'loss of bladder', 'loss of bowel', 'urinary retention'] },
+    { key: 'possible_stroke_progression', patterns: ['new weakness', 'facial droop', 'slurred speech'] },
+    { key: 'neurological_red_flag', patterns: ['new numbness', 'progressive weakness', 'foot drop'] },
+    { key: 'respiratory_distress', patterns: ['shortness of breath', 'chest pain', 'oxygen drop'] },
+  ];
+
+  return flags.filter((flag) => flag.patterns.some((pattern) => normalized.includes(pattern))).map((flag) => flag.key);
+}
+
+async function maybeCreatePhysioRedFlagEscalation(params: {
+  medplumPatientId: string;
+  markerId: string;
+  noteBody: string;
+  subjectiveFunction?: string | null;
+  responseSummary?: string | null;
+  changedBy: string;
+}): Promise<void> {
+  const combinedText = [params.noteBody, params.subjectiveFunction ?? '', params.responseSummary ?? '']
+    .join(' ')
+    .trim();
+
+  if (!combinedText) {
+    return;
+  }
+
+  const redFlags = detectPhysioRedFlags(combinedText);
+  if (redFlags.length === 0) {
+    return;
+  }
+
+  const owner = await resolveDoctorOwnerReference(params.medplumPatientId);
+
+  await createPatientReviewTask({
+    medplumPatientId: params.medplumPatientId,
+    taskCode: 'escalation',
+    marker: `[physio-red-flag]:${params.markerId}`,
+    title: 'Physio red-flag escalation review',
+    description: `Auto-detected red flags from physio note: ${redFlags.join(', ')}. Review within 4 hours.`,
+    changedBy: params.changedBy,
+    ownerReference: owner?.reference ?? null,
+    ownerDisplay: owner?.display ?? null,
+  });
+}
+
+async function resolveDoctorOwnerReference(patientId: string): Promise<{ reference: string; display?: string } | null> {
+  const careTeam = await getActivePatientCareTeam(patientId);
+  const doctorParticipant = careTeam?.participant?.find((participant) => {
+    const roleCode = participant.role?.[0]?.coding?.[0]?.code;
+    return roleCode === 'doctor';
+  });
+
+  const reference = doctorParticipant?.member?.reference;
+  if (!reference) {
+    return null;
+  }
+
+  return {
+    reference,
+    display: doctorParticipant?.member?.display ?? undefined,
+  };
+}
+
+async function resolveComplianceOwnerReference(): Promise<{ reference: string; display?: string } | null> {
+  const compliance = await prisma.staff.findFirst({
+    where: {
+      role: 'compliance_officer',
+      status: 'active',
+      medplumPractitionerId: {
+        not: null,
+      },
+    },
+    select: {
+      medplumPractitionerId: true,
+      name: true,
+    },
+  });
+
+  if (!compliance?.medplumPractitionerId) {
+    return null;
+  }
+
+  return {
+    reference: `Practitioner/${compliance.medplumPractitionerId}`,
+    display: compliance.name,
+  };
+}
+
+async function resolveAdminOwnerReferences(): Promise<Array<{ reference: string; display?: string }>> {
+  const admins = await prisma.staff.findMany({
+    where: {
+      role: {
+        in: ['admin', 'superadmin'],
+      },
+      status: 'active',
+      medplumPractitionerId: {
+        not: null,
+      },
+    },
+    select: {
+      medplumPractitionerId: true,
+      name: true,
+    },
+    take: 5,
+  });
+
+  return admins
+    .filter((entry) => !!entry.medplumPractitionerId)
+    .map((entry) => ({
+      reference: `Practitioner/${entry.medplumPractitionerId as string}`,
+      display: entry.name,
+    }));
+}
+
+function isAdminApprovalRole(role: StaffRole | null | undefined): boolean {
+  return role === 'admin' || role === 'superadmin' || role === 'compliance_officer';
+}
+
+async function hasOpenCoSignTaskForNote(patientId: string, compositionId: string): Promise<boolean> {
+  const tasks = await listPatientTasks(patientId, 120);
+  return tasks.some((task) => {
+    const open = !['completed', 'cancelled'].includes(task.status);
+    const isCosign = task.code?.coding?.[0]?.code === 'co-sign';
+    const linkedNote = (task.description ?? '').includes(`[note:${compositionId}]`);
+    return open && isCosign && linkedNote;
+  });
+}
+
+async function evaluateVisitGeofence(params: {
+  medplumPatientId: string;
+  role: StaffRole | null | undefined;
+  purpose: 'checkin' | 'checkout';
+  latitude: number;
+  longitude: number;
+  accuracyMeters: number | null;
+}) {
+  const policy = await getLocalPatientGeoPolicy(params.medplumPatientId);
+  const maxDistanceMeters = policy?.handoffGeofenceRadiusMeters ?? VISIT_GEOFENCE_DEFAULT_RADIUS_METERS;
+
+  const purpose = params.purpose === 'checkout'
+    ? 'visit-checkout'
+    : (params.role === 'physiotherapist' ? 'physio-visit-checkin' : 'doctor-visit-checkin');
+
+  const evaluation = await evaluatePatientGeoPresence({
+    patientId: params.medplumPatientId,
+    purpose,
+    currentLocation: {
+      latitude: params.latitude,
+      longitude: params.longitude,
+    },
+    accuracyMeters: params.accuracyMeters,
+    policy: {
+      maxDistanceMeters,
+      maxAccuracyMeters: VISIT_GEOFENCE_MAX_ACCURACY_METERS,
+    },
+  });
+
+  return evaluation;
+}
+
+function isClosedVisitStatus(status: VisitStatus): boolean {
+  return status === VisitStatus.cancelled || status === VisitStatus.completed || status === VisitStatus.no_show;
+}
+
 async function createEscalationAndCommunication(params: {
   patientId: string;
   encounterId?: string | null;
@@ -307,6 +1007,61 @@ async function runEscalationSlaSweepForPatient(
   return breachedCount;
 }
 
+async function runCoSignSlaSweepForPatient(
+  medplumPatientId: string,
+  sender: { reference: string; display: string },
+): Promise<number> {
+  const tasks = await listPatientTasks(medplumPatientId, 200);
+  const communications = await listPatientCommunications(medplumPatientId, 200);
+  const nowMs = Date.now();
+
+  let breachedCount = 0;
+
+  for (const task of tasks) {
+    if (task.code?.coding?.[0]?.code !== 'co-sign') {
+      continue;
+    }
+
+    if (['completed', 'cancelled'].includes(task.status)) {
+      continue;
+    }
+
+    const dueMs = task.executionPeriod?.end ? new Date(task.executionPeriod.end).getTime() : NaN;
+    if (!Number.isFinite(dueMs) || dueMs > nowMs) {
+      continue;
+    }
+
+    const alreadyRaised = communications.some(
+      (item) =>
+        item.category === 'escalation' &&
+        item.basedOnTaskId === (task.id ?? null) &&
+        item.message.includes(COSIGN_SLA_BREACH_MARKER),
+    );
+
+    if (alreadyRaised) {
+      continue;
+    }
+
+    const summary = `${COSIGN_SLA_BREACH_MARKER} Co-sign SLA breach: task ${task.id ?? 'unknown'} passed the 24-hour deadline without completion.`;
+
+    await createPatientCommunication({
+      patientId: medplumPatientId,
+      category: 'escalation',
+      priority: 'stat',
+      message: summary,
+      senderReference: sender.reference,
+      senderDisplay: sender.display,
+      recipientReference: task.owner?.reference ?? null,
+      recipientDisplay: task.owner?.display ?? null,
+      basedOnTaskId: task.id ?? null,
+    });
+
+    breachedCount += 1;
+  }
+
+  return breachedCount;
+}
+
 async function assertRosteredNurseForPatientIfNurse(
   staff: { staffId?: string | null; staffRole?: StaffRole | null },
   medplumPatientId: string,
@@ -381,6 +1136,641 @@ export async function recordVisitAction(formData: FormData): Promise<void> {
 
     await setAdminPatientFlash({ type: 'success', message: 'Visit saved successfully.' });
     refreshClinicalPaths(medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function acknowledgeVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = acknowledgeVisitSchema.parse(formDataToInput(formData));
+    const visit = await getWorkflowVisitOrThrow({
+      visitId: input.visitId,
+      medplumPatientId: input.medplumPatientId,
+    });
+
+    if (isClosedVisitStatus(visit.status)) {
+      throw new Error('Visit cannot be acknowledged in its current status.');
+    }
+
+    await prisma.visit.update({
+      where: { id: visit.id },
+      data: {
+        acknowledgedAt: input.acknowledgedAt,
+      },
+    });
+
+    await persistWorkflowStateTransition({
+      visit,
+      toState: 'acknowledged',
+      changedBy,
+    });
+
+    await writeVisitWorkflowAudit({
+      visitId: visit.id,
+      changedBy,
+      changedFields: ['acknowledgedAt', 'state'],
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit acknowledged.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function startTravelAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = startTravelSchema.parse(formDataToInput(formData));
+    const visit = await getWorkflowVisitOrThrow({
+      visitId: input.visitId,
+      medplumPatientId: input.medplumPatientId,
+    });
+
+    if (!visit.acknowledgedAt) {
+      throw new Error('Visit must be acknowledged before starting travel.');
+    }
+
+    if (isClosedVisitStatus(visit.status)) {
+      throw new Error('Visit cannot start travel in its current status.');
+    }
+
+    await prisma.visit.update({
+      where: { id: visit.id },
+      data: {
+        enRouteAt: input.enRouteAt,
+      },
+    });
+
+    await persistWorkflowStateTransition({
+      visit,
+      toState: 'en_route',
+      changedBy,
+    });
+
+    await writeVisitWorkflowAudit({
+      visitId: visit.id,
+      changedBy,
+      changedFields: ['enRouteAt', 'state'],
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit marked as en-route.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function markArrivedAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = markArrivedSchema.parse(formDataToInput(formData));
+    const visit = await getWorkflowVisitOrThrow({
+      visitId: input.visitId,
+      medplumPatientId: input.medplumPatientId,
+    });
+
+    if (!visit.enRouteAt) {
+      throw new Error('Visit must be en-route before arrival can be marked.');
+    }
+
+    if (isClosedVisitStatus(visit.status)) {
+      throw new Error('Visit cannot be marked as arrived in its current status.');
+    }
+
+    await prisma.visit.update({
+      where: { id: visit.id },
+      data: {
+        arrivedAt: input.arrivedAt,
+      },
+    });
+
+    await persistWorkflowStateTransition({
+      visit,
+      toState: 'arrived',
+      changedBy,
+    });
+
+    await writeVisitWorkflowAudit({
+      visitId: visit.id,
+      changedBy,
+      changedFields: ['arrivedAt', 'state'],
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit marked as arrived.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function checkInVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = checkInVisitSchema.parse(formDataToInput(formData));
+    const visit = await getWorkflowVisitOrThrow({
+      visitId: input.visitId,
+      medplumPatientId: input.medplumPatientId,
+    });
+
+    if (!visit.arrivedAt && !visit.enRouteAt) {
+      throw new Error('Visit must be in travel/arrival flow before check-in.');
+    }
+
+    if (isClosedVisitStatus(visit.status)) {
+      throw new Error('Visit cannot be checked in in its current status.');
+    }
+
+    const geofenceEvaluation = await evaluateVisitGeofence({
+      medplumPatientId: input.medplumPatientId,
+      role: staff.staffRole,
+      purpose: 'checkin',
+      latitude: input.checkInLatitude,
+      longitude: input.checkInLongitude,
+      accuracyMeters: input.checkInAccuracyMeters,
+    });
+
+    const isOverride = !geofenceEvaluation.allowed;
+    if (isOverride) {
+      if (!input.geofenceOverrideMethod) {
+        throw new Error(
+          `${geofenceEvaluation.failureReason ?? 'Visit geo-presence check failed.'} Add an approved override method to continue.`,
+        );
+      }
+      if (!input.geofenceOverrideReason || input.geofenceOverrideReason.trim().length < 6) {
+        throw new Error('Override reason is required (minimum 6 characters) when geofence validation fails.');
+      }
+    }
+
+    await prisma.visit.update({
+      where: { id: visit.id },
+      data: {
+        status: VisitStatus.in_progress,
+        checkInAt: input.checkInAt,
+        checkInLat: input.checkInLatitude,
+        checkInLng: input.checkInLongitude,
+        checkInAccuracyM: input.checkInAccuracyMeters,
+      },
+    });
+
+    try {
+      await prisma.$executeRaw`
+        UPDATE visits
+        SET
+          geofence_passed = ${geofenceEvaluation.allowed},
+          geofence_override_method = ${isOverride ? input.geofenceOverrideMethod ?? null : null},
+          override_photo_media_id = ${isOverride ? input.geofenceOverrideMediaId ?? null : null}
+        WHERE id = ${visit.id}
+      `;
+    } catch {
+      // Best effort while rollout schema may differ across environments.
+    }
+
+    const scheduledAt = parseScheduledVisitDateTime({
+      scheduledDate: visit.scheduledDate,
+      scheduledTime: visit.scheduledTime,
+    });
+    await maybeCreateLateCheckInTask({
+      medplumPatientId: input.medplumPatientId,
+      visitId: visit.id,
+      scheduledAt,
+      checkedInAt: input.checkInAt,
+      hadEnRoute: Boolean(visit.enRouteAt),
+      changedBy,
+    });
+
+    await persistWorkflowStateTransition({
+      visit,
+      toState: 'checked_in',
+      changedBy,
+      reasonNote: isOverride
+        ? `${input.geofenceOverrideReason ?? ''} (${geofenceEvaluation.failureReason ?? 'geo override'})`
+        : null,
+      latitude: input.checkInLatitude,
+      longitude: input.checkInLongitude,
+      accuracyMeters: input.checkInAccuracyMeters,
+      isOverride,
+      overrideMethod: isOverride ? input.geofenceOverrideMethod ?? null : null,
+    });
+
+    await writeVisitWorkflowAudit({
+      visitId: visit.id,
+      changedBy,
+      changedFields: [
+        'status',
+        'state',
+        'checkInAt',
+        'checkInLat',
+        'checkInLng',
+        'checkInAccuracyM',
+        'geofencePassed',
+        'geofenceOverrideMethod',
+        'overridePhotoMediaId',
+      ],
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit checked in.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function checkOutVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = checkOutVisitSchema.parse(formDataToInput(formData));
+    const visit = await getWorkflowVisitOrThrow({
+      visitId: input.visitId,
+      medplumPatientId: input.medplumPatientId,
+    });
+
+    if (!visit.checkInAt) {
+      throw new Error('Visit must be checked in before check-out.');
+    }
+
+    if (isClosedVisitStatus(visit.status)) {
+      throw new Error('Visit cannot be checked out in its current status.');
+    }
+
+    const geofenceEvaluation = await evaluateVisitGeofence({
+      medplumPatientId: input.medplumPatientId,
+      role: staff.staffRole,
+      purpose: 'checkout',
+      latitude: input.checkOutLatitude,
+      longitude: input.checkOutLongitude,
+      accuracyMeters: input.checkOutAccuracyMeters,
+    });
+
+    if (!geofenceEvaluation.allowed) {
+      throw new Error(geofenceEvaluation.failureReason ?? 'Visit geo-presence check failed.');
+    }
+
+    await assertVisitHasClinicalEvidence({
+      medplumPatientId: input.medplumPatientId,
+      startedAt: visit.checkInAt,
+      endedAt: input.checkOutAt,
+    });
+
+    await prisma.visit.update({
+      where: { id: visit.id },
+      data: {
+        status: VisitStatus.completed,
+        checkOutAt: input.checkOutAt,
+        checkOutLat: input.checkOutLatitude,
+        checkOutLng: input.checkOutLongitude,
+      },
+    });
+
+    await persistWorkflowStateTransition({
+      visit,
+      toState: 'checked_out',
+      changedBy,
+      latitude: input.checkOutLatitude,
+      longitude: input.checkOutLongitude,
+      accuracyMeters: input.checkOutAccuracyMeters,
+    });
+
+    await maybeCreateCheckoutReviewTasks({
+      medplumPatientId: input.medplumPatientId,
+      visitId: visit.id,
+      checkInAt: visit.checkInAt,
+      checkOutAt: input.checkOutAt,
+      checkInLat: toNumber(visit.checkInLat),
+      checkInLng: toNumber(visit.checkInLng),
+      checkOutLat: input.checkOutLatitude,
+      checkOutLng: input.checkOutLongitude,
+      changedBy,
+    });
+
+    await writeVisitWorkflowAudit({
+      visitId: visit.id,
+      changedBy,
+      changedFields: ['status', 'state', 'checkOutAt', 'checkOutLat', 'checkOutLng'],
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit checked out and marked completed.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+async function applyVisitDisruptionTransition(params: {
+  medplumPatientId: string;
+  visitId: string;
+  toState: WorkflowStateValue;
+  nextStatus?: VisitStatus;
+  eventAt: Date;
+  disruptionCode: DisruptionCode;
+  disruptionNote?: string | null;
+  reassignedProviderId?: string | null;
+  nextScheduledDate?: Date | null;
+  nextScheduledTime?: string | null;
+  changedBy: string;
+}): Promise<void> {
+  const visit = await getWorkflowVisitOrThrow({
+    visitId: params.visitId,
+    medplumPatientId: params.medplumPatientId,
+  });
+
+  const updatePayload: {
+    status?: VisitStatus;
+    providerId?: string | null;
+    scheduledDate?: Date;
+    scheduledTime?: string;
+  } = {
+  };
+
+  if (params.nextStatus) {
+    updatePayload.status = params.nextStatus;
+  }
+
+  if (params.reassignedProviderId !== undefined) {
+    updatePayload.providerId = params.reassignedProviderId;
+  }
+
+  if (params.nextScheduledDate && params.nextScheduledTime) {
+    updatePayload.scheduledDate = params.nextScheduledDate;
+    updatePayload.scheduledTime = params.nextScheduledTime;
+  }
+
+  await prisma.visit.update({
+    where: { id: visit.id },
+    data: updatePayload,
+  });
+
+  try {
+    await prisma.$executeRaw`
+      UPDATE visits
+      SET primary_disruption_code = ${params.disruptionCode}
+      WHERE id = ${visit.id}
+    `;
+  } catch {
+    // Best effort while generated Prisma client lags schema rollout.
+  }
+
+  await applyDisruptionFinancials({
+    visit,
+    eventAt: params.eventAt,
+    disruptionCode: params.disruptionCode,
+  });
+
+  await persistWorkflowStateTransition({
+    visit,
+    toState: params.toState,
+    changedBy: params.changedBy,
+    reasonCode: params.disruptionCode,
+    reasonNote: params.disruptionNote ?? null,
+  });
+
+  await writeVisitWorkflowAudit({
+    visitId: visit.id,
+    changedBy: params.changedBy,
+    changedFields: ['status', 'state', 'primaryDisruptionCode', 'discountEgp', 'netPriceEgp', 'providerPayoutEgp'],
+  });
+}
+
+export async function cancelVisitByPatientAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = cancelVisitByPatientSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'cancelled_by_patient',
+      nextStatus: VisitStatus.cancelled,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit cancelled by patient.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function cancelVisitByMedOpsAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = cancelVisitByMedOpsSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'cancelled_by_med_ops',
+      nextStatus: VisitStatus.cancelled,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit cancelled by Med Ops.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function declineVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = declineVisitSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'declined_by_physio',
+      nextStatus: VisitStatus.cancelled,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit declined by clinician.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function reassignVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = reassignVisitSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'reassigned_to_other_physio',
+      nextStatus: VisitStatus.rescheduled,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      reassignedProviderId: input.reassignedProviderId ?? null,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit reassigned.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function markRefusedAtDoorAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = markRefusedAtDoorSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'refused_at_door',
+      nextStatus: VisitStatus.no_show,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit marked as refused at door.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function markPatientNotHomeAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = markPatientNotHomeSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'patient_not_home',
+      nextStatus: VisitStatus.no_show,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit marked as patient not home.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function divertVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = divertVisitSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'diverted_in_transit',
+      nextStatus: VisitStatus.rescheduled,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit diverted and queued for reschedule.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function interruptSessionAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = interruptSessionSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'session_interrupted',
+      nextStatus: VisitStatus.in_progress,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Session interruption logged.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function rescheduleInPlaceAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = rescheduleInPlaceSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'rescheduled_in_place',
+      nextStatus: VisitStatus.rescheduled,
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      nextScheduledDate: input.nextScheduledDate,
+      nextScheduledTime: input.nextScheduledTime,
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit rescheduled in place.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function disputeVisitAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = disputeVisitSchema.parse(formDataToInput(formData));
+
+    await applyVisitDisruptionTransition({
+      medplumPatientId: input.medplumPatientId,
+      visitId: input.visitId,
+      toState: 'disputed',
+      eventAt: input.eventAt,
+      disruptionCode: input.disruptionCode,
+      disruptionNote: input.disruptionNote,
+      changedBy,
+    });
+
+    await createPatientReviewTask({
+      medplumPatientId: input.medplumPatientId,
+      taskCode: 'ops-dispute-review',
+      marker: `[visit-dispute]:${input.visitId}`,
+      title: 'Visit dispute requires Med Ops review',
+      description: input.disruptionNote,
+      changedBy,
+      ownerReference: 'Group/med-ops',
+      ownerDisplay: staff.name ?? 'Medical Operations',
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Visit dispute logged and sent to Med Ops queue.' });
+    refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);
   }
@@ -482,14 +1872,20 @@ export async function recordVitalsAction(formData: FormData): Promise<void> {
 
 export async function createClinicalNoteDraftAction(formData: FormData): Promise<void> {
   try {
-    const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createClinicalNoteSchema.parse(formDataToInput(formData));
+
+    const isMedicalOpsCompat = staff.staffRole === 'medical_ops' || staff.staffRole === 'operator';
+    if (!isMedicalOpsCompat && !canSignClinical({ staffRole: staff.staffRole }, input.noteDiscipline)) {
+      throw new Error(`Your role cannot author ${input.noteDiscipline} clinical notes.`);
+    }
 
     const draft = await createClinicalNoteDraft({
       patientId: input.medplumPatientId,
       encounterId: input.encounterId ?? null,
       title: input.noteTitle ?? '',
       noteBody: input.noteBody,
+      discipline: input.noteDiscipline,
       authorReference: practitioner.reference,
       authorDisplay: practitioner.display,
     });
@@ -511,10 +1907,38 @@ export async function createClinicalNoteDraftAction(formData: FormData): Promise
 
 export async function signClinicalNoteAction(formData: FormData): Promise<void> {
   try {
-    const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = signClinicalNoteSchema.parse(formDataToInput(formData));
 
-    await signClinicalNote(
+    const staffLicense = await prisma.staff.findUnique({
+      where: { id: staff.staffId ?? '' },
+      select: {
+        role: true,
+        clinicalLicenseType: true,
+        clinicalLicenseNumber: true,
+        clinicalLicenseExpiry: true,
+      },
+    });
+
+    if (!staffLicense) {
+      throw new Error('Staff profile not found for note signing.');
+    }
+
+    if (
+      !canSignClinical(
+        {
+          staffRole: staffLicense.role,
+          clinicalLicenseType: staffLicense.clinicalLicenseType,
+          clinicalLicenseNumber: staffLicense.clinicalLicenseNumber,
+          clinicalLicenseExpiry: staffLicense.clinicalLicenseExpiry,
+        },
+        input.noteDiscipline,
+      )
+    ) {
+      throw new Error(`Your role/license cannot sign ${input.noteDiscipline} clinical notes.`);
+    }
+
+    const signed = await signClinicalNote(
       input.compositionId,
       {
         authorReference: practitioner.reference,
@@ -525,6 +1949,37 @@ export async function signClinicalNoteAction(formData: FormData): Promise<void> 
       },
     );
 
+    const noteText =
+      signed.extension?.find((entry) => entry.url === 'https://anees.health/fhir/StructureDefinition/clinical-note-text')
+        ?.valueString ?? '';
+    const coSignFlags = detectCoSignFlags(noteText);
+
+    if (coSignFlags.length > 0 && (staff.staffRole === 'nurse' || staff.staffRole === 'physiotherapist' || staff.staffRole === 'medical_ops' || staff.staffRole === 'operator')) {
+      const alreadyQueued = await hasOpenCoSignTaskForNote(input.medplumPatientId, input.compositionId);
+      if (!alreadyQueued) {
+        const doctorOwner = await resolveDoctorOwnerReference(input.medplumPatientId);
+        const dueDate = new Date(Date.now() + NOTE_COSIGN_SLA_HOURS * 60 * 60 * 1000);
+        const coSignTask = await createPatientTask({
+          patientId: input.medplumPatientId,
+          ownerReference: doctorOwner?.reference ?? null,
+          ownerDisplay: doctorOwner?.display ?? null,
+          taskCode: 'co-sign',
+          priority: 'urgent',
+          title: 'Clinical note co-sign required',
+          description: `[note:${input.compositionId}] Flagged categories: ${coSignFlags.join(', ')}`,
+          dueDate,
+        });
+
+        await writeMedplumAuditMirror({
+          tableName: 'MedplumCoSignTask',
+          recordId: coSignTask.id ?? `${input.medplumPatientId}:${Date.now()}`,
+          action: AuditAction.create,
+          changedFields: ['code', 'status', 'priority', 'description', 'for', 'owner', 'executionPeriod.end'],
+          changedBy,
+        });
+      }
+    }
+
     await writeMedplumAuditMirror({
       tableName: 'MedplumClinicalNote',
       recordId: input.compositionId,
@@ -534,6 +1989,324 @@ export async function signClinicalNoteAction(formData: FormData): Promise<void> 
     });
 
     await setAdminPatientFlash({ type: 'success', message: 'Note signed successfully.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function amendClinicalNoteAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = amendClinicalNoteSchema.parse(formDataToInput(formData));
+
+    const staffLicense = await prisma.staff.findUnique({
+      where: { id: staff.staffId ?? '' },
+      select: {
+        role: true,
+        clinicalLicenseType: true,
+        clinicalLicenseNumber: true,
+        clinicalLicenseExpiry: true,
+      },
+    });
+
+    if (!staffLicense) {
+      throw new Error('Staff profile not found for note amendment.');
+    }
+
+    if (
+      !canSignClinical(
+        {
+          staffRole: staffLicense.role,
+          clinicalLicenseType: staffLicense.clinicalLicenseType,
+          clinicalLicenseNumber: staffLicense.clinicalLicenseNumber,
+          clinicalLicenseExpiry: staffLicense.clinicalLicenseExpiry,
+        },
+        input.noteDiscipline,
+      )
+    ) {
+      throw new Error(`Your role/license cannot amend ${input.noteDiscipline} clinical notes.`);
+    }
+
+    const amendment = await createClinicalNoteDraft({
+      patientId: input.medplumPatientId,
+      title: input.amendmentTitle ?? `Amendment for note ${input.sourceCompositionId}`,
+      noteBody: input.amendmentBody,
+      discipline: input.noteDiscipline,
+      amendedFromCompositionId: input.sourceCompositionId,
+      authorReference: practitioner.reference,
+      authorDisplay: practitioner.display,
+    });
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumClinicalNote',
+      recordId: amendment.id ?? `${input.medplumPatientId}:${Date.now()}`,
+      action: AuditAction.create,
+      changedFields: ['status', 'date', 'author', 'extension.clinical-note-amends'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Note amendment draft created.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function requestRestrictedAccessAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = requestRestrictedAccessSchema.parse(formDataToInput(formData));
+
+    const cookieStore = await cookies();
+    const payload = {
+      patientId: input.medplumPatientId,
+      reason: input.restrictedAccessReason,
+      grantedAt: new Date().toISOString(),
+      requestedBy: staff.staffRole ?? 'unknown',
+    };
+
+    cookieStore.set(ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE, JSON.stringify(payload), {
+      path: '/admin',
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES * 60,
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'restricted_clinical_access',
+        recordId: input.medplumPatientId,
+        action: 'override',
+        changedFields: {
+          reason: input.restrictedAccessReason,
+          role: staff.staffRole,
+        },
+        changedBy,
+      },
+    });
+
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const weeklyOverrides = await prisma.auditLog.count({
+      where: {
+        tableName: 'restricted_clinical_access',
+        action: 'override',
+        changedBy,
+        changedAt: {
+          gte: weekAgo,
+        },
+      },
+    });
+
+    if (weeklyOverrides > RESTRICTED_OVERRIDE_WEEKLY_THRESHOLD) {
+      const complianceOwner = await resolveComplianceOwnerReference();
+      await createPatientReviewTask({
+        medplumPatientId: input.medplumPatientId,
+        taskCode: 'compliance-review',
+        marker: `${RESTRICTED_OVERRIDE_COMPLIANCE_MARKER}:${changedBy}`,
+        title: 'Restricted-access override threshold exceeded',
+        description: `Staff ${changedBy} exceeded ${RESTRICTED_OVERRIDE_WEEKLY_THRESHOLD} restricted override requests in the trailing 7 days.`,
+        changedBy,
+        ownerReference: complianceOwner?.reference ?? null,
+        ownerDisplay: complianceOwner?.display ?? null,
+      });
+    }
+
+    await setAdminPatientFlash({ type: 'success', message: 'Restricted-tier access granted for this session.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function requestBreakGlassAccessAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = requestBreakGlassAccessSchema.parse(formDataToInput(formData));
+
+    const cookieStore = await cookies();
+    const payload = {
+      patientId: input.medplumPatientId,
+      reason: input.breakGlassReason,
+      grantedAt: new Date().toISOString(),
+      requestedBy: staff.staffRole ?? 'unknown',
+      mode: 'break-glass',
+    };
+
+    cookieStore.set(ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE, JSON.stringify(payload), {
+      path: '/admin',
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES * 60,
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'restricted_clinical_access',
+        recordId: input.medplumPatientId,
+        action: 'override',
+        changedFields: {
+          reason: input.breakGlassReason,
+          role: staff.staffRole,
+          mode: 'break-glass',
+        },
+        changedBy,
+      },
+    });
+
+    const complianceOwner = await resolveComplianceOwnerReference();
+    const adminOwners = await resolveAdminOwnerReferences();
+    const alertRecipients = [
+      ...(complianceOwner ? [complianceOwner] : []),
+      ...adminOwners,
+    ];
+
+    for (const recipient of alertRecipients) {
+      await createPatientCommunication({
+        patientId: input.medplumPatientId,
+        category: 'escalation',
+        priority: 'stat',
+        message: `Break-the-glass invoked by ${staff.name ?? changedBy}. Reason: ${input.breakGlassReason}`,
+        senderReference: practitioner.reference,
+        senderDisplay: practitioner.display,
+        recipientReference: recipient.reference,
+        recipientDisplay: recipient.display ?? null,
+      });
+    }
+
+    await createPatientReviewTask({
+      medplumPatientId: input.medplumPatientId,
+      taskCode: 'compliance-review',
+      marker: `[break-glass]:${changedBy}`,
+      title: 'Break-glass access review required',
+      description: `Immediate review required for break-glass invocation by ${staff.name ?? changedBy}.`,
+      changedBy,
+      ownerReference: complianceOwner?.reference ?? null,
+      ownerDisplay: complianceOwner?.display ?? null,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Break-glass access granted and compliance/admin alerts were sent.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function createStandingOrderAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = createStandingOrderSchema.parse(formDataToInput(formData));
+
+    if (!['doctor', 'admin', 'superadmin', 'medical_ops', 'operator'].includes(staff.staffRole ?? 'viewer')) {
+      throw new Error('Only doctor/admin/medical-ops roles can create standing orders.');
+    }
+
+    const localPatient = await prisma.patient.findUnique({
+      where: { medplumPatientId: input.medplumPatientId },
+      select: { id: true },
+    });
+
+    if (!localPatient?.id) {
+      throw new Error('Local patient profile is missing.');
+    }
+
+    await prisma.standingOrder.create({
+      data: {
+        patientId: localPatient.id,
+        discipline: input.standingOrderDiscipline,
+        title: input.standingOrderTitle,
+        instructions: input.standingOrderInstructions,
+        validUntil: input.standingOrderValidUntil ?? null,
+        createdByStaffId: changedBy,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'standing_order',
+        recordId: localPatient.id,
+        action: 'create',
+        changedFields: {
+          discipline: input.standingOrderDiscipline,
+          title: input.standingOrderTitle,
+          validUntil: input.standingOrderValidUntil?.toISOString() ?? null,
+        },
+        changedBy,
+      },
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Standing order created.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function executeStandingOrderAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
+    const input = executeStandingOrderSchema.parse(formDataToInput(formData));
+
+    if (!['doctor', 'nurse', 'physiotherapist', 'medical_ops', 'operator', 'admin', 'superadmin'].includes(staff.staffRole ?? 'viewer')) {
+      throw new Error('Your role cannot execute standing orders.');
+    }
+
+    const [standingOrder, visit] = await Promise.all([
+      prisma.standingOrder.findFirst({
+        where: {
+          id: input.standingOrderId,
+          patient: {
+            medplumPatientId: input.medplumPatientId,
+          },
+          isActive: true,
+        },
+        select: {
+          id: true,
+          validUntil: true,
+        },
+      }),
+      getWorkflowVisitOrThrow({
+        visitId: input.executionVisitId,
+        medplumPatientId: input.medplumPatientId,
+      }),
+    ]);
+
+    if (!standingOrder?.id) {
+      throw new Error('Standing order not found or inactive.');
+    }
+
+    if (standingOrder.validUntil && standingOrder.validUntil.getTime() < input.executionRecordedAt.getTime()) {
+      throw new Error('Standing order is expired and cannot be executed.');
+    }
+
+    if (!visit.checkInAt || visit.checkOutAt) {
+      throw new Error('Standing orders can only be executed during an active checked-in visit.');
+    }
+
+    await prisma.standingOrderExecution.create({
+      data: {
+        standingOrderId: standingOrder.id,
+        visitId: visit.id,
+        executedByStaffId: changedBy,
+        executedAt: input.executionRecordedAt,
+        executionNote: input.executionNote ?? null,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'standing_order_execution',
+        recordId: standingOrder.id,
+        action: 'create',
+        changedFields: {
+          visitId: visit.id,
+          executedAt: input.executionRecordedAt.toISOString(),
+        },
+        changedBy,
+      },
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Standing order execution recorded.' });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);
@@ -899,12 +2672,32 @@ export async function createPhysioReportAction(formData: FormData): Promise<void
       encounterId: input.encounterId ?? null,
       performerReference: practitioner.reference,
       performerDisplay: practitioner.display,
+      sessionTemplate: input.sessionTemplate,
+      sessionNumberLabel: input.sessionNumberLabel ?? '',
+      subjectiveFunction: input.subjectiveFunction ?? '',
+      objectiveSummary: input.objectiveSummary ?? '',
+      postOpKneeFlexionDeg: input.postOpKneeFlexionDeg,
+      postOpKneeExtensionDeg: input.postOpKneeExtensionDeg,
+      postOpKneeEffusionGrade: input.postOpKneeEffusionGrade,
+      postOpKneeGaitPhase: input.postOpKneeGaitPhase,
+      strokeAshworthScore: input.strokeAshworthScore,
+      strokeBergScore: input.strokeBergScore,
+      strokeFunctionalReachCm: input.strokeFunctionalReachCm,
+      lowBackSlrLeftDeg: input.lowBackSlrLeftDeg,
+      lowBackSlrRightDeg: input.lowBackSlrRightDeg,
+      lowBackSchoberCm: input.lowBackSchoberCm,
+      lowBackPainWithMovement: input.lowBackPainWithMovement,
+      geriatricTugSeconds: input.geriatricTugSeconds,
+      geriatricTinettiScore: input.geriatricTinettiScore,
+      geriatricFallRiskClass: input.geriatricFallRiskClass,
       noteBody: input.noteBody,
       interventions: input.interventions ?? '',
       painBefore: input.painBefore,
       painAfter: input.painAfter,
       responseSummary: input.responseSummary ?? '',
       homePlan: input.homePlan ?? '',
+      nextSessionFocus: input.nextSessionFocus ?? '',
+      dischargeReadiness: input.dischargeReadiness,
     });
 
     await writeMedplumAuditMirror({
@@ -912,6 +2705,32 @@ export async function createPhysioReportAction(formData: FormData): Promise<void
       recordId: report.id ?? `${input.medplumPatientId}:${Date.now()}`,
       action: AuditAction.create,
       changedFields: ['code', 'subject', 'encounter', 'performer', 'component', 'note'],
+      changedBy,
+    });
+
+    if (input.dischargeReadiness === 'ready' || input.dischargeReadiness === 'one_to_two_sessions') {
+      await createPatientReviewTask({
+        medplumPatientId: input.medplumPatientId,
+        taskCode: 'care-plan-review',
+        marker: `${PHYSIO_DISCHARGE_REVIEW_MARKER}:${input.physioVisitId ?? report.id ?? Date.now()}`,
+        title:
+          input.dischargeReadiness === 'ready'
+            ? 'Physio discharge summary review'
+            : 'Physio discharge readiness follow-up',
+        description:
+          input.dischargeReadiness === 'ready'
+            ? `Physiotherapist marked patient as ready for discharge. Home plan: ${input.homePlan ?? 'not provided'}`
+            : `Physiotherapist estimated discharge in 1-2 sessions. Next focus: ${input.nextSessionFocus ?? 'not provided'}`,
+        changedBy,
+      });
+    }
+
+    await maybeCreatePhysioRedFlagEscalation({
+      medplumPatientId: input.medplumPatientId,
+      markerId: input.physioVisitId ?? report.id ?? Date.now().toString(),
+      noteBody: input.noteBody,
+      subjectiveFunction: input.subjectiveFunction,
+      responseSummary: input.responseSummary,
       changedBy,
     });
 
@@ -925,13 +2744,18 @@ export async function createPhysioReportAction(formData: FormData): Promise<void
 export async function createConditionAction(formData: FormData): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
-    if (!canWriteClinicalCondition(staff.staffRole ?? null)) {
-      throw new Error('Only doctors and admins can add conditions.');
-    }
     const input = createConditionSchema.parse(formDataToInput(formData));
+
+    if (!canWriteClinicalCondition(staff.staffRole ?? null, input.conditionCategory)) {
+      if (input.conditionCategory === 'physical_therapy') {
+        throw new Error('PT diagnoses can be authored by physiotherapists, admins, or superadmins only.');
+      }
+      throw new Error('Medical diagnoses can be authored by doctors, admins, or superadmins only.');
+    }
 
     const condition = await createPatientCondition({
       patientId: input.medplumPatientId,
+      category: input.conditionCategory,
       label: input.conditionLabel,
       code: input.conditionCode ?? null,
       onsetDate: input.conditionOnsetDate ?? null,
@@ -1154,11 +2978,22 @@ export async function createDocumentAction(formData: FormData): Promise<void> {
       changedBy,
     });
 
-    await setAdminPatientFlash({ type: 'success', message: 'Document uploaded successfully. It is now available in the list below for download.' });
+    await setAdminPatientFlash({
+      type: 'success',
+      message: 'Document uploaded successfully.',
+    });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);
   }
+}
+
+export async function requestDocumentDeleteApprovalAction(formData: FormData): Promise<void> {
+  await failAction(formData, new Error('Delete approval tokens are no longer used. Delete documents directly.'));
+}
+
+export async function approveDestructiveTokenAction(formData: FormData): Promise<void> {
+  await failAction(formData, new Error('Delete approval tokens are no longer used. Delete documents directly.'));
 }
 
 export async function deleteDocumentAction(formData: FormData): Promise<void> {
@@ -1583,7 +3418,7 @@ export async function updatePatientGeoPolicyAction(formData: FormData): Promise<
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     if (!canEditDemographics(staff.staffRole ?? null)) {
-      throw new Error('Only admin/operator roles can update geofence policy.');
+      throw new Error('Only admin/medical-ops roles can update geofence policy.');
     }
 
     const input = updatePatientGeoPolicySchema.parse(formDataToInput(formData));
@@ -1594,6 +3429,16 @@ export async function updatePatientGeoPolicyAction(formData: FormData): Promise<
         handoffGeofenceRadiusMeters: input.handoffGeofenceRadiusMeters ?? null,
         temporarilyAwayUntil: input.temporarilyAwayUntil ?? null,
         temporarilyAwayNote: input.temporarilyAwayNote ?? null,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'patients',
+        recordId: input.medplumPatientId,
+        action: AuditAction.update,
+        changedFields: ['handoffGeofenceRadiusMeters', 'temporarilyAwayUntil', 'temporarilyAwayNote'],
+        changedBy,
       },
     });
 
@@ -1620,17 +3465,21 @@ export async function runEscalationSlaSweepAction(formData: FormData): Promise<v
       throw new Error('Patient id is required.');
     }
 
-    const breachedCount = await runEscalationSlaSweepForPatient(medplumPatientId, {
+    const sender = {
       reference: practitioner.reference,
       display: practitioner.display,
-    });
+    };
+
+    const escalationBreachedCount = await runEscalationSlaSweepForPatient(medplumPatientId, sender);
+    const coSignBreachedCount = await runCoSignSlaSweepForPatient(medplumPatientId, sender);
+    const totalBreachedCount = escalationBreachedCount + coSignBreachedCount;
 
     await setAdminPatientFlash({
       type: 'success',
       message:
-        breachedCount > 0
-          ? `Escalation SLA sweep completed. ${breachedCount} escalation(s) exceeded acknowledgment SLA.`
-          : 'Escalation SLA sweep completed. No breached escalations were found.',
+        totalBreachedCount > 0
+          ? `SLA sweep completed. Escalation breaches: ${escalationBreachedCount}. Co-sign breaches: ${coSignBreachedCount}.`
+          : 'SLA sweep completed. No breached escalation or co-sign tasks were found.',
     });
     refreshClinicalPaths(medplumPatientId);
   } catch (error) {
@@ -1699,6 +3548,23 @@ export async function updatePatientDemographicsAction(formData: FormData): Promi
         emergencyContactName: input.emergencyContactName ?? null,
         emergencyContactPhone: input.emergencyContactPhone ?? null,
         emergencyContactRelation: input.emergencyContactRelation ?? null,
+      },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'patients',
+        recordId: input.medplumPatientId,
+        action: AuditAction.update,
+        changedFields: [
+          'addressDetail',
+          'landmark',
+          'addressMapUrl',
+          'emergencyContactName',
+          'emergencyContactPhone',
+          'emergencyContactRelation',
+        ],
+        changedBy,
       },
     });
 

@@ -160,6 +160,7 @@ export async function POST(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
       });
 
+      const patientAction = existingPatient ? 'update' : 'create';
       const patient = existingPatient
         ? await tx.patient.update({
             where: { id: existingPatient.id },
@@ -194,6 +195,19 @@ export async function POST(request: NextRequest) {
             },
           });
 
+      await tx.auditLog.create({
+        data: {
+          tableName: 'patients',
+          recordId: patient.id,
+          action: patientAction,
+          changedFields: {
+            source: 'api.booking.create',
+            fields: ['fullName', 'status', 'phone'],
+          },
+          changedBy: `system_ip:${ip}`,
+        },
+      });
+
       // Re-claim promocode atomically to defend against races on usage limits
       if (promoId) {
         const claimed = await claimPromocodeWithinTx(tx, promoId);
@@ -202,7 +216,6 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // TODO(audit): wire when auth lands — emit AuditLog row for booking create
       const booking = await tx.onlineBooking.create({
         data: {
           bookingRef,
@@ -224,6 +237,20 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      await tx.auditLog.create({
+        data: {
+          tableName: 'online_bookings',
+          recordId: booking.id,
+          action: 'create',
+          changedFields: {
+            source: 'api.booking.create',
+            fields: ['status', 'amountEgp', 'discountEgp', 'promocodeCode'],
+            bookingRef: booking.bookingRef,
+          },
+          changedBy: `system_ip:${ip}`,
+        },
+      });
+
       return { booking, patient };
     });
 
@@ -240,10 +267,22 @@ export async function POST(request: NextRequest) {
 
       // Persist the Medplum id so future syncs read-by-id instead of searching.
       if (synced.id && synced.id !== patient.medplumPatientId) {
-        // TODO(audit): wire when auth lands — emit AuditLog row for medplum link
         await prisma.patient.update({
           where: { id: patient.id },
           data: { medplumPatientId: synced.id },
+        });
+
+        await prisma.auditLog.create({
+          data: {
+            tableName: 'patients',
+            recordId: patient.id,
+            action: 'update',
+            changedFields: {
+              source: 'api.booking.create.medplum-link',
+              fields: ['medplumPatientId'],
+            },
+            changedBy: `system_ip:${ip}`,
+          },
         });
       }
     } catch (error) {

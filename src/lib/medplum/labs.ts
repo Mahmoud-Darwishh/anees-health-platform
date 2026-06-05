@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { getMedplumClient } from './client';
+import { isRestrictedTierClinicalCoding, isRestrictedTierSecurityCoding } from './constants';
 
 type FhirReference = {
   reference?: string;
@@ -16,6 +17,9 @@ type FhirCoding = {
 export type ServiceRequestResource = {
   resourceType: 'ServiceRequest';
   id?: string;
+  meta?: {
+    security?: FhirCoding[];
+  };
   status: 'draft' | 'active' | 'on-hold' | 'revoked' | 'completed' | 'entered-in-error' | 'unknown';
   intent: 'proposal' | 'plan' | 'directive' | 'order' | 'original-order' | 'reflex-order' | 'filler-order' | 'instance-order' | 'option';
   category?: Array<{ coding?: FhirCoding[] }>;
@@ -31,6 +35,9 @@ export type ServiceRequestResource = {
 export type DiagnosticReportResource = {
   resourceType: 'DiagnosticReport';
   id?: string;
+  meta?: {
+    security?: FhirCoding[];
+  };
   status: 'registered' | 'partial' | 'preliminary' | 'final' | 'amended' | 'corrected' | 'appended' | 'cancelled' | 'entered-in-error' | 'unknown';
   category?: Array<{ coding?: FhirCoding[] }>;
   code?: { coding?: FhirCoding[]; text?: string };
@@ -53,6 +60,7 @@ export type LabOrderSummary = {
   authoredOn?: string;
   occurrence?: string;
   note?: string;
+  restrictedTier: boolean;
 };
 
 export type LabResultSummary = {
@@ -64,6 +72,7 @@ export type LabResultSummary = {
   issued?: string;
   conclusion?: string;
   performer?: string;
+  restrictedTier: boolean;
 };
 
 export type CreateLabOrderInput = {
@@ -126,15 +135,27 @@ export async function listPatientLabOrders(patientId: string, count = 20): Promi
 
   return resources
     .filter((resource) => !!resource.id)
-    .map((resource) => ({
-      id: resource.id as string,
-      title: firstCode(resource.code),
-      status: resource.status,
-      category: firstCategory(resource.category),
-      authoredOn: resource.authoredOn,
-      occurrence: resource.occurrenceDateTime ?? resource.occurrencePeriod?.start,
-      note: resource.note?.[0]?.text,
-    }));
+    .map((resource) => {
+      const securityCoding = resource.meta?.security ?? [];
+      const categoryCoding = resource.category?.flatMap((item) => item.coding ?? []) ?? [];
+      const codeCoding = resource.code?.coding ?? [];
+      const restrictedTier = [
+        ...securityCoding.map((coding) => isRestrictedTierSecurityCoding(coding)),
+        ...categoryCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+        ...codeCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+      ].some(Boolean);
+
+      return {
+        id: resource.id as string,
+        title: firstCode(resource.code),
+        status: resource.status,
+        category: firstCategory(resource.category),
+        authoredOn: resource.authoredOn,
+        occurrence: resource.occurrenceDateTime ?? resource.occurrencePeriod?.start,
+        note: resource.note?.[0]?.text,
+        restrictedTier,
+      };
+    });
 }
 
 export async function listPatientDiagnosticReports(patientId: string, count = 20): Promise<LabResultSummary[]> {
@@ -148,16 +169,30 @@ export async function listPatientDiagnosticReports(patientId: string, count = 20
 
   return resources
     .filter((resource) => !!resource.id)
-    .map((resource) => ({
-      id: resource.id as string,
-      title: firstCode(resource.code),
-      status: resource.status,
-      category: firstCategory(resource.category),
-      effective: resource.effectiveDateTime,
-      issued: resource.issued,
-      conclusion: resource.conclusion,
-      performer: resource.performer?.[0]?.display ?? resource.performer?.[0]?.reference,
-    }));
+    .map((resource) => {
+      const securityCoding = resource.meta?.security ?? [];
+      const categoryCoding = resource.category?.flatMap((item) => item.coding ?? []) ?? [];
+      const codeCoding = resource.code?.coding ?? [];
+      const conclusionCoding = resource.conclusionCode?.flatMap((item) => item.coding ?? []) ?? [];
+      const restrictedTier = [
+        ...securityCoding.map((coding) => isRestrictedTierSecurityCoding(coding)),
+        ...categoryCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+        ...codeCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+        ...conclusionCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+      ].some(Boolean);
+
+      return {
+        id: resource.id as string,
+        title: firstCode(resource.code),
+        status: resource.status,
+        category: firstCategory(resource.category),
+        effective: resource.effectiveDateTime,
+        issued: resource.issued,
+        conclusion: resource.conclusion,
+        performer: resource.performer?.[0]?.display ?? resource.performer?.[0]?.reference,
+        restrictedTier,
+      };
+    });
 }
 
 export async function createPatientLabOrder(input: CreateLabOrderInput): Promise<ServiceRequestResource> {

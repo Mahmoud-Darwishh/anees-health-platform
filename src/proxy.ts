@@ -45,6 +45,16 @@ export default auth((req: NextAuthRequest) => {
     return NextResponse.next();
   }
 
+  // ── Clinician workspace (staff only, no locale prefix) ─────────────────
+  if (pathname.startsWith('/clinician')) {
+    if (!session?.user?.staffId) {
+      const loginUrl = new URL(`/${DEFAULT_LOCALE}/auth/login`, req.url);
+      loginUrl.searchParams.set('callbackUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
   // ── Public locale routes ─────────────────────────────────────────────────
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return intlMiddleware(req as any);

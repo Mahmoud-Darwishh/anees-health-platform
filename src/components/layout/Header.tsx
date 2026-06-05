@@ -21,6 +21,20 @@ const Header = () => {
   const userMenuRef = useRef<HTMLLIElement>(null);
   const toggleSearch = () => setSearchField((v) => !v);
 
+  const auditedSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+      });
+    } catch {
+      // Best-effort only; auth sign-out should proceed even if audit write fails.
+    }
+
+    await signOut({ callbackUrl: `/${locale}` });
+  };
+
   const [headerClass, setHeaderClass] = useState(
     "header header-custom header-fixed inner-header relative"
   );
@@ -303,7 +317,7 @@ const Header = () => {
                           <button
                             type="button"
                             className="dropdown-item text-danger"
-                            onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: `/${locale}` }); }}
+                            onClick={() => { setUserMenuOpen(false); void auditedSignOut(); }}
                           >
                             <LucideIcon iconClass="fa-solid fa-right-from-bracket me-2" />{t('auth.signout')}
                           </button>
@@ -458,7 +472,7 @@ const Header = () => {
                   <button
                     type="button"
                     className="mobile-drawer__signout"
-                    onClick={() => { onHandleCloseMenu(); signOut({ callbackUrl: `/${locale}` }); }}
+                    onClick={() => { onHandleCloseMenu(); void auditedSignOut(); }}
                   >
                     <LucideIcon iconClass="fa-solid fa-right-from-bracket" />
                     <span>{t('auth.signout')}</span>

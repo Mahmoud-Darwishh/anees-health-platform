@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { auth } from '@/auth';
-import type { StaffRole } from '@prisma/client';
+import type { LicenseType, StaffRole } from '@prisma/client';
 
 export type SessionUser = {
   id: string;
@@ -14,10 +14,23 @@ export type SessionUser = {
   phone?: string | null;
 };
 
+export type ClinicalDiscipline = 'nursing' | 'physiotherapy' | 'medical';
+
+export type StaffLicenseSnapshot = {
+  staffRole?: StaffRole | null;
+  clinicalLicenseType?: LicenseType | null;
+  clinicalLicenseNumber?: string | null;
+  clinicalLicenseExpiry?: Date | string | null;
+};
+
+const MEDICAL_OPS_COMPAT_ROLES: StaffRole[] = ['medical_ops', 'operator'];
+
 /** Staff roles allowed to read clinical/admin data. */
 export const CLINICAL_ROLES: StaffRole[] = [
   'superadmin',
   'admin',
+  'finance',
+  'medical_ops',
   'operator',
   'doctor',
   'physiotherapist',
@@ -28,6 +41,7 @@ export const CLINICAL_ROLES: StaffRole[] = [
 export const CLINICAL_WRITE_ROLES: StaffRole[] = [
   'superadmin',
   'admin',
+  'finance',
   'doctor',
   'physiotherapist',
   'nurse',
@@ -38,6 +52,7 @@ export const CLINICAL_WRITE_ROLES: StaffRole[] = [
  * Admin and superadmin are intentionally excluded.
  */
 export const CASE_SCOPED_CLINICAL_READ_ROLES: StaffRole[] = [
+  'medical_ops',
   'operator',
   'doctor',
   'physiotherapist',
@@ -46,6 +61,93 @@ export const CASE_SCOPED_CLINICAL_READ_ROLES: StaffRole[] = [
 
 export function isCaseScopedClinicalRole(role?: StaffRole | null): boolean {
   return !!role && CASE_SCOPED_CLINICAL_READ_ROLES.includes(role);
+}
+
+export function isLicensedMedOps(staff: StaffLicenseSnapshot, at: Date = new Date()): boolean {
+  if (!staff.staffRole || !MEDICAL_OPS_COMPAT_ROLES.includes(staff.staffRole)) {
+    return false;
+  }
+
+  if (!staff.clinicalLicenseType || staff.clinicalLicenseType === 'none') {
+    return false;
+  }
+
+  if (!staff.clinicalLicenseNumber?.trim()) {
+    return false;
+  }
+
+  if (!staff.clinicalLicenseExpiry) {
+    return false;
+  }
+
+  const expiry = new Date(staff.clinicalLicenseExpiry);
+  if (Number.isNaN(expiry.getTime())) {
+    return false;
+  }
+
+  return expiry.getTime() >= at.getTime();
+}
+
+export function canSignClinical(
+  staff: StaffLicenseSnapshot,
+  discipline: ClinicalDiscipline,
+  at: Date = new Date(),
+): boolean {
+  const role = staff.staffRole;
+  if (!role) {
+    return false;
+  }
+
+  if (role === 'superadmin' || role === 'admin') {
+    return true;
+  }
+
+  if (role === 'finance') {
+    return true;
+  }
+
+  if (role === 'doctor') {
+    return discipline === 'medical';
+  }
+
+  if (role === 'nurse') {
+    return discipline === 'nursing';
+  }
+
+  if (role === 'physiotherapist') {
+    return discipline === 'physiotherapy';
+  }
+
+  if (!isLicensedMedOps(staff, at)) {
+    return false;
+  }
+
+  return (
+    (discipline === 'medical' && staff.clinicalLicenseType === 'medical_syndicate') ||
+    (discipline === 'nursing' && staff.clinicalLicenseType === 'nursing_syndicate') ||
+    (discipline === 'physiotherapy' && staff.clinicalLicenseType === 'physiotherapy_syndicate')
+  );
+}
+
+export function isRestrictedTierEligibleRole(role?: StaffRole | null): boolean {
+  if (!role) {
+    return false;
+  }
+
+  return [
+    'superadmin',
+    'admin',
+    'compliance_officer',
+    'medical_ops',
+    'operator',
+    'doctor',
+    'physiotherapist',
+    'nurse',
+  ].includes(role);
+}
+
+export async function isRestrictedTierEligible(user: SessionUser | null, _patientId: string): Promise<boolean> {
+  return isStaff(user) && isRestrictedTierEligibleRole(user.staffRole ?? null);
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {

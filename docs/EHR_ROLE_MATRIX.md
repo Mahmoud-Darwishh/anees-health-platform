@@ -2,8 +2,10 @@
 
 **Status:** Draft v1 — authoritative reference for who sees what, who can write what, how clinical workflows behave, and how field operations work.
 **Owner:** Founder + CTO.
-**Last reviewed:** 2026-06-04.
-**Companion docs:** [`CTO_STRATEGY.md`](./CTO_STRATEGY.md) (long-term architecture), [`EHR_NOW.md`](./EHR_NOW.md) (active sprint).
+**Last reviewed:** 2026-06-05.
+**Companion docs:** [`CTO_STRATEGY.md`](./CTO_STRATEGY.md) (long-term architecture), [`EHR_NOW.md`](./EHR_NOW.md) (active sprint), [`HIPAA_COMPLIANCE.md`](./HIPAA_COMPLIANCE.md) (control mapping), [`SECURITY_ARCHITECTURE.md`](./SECURITY_ARCHITECTURE.md) (defense-in-depth), [`FHIR_CATALOG.md`](./FHIR_CATALOG.md) (resource catalog), [`EHR_PHYSIO_SPEC.md`](./EHR_PHYSIO_SPEC.md) (physio workspace).
+
+> **Landed since last review (2026-06-04 → 2026-06-05):** New StaffRole values `medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin` are now in the schema. License gating via `Staff.licenseType/Number/Expiry` + `PhysioProfile`. Visit state machine (22 states + 16 disruption codes + `VisitStateTransition`). Break-glass governance via `DestructiveApprovalToken`. Cloudflare R2 + malware scanning for medical files. Login + logout audit live. Multi-tenancy `tenantId` columns on core tables. Clinician workspace at `/clinician/*`.
 
 > This document is the **single source of truth** for the EHR's business logic. When code conflicts with this doc, fix the code. When reality conflicts with this doc, update the doc.
 
@@ -571,7 +573,7 @@ Don't build the partner UI yet. Just make sure we can backfill `tenantId='platfo
 
 | Area | What's there |
 |---|---|
-| Roles enum | `superadmin, admin, operator, doctor, physiotherapist, nurse, finance, viewer` in `prisma/schema.prisma:115` |
+| Roles enum | `superadmin, admin, medical_ops, operator, doctor, physiotherapist, nurse, insurance_coordinator, compliance_officer, hospital_partner_admin, finance, viewer` in `prisma/schema.prisma` (all 12 final roles landed Jun 2026; legacy `operator` + `finance` kept for back-compat) |
 | RBAC helpers | `src/lib/auth/rbac.ts` — `getStaffUser`, `CLINICAL_ROLES`, `CASE_SCOPED_CLINICAL_READ_ROLES`, `staffHasRole` |
 | Patient model | Demographics, GPS (`gpsLatitude`/`gpsLongitude`), `handoffGeofenceRadiusMeters`, `temporarilyAwayUntil`, DNR, insurance fields, caregiver fields, soft-delete |
 | Visit model | Status enum, scheduled date/time, provider link, area, type, pricing |
@@ -594,11 +596,23 @@ Don't build the partner UI yet. Just make sure we can backfill `tenantId='platfo
 
 ### 🟡 Partially in place
 
-- Audit on writes is mirrored from Medplum; **read events + login events + export events not yet logged**
-- Zod validation in EHR schemas folder, not on every API route
-- Allergies module exists in Medplum but no banner UI yet
-- `Patient.handoffGeofenceRadiusMeters` exists but check-in/out flow doesn't yet enforce it
-- One geo-aware action already exists (nursing handoff) — needs generalization to visit check-in/out
+- **Login + logout events ARE now logged** (`writeLoginAudit` in `src/auth.ts`; `/api/auth/logout-audit`). Read events + export events not yet logged.
+- Operational Postgres-only mutations (Invoice, ProviderPayout, Promocode redemption, demographics admin edits) — `AuditLog` coverage incomplete.
+- Zod validation in EHR schemas folder, not on every API route.
+- Allergies module exists in Medplum but no banner UI yet.
+- `Patient.handoffGeofenceRadiusMeters` exists. Visit-state machine + `VisitLocationPing` now live; check-in/out flow uses geofence as advisory, not blocking.
+- Break-glass workflow — `DestructiveApprovalToken` schema landed; approval UI is partial in `/admin/compliance`.
+- Multi-tenancy `tenantId` columns landed (Phase 1A); query-level enforcement is per-call (no row-level security yet).
+
+### 🆕 Landed since last review
+
+- **Clinician workspace** at `/clinician/*` (physio pilot) — today, patients, session, tasks, earnings, profile.
+- **Cloudflare R2** as medical-file backend; **malware scanning** background job at `/api/internal/ehr/documents/scan`.
+- **Insurance + claims schema** (`InsurerProfile`, `Coverage`, `PriorAuth`, `Claim`, `ClaimLineItem`) + `/admin/insurance` dashboard skeleton.
+- **`ControlledSubstanceLedger`** for EDA-aligned medication audit.
+- **FHIR Goal round-trip** — `src/lib/medplum/goals.ts` + `PatientGoal.fhirGoalId`.
+- **Standing orders** — `StandingOrder` + `StandingOrderExecution`.
+- **Admin nav policy** — `src/lib/auth/admin-nav-policy.ts` is the single source of truth for role-based visibility.
 
 ### ❌ Missing entirely
 
@@ -610,11 +624,14 @@ Listed in § 17 below.
 
 | Item | Reason |
 |---|---|
-| `StaffRole.finance` | Merged into `admin` |
-| `StaffRole.operator` | Rename → `medical_ops` to reflect actual scope |
-| `ENABLE_ADMIN_DASHBOARD` env flag | Legacy dev-only; auth is now real gating |
-| `STORAGE_PROVIDER` env flag + `src/lib/storage/` placeholder | Medplum manages Binary storage; dead code |
-| `STORAGE_LOCAL_SIGNING_SECRET`, `STORAGE_LOCAL_ROOT` env vars | Same as above |
+| `StaffRole.finance` | Merge into `admin` — still in enum for back-compat, no new assignments |
+| `StaffRole.operator` | Rename → `medical_ops` — both kept for back-compat; new staff use `medical_ops` |
+| `ENABLE_ADMIN_DASHBOARD` env flag | Legacy dev-only; auth is now real gating. Safe to remove. |
+| `STORAGE_PROVIDER` env flag | Legacy storage toggle; R2 is the sole backend. Safe to remove. |
+| `STORAGE_LOCAL_SIGNING_SECRET`, `STORAGE_LOCAL_ROOT` env vars | Replaced by R2 + signed URLs (`src/lib/storage/r2-medical.ts`). Safe to remove. |
+| `src/lib/storage/file-storage.ts` | ✅ Already deleted (Jun 2026). |
+| `src/app/caregiver/*` | ✅ Already deleted — caregivers use `/[locale]/portal` via FHIR `Consent`. |
+| HEP models (`Exercise`, `PatientHEP`, etc.) | ✅ Already dropped from schema (Jun 2026). |
 | `src/app/caregiver/*` scaffolding folders | Already deleted; CLAUDE.md mention is stale and should be updated |
 | Allergies as a dedicated tab in admin patient detail | Replace with always-visible banner |
 | `Coordination` tab in admin patient detail | Merge into `Tasks` |

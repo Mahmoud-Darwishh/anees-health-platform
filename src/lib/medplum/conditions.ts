@@ -1,7 +1,11 @@
 import 'server-only';
 
 import { getMedplumClient } from './client';
-import { MEDPLUM_CODE_SYSTEMS } from './constants';
+import {
+  MEDPLUM_CODE_SYSTEMS,
+  isRestrictedTierClinicalCoding,
+  isRestrictedTierSecurityCoding,
+} from './constants';
 
 type FhirReference = {
   reference?: string;
@@ -17,7 +21,11 @@ type FhirCoding = {
 export type ConditionResource = {
   resourceType: 'Condition';
   id?: string;
-  meta?: { versionId?: string; lastUpdated?: string };
+  meta?: {
+    versionId?: string;
+    lastUpdated?: string;
+    security?: FhirCoding[];
+  };
   clinicalStatus?: { coding?: FhirCoding[] };
   verificationStatus?: { coding?: FhirCoding[] };
   category?: Array<{ coding?: FhirCoding[] }>;
@@ -38,10 +46,12 @@ export type ConditionSummary = {
   onset?: string;
   recordedDate?: string;
   note?: string;
+  restrictedTier: boolean;
 };
 
 export type CreateConditionInput = {
   patientId: string;
+  category?: 'medical' | 'physical_therapy';
   label: string;
   code?: string | null;
   onsetDate?: Date | null;
@@ -53,6 +63,15 @@ export type CreateConditionInput = {
 function normalizeCondition(resource: ConditionResource): ConditionSummary | null {
   if (!resource.id) return null;
 
+  const securityCoding = resource.meta?.security ?? [];
+  const categoryCoding = resource.category?.flatMap((item) => item.coding ?? []) ?? [];
+  const codeCoding = resource.code?.coding ?? [];
+  const restrictedTier = [
+    ...securityCoding.map((coding) => isRestrictedTierSecurityCoding(coding)),
+    ...categoryCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+    ...codeCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+  ].some(Boolean);
+
   return {
     id: resource.id,
     label: resource.code?.text ?? resource.code?.coding?.[0]?.display ?? resource.code?.coding?.[0]?.code ?? 'Problem',
@@ -62,6 +81,7 @@ function normalizeCondition(resource: ConditionResource): ConditionSummary | nul
     onset: resource.onsetDateTime,
     recordedDate: resource.recordedDate,
     note: resource.note?.[0]?.text,
+    restrictedTier,
   };
 }
 
@@ -79,6 +99,20 @@ export async function listPatientConditions(patientId: string, count = 50): Prom
 
 export async function createPatientCondition(input: CreateConditionInput): Promise<ConditionResource> {
   const medplum = await getMedplumClient();
+  const category = input.category ?? 'medical';
+
+  const categoryCoding: FhirCoding =
+    category === 'physical_therapy'
+      ? {
+          system: MEDPLUM_CODE_SYSTEMS.reportType,
+          code: 'physical-therapy',
+          display: 'Physical Therapy',
+        }
+      : {
+          system: 'http://terminology.hl7.org/CodeSystem/condition-category',
+          code: 'problem-list-item',
+          display: 'Problem List Item',
+        };
 
   return (await medplum.createResource({
     resourceType: 'Condition',
@@ -88,7 +122,7 @@ export async function createPatientCondition(input: CreateConditionInput): Promi
     verificationStatus: {
       coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status', code: 'confirmed', display: 'Confirmed' }],
     },
-    category: [{ coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-category', code: 'problem-list-item', display: 'Problem List Item' }] }],
+    category: [{ coding: [categoryCoding] }],
     code: {
       coding: input.code
         ? [{ system: MEDPLUM_CODE_SYSTEMS.icd10, code: input.code, display: input.label }]

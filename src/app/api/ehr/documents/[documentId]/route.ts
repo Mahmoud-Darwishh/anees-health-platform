@@ -1,11 +1,12 @@
+import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { CLINICAL_ROLES, getSessionUser, isCaseScopedClinicalRole, staffHasRole } from '@/lib/auth/rbac';
 import { getPatientDocumentBinary } from '@/lib/medplum/documents';
-import { getMedplumClient } from '@/lib/medplum/client';
-import { getMedplumConfig } from '@/lib/medplum/config';
+import { getPrivateMedicalObject } from '@/lib/storage/r2-medical';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
 import { getOwnPatientRecord } from '@/lib/portal/patient-record';
+import { prisma } from '@/lib/db/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,39 @@ type RouteContext = {
 };
 
 type AuthenticatedUser = NonNullable<Awaited<ReturnType<typeof getSessionUser>>>;
+
+async function writeDocumentAudit(params: {
+  action: 'export' | 'access_denied';
+  documentId: string;
+  patientMedplumId?: string | null;
+  user: AuthenticatedUser;
+  reason?: string;
+  expectedChecksumSha256?: string | null;
+  actualChecksumSha256?: string | null;
+}) {
+  try {
+    const actorId = params.user.staffId ?? params.user.patientId ?? params.user.id;
+
+    await prisma.auditLog.create({
+      data: {
+        tableName: 'document_reference',
+        recordId: params.documentId,
+        action: params.action,
+        changedFields: {
+          patientMedplumId: params.patientMedplumId ?? null,
+          actorRole: params.user.role,
+          staffRole: params.user.staffRole ?? null,
+          reason: params.reason ?? null,
+          expectedChecksumSha256: params.expectedChecksumSha256 ?? null,
+          actualChecksumSha256: params.actualChecksumSha256 ?? null,
+        },
+        changedBy: actorId,
+      },
+    });
+  } catch {
+    // Best-effort only.
+  }
+}
 
 function patientIdFromReference(reference?: string): string | null {
   if (!reference) return null;
@@ -40,49 +74,6 @@ function buildContentDispositionHeader(filename: string, mode: 'inline' | 'attac
 function resolveDispositionMode(requestUrl: string): 'inline' | 'attachment' {
   const mode = new URL(requestUrl).searchParams.get('disposition')?.toLowerCase();
   return mode === 'inline' ? 'inline' : 'attachment';
-}
-
-function resolveMedplumAttachmentUrl(attachmentUrl: string): string | null {
-  const trimmed = attachmentUrl.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  if (/^Binary\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  const medplumOrigin = new URL(getMedplumConfig().baseUrl).origin;
-
-  if (trimmed.startsWith('/')) {
-    return `${medplumOrigin}${trimmed}`;
-  }
-
-  try {
-    const parsed = new URL(trimmed);
-    if (parsed.origin !== medplumOrigin) {
-      return null;
-    }
-
-    return parsed.toString();
-  } catch {
-    return null;
-  }
-}
-
-function resolveSameOriginAttachmentUrl(attachmentUrl: string, requestUrl: string): URL | null {
-  const requestOrigin = new URL(requestUrl).origin;
-
-  if (attachmentUrl.startsWith('/')) {
-    return new URL(attachmentUrl, requestUrl);
-  }
-
-  try {
-    const parsed = new URL(attachmentUrl);
-    return parsed.origin === requestOrigin ? parsed : null;
-  } catch {
-    return null;
-  }
 }
 
 async function canReadDocumentForPatient(user: AuthenticatedUser, patientMedplumId: string): Promise<boolean> {
@@ -149,18 +140,72 @@ export async function GET(request: Request, context: RouteContext) {
 
   const authorized = await canReadDocumentForPatient(user, patientMedplumId);
   if (!authorized) {
+    await writeDocumentAudit({
+      action: 'access_denied',
+      documentId: documentId.trim(),
+      patientMedplumId,
+      user,
+      reason: 'authorization_denied',
+    });
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  if (payload.binary?.data) {
+  if (payload.malwareStatus === 'infected' || payload.malwareStatus === 'scan_failed') {
+    await writeDocumentAudit({
+      action: 'access_denied',
+      documentId: documentId.trim(),
+      patientMedplumId,
+      user,
+      reason: `malware_status_${payload.malwareStatus}`,
+    });
+
+    return NextResponse.json(
+      { error: `Document is blocked by security policy (status: ${payload.malwareStatus}).` },
+      { status: 423 },
+    );
+  }
+
+  if (payload.r2ObjectKey) {
+    const object = await getPrivateMedicalObject(payload.r2ObjectKey);
+    if (!object) {
+      return NextResponse.json({ error: 'Document object is unavailable.' }, { status: 404 });
+    }
+
+    const actualChecksumSha256 = createHash('sha256').update(object.body).digest('hex');
+    if (payload.checksumSha256 && actualChecksumSha256 !== payload.checksumSha256) {
+      await writeDocumentAudit({
+        action: 'access_denied',
+        documentId: documentId.trim(),
+        patientMedplumId,
+        user,
+        reason: 'checksum_mismatch',
+        expectedChecksumSha256: payload.checksumSha256,
+        actualChecksumSha256,
+      });
+
+      return NextResponse.json(
+        { error: 'Document integrity check failed; access is blocked.' },
+        { status: 409 },
+      );
+    }
+
+    await writeDocumentAudit({
+      action: 'export',
+      documentId: documentId.trim(),
+      patientMedplumId,
+      user,
+      reason: payload.checksumSha256 ? 'integrity_verified' : 'integrity_unverified_legacy',
+      expectedChecksumSha256: payload.checksumSha256,
+      actualChecksumSha256,
+    });
+
     const attachment = payload.document.content?.[0]?.attachment;
     const filename = safeDownloadName(
       attachment?.title || payload.document.type?.text,
       `${documentId}.bin`,
     );
-
-    const contentType = payload.binary.contentType || attachment?.contentType || 'application/octet-stream';
-    const body = Buffer.from(payload.binary.data, 'base64');
+    const contentType = object.contentType || attachment?.contentType || 'application/octet-stream';
+    const body = new Uint8Array(object.body);
 
     return new NextResponse(body, {
       status: 200,
@@ -174,68 +219,8 @@ export async function GET(request: Request, context: RouteContext) {
     });
   }
 
-  const attachmentUrl = payload.attachmentUrl;
-  if (attachmentUrl) {
-    const medplumAttachmentUrl = resolveMedplumAttachmentUrl(attachmentUrl);
-    if (medplumAttachmentUrl) {
-      try {
-        const medplum = await getMedplumClient();
-        const medplumResponse = await medplum.downloadResponse(medplumAttachmentUrl, { cache: 'no-store' });
-
-        if (medplumResponse.ok) {
-          const body = Buffer.from(await medplumResponse.arrayBuffer());
-          const attachment = payload.document.content?.[0]?.attachment;
-          const filename = safeDownloadName(
-            attachment?.title || payload.document.type?.text,
-            `${documentId}.bin`,
-          );
-          const contentType = medplumResponse.headers.get('content-type') || attachment?.contentType || 'application/octet-stream';
-
-          return new NextResponse(body, {
-            status: 200,
-            headers: {
-              'Content-Type': contentType,
-              'Content-Length': String(body.byteLength),
-              'Content-Disposition': buildContentDispositionHeader(filename, dispositionMode),
-              'Cache-Control': 'private, no-store, max-age=0',
-              'X-Content-Type-Options': 'nosniff',
-            },
-          });
-        }
-      } catch {
-        // Fall through to same-origin fallback below.
-      }
-    }
-
-    const sameOriginUrl = resolveSameOriginAttachmentUrl(attachmentUrl, request.url);
-    if (sameOriginUrl) {
-      const proxied = await fetch(sameOriginUrl, { method: 'GET', cache: 'no-store' });
-      if (proxied.ok) {
-        const body = Buffer.from(await proxied.arrayBuffer());
-        const attachment = payload.document.content?.[0]?.attachment;
-        const filename = safeDownloadName(
-          attachment?.title || payload.document.type?.text,
-          `${documentId}.bin`,
-        );
-        const contentType = proxied.headers.get('content-type') || attachment?.contentType || 'application/octet-stream';
-
-        return new NextResponse(body, {
-          status: 200,
-          headers: {
-            'Content-Type': contentType,
-            'Content-Length': String(body.byteLength),
-            'Content-Disposition': buildContentDispositionHeader(filename, dispositionMode),
-            'Cache-Control': 'private, no-store, max-age=0',
-            'X-Content-Type-Options': 'nosniff',
-          },
-        });
-      }
-    }
-  }
-
-  if (payload.binaryId) {
-    return NextResponse.json({ error: 'Document binary payload is unavailable.' }, { status: 404 });
-  }
-
-  return NextResponse.json({ error: 'Document attachment URL is unavailable or unsupported.' }, { status: 404 });
+  return NextResponse.json(
+    { error: 'Document is not stored in Cloudflare R2. Run docs:migrate:r2 to migrate legacy attachments.' },
+    { status: 409 },
+  );
 }

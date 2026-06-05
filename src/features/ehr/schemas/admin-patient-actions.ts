@@ -102,6 +102,151 @@ export const recordVisitSchema = z.object({
   notes: optionalTrimmedString,
 });
 
+const requiredVisitId = z.string().trim().min(1, 'Visit id is required');
+const visitDisruptionCode = z.enum([
+  'patient_late_cancel',
+  'patient_no_show',
+  'patient_refused_care',
+  'patient_hospitalised',
+  'patient_deceased',
+  'family_blocked_access',
+  'unsafe_environment',
+  'physio_personal_emergency',
+  'physio_vehicle_breakdown',
+  'physio_traffic_blocked',
+  'weather',
+  'med_ops_reassignment',
+  'equipment_failure',
+  'internet_blackout',
+  'other',
+]);
+
+export const acknowledgeVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  acknowledgedAt: requiredDate,
+});
+
+export const startTravelSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  enRouteAt: requiredDate,
+});
+
+export const markArrivedSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  arrivedAt: requiredDate,
+});
+
+export const checkInVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  checkInAt: requiredDate,
+  checkInLatitude: requiredLatitude,
+  checkInLongitude: requiredLongitude,
+  checkInAccuracyMeters: optionalAccuracyMeters,
+  geofenceOverrideMethod: z
+    .preprocess((value) => {
+      const next = typeof value === 'string' ? value.trim() : value;
+      return next === '' ? undefined : next;
+    }, z.enum(['photo', 'code', 'med_ops']).optional()),
+  geofenceOverrideReason: optionalTrimmedString,
+  geofenceOverrideMediaId: optionalTrimmedString,
+});
+
+export const checkOutVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  checkOutAt: requiredDate,
+  checkOutLatitude: requiredLatitude,
+  checkOutLongitude: requiredLongitude,
+  checkOutAccuracyMeters: optionalAccuracyMeters,
+});
+
+export const cancelVisitByPatientSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: optionalTrimmedString,
+});
+
+export const cancelVisitByMedOpsSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: optionalTrimmedString,
+});
+
+export const declineVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: optionalTrimmedString,
+});
+
+export const reassignVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  reassignedProviderId: optionalTrimmedString,
+  disruptionNote: optionalTrimmedString,
+});
+
+export const markRefusedAtDoorSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: z.string().trim().min(8, 'Attempt log is required (minimum 8 characters).'),
+});
+
+export const markPatientNotHomeSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: z.string().trim().min(8, 'Attempt log is required (minimum 8 characters).'),
+});
+
+export const divertVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: optionalTrimmedString,
+});
+
+export const interruptSessionSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: optionalTrimmedString,
+});
+
+export const rescheduleInPlaceSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  nextScheduledDate: requiredDate,
+  nextScheduledTime: z.string().trim().min(1, 'Next scheduled time is required.'),
+  disruptionNote: optionalTrimmedString,
+});
+
+export const disputeVisitSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  visitId: requiredVisitId,
+  eventAt: requiredDate,
+  disruptionCode: visitDisruptionCode,
+  disruptionNote: z.string().trim().min(10, 'Dispute note is required (minimum 10 characters).'),
+});
+
 export const recordVitalsSchema = z
   .object({
     medplumPatientId: requiredPatientId,
@@ -144,6 +289,7 @@ export const recordVitalsSchema = z
 export const createClinicalNoteSchema = z.object({
   medplumPatientId: requiredPatientId,
   encounterId: optionalTrimmedString,
+  noteDiscipline: z.enum(['medical', 'nursing', 'physiotherapy']).default('medical'),
   noteTitle: optionalTrimmedString,
   noteBody: z.string().trim().min(1, 'Note body is required'),
 });
@@ -151,7 +297,16 @@ export const createClinicalNoteSchema = z.object({
 export const signClinicalNoteSchema = z.object({
   medplumPatientId: requiredPatientId,
   compositionId: z.string().trim().min(1, 'Note id is required'),
+  noteDiscipline: z.enum(['medical', 'nursing', 'physiotherapy']).default('medical'),
   noteVersionId: optionalTrimmedString,
+});
+
+export const amendClinicalNoteSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  sourceCompositionId: z.string().trim().min(1, 'Source note id is required'),
+  noteDiscipline: z.enum(['medical', 'nursing', 'physiotherapy']).default('medical'),
+  amendmentTitle: optionalTrimmedString,
+  amendmentBody: z.string().trim().min(1, 'Amendment body is required'),
 });
 
 export const assignCareTeamSchema = z.object({
@@ -223,19 +378,150 @@ export const createNursingShiftHandoffSchema = z
     }
   });
 
-export const createPhysioReportSchema = z.object({
-  medplumPatientId: requiredPatientId,
-  encounterId: optionalTrimmedString,
-  noteBody: z.string().trim().min(1, 'Physiotherapy note body is required'),
-  interventions: optionalTrimmedString,
-  painBefore: optionalNumber,
-  painAfter: optionalNumber,
-  responseSummary: optionalTrimmedString,
-  homePlan: optionalTrimmedString,
-});
+export const createPhysioReportSchema = z
+  .object({
+    medplumPatientId: requiredPatientId,
+    physioVisitId: optionalTrimmedString,
+    encounterId: optionalTrimmedString,
+    sessionTemplate: z.enum(['post_op_knee', 'stroke_rehab', 'low_back_pain', 'geriatric_mobility', 'custom']).default('custom'),
+    sessionNumberLabel: optionalTrimmedString,
+    subjectiveFunction: optionalTrimmedString,
+    objectiveSummary: optionalTrimmedString,
+    // Structured objective fields (typed, template-specific)
+    postOpKneeFlexionDeg: optionalNumber,
+    postOpKneeExtensionDeg: optionalNumber,
+    postOpKneeEffusionGrade: z.enum(['0', '1', '2', '3']).optional(),
+    postOpKneeGaitPhase: z.enum(['loading_response', 'mid_stance', 'terminal_stance', 'swing', 'antalgic']).optional(),
+    strokeAshworthScore: optionalNumber,
+    strokeBergScore: optionalNumber,
+    strokeFunctionalReachCm: optionalNumber,
+    lowBackSlrLeftDeg: optionalNumber,
+    lowBackSlrRightDeg: optionalNumber,
+    lowBackSchoberCm: optionalNumber,
+    lowBackPainWithMovement: optionalBoolean,
+    geriatricTugSeconds: optionalNumber,
+    geriatricTinettiScore: optionalNumber,
+    geriatricFallRiskClass: z.enum(['low', 'moderate', 'high']).optional(),
+    noteBody: z.string().trim().min(1, 'Physiotherapy note body is required'),
+    interventions: optionalTrimmedString,
+    painBefore: optionalNumber,
+    painAfter: optionalNumber,
+    responseSummary: optionalTrimmedString,
+    homePlan: optionalTrimmedString,
+    nextSessionFocus: optionalTrimmedString,
+    dischargeReadiness: z.enum(['not_yet', 'one_to_two_sessions', 'ready']).optional(),
+  })
+  .superRefine((input, ctx) => {
+    if (input.painBefore !== null && (input.painBefore < 0 || input.painBefore > 10)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['painBefore'],
+        message: 'Pain before must be between 0 and 10.',
+      });
+    }
+
+    if (input.painAfter !== null && (input.painAfter < 0 || input.painAfter > 10)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['painAfter'],
+        message: 'Pain after must be between 0 and 10.',
+      });
+    }
+
+    if (input.sessionTemplate === 'post_op_knee') {
+      if (input.postOpKneeFlexionDeg === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['postOpKneeFlexionDeg'],
+          message: 'Post-op knee template requires flexion in degrees.',
+        });
+      }
+      if (input.postOpKneeExtensionDeg === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['postOpKneeExtensionDeg'],
+          message: 'Post-op knee template requires extension in degrees.',
+        });
+      }
+    }
+
+    if (input.sessionTemplate === 'stroke_rehab') {
+      if (input.strokeAshworthScore === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['strokeAshworthScore'],
+          message: 'Stroke rehab template requires Ashworth score.',
+        });
+      }
+      if (input.strokeBergScore === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['strokeBergScore'],
+          message: 'Stroke rehab template requires Berg score.',
+        });
+      }
+    }
+
+    if (input.sessionTemplate === 'low_back_pain') {
+      if (input.lowBackSlrLeftDeg === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['lowBackSlrLeftDeg'],
+          message: 'Low back template requires SLR left degree.',
+        });
+      }
+      if (input.lowBackSlrRightDeg === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['lowBackSlrRightDeg'],
+          message: 'Low back template requires SLR right degree.',
+        });
+      }
+      if (input.lowBackSchoberCm === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['lowBackSchoberCm'],
+          message: 'Low back template requires Schober score in cm.',
+        });
+      }
+    }
+
+    if (input.sessionTemplate === 'geriatric_mobility') {
+      if (input.geriatricTugSeconds === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['geriatricTugSeconds'],
+          message: 'Geriatric template requires TUG seconds.',
+        });
+      }
+      if (input.geriatricTinettiScore === null) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['geriatricTinettiScore'],
+          message: 'Geriatric template requires Tinetti score.',
+        });
+      }
+      if (!input.geriatricFallRiskClass) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['geriatricFallRiskClass'],
+          message: 'Geriatric template requires fall risk class.',
+        });
+      }
+    }
+
+    if (input.dischargeReadiness === 'ready' && !(input.homePlan ?? '').trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['homePlan'],
+        message: 'Home plan is required when discharge readiness is marked ready.',
+      });
+    }
+  });
 
 export const createConditionSchema = z.object({
   medplumPatientId: requiredPatientId,
+  conditionCategory: z.enum(['medical', 'physical_therapy']).default('medical'),
   conditionLabel: z.string().trim().min(1, 'Problem title is required'),
   conditionCode: optionalTrimmedString,
   conditionOnsetDate: optionalDate,
@@ -375,6 +661,43 @@ export const updatePatientGeoPolicySchema = z.object({
   temporarilyAwayNote: optionalTrimmedString,
 });
 
+export const requestRestrictedAccessSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  restrictedAccessReason: z.string().trim().min(12, 'Restricted-access reason must be at least 12 characters.'),
+});
+
+export const requestBreakGlassAccessSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  breakGlassReason: z.string().trim().min(20, 'Break-glass reason must be at least 20 characters.'),
+});
+
+export const createStandingOrderSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  standingOrderDiscipline: z.enum(['medical', 'nursing', 'physiotherapy']).default('medical'),
+  standingOrderTitle: z.string().trim().min(1, 'Standing order title is required.'),
+  standingOrderInstructions: z.string().trim().min(8, 'Standing order instructions are required.'),
+  standingOrderValidUntil: optionalDate,
+});
+
+export const executeStandingOrderSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  standingOrderId: z.string().trim().min(1, 'Standing order id is required.'),
+  executionVisitId: z.string().trim().min(1, 'Visit id is required for standing order execution.'),
+  executionRecordedAt: requiredDate,
+  executionNote: optionalTrimmedString,
+});
+
+export const requestDocumentDeleteApprovalSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  documentId: z.string().trim().min(1, 'Document id is required'),
+  deleteApprovalReason: z.string().trim().min(8, 'Delete approval reason is required.'),
+});
+
+export const approveDestructiveTokenSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  approvalTokenId: z.string().trim().min(1, 'Approval token id is required.'),
+});
+
 export const createEscalationSchema = z.object({
   medplumPatientId: requiredPatientId,
   escalationTitle: z.string().trim().min(1, 'Escalation title is required'),
@@ -478,6 +801,27 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     visitType: formData.get('visitType'),
     startAt: formData.get('startAt'),
     notes: formData.get('notes'),
+    visitId: formData.get('visitId'),
+    acknowledgedAt: formData.get('acknowledgedAt'),
+    enRouteAt: formData.get('enRouteAt'),
+    arrivedAt: formData.get('arrivedAt'),
+    checkInAt: formData.get('checkInAt'),
+    checkInLatitude: formData.get('checkInLatitude'),
+    checkInLongitude: formData.get('checkInLongitude'),
+    checkInAccuracyMeters: formData.get('checkInAccuracyMeters'),
+    geofenceOverrideMethod: formData.get('geofenceOverrideMethod'),
+    geofenceOverrideReason: formData.get('geofenceOverrideReason'),
+    geofenceOverrideMediaId: formData.get('geofenceOverrideMediaId'),
+    checkOutAt: formData.get('checkOutAt'),
+    checkOutLatitude: formData.get('checkOutLatitude'),
+    checkOutLongitude: formData.get('checkOutLongitude'),
+    checkOutAccuracyMeters: formData.get('checkOutAccuracyMeters'),
+    eventAt: formData.get('eventAt'),
+    disruptionCode: formData.get('disruptionCode'),
+    disruptionNote: formData.get('disruptionNote'),
+    reassignedProviderId: formData.get('reassignedProviderId'),
+    nextScheduledDate: formData.get('nextScheduledDate'),
+    nextScheduledTime: formData.get('nextScheduledTime'),
     recordedAt: formData.get('recordedAt'),
     systolicBp: formData.get('systolicBp'),
     diastolicBp: formData.get('diastolicBp'),
@@ -488,9 +832,13 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     spo2Pct: formData.get('spo2Pct'),
     painScore: formData.get('painScore'),
     noteTitle: formData.get('noteTitle'),
+    noteDiscipline: formData.get('noteDiscipline'),
     noteBody: formData.get('noteBody'),
     compositionId: formData.get('compositionId'),
     noteVersionId: formData.get('noteVersionId'),
+    sourceCompositionId: formData.get('sourceCompositionId'),
+    amendmentTitle: formData.get('amendmentTitle'),
+    amendmentBody: formData.get('amendmentBody'),
     staffId: formData.get('staffId'),
     practitionerReference: formData.get('practitionerReference'),
     careTeamVersionId: formData.get('careTeamVersionId'),
@@ -515,11 +863,33 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     handoffLongitude: formData.get('handoffLongitude'),
     handoffAccuracyMeters: formData.get('handoffAccuracyMeters'),
     handoffConfirmed: formData.get('handoffConfirmed'),
+    physioVisitId: formData.get('physioVisitId'),
+    sessionTemplate: formData.get('sessionTemplate'),
+    sessionNumberLabel: formData.get('sessionNumberLabel'),
+    subjectiveFunction: formData.get('subjectiveFunction'),
+    objectiveSummary: formData.get('objectiveSummary'),
+    postOpKneeFlexionDeg: formData.get('postOpKneeFlexionDeg'),
+    postOpKneeExtensionDeg: formData.get('postOpKneeExtensionDeg'),
+    postOpKneeEffusionGrade: formData.get('postOpKneeEffusionGrade'),
+    postOpKneeGaitPhase: formData.get('postOpKneeGaitPhase'),
+    strokeAshworthScore: formData.get('strokeAshworthScore'),
+    strokeBergScore: formData.get('strokeBergScore'),
+    strokeFunctionalReachCm: formData.get('strokeFunctionalReachCm'),
+    lowBackSlrLeftDeg: formData.get('lowBackSlrLeftDeg'),
+    lowBackSlrRightDeg: formData.get('lowBackSlrRightDeg'),
+    lowBackSchoberCm: formData.get('lowBackSchoberCm'),
+    lowBackPainWithMovement: formData.get('lowBackPainWithMovement'),
+    geriatricTugSeconds: formData.get('geriatricTugSeconds'),
+    geriatricTinettiScore: formData.get('geriatricTinettiScore'),
+    geriatricFallRiskClass: formData.get('geriatricFallRiskClass'),
     interventions: formData.get('interventions'),
     painBefore: formData.get('painBefore'),
     painAfter: formData.get('painAfter'),
     responseSummary: formData.get('responseSummary'),
     homePlan: formData.get('homePlan'),
+    nextSessionFocus: formData.get('nextSessionFocus'),
+    dischargeReadiness: formData.get('dischargeReadiness'),
+    conditionCategory: formData.get('conditionCategory'),
     conditionLabel: formData.get('conditionLabel'),
     conditionCode: formData.get('conditionCode'),
     conditionOnsetDate: formData.get('conditionOnsetDate'),
@@ -545,6 +915,8 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     administrationNote: formData.get('administrationNote'),
     documentTitle: formData.get('documentTitle'),
     documentId: formData.get('documentId'),
+    approvalTokenId: formData.get('approvalTokenId'),
+    deleteApprovalReason: formData.get('deleteApprovalReason'),
     documentCategory: formData.get('documentCategory'),
     documentDate: formData.get('documentDate'),
     documentNote: formData.get('documentNote'),
@@ -593,11 +965,20 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     shiftNotes: formData.get('shiftNotes'),
     assignmentId: formData.get('assignmentId'),
     incomingNurseStaffId: formData.get('incomingNurseStaffId'),
-    acknowledgedAt: formData.get('acknowledgedAt'),
     acknowledgementNote: formData.get('acknowledgementNote'),
     handoffGeofenceRadiusMeters: formData.get('handoffGeofenceRadiusMeters'),
     temporarilyAwayUntil: formData.get('temporarilyAwayUntil'),
     temporarilyAwayNote: formData.get('temporarilyAwayNote'),
+    restrictedAccessReason: formData.get('restrictedAccessReason'),
+    breakGlassReason: formData.get('breakGlassReason'),
+    standingOrderDiscipline: formData.get('standingOrderDiscipline'),
+    standingOrderTitle: formData.get('standingOrderTitle'),
+    standingOrderInstructions: formData.get('standingOrderInstructions'),
+    standingOrderValidUntil: formData.get('standingOrderValidUntil'),
+    standingOrderId: formData.get('standingOrderId'),
+    executionVisitId: formData.get('executionVisitId'),
+    executionRecordedAt: formData.get('executionRecordedAt'),
+    executionNote: formData.get('executionNote'),
     patientVersionId: formData.get('patientVersionId'),
     addressDetail: formData.get('addressDetail'),
     landmark: formData.get('landmark'),

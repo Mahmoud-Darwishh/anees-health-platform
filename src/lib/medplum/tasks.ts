@@ -156,6 +156,16 @@ export async function listPatientTasks(patientId: string, count = 50): Promise<M
   })) as MedplumTaskResource[];
 }
 
+export async function listTasksByOwner(ownerReference: string, count = 100): Promise<MedplumTaskResource[]> {
+  const medplum = await getMedplumClient();
+
+  return (await medplum.searchResources('Task', {
+    owner: ownerReference,
+    _count: String(count),
+    _sort: '-_lastUpdated',
+  })) as MedplumTaskResource[];
+}
+
 export async function listEscalationTasks(options: ListEscalationTasksOptions = {}): Promise<EscalationTaskSummary[]> {
   const medplum = await getMedplumClient();
   const resources = (await medplum.searchResources('Task', {

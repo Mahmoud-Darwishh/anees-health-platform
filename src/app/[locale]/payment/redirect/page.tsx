@@ -88,7 +88,7 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
       const transactionId = searchParams.transactionId;
 
       if (status === 'SUCCESS') {
-        await prisma.onlineBooking.updateMany({
+        const paymentCompleted = await prisma.onlineBooking.updateMany({
           where: { bookingRef: orderId },
           data: {
             status: 'payment_completed',
@@ -96,17 +96,66 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
             paymentCompletedAt: new Date(),
           },
         });
+
+        if (paymentCompleted.count > 0) {
+          await prisma.auditLog.create({
+            data: {
+              tableName: 'online_bookings',
+              recordId: orderId,
+              action: 'update',
+              changedFields: {
+                source: 'payment.redirect',
+                fields: ['status', 'kashierTransactionId', 'paymentCompletedAt'],
+                count: paymentCompleted.count,
+              },
+              changedBy: 'system:kashier_redirect',
+            },
+          });
+        }
       } else if (status === 'FAILED' || status === 'FAILURE') {
-        await prisma.$transaction([
-          prisma.onlineBooking.updateMany({
+        await prisma.$transaction(async (tx) => {
+          const failedBookings = await tx.onlineBooking.updateMany({
             where: { bookingRef: orderId },
             data: { status: 'payment_failed' },
-          }),
-          prisma.invoice.updateMany({
+          });
+
+          const cancelledInvoices = await tx.invoice.updateMany({
             where: { code: `INV_${orderId}` },
             data: { status: 'cancelled' },
-          }),
-        ]);
+          });
+
+          if (failedBookings.count > 0) {
+            await tx.auditLog.create({
+              data: {
+                tableName: 'online_bookings',
+                recordId: orderId,
+                action: 'update',
+                changedFields: {
+                  source: 'payment.redirect',
+                  fields: ['status'],
+                  count: failedBookings.count,
+                },
+                changedBy: 'system:kashier_redirect',
+              },
+            });
+          }
+
+          if (cancelledInvoices.count > 0) {
+            await tx.auditLog.create({
+              data: {
+                tableName: 'invoices',
+                recordId: orderId,
+                action: 'update',
+                changedFields: {
+                  source: 'payment.redirect',
+                  fields: ['status'],
+                  count: cancelledInvoices.count,
+                },
+                changedBy: 'system:kashier_redirect',
+              },
+            });
+          }
+        });
       }
     } catch (error) {
       console.error('❌ Failed to persist redirect payment result', error);

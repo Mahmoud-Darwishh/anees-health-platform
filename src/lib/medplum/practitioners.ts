@@ -155,7 +155,8 @@ export async function ensureCachedMedplumPractitionerForStaff(
     cachedPractitionerId: staff?.medplumPractitionerId ?? null,
   });
 
-  if (staff?.medplumPractitionerId !== practitioner.id) {
+  // The session can reference a stale/deleted staff id; avoid write-not-found crashes.
+  if (staff && staff.medplumPractitionerId !== practitioner.id) {
     await prisma.staff.update({
       where: { id: input.staffId },
       data: { medplumPractitionerId: practitioner.id },

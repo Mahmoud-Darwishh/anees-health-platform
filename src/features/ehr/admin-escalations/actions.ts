@@ -12,10 +12,12 @@ import { setAdminEscalationsFlash } from './flash';
 const COORDINATION_WRITE_ROLES: StaffRole[] = [
   'superadmin',
   'admin',
+  'medical_ops',
   'operator',
   'doctor',
   'physiotherapist',
   'nurse',
+  'finance',
 ];
 
 function parseActionError(error: unknown): string {

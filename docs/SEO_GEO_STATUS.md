@@ -1,7 +1,10 @@
 # SEO & GEO Status Documentation
 
-**Last Updated:** January 23, 2026  
-**Platform:** Anees Health (Next.js, TypeScript, Bilingual EN/AR)
+**Last Updated:** 2026-06-05
+**Platform:** Anees Health (Next.js 16, TypeScript strict, Bilingual EN/AR)
+**Companion docs:** [docs/README.md](./README.md) for the docs map; [CTO_STRATEGY.md](./CTO_STRATEGY.md) for the broader product strategy.
+
+> **June 2026 status note:** SEO + GEO has been stable since the May refresh. The public-site service / specialty pages are under restructure (see CLAUDE.md route map) and some entries here will need re-validation once those land. FAQ schema and expanded city coverage remain the top-priority improvements.
 
 ---
 

@@ -122,9 +122,23 @@ export function reportComponentText(
 
 export function toCareTeamRole(
   role: AssignableStaff['role'],
-): 'doctor' | 'nurse' | 'physiotherapist' | 'operator' | 'admin' | 'superadmin' | null {
-  if (role === 'finance' || role === 'viewer') {
+): 'doctor' | 'nurse' | 'physiotherapist' | 'medical_ops' | 'admin' | 'superadmin' | null {
+  const allowedRoles: Array<'doctor' | 'nurse' | 'physiotherapist' | 'medical_ops' | 'admin' | 'superadmin'> = [
+    'doctor',
+    'nurse',
+    'physiotherapist',
+    'medical_ops',
+    'admin',
+    'superadmin',
+  ];
+
+  if (role === 'operator') {
+    return 'medical_ops';
+  }
+
+  if (!allowedRoles.includes(role as (typeof allowedRoles)[number])) {
     return null;
   }
-  return role;
+
+  return role as (typeof allowedRoles)[number];
 }

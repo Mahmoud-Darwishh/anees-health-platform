@@ -2,18 +2,29 @@ import 'server-only';
 
 import { EgyptianExtensions } from '@/lib/medplum/fhir-extensions';
 import { getMedplumClient } from '@/lib/medplum/client';
-import { MEDPLUM_CODE_SYSTEMS } from '@/lib/medplum/constants';
+import {
+  MEDPLUM_CODE_SYSTEMS,
+  isRestrictedTierClinicalCoding,
+  isRestrictedTierSecurityCoding,
+} from '@/lib/medplum/constants';
 
 type FhirReference = {
   reference?: string;
   display?: string;
 };
 
+export type ClinicalNoteDiscipline = 'medical' | 'nursing' | 'physiotherapy';
+
 type MedplumClinicalNoteResource = {
   resourceType: 'Composition';
   id?: string;
   meta?: {
     versionId?: string;
+    security?: Array<{
+      system?: string;
+      code?: string;
+      display?: string;
+    }>;
   };
   status: 'preliminary' | 'final' | 'amended' | 'entered-in-error';
   type: {
@@ -38,6 +49,7 @@ type MedplumClinicalNoteResource = {
   extension?: Array<{
     url: string;
     valueString?: string;
+    valueCode?: string;
   }>;
 };
 
@@ -46,6 +58,8 @@ export type CreateClinicalNoteDraftInput = {
   encounterId?: string | null;
   title?: string | null;
   noteBody: string;
+  discipline: ClinicalNoteDiscipline;
+  amendedFromCompositionId?: string | null;
   authorReference?: string | null;
   authorDisplay?: string | null;
   recordedAt?: Date;
@@ -60,7 +74,34 @@ export type ClinicalNoteItem = {
   date: string;
   author?: string | null;
   encounterId?: string | null;
+  discipline: ClinicalNoteDiscipline;
+  restrictedTier: boolean;
 };
+
+function normalizeDiscipline(raw?: string | null): ClinicalNoteDiscipline {
+  if (raw === 'nursing' || raw === 'physiotherapy') {
+    return raw;
+  }
+  return 'medical';
+}
+
+function extractDiscipline(resource: MedplumClinicalNoteResource): ClinicalNoteDiscipline {
+  const byExtension = resource.extension?.find(
+    (entry) => entry.url === EgyptianExtensions.clinicalNoteDiscipline,
+  )?.valueCode;
+
+  return normalizeDiscipline(byExtension);
+}
+
+function hasRestrictedTier(resource: MedplumClinicalNoteResource): boolean {
+  const typeCoding = resource.type?.coding ?? [];
+  const security = resource.meta?.security ?? [];
+
+  return [
+    ...security.map((coding) => isRestrictedTierSecurityCoding(coding)),
+    ...typeCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
+  ].some(Boolean);
+}
 
 function escapeHtml(input: string): string {
   return input
@@ -135,6 +176,18 @@ export async function createClinicalNoteDraft(
         url: EgyptianExtensions.clinicalNoteText,
         valueString: input.noteBody,
       },
+      {
+        url: EgyptianExtensions.clinicalNoteDiscipline,
+        valueCode: input.discipline,
+      },
+      ...(input.amendedFromCompositionId
+        ? [
+            {
+              url: EgyptianExtensions.clinicalNoteAmends,
+              valueString: input.amendedFromCompositionId,
+            },
+          ]
+        : []),
     ],
   };
 
@@ -207,6 +260,8 @@ export async function listPatientClinicalNotes(
       date: resource.date,
       author: resource.author?.[0]?.display ?? null,
       encounterId: resource.encounter?.reference?.replace('Encounter/', '') ?? null,
+      discipline: extractDiscipline(resource),
+      restrictedTier: hasRestrictedTier(resource),
     }))
     .filter((note) => note.id);
 

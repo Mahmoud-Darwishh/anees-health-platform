@@ -7,6 +7,7 @@ export const MEDPLUM_CODE_SYSTEMS = {
   encounterType: 'https://anees.health/fhir/encounter-type',
   taskType: 'https://anees.health/fhir/task-type',
   communicationType: 'https://anees.health/fhir/communication-type',
+  patientGoalId: 'https://anees.health/fhir/identifier/patient-goal-id',
   reportType: 'https://anees.health/fhir/report-type',
   careTeamCategory: 'https://anees.health/fhir/care-team-category',
   clinicalNoteType: 'https://anees.health/fhir/document-type',
@@ -24,3 +25,52 @@ export const MEDPLUM_EXTENSION_URLS = {
   caregiverEmail: 'https://anees.health/fhir/extension/caregiver-email',
   portalScope: 'https://anees.health/fhir/extension/portal-scope',
 } as const;
+
+const RESTRICTED_TIER_SECURITY_CODES = new Set(['r', 'v', 'psy', 'eth']);
+const RESTRICTED_TIER_CODE_HINTS = new Set([
+  'hiv',
+  'sti',
+  'std',
+  'mental-health',
+  'psychiatry',
+  'behavioral-health',
+  'reproductive-health',
+  'sexual-health',
+  'substance-use',
+  'domestic-violence',
+  'consent',
+  'insurance',
+]);
+
+type FhirCodingLike = {
+  system?: string;
+  code?: string;
+  display?: string;
+};
+
+export function isRestrictedTierSecurityCoding(coding: FhirCodingLike | null | undefined): boolean {
+  const code = coding?.code?.trim().toLowerCase();
+  if (!code) {
+    return false;
+  }
+  return RESTRICTED_TIER_SECURITY_CODES.has(code);
+}
+
+export function isRestrictedTierClinicalCoding(coding: FhirCodingLike | null | undefined): boolean {
+  const code = coding?.code?.trim().toLowerCase();
+  if (!code) {
+    return false;
+  }
+
+  if (RESTRICTED_TIER_CODE_HINTS.has(code)) {
+    return true;
+  }
+
+  for (const hint of RESTRICTED_TIER_CODE_HINTS) {
+    if (code.includes(hint)) {
+      return true;
+    }
+  }
+
+  return false;
+}

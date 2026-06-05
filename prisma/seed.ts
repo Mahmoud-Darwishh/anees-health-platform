@@ -1140,6 +1140,23 @@ async function main() {
   // ── Doctors ──────────────────────────────────────────────────────────────────
   // JSON source files were removed after data was migrated to PostgreSQL.
   // This block is kept for reference and skips gracefully if files are absent.
+  const safeDoctorUpsert = async (payload: Parameters<typeof prisma.doctor.upsert>[0]) => {
+    try {
+      await prisma.doctor.upsert(payload);
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as { code?: string }).code === 'P2011'
+      ) {
+        console.log('Skipping doctor upsert due to DB drift (required doctors.doctorCode).');
+        return;
+      }
+      throw error;
+    }
+  };
+
   let doctorCount = 0;
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1151,7 +1168,7 @@ async function main() {
 
     for (const en of enDoctors) {
       const ar = arById.get(en.id) || en;
-      await prisma.doctor.upsert({
+      await safeDoctorUpsert({
         where: { id: en.id },
         update: {},
         create: {
@@ -1207,7 +1224,7 @@ async function main() {
     }
   }
 
-  await prisma.doctor.upsert({
+  await safeDoctorUpsert({
     where: { id: 19 },
     update: {
       slug: 'mahmoud-darwish',
@@ -1415,7 +1432,7 @@ async function main() {
     },
   });
 
-  await prisma.doctor.upsert({
+  await safeDoctorUpsert({
     where: { id: 101 },
     update: {
       slug: 'reem-ragab',
@@ -1546,7 +1563,7 @@ async function main() {
     },
   });
 
-  await prisma.doctor.upsert({
+  await safeDoctorUpsert({
     where: { id: 102 },
     update: {
       slug: 'menna-m-yahia',
@@ -1661,7 +1678,7 @@ async function main() {
     },
   });
 
-  await prisma.doctor.upsert({
+  await safeDoctorUpsert({
     where: { id: 103 },
     update: {
       slug: 'mohamed-mahmoud-hamza',
@@ -2251,6 +2268,50 @@ async function main() {
       create: { name: demoNurse.name, email: demoNurse.email, role: 'staff', staffId: demoNurse.id },
     });
 
+    const additionalRoleAccounts = [
+      { name: 'Demo Medical Ops', email: 'medops@aneeshealth.local', role: 'medical_ops' as const, password: 'MedOps@123' },
+      { name: 'Demo Insurance Coordinator', email: 'insurance@aneeshealth.local', role: 'insurance_coordinator' as const, password: 'Insurance@123' },
+      { name: 'Demo Compliance Officer', email: 'compliance@aneeshealth.local', role: 'compliance_officer' as const, password: 'Compliance@123' },
+      { name: 'Demo Hospital Partner Admin', email: 'partner@aneeshealth.local', role: 'hospital_partner_admin' as const, password: 'Partner@123' },
+      { name: 'Demo Finance', email: 'finance@aneeshealth.local', role: 'finance' as const, password: 'Finance@123' },
+      { name: 'Demo Viewer', email: 'viewer@aneeshealth.local', role: 'viewer' as const, password: 'Viewer@123' },
+    ];
+
+    for (const account of additionalRoleAccounts) {
+      const passwordHash = await bcrypt.hash(account.password, 10);
+      const staffRow = await prisma.staff.upsert({
+        where: { email: account.email },
+        update: {
+          name: account.name,
+          role: account.role,
+          status: 'active',
+          passwordHash,
+        },
+        create: {
+          name: account.name,
+          email: account.email,
+          role: account.role,
+          status: 'active',
+          passwordHash,
+        },
+      });
+
+      await prisma.user.upsert({
+        where: { email: staffRow.email },
+        update: {
+          name: staffRow.name,
+          role: 'staff',
+          staffId: staffRow.id,
+        },
+        create: {
+          name: staffRow.name,
+          email: staffRow.email,
+          role: 'staff',
+          staffId: staffRow.id,
+        },
+      });
+    }
+
     // Invoices + payment for the completed visit
     const cardPaymentMethod = await prisma.paymentMethod.findFirst({ where: { code: 'PM-04' } });
     const cashPaymentMethod = await prisma.paymentMethod.findFirst({ where: { code: 'PM-01' } });
@@ -2319,6 +2380,170 @@ async function main() {
             amountEgp: 350,
             paymentMethodId: cashPaymentMethod.id,
             notes: 'Cash on visit completion.',
+          },
+        });
+      }
+    }
+
+    // Insurance/claims demo entities for the insurance workspace.
+    const demoInsurer = await prisma.insurerProfile.upsert({
+      where: { code: 'INS-AXA-DEMO' },
+      update: {
+        name: 'AXA Egypt Demo Payer',
+        payerType: 'private',
+        supportsDirectBilling: true,
+        isActive: true,
+        notes: 'Seeded insurer profile for role-matrix insurance workspace demo.',
+      },
+      create: {
+        code: 'INS-AXA-DEMO',
+        name: 'AXA Egypt Demo Payer',
+        payerType: 'private',
+        supportsDirectBilling: true,
+        isActive: true,
+        notes: 'Seeded insurer profile for role-matrix insurance workspace demo.',
+      },
+    });
+
+    await prisma.coverage.upsert({
+      where: { id: 'cov_demo_pt_001' },
+      update: {
+        patientId: demoPatient1.id,
+        insurerProfileId: demoInsurer.id,
+        memberId: 'AXA-EG-554-001',
+        policyNumber: 'POL-2026-44871',
+        planName: 'Premium Care Gold',
+        status: 'active',
+        startsAt: new Date('2026-01-01'),
+        expiresAt: new Date('2026-12-31'),
+        tenantId: 'platform',
+      },
+      create: {
+        id: 'cov_demo_pt_001',
+        patientId: demoPatient1.id,
+        insurerProfileId: demoInsurer.id,
+        memberId: 'AXA-EG-554-001',
+        policyNumber: 'POL-2026-44871',
+        planName: 'Premium Care Gold',
+        status: 'active',
+        startsAt: new Date('2026-01-01'),
+        expiresAt: new Date('2026-12-31'),
+        tenantId: 'platform',
+      },
+    });
+
+    const demoPriorAuth = await prisma.priorAuth.upsert({
+      where: { id: 'prior_auth_demo_001' },
+      update: {
+        patientId: demoPatient1.id,
+        insurerProfileId: demoInsurer.id,
+        referenceNumber: 'PA-AXA-2026-0001',
+        requestedFor: '8-session post-op home physiotherapy block',
+        status: 'approved',
+        submittedAt: new Date('2026-05-15T10:00:00Z'),
+        resolvedAt: new Date('2026-05-16T13:30:00Z'),
+        expiresAt: new Date('2026-08-16T00:00:00Z'),
+        notes: 'Approved for one quarter under post-op mobility restoration bundle.',
+        tenantId: 'platform',
+      },
+      create: {
+        id: 'prior_auth_demo_001',
+        patientId: demoPatient1.id,
+        insurerProfileId: demoInsurer.id,
+        referenceNumber: 'PA-AXA-2026-0001',
+        requestedFor: '8-session post-op home physiotherapy block',
+        status: 'approved',
+        submittedAt: new Date('2026-05-15T10:00:00Z'),
+        resolvedAt: new Date('2026-05-16T13:30:00Z'),
+        expiresAt: new Date('2026-08-16T00:00:00Z'),
+        notes: 'Approved for one quarter under post-op mobility restoration bundle.',
+        tenantId: 'platform',
+      },
+    });
+
+    const demoClaim = await prisma.claim.upsert({
+      where: { code: 'CLM-DEMO-0001' },
+      update: {
+        patientId: demoPatient1.id,
+        visitId: demoVisit2.id,
+        insurerProfileId: demoInsurer.id,
+        priorAuthId: demoPriorAuth.id,
+        status: 'submitted',
+        submittedAt: new Date('2026-05-17T09:00:00Z'),
+        totalAmountEgp: 350,
+        approvedAmountEgp: null,
+        deniedReason: null,
+        tenantId: 'platform',
+      },
+      create: {
+        code: 'CLM-DEMO-0001',
+        patientId: demoPatient1.id,
+        visitId: demoVisit2.id,
+        insurerProfileId: demoInsurer.id,
+        priorAuthId: demoPriorAuth.id,
+        status: 'submitted',
+        submittedAt: new Date('2026-05-17T09:00:00Z'),
+        totalAmountEgp: 350,
+        approvedAmountEgp: null,
+        deniedReason: null,
+        tenantId: 'platform',
+      },
+    });
+
+    await prisma.claimLineItem.upsert({
+      where: { id: 'claim_line_demo_001' },
+      update: {
+        claimId: demoClaim.id,
+        serviceCode: 'SV-001',
+        description: 'Telemedicine follow-up consultation',
+        quantity: 1,
+        unitPriceEgp: 350,
+        amountEgp: 350,
+        status: 'pending',
+        notes: 'Awaiting adjudication.',
+      },
+      create: {
+        id: 'claim_line_demo_001',
+        claimId: demoClaim.id,
+        serviceCode: 'SV-001',
+        description: 'Telemedicine follow-up consultation',
+        quantity: 1,
+        unitPriceEgp: 350,
+        amountEgp: 350,
+        status: 'pending',
+        notes: 'Awaiting adjudication.',
+      },
+    });
+
+    // Compliance workspace demo events.
+    const complianceEvents = [
+      { key: 'audit_seed_restricted_read_001', tableName: 'restricted_clinical_access', action: 'read' as const, changedBy: 'staff_nurse_demo', changedFields: { accessType: 'restricted', reason: 'Night shift continuity of care' } },
+      { key: 'audit_seed_break_glass_001', tableName: 'restricted_clinical_access', action: 'override' as const, changedBy: 'staff_doctor_demo', changedFields: { accessType: 'break_glass', reason: 'Emergency respiratory decline' } },
+      { key: 'audit_seed_export_001', tableName: 'documents', action: 'export' as const, changedBy: 'staff_compliance_demo', changedFields: { route: '/api/ehr/documents/[id]' } },
+      { key: 'audit_seed_access_denied_001', tableName: 'documents', action: 'access_denied' as const, changedBy: 'staff_viewer_demo', changedFields: { reason: 'Missing consent scope' } },
+      { key: 'audit_seed_login_001', tableName: 'staff', action: 'login' as const, changedBy: 'staff_admin_demo', changedFields: { provider: 'staff-credentials' } },
+      { key: 'audit_seed_logout_001', tableName: 'staff', action: 'logout' as const, changedBy: 'staff_admin_demo', changedFields: { source: 'header' } },
+    ];
+
+    for (const event of complianceEvents) {
+      const exists = await prisma.auditLog.findFirst({
+        where: {
+          tableName: event.tableName,
+          recordId: event.key,
+          action: event.action,
+        },
+        select: { id: true },
+      });
+
+      if (!exists) {
+        await prisma.auditLog.create({
+          data: {
+            tableName: event.tableName,
+            recordId: event.key,
+            action: event.action,
+            changedBy: event.changedBy,
+            changedFields: event.changedFields as Prisma.JsonObject,
+            changedAt: new Date(),
           },
         });
       }
@@ -2622,12 +2847,24 @@ async function main() {
     console.log('  - Password: Admin@123');
     console.log('  - Email: operator@aneeshealth.local');
     console.log('  - Password: Operator@123');
+    console.log('  - Email: medops@aneeshealth.local');
+    console.log('  - Password: MedOps@123');
     console.log('  - Email: doctor@aneeshealth.local');
     console.log('  - Password: Doctor@123');
     console.log('  - Email: physio@aneeshealth.local');
     console.log('  - Password: Physio@123');
     console.log('  - Email: nurse@aneeshealth.local');
     console.log('  - Password: Nurse@123');
+    console.log('  - Email: insurance@aneeshealth.local');
+    console.log('  - Password: Insurance@123');
+    console.log('  - Email: compliance@aneeshealth.local');
+    console.log('  - Password: Compliance@123');
+    console.log('  - Email: partner@aneeshealth.local');
+    console.log('  - Password: Partner@123');
+    console.log('  - Email: finance@aneeshealth.local');
+    console.log('  - Password: Finance@123');
+    console.log('  - Email: viewer@aneeshealth.local');
+    console.log('  - Password: Viewer@123');
   }
 
   console.log('Seed complete.');

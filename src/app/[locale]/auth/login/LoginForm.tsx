@@ -16,7 +16,7 @@ export default function LoginForm() {
   const rawCallbackUrl = searchParams.get('callbackUrl');
   const safeCallbackUrl = rawCallbackUrl?.startsWith('/') ? rawCallbackUrl : null;
   const patientDefaultUrl = `/${locale}/portal`;
-  const staffDefaultUrl = '/admin/patients';
+  const staffDefaultUrl = '/admin/clinician';
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');

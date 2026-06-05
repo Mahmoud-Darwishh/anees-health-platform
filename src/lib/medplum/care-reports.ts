@@ -45,11 +45,31 @@ export type CreateNursingReportInput = CreateBaseReportInput & {
 };
 
 export type CreatePhysioReportInput = CreateBaseReportInput & {
+  sessionTemplate?: 'post_op_knee' | 'stroke_rehab' | 'low_back_pain' | 'geriatric_mobility' | 'custom' | null;
+  sessionNumberLabel?: string | null;
+  subjectiveFunction?: string | null;
+  objectiveSummary?: string | null;
+  postOpKneeFlexionDeg?: number | null;
+  postOpKneeExtensionDeg?: number | null;
+  postOpKneeEffusionGrade?: '0' | '1' | '2' | '3' | null;
+  postOpKneeGaitPhase?: 'loading_response' | 'mid_stance' | 'terminal_stance' | 'swing' | 'antalgic' | null;
+  strokeAshworthScore?: number | null;
+  strokeBergScore?: number | null;
+  strokeFunctionalReachCm?: number | null;
+  lowBackSlrLeftDeg?: number | null;
+  lowBackSlrRightDeg?: number | null;
+  lowBackSchoberCm?: number | null;
+  lowBackPainWithMovement?: boolean | null;
+  geriatricTugSeconds?: number | null;
+  geriatricTinettiScore?: number | null;
+  geriatricFallRiskClass?: 'low' | 'moderate' | 'high' | null;
   interventions?: string | null;
   painBefore?: number | null;
   painAfter?: number | null;
   responseSummary?: string | null;
   homePlan?: string | null;
+  nextSessionFocus?: string | null;
+  dischargeReadiness?: 'not_yet' | 'one_to_two_sessions' | 'ready' | null;
 };
 
 export type CreateNursingShiftHandoffInput = CreateBaseReportInput & {
@@ -180,6 +200,258 @@ export async function createPhysioSessionReport(input: CreatePhysioReportInput):
       text: 'Physiotherapy Session Report',
     },
     component: [
+      input.sessionTemplate
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'session-template',
+                  display: 'Session Template',
+                },
+              ],
+            },
+            valueString: input.sessionTemplate,
+          }
+        : undefined,
+      input.sessionNumberLabel
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'session-number-label',
+                  display: 'Session Number Label',
+                },
+              ],
+            },
+            valueString: input.sessionNumberLabel,
+          }
+        : undefined,
+      input.subjectiveFunction
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'subjective-function',
+                  display: 'Subjective Function',
+                },
+              ],
+            },
+            valueString: input.subjectiveFunction,
+          }
+        : undefined,
+      input.objectiveSummary
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'objective-summary',
+                  display: 'Objective Summary',
+                },
+              ],
+            },
+            valueString: input.objectiveSummary,
+          }
+        : undefined,
+      typeof input.postOpKneeFlexionDeg === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'post-op-knee-flexion-deg',
+                  display: 'Post-op Knee Flexion (deg)',
+                },
+              ],
+            },
+            valueInteger: input.postOpKneeFlexionDeg,
+          }
+        : undefined,
+      typeof input.postOpKneeExtensionDeg === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'post-op-knee-extension-deg',
+                  display: 'Post-op Knee Extension (deg)',
+                },
+              ],
+            },
+            valueInteger: input.postOpKneeExtensionDeg,
+          }
+        : undefined,
+      input.postOpKneeEffusionGrade
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'post-op-knee-effusion-grade',
+                  display: 'Post-op Knee Effusion Grade',
+                },
+              ],
+            },
+            valueString: input.postOpKneeEffusionGrade,
+          }
+        : undefined,
+      input.postOpKneeGaitPhase
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'post-op-knee-gait-phase',
+                  display: 'Post-op Knee Gait Phase',
+                },
+              ],
+            },
+            valueString: input.postOpKneeGaitPhase,
+          }
+        : undefined,
+      typeof input.strokeAshworthScore === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'stroke-ashworth-score',
+                  display: 'Stroke Ashworth Score',
+                },
+              ],
+            },
+            valueInteger: input.strokeAshworthScore,
+          }
+        : undefined,
+      typeof input.strokeBergScore === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'stroke-berg-score',
+                  display: 'Stroke Berg Score',
+                },
+              ],
+            },
+            valueInteger: input.strokeBergScore,
+          }
+        : undefined,
+      typeof input.strokeFunctionalReachCm === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'stroke-functional-reach-cm',
+                  display: 'Stroke Functional Reach (cm)',
+                },
+              ],
+            },
+            valueInteger: input.strokeFunctionalReachCm,
+          }
+        : undefined,
+      typeof input.lowBackSlrLeftDeg === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'low-back-slr-left-deg',
+                  display: 'Low Back SLR Left (deg)',
+                },
+              ],
+            },
+            valueInteger: input.lowBackSlrLeftDeg,
+          }
+        : undefined,
+      typeof input.lowBackSlrRightDeg === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'low-back-slr-right-deg',
+                  display: 'Low Back SLR Right (deg)',
+                },
+              ],
+            },
+            valueInteger: input.lowBackSlrRightDeg,
+          }
+        : undefined,
+      typeof input.lowBackSchoberCm === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'low-back-schober-cm',
+                  display: 'Low Back Schober (cm)',
+                },
+              ],
+            },
+            valueInteger: input.lowBackSchoberCm,
+          }
+        : undefined,
+      typeof input.lowBackPainWithMovement === 'boolean'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'low-back-pain-with-movement',
+                  display: 'Low Back Pain with Movement',
+                },
+              ],
+            },
+            valueString: input.lowBackPainWithMovement ? 'yes' : 'no',
+          }
+        : undefined,
+      typeof input.geriatricTugSeconds === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'geriatric-tug-seconds',
+                  display: 'Geriatric TUG (seconds)',
+                },
+              ],
+            },
+            valueInteger: input.geriatricTugSeconds,
+          }
+        : undefined,
+      typeof input.geriatricTinettiScore === 'number'
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'geriatric-tinetti-score',
+                  display: 'Geriatric Tinetti Score',
+                },
+              ],
+            },
+            valueInteger: input.geriatricTinettiScore,
+          }
+        : undefined,
+      input.geriatricFallRiskClass
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'geriatric-fall-risk-class',
+                  display: 'Geriatric Fall Risk Class',
+                },
+              ],
+            },
+            valueString: input.geriatricFallRiskClass,
+          }
+        : undefined,
       input.interventions
         ? {
             code: {
@@ -248,6 +520,34 @@ export async function createPhysioSessionReport(input: CreatePhysioReportInput):
               ],
             },
             valueString: input.homePlan,
+          }
+        : undefined,
+      input.nextSessionFocus
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'next-session-focus',
+                  display: 'Next Session Focus',
+                },
+              ],
+            },
+            valueString: input.nextSessionFocus,
+          }
+        : undefined,
+      input.dischargeReadiness
+        ? {
+            code: {
+              coding: [
+                {
+                  system: MEDPLUM_CODE_SYSTEMS.reportType,
+                  code: 'discharge-readiness',
+                  display: 'Discharge Readiness',
+                },
+              ],
+            },
+            valueString: input.dischargeReadiness,
           }
         : undefined,
     ].filter(Boolean) as NonNullable<CareReportResource['component']>,

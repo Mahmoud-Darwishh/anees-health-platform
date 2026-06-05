@@ -3,6 +3,9 @@
 > Short-term execution plan, based on the **actual state of the codebase** (audited).
 > Companion to `CTO_STRATEGY.md` and `.claude/CLAUDE.md` — those are the long view and the reference; this one is **what we do this week, this sprint, this quarter**.
 > Horizon: **next 12 weeks (6 sprints × 2 weeks)**.
+> **Last updated:** 2026-06-05.
+
+> **Status snapshot:** Sprint 1 audit-gap work is partially done (login/logout audit ✅; operational Postgres writes still gap). Sprint 2 multi-tenancy foundations landed as Phase 1A (`Tenant` model + `tenantId` columns). New tracks landed out of sequence: clinician workspace at `/clinician/*` (physio pilot), Cloudflare R2 + malware scanning, break-glass governance, insurance + claims schema. Sprint 0 (Hostinger → OVH) is **still in flight** — that gates everything else.
 
 ---
 
@@ -10,27 +13,38 @@
 
 Before planning the next sprint, this is what already exists in the repo (so we don't rebuild it):
 
-✅ **NextAuth v5** installed and live (Google + patient creds + staff creds + JWT sessions + RBAC)
+✅ **NextAuth v5** installed and live (Google + patient creds + staff creds + JWT sessions + RBAC + **login/logout audit**)
 ✅ **WhatsApp OTP** via Wapilot (send + verify)
-✅ **Medplum FHIR fully integrated** — 23 modules, patient sync, all major clinical resources
-✅ **Admin patient EHR detail page** with 30 server actions (visits, vitals, notes draft/sign, care team, tasks, conditions, allergies, meds, med-admins, labs, docs, escalations, nursing handoffs, geo-policy, caregiver consent, demographics)
-✅ **Patient portal** at `/[locale]/portal` with tabbed workspace (overview, clinical, files, care, visits, vitals, notes, tasks) — bilingual, caregiver-consent-scoped
+✅ **Medplum FHIR fully integrated** — **24 modules** (including `goals.ts`), patient sync, all major clinical resources
+✅ **Admin patient EHR detail page** with 30+ server actions
+✅ **Patient portal** at `/[locale]/portal` with tabbed workspace, bilingual, caregiver-consent-scoped
+✅ **Clinician workspace** at `/clinician/*` — physiotherapy pilot, mobile-first, license-gated, case-scoped (today, patients, session, tasks, earnings, profile)
 ✅ **Nursing dashboard** + **escalations queue**
 ✅ **Document streaming** with auth + case-scope + consent enforcement
-✅ **Patient ↔ Medplum** identity link (`Patient.medplumPatientId`, `Staff.medplumPractitionerId`)
-✅ **Prisma Migrate** workflow (not `db:push`)
+✅ **Cloudflare R2** medical-file storage + **malware scanning** background job (`/api/internal/ehr/documents/scan`)
+✅ **Multi-tenancy foundations (Phase 1A)** — `Tenant` model + `tenantId` columns on 11 core tables, defaulted to `"platform"`
+✅ **Visit state machine** — 22 states + 16 disruption codes + `VisitStateTransition` ledger + `VisitParticipant` + `VisitLocationPing`
+✅ **Break-glass governance schema** — `DestructiveApprovalToken`, `StandingOrder`, `StandingOrderExecution`
+✅ **Insurance + claims schema** — `InsurerProfile`, `Coverage`, `PriorAuth`, `Claim`, `ClaimLineItem`, `ControlledSubstanceLedger` + admin dashboard skeleton at `/admin/insurance`
+✅ **Admin compliance dashboard** at `/admin/compliance` for audit log review
+✅ **New staff roles** — `medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin`
+✅ **License gating** via `Staff.license*` fields + `PhysioProfile` + `canSignClinical()` helper
+✅ **Patient ↔ Medplum** identity link (`Patient.medplumPatientId`, `Staff.medplumPractitionerId`); **FHIR Goal round-trip** (`PatientGoal.fhirGoalId`)
+✅ **Prisma Migrate** workflow (9 migrations applied)
 ✅ **Zod** in EHR schemas
 ✅ **PWA** + VAPID push
+✅ **HEP feature removed** — dropped from schema (parked behind protocol gate)
+✅ **Caregiver scaffolding deleted** — caregivers access via `/[locale]/portal` + FHIR `Consent`
 
-The earlier draft of this file proposed building most of the above — that was wrong. The real gaps are smaller, more specific, and listed below.
+The original draft of this file proposed building most of the above — that was wrong. The real gaps are smaller, more specific, and listed below.
 
 ---
 
 ## The one-line goal
 
-> **In 12 weeks: migrate off Hostinger to OVH Bahrain, close the audit gap, wire observability, add multi-tenancy, ship telemedicine, and stand up a hospital-partner portal stub — so the MOU hospital can start using the platform and we can credibly pitch hospital #2.**
+> **In 12 weeks: complete the OVH migration, close the Postgres audit gap, wire observability, sign the Medplum BAA + DPL DPAs, harden the clinician portal + R2 + malware scanning for production, ship telemedicine, and stand up a hospital-partner portal stub — so the MOU hospital can start using the platform and we can credibly pitch hospital #2.**
 
-That is the only goal. Everything below serves it.
+Multi-tenancy foundations already landed (Phase 1A). The remaining gates are infrastructure, paperwork, and the hospital-facing surface.
 
 ---
 
@@ -88,62 +102,61 @@ That is the only goal. Everything below serves it.
 **Compliance and hygiene. Boring. Required.**
 
 ### Backend
-- [ ] **Close Postgres mutation auditing with explicit writes** (`prisma.auditLog.create()` or a wired extension) across `Patient`, `OnlineBooking`, `Visit`, `CarePlan`, `Invoice`, `Payment`, `Staff`, and `User` mutations. Document the chosen pattern.
-- [ ] Add **staff login audit event** in `src/auth.ts` (`staff-credentials.authorize` callback — see the TODO comment).
+- [ ] **Close Postgres mutation auditing with explicit writes** (`prisma.auditLog.create()` or a wired extension) across `Patient`, `OnlineBooking`, `Visit`, `CarePlan`, `Invoice`, `Payment`, `Staff`, and `User` mutations. Document the chosen pattern. **(Login/logout already done.)**
+- [x] Add **staff login audit event** in `src/auth.ts` — done as `writeLoginAudit()`.
+- [x] Add **logout audit endpoint** — done at `/api/auth/logout-audit`.
 - [ ] Audit drill: write a script that lists "tables with mutations in the last 7 days" vs "tables with AuditLog rows in the last 7 days." Gap should be zero for audited models.
-- [ ] Move all secrets from `.env.local` (on each engineer's laptop) to **Doppler** or **1Password Secrets Automation**. App reads from there in production. No secrets in repo, no secrets in chat.
+- [ ] Emit `AuditLog` with `action = access_denied` from every RBAC failure path.
+- [ ] Move all secrets from `.env.local` to **Doppler** or **1Password Secrets Automation** (or OVH-native secret store post-migration).
 - [x] Remove stale/missing `scripts/*` references from `package.json` scripts.
 - [x] Delete nested duplicate `anees-health-platform/anees-health-platform/` folder.
-- [x] Delete dead local storage abstraction (`src/lib/storage/file-storage.ts`) now that file storage is Medplum-managed.
-- [x] Delete empty caregiver and portal scaffolding folders.
+- [x] Delete dead local storage abstraction (`src/lib/storage/file-storage.ts`) — replaced by `src/lib/storage/r2-medical.ts`.
+- [x] Delete empty caregiver scaffolding folders.
 
 ### Sprint 1 — Definition of done
 - Every Postgres mutation to an audited model produces an `AuditLog` row, verified by an audit-gap script
-- Staff login + logout emit audit events
-- No secrets remain in any engineer's `.env.local` (production reads from Doppler / 1Password)
-- Repo has no dead code with the labels above
+- Staff login + logout emit audit events ✅
+- `access_denied` is emitted from every RBAC denial
+- No secrets remain in any engineer's `.env.local` (production reads from a managed store)
+- Repo has no dead code with the labels above ✅
 - `npm run db:migrate:status` and all `package.json` scripts execute successfully (or are removed)
 
 ---
 
-## Sprint 2 — Multi-tenancy foundation (Weeks 3–4)
+## Sprint 2 — Multi-tenancy enforcement + clinician hardening (Weeks 3–4)
 
-**Add tenant scoping before we have multiple tenants. Once we have two, retrofit is painful.**
+**Phase 1A foundations already landed.** Schema has `Tenant` + `tenantId` columns on 11 tables, all defaulted to `"platform"`. The remaining work is enforcement and clinician-portal hardening.
 
 ### Backend
-- [ ] Add `Tenant` model to schema:
-  ```
-  model Tenant {
-    id            String   @id @default(cuid())
-    code          String   @unique   // "anees", "hospital-x"
-    displayName   String
-    type          TenantType         // direct | hospital | insurer
-    logoUrl       String?
-    primaryColor  String?
-    supportPhone  String?
-    serviceLines  String[]           // ["doctor","nursing","physio","telemedicine"]
-    isActive      Boolean  @default(true)
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
-  }
-  ```
-- [ ] Add `tenantId` (FK, nullable for now) to: `Patient`, `Visit`, `CarePlan`, `Invoice`, `OnlineBooking`, `Staff`, `NurseShiftAssignment`
-- [ ] Seed the `anees` default tenant; backfill all existing rows with that tenant
-- [ ] Once backfilled, drop `nullable` from `tenantId`
-- [ ] Add `tenantId` filter to every Prisma query in `data.ts` files (use a query helper that injects the tenant from session)
-- [ ] Update Medplum: add a `tenant-id` FHIR extension on Patient/Encounter/etc., and a `Group` resource per tenant (FHIR-native multi-tenancy pattern)
-- [ ] Update RBAC: `getSessionUser()` returns `tenantId` derived from staff/patient → tenant join
+- [x] `Tenant` model + `TenantStatus` enum — done.
+- [x] `tenantId` columns on `Patient`, `Provider`, `Visit`, `CarePlan`, `Invoice`, `OnlineBooking`, `Staff`, `Coverage`, `PriorAuth`, `Claim`, `ControlledSubstanceLedger` — done, defaulted to `"platform"`.
+- [ ] **Add `tenantId` filter to every Prisma query in `data.ts` files** — use a query helper that injects the tenant from session. Today queries are per-call.
+- [ ] Investigate Postgres **row-level security (RLS)** as the long-term enforcement (Sprint 5 candidate).
+- [ ] Update Medplum: add a `tenant-id` FHIR extension on Patient/Encounter/etc., and a `Group` resource per tenant.
+- [ ] Update RBAC: `getSessionUser()` returns `tenantId` derived from staff/patient → tenant join.
+
+### Clinician portal hardening
+- [ ] Switch `clinician-physio/patients/*` from raw SQL on `PatientGoal` to Prisma.
+- [ ] Add explicit `AuditLog` writes in every clinician action (TODO comments in `src/features/ehr/clinician-physio/actions.ts`).
+- [ ] Wire up `VisitStateTransition` writes for every transition action — direct `Visit.update({ state })` should be unreachable.
+- [ ] End-of-day clinician card (visit summary + earnings).
+- [ ] Map view on the "Today" page (route + ETA per visit).
+
+### R2 + malware scanning — production readiness
+- [ ] Decide on production malware-scan vendor (ClamAV / Cloudflare Email Security / Bitdefender). **Owner action.**
+- [ ] Wire `EHR_MALWARE_SCAN_BACKEND=http` in staging and prod.
+- [ ] Add R2 bucket **lifecycle policy** — quarantine bucket auto-expires `infected` objects after 90 days.
+- [ ] Confirm signed-URL TTL is ≤ 10 minutes on every download path.
 
 ### Frontend
-- [ ] Admin nav shows current tenant name; superadmin can switch tenants
-- [ ] Patient list queries scoped to current tenant
-- [ ] No UI visible difference for now (we only have 1 tenant) — this is plumbing
+- [ ] Admin nav shows current tenant name; superadmin can switch tenants.
+- [ ] Patient list queries scoped to current tenant (already true for some surfaces; verify all).
 
 ### Sprint 2 — Definition of done
-- Schema migration applied, all existing rows backfilled
-- All admin queries scoped by tenant — a test tenant can be created and its data is invisible to `anees`
-- Medplum resources carry tenant identifier
-- Hospital tenant can be created in <5 minutes via admin UI (even if its portal isn't built yet)
+- Every `data.ts` query on a tenant-scoped table goes through a tenant-aware helper.
+- Clinician portal writes audit rows and goes through transitions; raw SQL gone.
+- Malware scanner in staging + prod is the real engine, not the mock backend.
+- Admin can create a hospital tenant in <5 minutes via UI (even if its portal isn't built yet).
 
 ---
 
@@ -352,6 +365,12 @@ Stop work and escalate if:
 - Long-view: `docs/CTO_STRATEGY.md` — the **why / phases**
 - Reference: `.claude/CLAUDE.md` — the **current codebase state**
 - Codebase: `src/` — the **how**
+- Compliance: `docs/HIPAA_COMPLIANCE.md` — the **owner-actions list** and gap tracker
+- Security: `docs/SECURITY_ARCHITECTURE.md` — the **controls** and the IR runbook
+- Infra: `docs/DEPLOYMENT_RUNBOOK.md` — the **migration plan** and on-call runbooks
+- FHIR: `docs/FHIR_CATALOG.md` — the **clinical resource catalog**
+- Roles: `docs/EHR_ROLE_MATRIX.md` — the **RBAC source of truth**
+- Physio: `docs/EHR_PHYSIO_SPEC.md` — the **clinician workspace spec**
 
 Update this file **at the end of every sprint**. Move done sprints to a "Completed" section at the bottom. Add the next sprint's plan to the top of the queue. Keep it ruthlessly current — a stale plan is worse than no plan.
 

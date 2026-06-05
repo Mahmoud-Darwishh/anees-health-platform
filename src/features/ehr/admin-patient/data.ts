@@ -1,4 +1,5 @@
 import 'server-only';
+import { cookies } from 'next/headers';
 
 import { getMedplumPatient } from '@/lib/medplum/patients';
 import { listPatientEncounters } from '@/lib/medplum/encounters';
@@ -20,8 +21,136 @@ import { listPatientAppointments } from '@/lib/medplum/appointments';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { CLINICAL_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
 import { prisma } from '@/lib/db/prisma';
+import {
+  ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE,
+} from './constants';
 import type { AdminPatientDetailData } from './types';
 import { toCareTeamRole } from './helpers';
+
+type RestrictedAccessCookiePayload = {
+  patientId: string;
+  reason: string;
+  grantedAt: string;
+};
+
+type LocalVisitStateRow = {
+  state: string | null;
+};
+
+type LocalVisitTransitionRow = {
+  toState: string;
+  createdAt: Date;
+  isOverride: boolean;
+  overrideMethod: string | null;
+};
+
+function deriveLocalVisitStateFallback(visit: {
+  status: string;
+  acknowledgedAt: Date | null;
+  enRouteAt: Date | null;
+  arrivedAt: Date | null;
+  checkInAt: Date | null;
+  checkOutAt: Date | null;
+}): string {
+  if (visit.status === 'cancelled' || visit.status === 'no_show' || visit.status === 'completed') {
+    return visit.status;
+  }
+  if (visit.checkOutAt) {
+    return 'checked_out';
+  }
+  if (visit.checkInAt) {
+    return 'checked_in';
+  }
+  if (visit.arrivedAt) {
+    return 'arrived';
+  }
+  if (visit.enRouteAt) {
+    return 'en_route';
+  }
+  if (visit.acknowledgedAt) {
+    return 'acknowledged';
+  }
+  return 'scheduled';
+}
+
+async function readLocalVisitState(visitId: string): Promise<string | null> {
+  try {
+    const rows = await prisma.$queryRaw<LocalVisitStateRow[]>`
+      SELECT state::text AS state
+      FROM visits
+      WHERE id = ${visitId}
+      LIMIT 1
+    `;
+    return rows[0]?.state ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function readLocalVisitTimeline(
+  visitId: string,
+): Promise<Array<{ toState: string; createdAt: string; isOverride: boolean; overrideMethod: string | null }>> {
+  try {
+    const rows = await prisma.$queryRaw<LocalVisitTransitionRow[]>`
+      SELECT
+        to_state::text AS "toState",
+        created_at AS "createdAt",
+        is_override AS "isOverride",
+        override_method AS "overrideMethod"
+      FROM visit_state_transitions
+      WHERE visit_id = ${visitId}
+      ORDER BY created_at DESC
+      LIMIT 5
+    `;
+
+    return rows.map((row) => ({
+      toState: row.toState,
+      createdAt: new Date(row.createdAt).toISOString(),
+      isOverride: Boolean(row.isOverride),
+      overrideMethod: row.overrideMethod,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function hasRestrictedSignal(text: string): boolean {
+  const keywords = ['hiv', 'sti', 'mental', 'psychi', 'reproductive', 'domestic violence', 'substance'];
+  const normalized = text.toLowerCase();
+  return keywords.some((keyword) => normalized.includes(keyword));
+}
+
+function isRestrictedTierItem(params: {
+  structuredFlag?: boolean;
+  fallbackText?: string;
+}): boolean {
+  if (params.structuredFlag) {
+    return true;
+  }
+  return params.fallbackText ? hasRestrictedSignal(params.fallbackText) : false;
+}
+
+function canBypassRestrictedReason(role: AdminPatientDetailData['staffRole']): boolean {
+  return role === 'compliance_officer' || role === 'superadmin';
+}
+
+async function getRestrictedAccessGrant(patientId: string): Promise<RestrictedAccessCookiePayload | null> {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE)?.value;
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as RestrictedAccessCookiePayload;
+    if (!parsed?.patientId || parsed.patientId !== patientId || !parsed.reason) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 export async function loadAdminPatientDetailData(id: string): Promise<AdminPatientDetailData> {
   const user = await getStaffUser(CLINICAL_ROLES);
@@ -29,6 +158,11 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
   if (!user?.staffId || !user.staffRole) {
     return {
       staffRole: null,
+      restrictedAccess: {
+        hasRestrictedContent: false,
+        requiresReason: false,
+        reasonPreview: null,
+      },
       patient: null,
       localPatient: null,
       error: 'Unauthorized',
@@ -67,6 +201,10 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       appointmentsError: null,
       nurseShiftAssignments: [],
       nurseShiftAssignmentsError: null,
+      localVisits: [],
+      localVisitsError: null,
+      standingOrders: [],
+      standingOrdersError: null,
       caregiverConsents: [],
       caregiverConsentsError: null,
     };
@@ -98,6 +236,11 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
   if (!patient?.id) {
     return {
       staffRole: user.staffRole,
+      restrictedAccess: {
+        hasRestrictedContent: false,
+        requiresReason: false,
+        reasonPreview: null,
+      },
       patient: null,
       localPatient: null,
       error,
@@ -136,6 +279,10 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       appointmentsError: null,
       nurseShiftAssignments: [],
       nurseShiftAssignmentsError: null,
+      localVisits: [],
+      localVisitsError: null,
+      standingOrders: [],
+      standingOrdersError: null,
       caregiverConsents: [],
       caregiverConsentsError: null,
     };
@@ -157,6 +304,65 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       emergencyContactName: true,
       emergencyContactPhone: true,
       emergencyContactRelation: true,
+      dnrStatus: true,
+    },
+  });
+
+  const localVisitsPromise = prisma.visit.findMany({
+    where: {
+      patient: {
+        medplumPatientId: patient.id,
+      },
+    },
+    orderBy: [{ scheduledDate: 'desc' }, { updatedAt: 'desc' }],
+    take: 40,
+    select: {
+      id: true,
+      code: true,
+      status: true,
+      scheduledDate: true,
+      scheduledTime: true,
+      acknowledgedAt: true,
+      enRouteAt: true,
+      arrivedAt: true,
+      checkInAt: true,
+      checkOutAt: true,
+      checkInLat: true,
+      checkInLng: true,
+      checkOutLat: true,
+      checkOutLng: true,
+      checkInAccuracyM: true,
+      provider: {
+        select: {
+          fullName: true,
+        },
+      },
+    },
+  });
+
+  const standingOrdersPromise = prisma.standingOrder.findMany({
+    where: {
+      patient: {
+        medplumPatientId: patient.id,
+      },
+    },
+    orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
+    take: 60,
+    include: {
+      executions: {
+        orderBy: {
+          executedAt: 'desc',
+        },
+        take: 1,
+        select: {
+          executedAt: true,
+        },
+      },
+      _count: {
+        select: {
+          executions: true,
+        },
+      },
     },
   });
 
@@ -164,7 +370,7 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     where: {
       status: 'active',
       role: {
-        in: ['doctor', 'nurse', 'physiotherapist', 'operator', 'admin', 'superadmin'],
+        in: ['doctor', 'nurse', 'physiotherapist', 'medical_ops', 'operator', 'admin', 'superadmin', 'finance'],
       },
     },
     select: {
@@ -194,6 +400,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     communicationsResult,
     appointmentsResult,
     nurseShiftAssignmentsResult,
+    localVisitsResult,
+    standingOrdersResult,
     staffRows,
     consentsResult,
     localPatientResult,
@@ -247,13 +455,160 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
           },
         },
       }),
+      localVisitsPromise,
+      standingOrdersPromise,
       staffPromise,
       listPatientCaregiverPortalConsents(patient.id),
       localPatientPromise,
     ]);
 
+  const baseConditions = conditionsResult.status === 'fulfilled' ? conditionsResult.value : [];
+  const baseClinicalNotes = clinicalNotesResult.status === 'fulfilled' ? clinicalNotesResult.value : [];
+  const baseDocuments = documentsResult.status === 'fulfilled' ? documentsResult.value : [];
+  const baseLabOrders = labOrdersResult.status === 'fulfilled' ? labOrdersResult.value : [];
+  const baseLabResults = labResultsResult.status === 'fulfilled' ? labResultsResult.value : [];
+  const restrictedInConditions = baseConditions.filter((item) =>
+    isRestrictedTierItem({
+      structuredFlag: item.restrictedTier,
+      fallbackText: `${item.label} ${item.note ?? ''}`,
+    }),
+  );
+  const restrictedInNotes = baseClinicalNotes.filter((item) =>
+    isRestrictedTierItem({
+      structuredFlag: item.restrictedTier,
+      fallbackText: `${item.title} ${item.body ?? ''}`,
+    }),
+  );
+  const restrictedInDocuments = baseDocuments.filter((item) =>
+    isRestrictedTierItem({ structuredFlag: item.restrictedTier, fallbackText: `${item.title} ${item.category}` }),
+  );
+  const restrictedInLabOrders = baseLabOrders.filter((item) =>
+    isRestrictedTierItem({ structuredFlag: item.restrictedTier, fallbackText: `${item.title} ${item.note ?? ''}` }),
+  );
+  const restrictedInLabResults = baseLabResults.filter((item) =>
+    isRestrictedTierItem({ structuredFlag: item.restrictedTier, fallbackText: `${item.title} ${item.conclusion ?? ''}` }),
+  );
+  const hasRestrictedContent =
+    restrictedInConditions.length > 0 ||
+    restrictedInNotes.length > 0 ||
+    restrictedInDocuments.length > 0 ||
+    restrictedInLabOrders.length > 0 ||
+    restrictedInLabResults.length > 0;
+
+  const restrictedGrant = hasRestrictedContent ? await getRestrictedAccessGrant(patient.id) : null;
+  const requiresReason =
+    hasRestrictedContent &&
+    !canBypassRestrictedReason(user.staffRole) &&
+    !restrictedGrant;
+
+  const visibleConditions = requiresReason
+    ? baseConditions.filter(
+        (item) =>
+          !isRestrictedTierItem({
+            structuredFlag: item.restrictedTier,
+            fallbackText: `${item.label} ${item.note ?? ''}`,
+          }),
+      )
+    : baseConditions;
+  const visibleClinicalNotes = requiresReason
+    ? baseClinicalNotes.filter(
+        (item) =>
+          !isRestrictedTierItem({
+            structuredFlag: item.restrictedTier,
+            fallbackText: `${item.title} ${item.body ?? ''}`,
+          }),
+      )
+    : baseClinicalNotes;
+  const visibleDocuments = requiresReason
+    ? baseDocuments.filter(
+        (item) => !isRestrictedTierItem({ structuredFlag: item.restrictedTier, fallbackText: `${item.title} ${item.category}` }),
+      )
+    : baseDocuments;
+  const visibleLabOrders = requiresReason
+    ? baseLabOrders.filter(
+        (item) => !isRestrictedTierItem({ structuredFlag: item.restrictedTier, fallbackText: `${item.title} ${item.note ?? ''}` }),
+      )
+    : baseLabOrders;
+  const visibleLabResults = requiresReason
+    ? baseLabResults.filter(
+        (item) =>
+          !isRestrictedTierItem({ structuredFlag: item.restrictedTier, fallbackText: `${item.title} ${item.conclusion ?? ''}` }),
+      )
+    : baseLabResults;
+
+  if (hasRestrictedContent && user.staffId) {
+    try {
+      await prisma.auditLog.create({
+        data: {
+          tableName: 'restricted_clinical_read',
+          recordId: patient.id,
+          action: requiresReason ? 'access_denied' : 'read',
+          changedFields: {
+            role: user.staffRole,
+            reasonProvided: Boolean(restrictedGrant?.reason),
+            maskedResources: {
+              conditions: restrictedInConditions.length,
+              notes: restrictedInNotes.length,
+              documents: restrictedInDocuments.length,
+              labOrders: restrictedInLabOrders.length,
+              labResults: restrictedInLabResults.length,
+            },
+          },
+          changedBy: user.staffId,
+        },
+      });
+    } catch {
+      // Best-effort audit.
+    }
+  }
+
+  const resolvedLocalVisits =
+    localVisitsResult.status === 'fulfilled'
+      ? await Promise.all(
+          localVisitsResult.value.map(async (visit) => {
+            const effectiveState =
+              (await readLocalVisitState(visit.id))
+              ?? deriveLocalVisitStateFallback({
+                status: visit.status,
+                acknowledgedAt: visit.acknowledgedAt,
+                enRouteAt: visit.enRouteAt,
+                arrivedAt: visit.arrivedAt,
+                checkInAt: visit.checkInAt,
+                checkOutAt: visit.checkOutAt,
+              });
+            const transitionTimeline = await readLocalVisitTimeline(visit.id);
+
+            return {
+              id: visit.id,
+              code: visit.code,
+              status: visit.status,
+              effectiveState,
+              scheduledDate: visit.scheduledDate.toISOString(),
+              scheduledTime: visit.scheduledTime ?? null,
+              acknowledgedAt: visit.acknowledgedAt?.toISOString() ?? null,
+              enRouteAt: visit.enRouteAt?.toISOString() ?? null,
+              arrivedAt: visit.arrivedAt?.toISOString() ?? null,
+              checkInAt: visit.checkInAt?.toISOString() ?? null,
+              checkOutAt: visit.checkOutAt?.toISOString() ?? null,
+              checkInLat: visit.checkInLat?.toString() ?? null,
+              checkInLng: visit.checkInLng?.toString() ?? null,
+              checkOutLat: visit.checkOutLat?.toString() ?? null,
+              checkOutLng: visit.checkOutLng?.toString() ?? null,
+              checkInAccuracyM: visit.checkInAccuracyM ?? null,
+              providerName: visit.provider?.fullName ?? null,
+              transitionTimeline,
+            };
+          }),
+        )
+      : [];
+
   return {
     staffRole: user.staffRole,
+    restrictedAccess: {
+      hasRestrictedContent,
+      requiresReason,
+      reasonPreview: restrictedGrant?.reason ?? null,
+    },
     patient,
     localPatient:
       localPatientResult.status === 'fulfilled' && localPatientResult.value
@@ -279,7 +634,7 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
           ? vitalsResult.reason.message
           : 'Failed to load patient vitals from Medplum'
         : null,
-    clinicalNotes: clinicalNotesResult.status === 'fulfilled' ? clinicalNotesResult.value : [],
+    clinicalNotes: visibleClinicalNotes,
     clinicalNotesError:
       clinicalNotesResult.status === 'rejected'
         ? clinicalNotesResult.reason instanceof Error
@@ -311,7 +666,7 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
           ? careReportsResult.reason.message
           : 'Failed to load care reports from Medplum'
         : null,
-    conditions: conditionsResult.status === 'fulfilled' ? conditionsResult.value : [],
+    conditions: visibleConditions,
     conditionsError:
       conditionsResult.status === 'rejected'
         ? conditionsResult.reason instanceof Error
@@ -342,21 +697,21 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
           ? medicationAdministrationsResult.reason.message
           : 'Failed to load medication administration records from Medplum'
         : null,
-    documents: documentsResult.status === 'fulfilled' ? documentsResult.value : [],
+    documents: visibleDocuments,
     documentsError:
       documentsResult.status === 'rejected'
         ? documentsResult.reason instanceof Error
           ? documentsResult.reason.message
           : 'Failed to load patient documents from Medplum'
         : null,
-    labOrders: labOrdersResult.status === 'fulfilled' ? labOrdersResult.value : [],
+    labOrders: visibleLabOrders,
     labOrdersError:
       labOrdersResult.status === 'rejected'
         ? labOrdersResult.reason instanceof Error
           ? labOrdersResult.reason.message
           : 'Failed to load lab orders from Medplum'
         : null,
-    labResults: labResultsResult.status === 'fulfilled' ? labResultsResult.value : [],
+    labResults: visibleLabResults,
     labResultsError:
       labResultsResult.status === 'rejected'
         ? labResultsResult.reason instanceof Error
@@ -405,6 +760,35 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
         ? nurseShiftAssignmentsResult.reason instanceof Error
           ? nurseShiftAssignmentsResult.reason.message
           : 'Failed to load shift roster'
+        : null,
+    localVisits: resolvedLocalVisits,
+    localVisitsError:
+      localVisitsResult.status === 'rejected'
+        ? localVisitsResult.reason instanceof Error
+          ? localVisitsResult.reason.message
+          : 'Failed to load local visit workflow records'
+        : null,
+    standingOrders:
+      standingOrdersResult.status === 'fulfilled'
+        ? standingOrdersResult.value.map((order) => ({
+            id: order.id,
+            discipline: order.discipline,
+            title: order.title,
+            instructions: order.instructions,
+            isActive: order.isActive,
+            validFrom: order.validFrom?.toISOString() ?? null,
+            validUntil: order.validUntil?.toISOString() ?? null,
+            createdAt: order.createdAt.toISOString(),
+            createdByStaffId: order.createdByStaffId,
+            lastExecutionAt: order.executions[0]?.executedAt?.toISOString() ?? null,
+            executionCount: order._count.executions,
+          }))
+        : [],
+    standingOrdersError:
+      standingOrdersResult.status === 'rejected'
+        ? standingOrdersResult.reason instanceof Error
+          ? standingOrdersResult.reason.message
+          : 'Failed to load standing orders'
         : null,
     caregiverConsents: consentsResult.status === 'fulfilled' ? consentsResult.value : [],
     caregiverConsentsError:

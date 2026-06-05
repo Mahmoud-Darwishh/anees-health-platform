@@ -20,6 +20,7 @@ import {
   createAppointmentAction,
   createCareTaskAction,
   createClinicalNoteDraftAction,
+  amendClinicalNoteAction,
   createCommunicationAction,
   createDiagnosticReportAction,
   createDocumentAction,
@@ -29,6 +30,15 @@ import {
   createLabOrderAction,
   createMedicationAction,
   createMedicationAdministrationAction,
+  acknowledgeVisitAction,
+  startTravelAction,
+  markArrivedAction,
+  checkInVisitAction,
+  checkOutVisitAction,
+  requestRestrictedAccessAction,
+  requestBreakGlassAccessAction,
+  createStandingOrderAction,
+  executeStandingOrderAction,
   createNursingReportAction,
   createNursingShiftHandoffAction,
   createNurseShiftAssignmentAction,
@@ -133,6 +143,13 @@ function appointmentStatusLabel(status: string): string {
   }
 }
 
+function workflowStateLabel(state: string): string {
+  return state
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 export function AdminPatientDetailView({
   data,
   flash,
@@ -144,6 +161,7 @@ export function AdminPatientDetailView({
 }) {
   const {
     staffRole,
+    restrictedAccess,
     patient,
     localPatient,
     error,
@@ -182,6 +200,10 @@ export function AdminPatientDetailView({
     appointmentsError,
     nurseShiftAssignments,
     nurseShiftAssignmentsError,
+    localVisits,
+    localVisitsError,
+    standingOrders,
+    standingOrdersError,
     caregiverConsents,
     caregiverConsentsError,
   } = data;
@@ -207,11 +229,16 @@ export function AdminPatientDetailView({
   );
   const currentTab = resolveAllowedWorkspaceTab(activeTab, allowedTabs);
   const editableDemographics = canEditDemographics(staffRole);
-  const clinicalConditionWrite = canWriteClinicalCondition(staffRole);
+  const canWriteMedicalCondition = canWriteClinicalCondition(staffRole, 'medical');
+  const canWritePhysioCondition = canWriteClinicalCondition(staffRole, 'physical_therapy');
+  const clinicalConditionWrite = canWriteMedicalCondition || canWritePhysioCondition;
   const medicationWrite = canWriteMedication(staffRole);
   const nursingShiftHandoffWrite = canCreateNursingShiftHandoff(staffRole);
   const isTab = (...tabs: AdminWorkspaceTab[]): boolean => tabs.includes(currentTab);
   const escalationTasks = tasks.filter((task) => task.code?.coding?.[0]?.code === 'escalation');
+  const activeDiagnoses = conditions.slice(0, 3).map((condition) => condition.label);
+  const activeMedicationCount = medications.filter((medication) => medication.status === 'active').length;
+  const restrictedTierSignal = restrictedAccess.hasRestrictedContent;
   const clinicalDepthStats = [
     { key: 'conditions', label: 'Conditions', value: conditions.length },
     { key: 'allergies', label: 'Allergies', value: allergies.length },
@@ -238,6 +265,18 @@ export function AdminPatientDetailView({
       sharePct,
     };
   });
+  const localVisitTransitions = localVisits
+    .flatMap((visit) =>
+      visit.transitionTimeline.map((entry) => ({
+        visitCode: visit.code,
+        toState: entry.toState,
+        createdAt: entry.createdAt,
+        isOverride: entry.isOverride,
+        overrideMethod: entry.overrideMethod,
+      })),
+    )
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 8);
 
   const tabHref = (tab: AdminWorkspaceTab): string => {
     return `/admin/patients/${patient.id}?tab=${tab}`;
@@ -300,6 +339,97 @@ export function AdminPatientDetailView({
             </div>
           </div>
 
+          <div className="card bg-white border-danger-subtle">
+            <div className="card-body d-flex flex-column gap-2">
+              <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                  <h2 className="h6 mb-1">Patient safety banner</h2>
+                  <p className="small text-muted mb-0">Always-visible clinical alerts for this chart.</p>
+                </div>
+                <div className="d-flex flex-wrap gap-2">
+                  <span className={`badge ${allergies.length > 0 ? 'text-bg-danger' : 'text-bg-secondary'}`}>
+                    Allergies: {allergies.length}
+                  </span>
+                  <span className={`badge ${localPatient?.dnrStatus === 'dnr' ? 'text-bg-warning' : 'text-bg-secondary'}`}>
+                    DNR: {localPatient?.dnrStatus === 'dnr' ? 'Active' : 'Not flagged'}
+                  </span>
+                  <span className={`badge ${restrictedTierSignal ? 'text-bg-dark' : 'text-bg-secondary'}`}>
+                    Restricted: {restrictedTierSignal ? 'Review required' : 'No signal'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="row g-2 small">
+                <div className="col-md-4">
+                  <div className="border rounded p-2 h-100">
+                    <div className="text-muted">Top diagnoses</div>
+                    <div className="fw-semibold">{activeDiagnoses.length > 0 ? activeDiagnoses.join(', ') : 'None recorded'}</div>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="border rounded p-2 h-100">
+                    <div className="text-muted">Active medications</div>
+                    <div className="fw-semibold">{activeMedicationCount}</div>
+                  </div>
+                </div>
+                <div className="col-md-4">
+                  <div className="border rounded p-2 h-100">
+                    <div className="text-muted">Care team size</div>
+                    <div className="fw-semibold">{careTeamMembers.length}</div>
+                  </div>
+                </div>
+              </div>
+
+              {restrictedAccess.hasRestrictedContent && restrictedAccess.requiresReason && (
+                <form action={requestRestrictedAccessAction} className="row g-2 border-top pt-3 mt-1">
+                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                  <div className="col-md-10">
+                    <label htmlFor="restrictedAccessReason" className="form-label mb-1">Restricted-tier access reason (required)</label>
+                    <textarea
+                      id="restrictedAccessReason"
+                      name="restrictedAccessReason"
+                      className="form-control form-control-sm"
+                      rows={2}
+                      placeholder="State the clinical justification for restricted data access"
+                      required
+                      dir="auto"
+                    />
+                  </div>
+                  <div className="col-md-2 d-flex align-items-end">
+                    <button type="submit" className="btn btn-sm btn-outline-dark w-100">Request access</button>
+                  </div>
+                </form>
+              )}
+
+              {restrictedAccess.hasRestrictedContent && restrictedAccess.requiresReason && (
+                <form action={requestBreakGlassAccessAction} className="row g-2 mt-1">
+                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                  <div className="col-md-10">
+                    <label htmlFor="breakGlassReason" className="form-label mb-1">Emergency break-glass reason</label>
+                    <textarea
+                      id="breakGlassReason"
+                      name="breakGlassReason"
+                      className="form-control form-control-sm"
+                      rows={2}
+                      placeholder="Emergency-only access justification (audited and escalated)"
+                      required
+                      dir="auto"
+                    />
+                  </div>
+                  <div className="col-md-2 d-flex align-items-end">
+                    <button type="submit" className="btn btn-sm btn-outline-danger w-100">Break glass</button>
+                  </div>
+                </form>
+              )}
+
+              {restrictedAccess.hasRestrictedContent && !restrictedAccess.requiresReason && restrictedAccess.reasonPreview && (
+                <div className="small text-muted border-top pt-2 mt-1">
+                  Restricted access active for this session. Reason: {restrictedAccess.reasonPreview}
+                </div>
+              )}
+            </div>
+          </div>
+
           {isTab('overview') && (
           <div className="card bg-white">
             <div className="card-header">
@@ -315,6 +445,33 @@ export function AdminPatientDetailView({
               <Row label="Gender" value={patient.gender} />
               <Row label="Birth date" value={patient.birthDate} />
               <Row label="Active" value={patient.active ? 'Yes' : 'No'} />
+            </div>
+          </div>
+          )}
+
+          {isTab('overview') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Visit transition timeline</h2>
+              <span className="text-muted small">State-first workflow telemetry</span>
+            </div>
+            <div className="card-body">
+              {localVisitsError && <div className="alert alert-warning" role="alert">Could not load workflow visits: {localVisitsError}</div>}
+              {!localVisitsError && localVisitTransitions.length === 0 ? (
+                <div className="alert alert-info mb-0" role="alert">No transition events recorded yet.</div>
+              ) : (
+                <ul className="list-group list-group-flush">
+                  {localVisitTransitions.map((entry, index) => (
+                    <li key={`${entry.visitCode}-${entry.toState}-${entry.createdAt}-${index}`} className="list-group-item px-0">
+                      <div className="fw-semibold">{entry.visitCode} · {workflowStateLabel(entry.toState)}</div>
+                      <div className="small text-muted">
+                        {new Date(entry.createdAt).toLocaleString('en-GB')}
+                        {entry.isOverride ? ` · override (${entry.overrideMethod ?? 'manual'})` : ''}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           )}
@@ -528,15 +685,22 @@ export function AdminPatientDetailView({
               {clinicalConditionWrite ? (
               <form action={createConditionAction} className="row g-3 mb-3">
                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
-                <div className="col-md-6">
+                <div className="col-md-4">
+                  <label htmlFor="conditionCategory" className="form-label">Category</label>
+                  <select id="conditionCategory" name="conditionCategory" className="form-select" defaultValue={canWriteMedicalCondition ? 'medical' : 'physical_therapy'}>
+                    {canWriteMedicalCondition ? <option value="medical">Medical diagnosis</option> : null}
+                    {canWritePhysioCondition ? <option value="physical_therapy">PT diagnosis</option> : null}
+                  </select>
+                </div>
+                <div className="col-md-4">
                   <label htmlFor="conditionLabel" className="form-label">Problem title</label>
                   <input id="conditionLabel" name="conditionLabel" className="form-control" placeholder="Type 2 diabetes" required />
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-2">
                   <label htmlFor="conditionCode" className="form-label">ICD-10 code</label>
                   <input id="conditionCode" name="conditionCode" className="form-control" placeholder="E11.9" />
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-2">
                   <label htmlFor="conditionOnsetDate" className="form-label">Onset</label>
                   <input id="conditionOnsetDate" name="conditionOnsetDate" type="date" className="form-control" />
                 </div>
@@ -549,7 +713,7 @@ export function AdminPatientDetailView({
                 </div>
               </form>
               ) : (
-                <div className="alert alert-info">Problem authoring is limited to doctors/admin roles. You still have read access.</div>
+                <div className="alert alert-info">Diagnosis authoring is role-scoped. You still have read access.</div>
               )}
               {conditionsError && <div className="alert alert-warning" role="alert">Could not load problems: {conditionsError}</div>}
               {!conditionsError && conditions.length === 0 && <div className="alert alert-info mb-0" role="alert">No problems recorded yet.</div>}
@@ -874,7 +1038,7 @@ export function AdminPatientDetailView({
                             <div className="d-inline-flex gap-2 anees-doc-actions-wrap">
                               <a className="btn btn-sm btn-outline-secondary" href={`/api/ehr/documents/${document.id}?disposition=inline`} target="_blank" rel="noopener noreferrer">View</a>
                               <a className="btn btn-sm btn-outline-primary" href={`/api/ehr/documents/${document.id}`}>Download</a>
-                              <form action={deleteDocumentAction} className="d-inline">
+                              <form action={deleteDocumentAction} className="d-inline d-flex gap-1">
                                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                 <input type="hidden" name="documentId" value={document.id} />
                                 <button type="submit" className="btn btn-sm btn-outline-danger">Delete</button>
@@ -1190,6 +1354,123 @@ export function AdminPatientDetailView({
                   <button type="submit" className="btn btn-primary">Save visit</button>
                 </div>
               </form>
+
+              <hr className="my-4" />
+
+              <h3 className="h6">Visit workflow state machine (local schedule records)</h3>
+              {localVisitsError && <div className="alert alert-warning" role="alert">Could not load workflow visits: {localVisitsError}</div>}
+              {!localVisitsError && localVisits.length === 0 && (
+                <div className="alert alert-info mb-0" role="alert">
+                  No local scheduled visits found yet. Create visits from booking/ops flow to use workflow actions.
+                </div>
+              )}
+
+              {!localVisitsError && localVisits.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Visit</th>
+                        <th>State</th>
+                        <th>Timeline</th>
+                        <th>Check-in/out geo</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {localVisits.map((visit) => (
+                        <tr key={visit.id}>
+                          <td>
+                            <div className="fw-semibold">{visit.code}</div>
+                            <div className="text-muted small">
+                              {new Date(visit.scheduledDate).toLocaleDateString('en-GB')}
+                              {visit.scheduledTime ? ` · ${visit.scheduledTime}` : ''}
+                              {visit.providerName ? ` · ${visit.providerName}` : ''}
+                            </div>
+                          </td>
+                          <td className="text-capitalize">{workflowStateLabel(visit.effectiveState)}</td>
+                          <td className="small text-muted">
+                            <div>Ack: {visit.acknowledgedAt ? new Date(visit.acknowledgedAt).toLocaleString('en-GB') : '—'}</div>
+                            <div>En route: {visit.enRouteAt ? new Date(visit.enRouteAt).toLocaleString('en-GB') : '—'}</div>
+                            <div>Arrived: {visit.arrivedAt ? new Date(visit.arrivedAt).toLocaleString('en-GB') : '—'}</div>
+                            <div>Check-in: {visit.checkInAt ? new Date(visit.checkInAt).toLocaleString('en-GB') : '—'}</div>
+                            <div>Check-out: {visit.checkOutAt ? new Date(visit.checkOutAt).toLocaleString('en-GB') : '—'}</div>
+                            {visit.transitionTimeline.length > 0 && (
+                              <div className="mt-1">
+                                {visit.transitionTimeline.slice(0, 2).map((entry) => (
+                                  <div key={`${visit.id}-${entry.toState}-${entry.createdAt}`}>
+                                    {workflowStateLabel(entry.toState)} · {new Date(entry.createdAt).toLocaleString('en-GB')}
+                                    {entry.isOverride ? ` · override (${entry.overrideMethod ?? 'manual'})` : ''}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td className="small text-muted">
+                            <div>In: {visit.checkInLat && visit.checkInLng ? `${visit.checkInLat}, ${visit.checkInLng}` : '—'}</div>
+                            <div>Out: {visit.checkOutLat && visit.checkOutLng ? `${visit.checkOutLat}, ${visit.checkOutLng}` : '—'}</div>
+                            <div>Acc: {visit.checkInAccuracyM ?? '—'} m</div>
+                          </td>
+                          <td>
+                            <div className="d-grid gap-2">
+                              <form action={acknowledgeVisitAction} className="d-flex gap-2">
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="visitId" value={visit.id} />
+                                <input name="acknowledgedAt" type="datetime-local" className="form-control form-control-sm" required />
+                                <button type="submit" className="btn btn-sm btn-outline-primary">Acknowledge</button>
+                              </form>
+
+                              <form action={startTravelAction} className="d-flex gap-2">
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="visitId" value={visit.id} />
+                                <input name="enRouteAt" type="datetime-local" className="form-control form-control-sm" required />
+                                <button type="submit" className="btn btn-sm btn-outline-primary">Start travel</button>
+                              </form>
+
+                              <form action={markArrivedAction} className="d-flex gap-2">
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="visitId" value={visit.id} />
+                                <input name="arrivedAt" type="datetime-local" className="form-control form-control-sm" required />
+                                <button type="submit" className="btn btn-sm btn-outline-primary">Mark arrived</button>
+                              </form>
+
+                              <form action={checkInVisitAction} className="row g-1">
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="visitId" value={visit.id} />
+                                <div className="col-12"><input name="checkInAt" type="datetime-local" className="form-control form-control-sm" required /></div>
+                                <div className="col-6"><input name="checkInLatitude" className="form-control form-control-sm" placeholder="Lat" required /></div>
+                                <div className="col-6"><input name="checkInLongitude" className="form-control form-control-sm" placeholder="Lng" required /></div>
+                                <div className="col-12"><input name="checkInAccuracyMeters" className="form-control form-control-sm" placeholder="Accuracy meters" /></div>
+                                <div className="col-12">
+                                  <select name="geofenceOverrideMethod" className="form-select form-select-sm" defaultValue="">
+                                    <option value="">No geofence override</option>
+                                    <option value="med_ops">Med Ops unlock</option>
+                                    <option value="code">Patient verification code</option>
+                                    <option value="photo">Door photo proof</option>
+                                  </select>
+                                </div>
+                                <div className="col-12"><input name="geofenceOverrideReason" className="form-control form-control-sm" placeholder="Override reason (required if geofence fails)" dir="auto" /></div>
+                                <div className="col-12"><input name="geofenceOverrideMediaId" className="form-control form-control-sm" placeholder="Proof media id (optional)" dir="auto" /></div>
+                                <div className="col-12"><button type="submit" className="btn btn-sm btn-outline-success w-100">Check in</button></div>
+                              </form>
+
+                              <form action={checkOutVisitAction} className="row g-1">
+                                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                <input type="hidden" name="visitId" value={visit.id} />
+                                <div className="col-12"><input name="checkOutAt" type="datetime-local" className="form-control form-control-sm" required /></div>
+                                <div className="col-6"><input name="checkOutLatitude" className="form-control form-control-sm" placeholder="Lat" required /></div>
+                                <div className="col-6"><input name="checkOutLongitude" className="form-control form-control-sm" placeholder="Lng" required /></div>
+                                <div className="col-12"><input name="checkOutAccuracyMeters" className="form-control form-control-sm" placeholder="Accuracy meters" /></div>
+                                <div className="col-12"><button type="submit" className="btn btn-sm btn-outline-success w-100">Check out</button></div>
+                              </form>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
           )}
@@ -1221,6 +1502,87 @@ export function AdminPatientDetailView({
                           <td>{encounterStatusLabel(encounter.status)}</td>
                           <td className="text-capitalize">{encounterVisitType(encounter)}</td>
                           <td>{encounter.participant?.[0]?.individual?.display ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+          )}
+
+          {isTab('visits') && (
+          <div className="card bg-white">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Standing orders</h2>
+              <span className="text-muted small">{standingOrders.length} records</span>
+            </div>
+            <div className="card-body d-grid gap-3">
+              <form action={createStandingOrderAction} className="row g-3">
+                <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                <div className="col-md-3">
+                  <label htmlFor="standingOrderDiscipline" className="form-label">Discipline</label>
+                  <select id="standingOrderDiscipline" name="standingOrderDiscipline" className="form-select" defaultValue="medical">
+                    <option value="medical">Medical</option>
+                    <option value="nursing">Nursing</option>
+                    <option value="physiotherapy">Physiotherapy</option>
+                  </select>
+                </div>
+                <div className="col-md-5">
+                  <label htmlFor="standingOrderTitle" className="form-label">Title</label>
+                  <input id="standingOrderTitle" name="standingOrderTitle" className="form-control" placeholder="Fever panel standing order" required />
+                </div>
+                <div className="col-md-4">
+                  <label htmlFor="standingOrderValidUntil" className="form-label">Valid until</label>
+                  <input id="standingOrderValidUntil" name="standingOrderValidUntil" type="datetime-local" className="form-control" />
+                </div>
+                <div className="col-12">
+                  <label htmlFor="standingOrderInstructions" className="form-label">Instructions</label>
+                  <textarea id="standingOrderInstructions" name="standingOrderInstructions" rows={2} className="form-control" required dir="auto" />
+                </div>
+                <div className="col-12">
+                  <button type="submit" className="btn btn-outline-primary">Create standing order</button>
+                </div>
+              </form>
+
+              {standingOrdersError && <div className="alert alert-warning" role="alert">Could not load standing orders: {standingOrdersError}</div>}
+              {!standingOrdersError && standingOrders.length === 0 && <div className="alert alert-info mb-0" role="alert">No standing orders configured yet.</div>}
+              {!standingOrdersError && standingOrders.length > 0 && (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr><th>Order</th><th>Status</th><th>Last execution</th><th>Execute</th></tr>
+                    </thead>
+                    <tbody>
+                      {standingOrders.map((order) => (
+                        <tr key={order.id}>
+                          <td>
+                            <div className="fw-semibold">{order.title}</div>
+                            <div className="small text-muted text-capitalize">{order.discipline} · {order.instructions}</div>
+                          </td>
+                          <td>
+                            <span className={`badge ${order.isActive ? 'text-bg-success' : 'text-bg-secondary'}`}>{order.isActive ? 'Active' : 'Inactive'}</span>
+                            <div className="small text-muted">Exec count: {order.executionCount}</div>
+                          </td>
+                          <td>{order.lastExecutionAt ? new Date(order.lastExecutionAt).toLocaleString('en-GB') : 'Never'}</td>
+                          <td>
+                            <form action={executeStandingOrderAction} className="row g-1">
+                              <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                              <input type="hidden" name="standingOrderId" value={order.id} />
+                              <div className="col-12">
+                                <select name="executionVisitId" className="form-select form-select-sm" defaultValue="" required>
+                                  <option value="" disabled>Select active visit</option>
+                                  {localVisits.filter((visit) => Boolean(visit.checkInAt) && !visit.checkOutAt).map((visit) => (
+                                    <option key={visit.id} value={visit.id}>{visit.code}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div className="col-12"><input name="executionRecordedAt" type="datetime-local" className="form-control form-control-sm" required /></div>
+                              <div className="col-12"><input name="executionNote" className="form-control form-control-sm" placeholder="Execution note" /></div>
+                              <div className="col-12"><button type="submit" className="btn btn-sm btn-outline-success w-100">Execute</button></div>
+                            </form>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1309,7 +1671,15 @@ export function AdminPatientDetailView({
               <form action={createClinicalNoteDraftAction} className="row g-3">
                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                 <div className="col-md-4"><label htmlFor="note-encounter" className="form-label">Linked visit</label><select id="note-encounter" name="encounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.period?.start ? new Date(encounter.period.start).toLocaleString('en-GB') : encounter.id}</option>))}</select></div>
-                <div className="col-md-8"><label htmlFor="note-title" className="form-label">Title</label><input id="note-title" name="noteTitle" type="text" className="form-control" placeholder="Visit assessment" /></div>
+                <div className="col-md-4">
+                  <label htmlFor="note-discipline" className="form-label">Discipline</label>
+                  <select id="note-discipline" name="noteDiscipline" className="form-select" defaultValue="medical">
+                    <option value="medical">Medical</option>
+                    <option value="nursing">Nursing</option>
+                    <option value="physiotherapy">Physiotherapy</option>
+                  </select>
+                </div>
+                <div className="col-md-4"><label htmlFor="note-title" className="form-label">Title</label><input id="note-title" name="noteTitle" type="text" className="form-control" placeholder="Visit assessment" /></div>
                 <div className="col-12"><label htmlFor="note-body" className="form-label">Note body</label><textarea id="note-body" name="noteBody" className="form-control" rows={4} placeholder="Clinical findings, plan, and follow up" dir="auto" required /></div>
                 <div className="col-12"><button type="submit" className="btn btn-primary">Save draft note</button></div>
               </form>
@@ -1339,11 +1709,22 @@ export function AdminPatientDetailView({
                               <form action={signClinicalNoteAction}>
                                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                 <input type="hidden" name="compositionId" value={note.id} />
+                                <input type="hidden" name="noteDiscipline" value={note.discipline ?? 'medical'} />
                                 <input type="hidden" name="noteVersionId" value={note.versionId ?? ''} />
                                 <button type="submit" className="btn btn-sm btn-outline-success">Sign off</button>
                               </form>
                             ) : (
-                              <span className="badge text-bg-success">Signed</span>
+                              <div className="d-grid gap-1">
+                                <span className="badge text-bg-success">Signed</span>
+                                <form action={amendClinicalNoteAction} className="d-grid gap-1">
+                                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                                  <input type="hidden" name="sourceCompositionId" value={note.id} />
+                                  <input type="hidden" name="noteDiscipline" value={note.discipline ?? 'medical'} />
+                                  <input type="hidden" name="amendmentTitle" value={`Amendment: ${note.title}`} />
+                                  <textarea name="amendmentBody" className="form-control form-control-sm" rows={2} placeholder="Addendum note" dir="auto" required />
+                                  <button type="submit" className="btn btn-sm btn-outline-primary">Create addendum</button>
+                                </form>
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -1748,7 +2129,7 @@ export function AdminPatientDetailView({
 
               <form action={runEscalationSlaSweepAction} className="mb-3">
                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
-                <button type="submit" className="btn btn-outline-secondary">Run SLA sweep</button>
+                <button type="submit" className="btn btn-outline-secondary">Run Escalation + Co-sign SLA Sweep</button>
               </form>
 
               {tasksError && <div className="alert alert-warning" role="alert">Could not load escalation tasks: {tasksError}</div>}
@@ -1931,11 +2312,17 @@ export function AdminPatientDetailView({
                   <form action={createPhysioReportAction} className="row g-2">
                     <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                     <div className="col-12"><label htmlFor="physio-encounter" className="form-label">Linked visit</label><select id="physio-encounter" name="encounterId" className="form-select" defaultValue=""><option value="">None</option>{encounters.map((encounter) => (<option key={encounter.id} value={encounter.id}>{encounter.id}</option>))}</select></div>
+                    <div className="col-md-6"><label htmlFor="physio-template" className="form-label">Template</label><select id="physio-template" name="sessionTemplate" className="form-select" defaultValue="custom"><option value="post_op_knee">Post-op knee</option><option value="stroke_rehab">Stroke rehab</option><option value="low_back_pain">Low back pain</option><option value="geriatric_mobility">Geriatric mobility</option><option value="custom">Custom</option></select></div>
+                    <div className="col-md-6"><label htmlFor="physio-session-number" className="form-label">Session number</label><input id="physio-session-number" name="sessionNumberLabel" className="form-control" placeholder="4 of 12" /></div>
+                    <div className="col-12"><label htmlFor="physio-subjective-function" className="form-label">Subjective function</label><input id="physio-subjective-function" name="subjectiveFunction" className="form-control" placeholder="Patient reports easier transfers since last session" /></div>
+                    <div className="col-12"><label htmlFor="physio-objective-summary" className="form-label">Objective summary</label><textarea id="physio-objective-summary" name="objectiveSummary" rows={2} className="form-control" placeholder="ROM, balance, gait, or template-specific objective findings" dir="auto" /></div>
                     <div className="col-12"><label htmlFor="physio-interventions" className="form-label">Interventions</label><input id="physio-interventions" name="interventions" className="form-control" /></div>
                     <div className="col-6"><label htmlFor="physio-pain-before" className="form-label">Pain before</label><input id="physio-pain-before" name="painBefore" type="number" min="0" max="10" className="form-control" /></div>
                     <div className="col-6"><label htmlFor="physio-pain-after" className="form-label">Pain after</label><input id="physio-pain-after" name="painAfter" type="number" min="0" max="10" className="form-control" /></div>
                     <div className="col-12"><label htmlFor="physio-response" className="form-label">Response summary</label><input id="physio-response" name="responseSummary" className="form-control" /></div>
                     <div className="col-12"><label htmlFor="physio-home-plan" className="form-label">Home plan</label><input id="physio-home-plan" name="homePlan" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="physio-next-focus" className="form-label">Next session focus</label><input id="physio-next-focus" name="nextSessionFocus" className="form-control" /></div>
+                    <div className="col-12"><label htmlFor="physio-discharge-readiness" className="form-label">Discharge readiness</label><select id="physio-discharge-readiness" name="dischargeReadiness" className="form-select" defaultValue=""><option value="">Not set</option><option value="not_yet">Not yet</option><option value="one_to_two_sessions">1-2 sessions</option><option value="ready">Ready</option></select></div>
                     <div className="col-12"><label htmlFor="physio-note" className="form-label">Clinical note</label><textarea id="physio-note" name="noteBody" rows={3} className="form-control" dir="auto" required /></div>
                     <div className="col-12"><button type="submit" className="btn btn-primary">Save physio report</button></div>
                   </form>

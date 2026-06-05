@@ -531,8 +531,9 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
                       </tr>
                     </thead>
                     <tbody>
-                      {documents.map((document) => (
-                        <tr key={document.id}>
+                      {documents.map((document) => {
+                        return (
+                          <tr key={document.id}>
                           <td className={styles.docCellTitle} data-label={t('documentLabel')}>
                             <div className="fw-semibold">{document.title}</div>
                             <div className="text-muted small">{document.author ?? '—'}</div>
@@ -545,8 +546,9 @@ export default async function PatientPortalPage({ params, searchParams }: Props)
                               <a href={`/api/ehr/documents/${document.id}`} className="btn btn-sm btn-outline-primary">{t('documentDownload')}</a>
                             </div>
                           </td>
-                        </tr>
-                      ))}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

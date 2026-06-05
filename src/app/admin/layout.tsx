@@ -2,14 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSessionUser, isStaff } from '@/lib/auth/rbac';
+import { getAdminNavItems } from '@/lib/auth/admin-nav-policy';
 import './admin-theme.scss';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
-  const canOpenNurseDashboard =
-    user?.staffRole === 'nurse' || user?.staffRole === 'admin' || user?.staffRole === 'superadmin';
+  const visibleNavItems = getAdminNavItems(user?.staffRole);
 
   // Defence in depth — proxy.ts already gates /admin, but never trust it alone.
   if (!isStaff(user)) {
@@ -34,24 +34,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </span>
           </span>
         </Link>
-        <div className="d-inline-flex align-items-center gap-2 ms-2">
-          <Link href="/admin/patients" className="btn btn-sm btn-outline-secondary">
-            Patients
-          </Link>
-          <Link href="/admin/escalations" className="btn btn-sm btn-outline-secondary">
-            Escalations
-          </Link>
-          {canOpenNurseDashboard ? (
-            <Link href="/admin/nursing/dashboard" className="btn btn-sm btn-outline-secondary">
-              Nurse Dashboard
+        <div className="anees-admin-nav-links" aria-label="Admin workspace sections">
+          {visibleNavItems.map((item) => (
+            <Link key={item.href} href={item.href} className="anees-admin-nav-link">
+              {item.label}
             </Link>
-          ) : null}
+          ))}
         </div>
         <div className="anees-admin-navbar-right">
-          <Link href="/en" className="btn btn-sm btn-outline-secondary anees-admin-home-link">
+          <Link href="/en" className="anees-admin-nav-link anees-admin-home-link">
             Back to home
           </Link>
-          <span className="navbar-text small anees-admin-meta">
+          <span className="anees-admin-user-chip">
             {user.name ?? user.email} · {user.staffRole}
           </span>
         </div>

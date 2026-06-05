@@ -13,7 +13,8 @@
       "Bash(ls -la src/app/\\\\[locale\\\\]/portal/)",
       "Bash(find src/features/ehr -type f)",
       "Bash(grep -n \"'whatsapp'\\\\|whatsapp\\\\\\\\.\" \"C:/Users/madyo/Desktop/Anees NXTJS/anees-health-platform/src/components/common/WhatsAppButton.tsx\")",
-      "Bash(grep -E \"\\\\.\\(mjs|js|json|md|ts\\)$\")"
+      "Bash(grep -E \"\\\\.\\(mjs|js|json|md|ts\\)$\")",
+      "Bash(npm run *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\madyo\\Desktop\\Anees NXTJS\\anees-health-platform\\src\\app\\[locale]\\payment\\mock"

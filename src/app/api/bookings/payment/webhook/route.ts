@@ -127,6 +127,20 @@ export async function POST(request: NextRequest) {
               },
             });
 
+            await tx.auditLog.create({
+              data: {
+                tableName: 'invoices',
+                recordId: invoice.id,
+                action: 'update',
+                changedFields: {
+                  source: 'api.booking.payment.webhook',
+                  fields: ['status', 'grossAmountEgp', 'netAmountEgp'],
+                  bookingRef: booking.bookingRef,
+                },
+                changedBy: 'system:kashier_webhook',
+              },
+            });
+
             await tx.payment.upsert({
               where: { code: paymentCode },
               create: {
@@ -158,9 +172,35 @@ export async function POST(request: NextRequest) {
               },
             });
 
+            await tx.auditLog.create({
+              data: {
+                tableName: 'online_bookings',
+                recordId: booking.bookingRef,
+                action: 'update',
+                changedFields: {
+                  source: 'api.booking.payment.webhook',
+                  fields: ['status', 'kashierOrderId', 'kashierTransactionId', 'paymentCompletedAt'],
+                },
+                changedBy: 'system:kashier_webhook',
+              },
+            });
+
             await tx.patient.update({
               where: { id: patient.id },
               data: { status: 'active' },
+            });
+
+            await tx.auditLog.create({
+              data: {
+                tableName: 'patients',
+                recordId: patient.id,
+                action: 'update',
+                changedFields: {
+                  source: 'api.booking.payment.webhook',
+                  fields: ['status'],
+                },
+                changedBy: 'system:kashier_webhook',
+              },
             });
           });
 
@@ -246,12 +286,39 @@ export async function POST(request: NextRequest) {
                   where: { id: medplumPatient.id },
                   data: { medplumPatientId: synced.id },
                 });
+
+                await prisma.auditLog.create({
+                  data: {
+                    tableName: 'patients',
+                    recordId: medplumPatient.id,
+                    action: 'update',
+                    changedFields: {
+                      source: 'api.booking.payment.webhook.medplum-link',
+                      fields: ['medplumPatientId'],
+                    },
+                    changedBy: 'system:kashier_webhook',
+                  },
+                });
               }
 
               if (booking.visitType === 'package' && booking.packageType && synced.id) {
                 await createProgramCarePlan({
                   medplumPatientId: synced.id,
                   program: booking.packageType as CareProgramCode,
+                });
+
+                await prisma.auditLog.create({
+                  data: {
+                    tableName: 'care_plans',
+                    recordId: `${booking.bookingRef}:${synced.id}`,
+                    action: 'create',
+                    changedFields: {
+                      source: 'api.booking.payment.webhook.medplum-careplan',
+                      fields: ['program', 'status'],
+                      program: booking.packageType,
+                    },
+                    changedBy: 'system:kashier_webhook',
+                  },
                 });
               }
             }
@@ -260,15 +327,44 @@ export async function POST(request: NextRequest) {
           }
         } else {
           await prisma.$transaction(async (tx) => {
-            await tx.onlineBooking.update({
+            const failedBooking = await tx.onlineBooking.update({
               where: { bookingRef: data.merchantOrderId },
               data: { status: 'payment_failed' },
             });
 
-            await tx.invoice.updateMany({
+            await tx.auditLog.create({
+              data: {
+                tableName: 'online_bookings',
+                recordId: failedBooking.id,
+                action: 'update',
+                changedFields: {
+                  source: 'api.booking.payment.webhook',
+                  fields: ['status'],
+                },
+                changedBy: 'system:kashier_webhook',
+              },
+            });
+
+            const cancelledInvoices = await tx.invoice.updateMany({
               where: { code: `INV_${data.merchantOrderId}` },
               data: { status: 'cancelled' },
             });
+
+            if (cancelledInvoices.count > 0) {
+              await tx.auditLog.create({
+                data: {
+                  tableName: 'invoices',
+                  recordId: data.merchantOrderId,
+                  action: 'update',
+                  changedFields: {
+                    source: 'api.booking.payment.webhook',
+                    fields: ['status'],
+                    count: cancelledInvoices.count,
+                  },
+                  changedBy: 'system:kashier_webhook',
+                },
+              });
+            }
           });
         }
         break;
@@ -276,15 +372,44 @@ export async function POST(request: NextRequest) {
 
       case 'refund': {
         await prisma.$transaction(async (tx) => {
-          await tx.onlineBooking.update({
+          const refundedBooking = await tx.onlineBooking.update({
             where: { bookingRef: data.merchantOrderId },
             data: { status: 'refunded' },
           });
 
-          await tx.invoice.updateMany({
+          await tx.auditLog.create({
+            data: {
+              tableName: 'online_bookings',
+              recordId: refundedBooking.id,
+              action: 'update',
+              changedFields: {
+                source: 'api.booking.payment.webhook',
+                fields: ['status'],
+              },
+              changedBy: 'system:kashier_webhook',
+            },
+          });
+
+          const cancelledInvoices = await tx.invoice.updateMany({
             where: { code: `INV_${data.merchantOrderId}` },
             data: { status: 'cancelled' },
           });
+
+          if (cancelledInvoices.count > 0) {
+            await tx.auditLog.create({
+              data: {
+                tableName: 'invoices',
+                recordId: data.merchantOrderId,
+                action: 'update',
+                changedFields: {
+                  source: 'api.booking.payment.webhook',
+                  fields: ['status'],
+                  count: cancelledInvoices.count,
+                },
+                changedBy: 'system:kashier_webhook',
+              },
+            });
+          }
         });
         console.log('[Webhook] Refund recorded for order:', data.merchantOrderId);
         break;

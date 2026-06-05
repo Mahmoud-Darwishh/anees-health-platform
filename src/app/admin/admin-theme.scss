@@ -8,9 +8,9 @@
   --anees-accent: #a68341;
   --anees-accent-strong: #8f6f34;
   --anees-border: rgba(19, 44, 77, 0.12);
-  --anees-radius-card: 16px;
-  --anees-radius-control: 12px;
-  --anees-radius-pill: 12px;
+  --anees-radius-card: 12px;
+  --anees-radius-control: 8px;
+  --anees-radius-pill: 8px;
   --anees-shadow-soft: 0 10px 24px rgba(19, 44, 77, 0.07);
   --anees-space-1: 0.35rem;
   --anees-space-2: 0.55rem;
@@ -29,8 +29,9 @@
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--anees-border);
-  box-shadow: 0 8px 18px rgba(19, 44, 77, 0.06);
-  min-height: 72px;
+  box-shadow: 0 7px 16px rgba(19, 44, 77, 0.06);
+  min-height: 68px;
+  gap: 0.8rem;
 }
 
 .anees-admin-brand {
@@ -48,7 +49,7 @@
 .anees-admin-brand-logo {
   width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: 7px;
   object-fit: contain;
   background: #fff;
   border: 1px solid rgba(19, 44, 77, 0.14);
@@ -76,25 +77,58 @@
   color: #5a6675;
 }
 
-.anees-admin-meta {
+.anees-admin-user-chip {
   color: var(--anees-ink-muted) !important;
   border: 1px solid rgba(19, 44, 77, 0.18);
   border-radius: var(--anees-radius-pill);
-  padding: 0.22rem 0.62rem;
+  padding: 0.38rem 0.62rem;
   background: #ffffff;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.anees-admin-nav-links {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.anees-admin-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.4rem 0.78rem;
+  border-radius: var(--anees-radius-pill);
+  border: 1px solid rgba(19, 44, 77, 0.22);
+  color: #233b5a;
+  text-decoration: none;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(166, 131, 65, 0.62);
+    color: #142f50;
+    background: #fff;
+  }
 }
 
 .anees-admin-navbar-right {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-left: auto;
 }
 
 .anees-admin-home-link {
-  border-color: rgba(19, 44, 77, 0.2) !important;
-  color: #233b5a !important;
-  background: #fff !important;
+  border-color: rgba(166, 131, 65, 0.5);
+  color: #785b26;
+  background: #fffdf7;
 }
 
 .anees-mobile-patient-list {
@@ -142,6 +176,15 @@
     overflow: hidden;
   }
 
+  .alert {
+    border-radius: var(--anees-radius-control);
+    border-width: 1px;
+  }
+
+  .badge {
+    border-radius: 6px;
+  }
+
   .card-header {
     background: linear-gradient(180deg, #fdfaf2 0%, #f9f3e6 100%);
     border-bottom: 1px solid var(--anees-border);
@@ -152,6 +195,18 @@
 
   .card-body {
     padding: var(--anees-space-5);
+  }
+
+  .btn {
+    border-radius: var(--anees-radius-control);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-sm {
+    border-radius: 7px;
+    min-height: 34px;
+    padding-inline: 0.72rem;
   }
 
   .btn-primary {
@@ -176,15 +231,53 @@
     color: #fff;
   }
 
+  .btn-outline-secondary {
+    border-color: rgba(19, 44, 77, 0.24);
+    color: #213a5c;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafd 100%);
+  }
+
+  .btn-outline-secondary:hover,
+  .btn-outline-secondary:focus {
+    border-color: rgba(166, 131, 65, 0.56);
+    color: #142f50;
+    background: #fff;
+  }
+
   .form-control,
   .form-select {
     border-radius: var(--anees-radius-control);
     border-color: rgba(19, 44, 77, 0.18);
     padding: 0.56rem 0.74rem;
+    background: #fff;
+    color: #1d3555;
 
     &:focus {
       border-color: rgba(166, 131, 65, 0.5);
       box-shadow: 0 0 0 0.2rem rgba(166, 131, 65, 0.14);
+    }
+  }
+
+  .form-control-sm,
+  .form-select-sm {
+    border-radius: 7px;
+    min-height: 34px;
+    padding-block: 0.35rem;
+  }
+
+  .input-group-text {
+    border-radius: var(--anees-radius-control);
+    border-color: rgba(19, 44, 77, 0.18);
+    background: #f7f9fc;
+    color: #3b4b61;
+  }
+
+  .form-check-input {
+    border-color: rgba(19, 44, 77, 0.28);
+
+    &:focus {
+      border-color: rgba(166, 131, 65, 0.56);
+      box-shadow: 0 0 0 0.2rem rgba(166, 131, 65, 0.16);
     }
   }
 
@@ -209,6 +302,14 @@
     border-radius: var(--anees-radius-control);
     border: 1px solid var(--anees-border);
     background: #fff;
+  }
+
+  .table {
+    margin-bottom: 0;
+  }
+
+  .table > :not(caption) > * > * {
+    border-bottom-color: rgba(19, 44, 77, 0.12);
   }
 
   .anees-chip {
@@ -462,9 +563,13 @@
     flex-direction: column;
   }
 
-  .anees-admin-meta {
+  .anees-admin-user-chip {
     display: inline-flex;
     line-height: 1.35;
+  }
+
+  .anees-admin-nav-links {
+    width: 100%;
   }
 
   .anees-admin-page {
@@ -515,6 +620,22 @@
     width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
+  }
+
+  .anees-admin-nav-links {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .anees-admin-nav-link {
+    white-space: nowrap;
+    min-height: 38px;
+    padding: 0.43rem 0.75rem;
+    font-size: 0.82rem;
   }
 
   .anees-admin-home-link {
