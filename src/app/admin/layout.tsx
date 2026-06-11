@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSessionUser, isStaff } from '@/lib/auth/rbac';
 import { getAdminNavItems } from '@/lib/auth/admin-nav-policy';
+import { AdminNav } from './AdminNav';
 import './admin-theme.scss';
 
 export const dynamic = 'force-dynamic';
@@ -13,13 +14,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // Defence in depth — proxy.ts already gates /admin, but never trust it alone.
   if (!isStaff(user)) {
-    redirect('/en/auth/login?callbackUrl=/admin/patients');
+    redirect('/en/auth/login?callbackUrl=/admin');
   }
 
   return (
     <div className="anees-admin-shell">
       <nav className="navbar anees-admin-navbar px-3">
-        <Link href="/admin/patients" className="navbar-brand mb-0 h1 anees-admin-brand">
+        <Link href="/admin" className="navbar-brand mb-0 h1 anees-admin-brand">
           <span className="anees-admin-brand-lockup">
             <Image
               src="/assets/img/anees-logo.png"
@@ -34,13 +35,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </span>
           </span>
         </Link>
-        <div className="anees-admin-nav-links" aria-label="Admin workspace sections">
-          {visibleNavItems.map((item) => (
-            <Link key={item.href} href={item.href} className="anees-admin-nav-link">
-              {item.label}
-            </Link>
-          ))}
-        </div>
+        <AdminNav items={visibleNavItems} />
         <div className="anees-admin-navbar-right">
           <Link href="/en" className="anees-admin-nav-link anees-admin-home-link">
             Back to home

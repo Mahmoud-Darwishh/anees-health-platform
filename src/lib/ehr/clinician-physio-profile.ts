@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { Prisma, type StaffRole } from '@prisma/client';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
 
 export type ClinicianPhysioProfileData = {
@@ -59,10 +59,7 @@ function toOptionalString(value: unknown): string | null {
 }
 
 export async function getClinicianPhysioProfileData(): Promise<ClinicianPhysioProfileData> {
-  const user = await getStaffUser(['physiotherapist', 'admin', 'superadmin']);
-  if (!user?.staffId || !user.staffRole) {
-    throw new Error('Unauthorized');
-  }
+  const { user } = await requireStaffCan('workspace.physio.access');
 
   const staff = await prisma.staff.findUnique({
     where: { id: user.staffId },

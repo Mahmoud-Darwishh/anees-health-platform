@@ -1,7 +1,15 @@
 import 'server-only';
 
-import { auth } from '@/auth';
 import type { LicenseType, StaffRole } from '@prisma/client';
+import {
+  CLINICAL_ROLES,
+  CLINICAL_WRITE_ROLES,
+  CASE_SCOPED_CLINICAL_READ_ROLES,
+} from './role-constants';
+
+// Re-exported so existing `import { CLINICAL_ROLES } from '@/lib/auth/rbac'`
+// keeps working. The lists themselves live in the Edge-safe role-constants.ts.
+export { CLINICAL_ROLES, CLINICAL_WRITE_ROLES, CASE_SCOPED_CLINICAL_READ_ROLES };
 
 export type SessionUser = {
   id: string;
@@ -12,6 +20,10 @@ export type SessionUser = {
   staffId?: string | null;
   staffRole?: StaffRole | null;
   phone?: string | null;
+  tenantId?: string | null;
+  clinicalLicenseType?: LicenseType | null;
+  clinicalLicenseNumber?: string | null;
+  clinicalLicenseExpiry?: Date | string | null;
 };
 
 export type ClinicalDiscipline = 'nursing' | 'physiotherapy' | 'medical';
@@ -25,49 +37,11 @@ export type StaffLicenseSnapshot = {
 
 const MEDICAL_OPS_COMPAT_ROLES: StaffRole[] = ['medical_ops', 'operator'];
 
-/** Staff roles allowed to read clinical/admin data. */
-export const CLINICAL_ROLES: StaffRole[] = [
-  'superadmin',
-  'admin',
-  'finance',
-  'medical_ops',
-  'operator',
-  'doctor',
-  'physiotherapist',
-  'nurse',
-];
-
-/** Staff roles allowed to write clinical data. */
-export const CLINICAL_WRITE_ROLES: StaffRole[] = [
-  'superadmin',
-  'admin',
-  'finance',
-  'doctor',
-  'physiotherapist',
-  'nurse',
-];
-
-/**
- * Roles that must be scoped to assigned care-team patients for clinical reads.
- * Admin and superadmin are intentionally excluded.
- */
-export const CASE_SCOPED_CLINICAL_READ_ROLES: StaffRole[] = [
-  'medical_ops',
-  'operator',
-  'doctor',
-  'physiotherapist',
-  'nurse',
-];
-
 export function isCaseScopedClinicalRole(role?: StaffRole | null): boolean {
   return !!role && CASE_SCOPED_CLINICAL_READ_ROLES.includes(role);
 }
 
-export function isLicensedMedOps(staff: StaffLicenseSnapshot, at: Date = new Date()): boolean {
-  if (!staff.staffRole || !MEDICAL_OPS_COMPAT_ROLES.includes(staff.staffRole)) {
-    return false;
-  }
-
+function hasActiveClinicalLicense(staff: StaffLicenseSnapshot, at: Date = new Date()): boolean {
   if (!staff.clinicalLicenseType || staff.clinicalLicenseType === 'none') {
     return false;
   }
@@ -88,6 +62,33 @@ export function isLicensedMedOps(staff: StaffLicenseSnapshot, at: Date = new Dat
   return expiry.getTime() >= at.getTime();
 }
 
+export function hasValidClinicalLicense(staff: StaffLicenseSnapshot, at: Date = new Date()): boolean {
+  const role = staff.staffRole;
+  if (role === 'superadmin') {
+    return true;
+  }
+  if (role === 'admin' || role === 'finance') {
+    return false;
+  }
+  return hasActiveClinicalLicense(staff, at);
+}
+
+function licenseMatchesDiscipline(staff: StaffLicenseSnapshot, discipline: ClinicalDiscipline): boolean {
+  return (
+    (discipline === 'medical' && staff.clinicalLicenseType === 'medical_syndicate') ||
+    (discipline === 'nursing' && staff.clinicalLicenseType === 'nursing_syndicate') ||
+    (discipline === 'physiotherapy' && staff.clinicalLicenseType === 'physiotherapy_syndicate')
+  );
+}
+
+export function isLicensedMedOps(staff: StaffLicenseSnapshot, at: Date = new Date()): boolean {
+  if (!staff.staffRole || !MEDICAL_OPS_COMPAT_ROLES.includes(staff.staffRole)) {
+    return false;
+  }
+
+  return hasActiveClinicalLicense(staff, at);
+}
+
 export function canSignClinical(
   staff: StaffLicenseSnapshot,
   discipline: ClinicalDiscipline,
@@ -99,34 +100,26 @@ export function canSignClinical(
   }
 
   if (role === 'superadmin' || role === 'admin') {
-    return true;
-  }
-
-  if (role === 'finance') {
-    return true;
+    return role === 'superadmin';
   }
 
   if (role === 'doctor') {
-    return discipline === 'medical';
+    return discipline === 'medical' && hasActiveClinicalLicense(staff, at) && licenseMatchesDiscipline(staff, discipline);
   }
 
   if (role === 'nurse') {
-    return discipline === 'nursing';
+    return discipline === 'nursing' && hasActiveClinicalLicense(staff, at) && licenseMatchesDiscipline(staff, discipline);
   }
 
   if (role === 'physiotherapist') {
-    return discipline === 'physiotherapy';
+    return discipline === 'physiotherapy' && hasActiveClinicalLicense(staff, at) && licenseMatchesDiscipline(staff, discipline);
   }
 
   if (!isLicensedMedOps(staff, at)) {
     return false;
   }
 
-  return (
-    (discipline === 'medical' && staff.clinicalLicenseType === 'medical_syndicate') ||
-    (discipline === 'nursing' && staff.clinicalLicenseType === 'nursing_syndicate') ||
-    (discipline === 'physiotherapy' && staff.clinicalLicenseType === 'physiotherapy_syndicate')
-  );
+  return licenseMatchesDiscipline(staff, discipline);
 }
 
 export function isRestrictedTierEligibleRole(role?: StaffRole | null): boolean {
@@ -151,6 +144,7 @@ export async function isRestrictedTierEligible(user: SessionUser | null, _patien
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
+  const { auth } = await import('@/auth');
   const session = await auth();
   return (session?.user as SessionUser | undefined) ?? null;
 }

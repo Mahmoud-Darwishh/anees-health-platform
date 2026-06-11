@@ -166,7 +166,7 @@ export function AdminEscalationsPageView({
                     <div className="small text-muted">{item.title}</div>
                     {item.description && <div className="small text-muted">{item.description}</div>}
                     {item.patientId && (
-                      <Link href={`/admin/patients/${item.patientId}?tab=coordination`} className="small">
+                      <Link href={`/admin/patients/${item.patientId}?tab=orders-tasks`} className="small">
                         Open patient case
                       </Link>
                     )}

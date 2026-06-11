@@ -1,8 +1,9 @@
 import 'server-only';
 
 import { type StaffRole, VisitStatus } from '@prisma/client';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listEscalationTasks } from '@/lib/medplum/tasks';
 import { listNursingShiftHandoffsByPerformer } from '@/lib/medplum/care-reports';
@@ -12,7 +13,6 @@ import type {
   NurseDashboardPeriod,
 } from './types';
 
-const NURSE_DASHBOARD_ROLES: StaffRole[] = ['nurse', 'admin', 'superadmin'];
 const OPERATIONAL_DRILLDOWN_ROLES: StaffRole[] = ['nurse', 'admin', 'superadmin'];
 const PATIENT_IDENTIFIER_ROLES: StaffRole[] = ['admin', 'superadmin'];
 
@@ -264,9 +264,15 @@ const EMPTY_DASHBOARD: Omit<
 
 export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput): Promise<NurseDashboardData> {
   const periodContext = resolvePeriodContext(filters);
-  const user = await getStaffUser(NURSE_DASHBOARD_ROLES);
-
-  if (!user?.staffId || !user.staffRole) {
+  let user: Awaited<ReturnType<typeof requireStaffCan>>['user'];
+  try {
+    ({ user } = await requireStaffCan('dashboard.nursing.read', {
+      audit: {
+        tableName: 'nursing_dashboard',
+        recordId: 'admin_nursing_dashboard',
+      },
+    }));
+  } catch {
     return {
       staffName: 'Unknown',
       staffRole: null,
@@ -283,6 +289,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
   const warnings = [...periodContext.warnings];
   const periodStart = periodContext.start;
   const periodEnd = periodContext.end;
+  const tenantId = sessionTenantId(user);
 
   const staff = await prisma.staff.findUnique({
     where: { id: user.staffId },
@@ -341,6 +348,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
       prisma.visit.groupBy({
         by: ['status'],
         where: {
+          tenantId,
           providerId: staff.providerId,
           scheduledDate: {
             gte: periodStart,
@@ -353,6 +361,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
       }),
       prisma.visit.aggregate({
         where: {
+          tenantId,
           providerId: staff.providerId,
           status: VisitStatus.completed,
           scheduledDate: {
@@ -377,7 +386,9 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
         },
       }),
       prisma.providerPayout.findFirst({
-        where: { providerId: staff.providerId },
+        where: {
+          providerId: staff.providerId,
+        },
         orderBy: { payoutDate: 'desc' },
         select: {
           payoutDate: true,
@@ -386,6 +397,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
       }),
       prisma.visit.aggregate({
         where: {
+          tenantId,
           providerId: staff.providerId,
           status: VisitStatus.completed,
           scheduledDate: {
@@ -403,6 +415,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
       canViewOperationalDrilldown
         ? prisma.visit.findMany({
             where: {
+              tenantId,
               providerId: staff.providerId,
               scheduledDate: {
                 gte: periodStart,
@@ -442,6 +455,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
       canViewOperationalDrilldown
         ? prisma.visit.findMany({
             where: {
+              tenantId,
               providerId: staff.providerId,
               scheduledDate: {
                 gte: periodStart,
@@ -496,7 +510,7 @@ export async function loadNurseDashboardData(filters?: NurseDashboardFilterInput
     }
 
     earnedInPeriodEgp = decimalToNumber(visitPayoutAggregate._sum.providerPayoutEgp);
-    paidInPeriodEgp = decimalToNumber(payoutAggregate._sum.netAmountEgp);
+    paidInPeriodEgp = decimalToNumber(payoutAggregate._sum?.netAmountEgp);
     pendingEstimateEgp = Math.max(earnedInPeriodEgp - paidInPeriodEgp, 0);
     avgPatientRatingInPeriod = Number(ratingAggregate._avg.patientRating ?? 0);
 

@@ -27,9 +27,16 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
  */
 export const metadata: Metadata = {
   ...buildSiteMetadata(),
+  // All icons point to the SQUARE ECG mark. Google (and Apple devices) build the
+  // search/home-screen icon from these — previously `apple` used the wide
+  // `footer-logo.png`, which Google squashed into a stretched square. The 512px
+  // version gives Google a crisp, correctly-proportioned icon to display.
   icons: {
-    icon: '/assets/img/fav.png',
-    apple: '/assets/img/footer-logo.png',
+    icon: [
+      { url: '/assets/img/fav.png', type: 'image/png' },
+      { url: '/assets/img/pwa-icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/assets/img/pwa-icon-512.png',
   },
   category: 'Healthcare',
   other: {

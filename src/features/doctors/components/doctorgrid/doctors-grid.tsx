@@ -46,13 +46,23 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
     [doctors]
   );
 
-  const [filters, setFilters] = useState<FilterState>({
+  // Seed the search box from the URL `?search=` param so the header search bar
+  // (which navigates here with ?search=...) actually drives the list on first load.
+  const [filters, setFilters] = useState<FilterState>(() => ({
     selectedSpecialities: [],
     selectedGenders: [],
     selectedLanguages: [],
     selectedExperience: [],
-    searchText: '',
-  });
+    searchText: searchParams.get('search') ?? '',
+  }));
+
+  // Keep the search in sync when the URL `?search=` changes while already on this
+  // page (e.g. the header search bar is used again). Typing in the sidebar updates
+  // local state directly and does not touch the URL, so it is never clobbered here.
+  const urlSearch = searchParams.get('search') ?? '';
+  useEffect(() => {
+    setFilters((prev) => (prev.searchText === urlSearch ? prev : { ...prev, searchText: urlSearch }));
+  }, [urlSearch]);
 
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const [showMobileFilters, setShowMobileFilters] = useState(false);

@@ -42,6 +42,8 @@ export type ConditionSummary = {
   label: string;
   code?: string;
   status: string;
+  statusCode: string;
+  category: 'medical' | 'physical_therapy';
   verification?: string;
   onset?: string;
   recordedDate?: string;
@@ -54,6 +56,7 @@ export type CreateConditionInput = {
   category?: 'medical' | 'physical_therapy';
   label: string;
   code?: string | null;
+  codings?: FhirCoding[] | null;
   onsetDate?: Date | null;
   note?: string | null;
   recordedByReference?: string | null;
@@ -72,17 +75,26 @@ function normalizeCondition(resource: ConditionResource): ConditionSummary | nul
     ...codeCoding.map((coding) => isRestrictedTierClinicalCoding(coding)),
   ].some(Boolean);
 
+  const isPhysioTherapy = categoryCoding.some((coding) => coding.code === 'physical-therapy');
+  const statusCode = resource.clinicalStatus?.coding?.[0]?.code ?? 'active';
+
   return {
     id: resource.id,
     label: resource.code?.text ?? resource.code?.coding?.[0]?.display ?? resource.code?.coding?.[0]?.code ?? 'Problem',
     code: resource.code?.coding?.[0]?.code,
     status: resource.clinicalStatus?.coding?.[0]?.display ?? resource.clinicalStatus?.coding?.[0]?.code ?? 'unknown',
+    statusCode,
+    category: isPhysioTherapy ? 'physical_therapy' : 'medical',
     verification: resource.verificationStatus?.coding?.[0]?.display ?? resource.verificationStatus?.coding?.[0]?.code,
     onset: resource.onsetDateTime,
     recordedDate: resource.recordedDate,
     note: resource.note?.[0]?.text,
     restrictedTier,
   };
+}
+
+function isEnteredInError(resource: ConditionResource): boolean {
+  return (resource.verificationStatus?.coding ?? []).some((coding) => coding.code === 'entered-in-error');
 }
 
 export async function listPatientConditions(patientId: string, count = 50): Promise<ConditionSummary[]> {
@@ -94,25 +106,37 @@ export async function listPatientConditions(patientId: string, count = 50): Prom
     _sort: '-_lastUpdated',
   })) as ConditionResource[];
 
-  return resources.map(normalizeCondition).filter((item): item is ConditionSummary => !!item);
+  return resources
+    .filter((resource) => !isEnteredInError(resource))
+    .map(normalizeCondition)
+    .filter((item): item is ConditionSummary => !!item);
 }
 
 export async function createPatientCondition(input: CreateConditionInput): Promise<ConditionResource> {
   const medplum = await getMedplumClient();
   const category = input.category ?? 'medical';
 
-  const categoryCoding: FhirCoding =
-    category === 'physical_therapy'
-      ? {
-          system: MEDPLUM_CODE_SYSTEMS.reportType,
-          code: 'physical-therapy',
-          display: 'Physical Therapy',
-        }
-      : {
-          system: 'http://terminology.hl7.org/CodeSystem/condition-category',
-          code: 'problem-list-item',
-          display: 'Problem List Item',
-        };
+  const categoryCodings: FhirCoding[] = [
+    {
+      system: 'http://terminology.hl7.org/CodeSystem/condition-category',
+      code: 'problem-list-item',
+      display: 'Problem List Item',
+    },
+  ];
+
+  if (category === 'physical_therapy') {
+    categoryCodings.push({
+      system: MEDPLUM_CODE_SYSTEMS.reportType,
+      code: 'physical-therapy',
+      display: 'Physical Therapy',
+    });
+  }
+
+  const normalizedCodings = input.codings?.filter((coding) => Boolean(coding.system && coding.code)) ?? [];
+  const fallbackIcdCoding = input.code
+    ? [{ system: MEDPLUM_CODE_SYSTEMS.icd10, code: input.code, display: input.label }]
+    : [];
+  const resolvedCodeCodings = normalizedCodings.length > 0 ? normalizedCodings : fallbackIcdCoding;
 
   return (await medplum.createResource({
     resourceType: 'Condition',
@@ -122,11 +146,9 @@ export async function createPatientCondition(input: CreateConditionInput): Promi
     verificationStatus: {
       coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status', code: 'confirmed', display: 'Confirmed' }],
     },
-    category: [{ coding: [categoryCoding] }],
+    category: [{ coding: categoryCodings }],
     code: {
-      coding: input.code
-        ? [{ system: MEDPLUM_CODE_SYSTEMS.icd10, code: input.code, display: input.label }]
-        : undefined,
+      coding: resolvedCodeCodings.length > 0 ? resolvedCodeCodings : undefined,
       text: input.label,
     },
     subject: { reference: `Patient/${input.patientId}` },
@@ -136,5 +158,73 @@ export async function createPatientCondition(input: CreateConditionInput): Promi
       ? { reference: input.recordedByReference, display: input.recordedByDisplay ?? undefined }
       : undefined,
     note: input.note ? [{ text: input.note }] : undefined,
+  } as never)) as ConditionResource;
+}
+
+export async function markConditionEnteredInError(conditionId: string): Promise<ConditionResource> {
+  const medplum = await getMedplumClient();
+  const existing = (await medplum.readResource('Condition', conditionId)) as ConditionResource;
+
+  // FHIR con-5: clinicalStatus SHALL NOT be present when verificationStatus is
+  // entered-in-error. Drop the existing clinicalStatus before persisting.
+  const { clinicalStatus: _removed, ...rest } = existing;
+  void _removed;
+
+  return (await medplum.updateResource({
+    ...rest,
+    verificationStatus: {
+      coding: [
+        {
+          system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status',
+          code: 'entered-in-error',
+          display: 'Entered in Error',
+        },
+      ],
+    },
+  } as never)) as ConditionResource;
+}
+
+export type ConditionClinicalStatus = 'active' | 'resolved' | 'inactive' | 'remission';
+
+const CONDITION_CLINICAL_STATUS_DISPLAY: Record<ConditionClinicalStatus, string> = {
+  active: 'Active',
+  resolved: 'Resolved',
+  inactive: 'Inactive',
+  remission: 'Remission',
+};
+
+/**
+ * Update a problem's clinical status (e.g. a transient finding like hyperkalaemia
+ * that has since normalised → `resolved`). This is a clinical lifecycle edit and
+ * is distinct from `markConditionEnteredInError`, which is reserved for records
+ * that were never true. Verification stays `confirmed`.
+ */
+export async function setConditionClinicalStatus(
+  conditionId: string,
+  status: ConditionClinicalStatus,
+): Promise<ConditionResource> {
+  const medplum = await getMedplumClient();
+  const existing = (await medplum.readResource('Condition', conditionId)) as ConditionResource;
+
+  return (await medplum.updateResource({
+    ...existing,
+    clinicalStatus: {
+      coding: [
+        {
+          system: 'http://terminology.hl7.org/CodeSystem/condition-clinical',
+          code: status,
+          display: CONDITION_CLINICAL_STATUS_DISPLAY[status],
+        },
+      ],
+    },
+    verificationStatus: {
+      coding: [
+        {
+          system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status',
+          code: 'confirmed',
+          display: 'Confirmed',
+        },
+      ],
+    },
   } as never)) as ConditionResource;
 }

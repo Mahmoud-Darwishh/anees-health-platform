@@ -1,8 +1,8 @@
 import 'server-only';
 
-import { type StaffRole } from '@prisma/client';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
 import { listPatientGoalsFromMedplum } from '@/lib/medplum/goals';
@@ -46,7 +46,6 @@ export type PhysioPatientsData = {
   warning: string | null;
 };
 
-const PHYSIO_WORKSPACE_ROLES: StaffRole[] = ['physiotherapist', 'admin', 'superadmin'];
 const DEFAULT_GOAL_READ_MODE = 'fhir_with_fallback' as const;
 
 type GoalReadMode = 'postgres' | 'fhir' | 'fhir_with_fallback';
@@ -179,10 +178,7 @@ export async function getPhysioPatientsData(params: {
   filter?: string;
   query?: string;
 } = {}): Promise<PhysioPatientsData> {
-  const staff = await getStaffUser(PHYSIO_WORKSPACE_ROLES);
-  if (!staff?.staffId || !staff.staffRole) {
-    throw new Error('Unauthorized');
-  }
+  const { user: staff } = await requireStaffCan('workspace.physio.access');
 
   const filter = normalizeFilter(params.filter);
   const query = trimQuery(params.query);
@@ -242,6 +238,7 @@ export async function getPhysioPatientsData(params: {
 
   const patients = await prisma.patient.findMany({
     where: {
+      tenantId: sessionTenantId(staff),
       deletedAt: null,
       ...(staff.staffRole === 'physiotherapist'
         ? {

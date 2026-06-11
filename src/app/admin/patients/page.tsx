@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { listMedplumPatients } from '@/lib/medplum/patients';
 import { getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
+import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,6 +66,12 @@ function staffRoleLabel(staffRole?: string | null): string {
 
 export default async function AdminPatientsPage() {
   const user = await getStaffUser();
+  await requireStaffCan('patient.directory.read', {
+    audit: {
+      tableName: 'patients',
+      recordId: 'admin_patient_directory',
+    },
+  });
   const firstName = (user?.name ?? user?.email ?? 'teammate').split(' ')[0];
   const greetingLine = `${adminTimeGreeting()}, ${firstName}`;
   const roleLine = `${staffRoleLabel(user?.staffRole)} workspace`;
@@ -72,6 +81,20 @@ export default async function AdminPatientsPage() {
 
   try {
     patients = await listMedplumPatients();
+    const tenantPatientIds = await prisma.patient.findMany({
+      where: {
+        tenantId: sessionTenantId(user),
+        medplumPatientId: {
+          not: null,
+        },
+        deletedAt: null,
+      },
+      select: {
+        medplumPatientId: true,
+      },
+    });
+    const tenantPatientIdSet = new Set(tenantPatientIds.map((row) => row.medplumPatientId).filter(Boolean));
+    patients = patients.filter((patient) => !!patient.id && tenantPatientIdSet.has(patient.id));
 
     const isClinicianScoped = isCaseScopedClinicalRole(user?.staffRole ?? null);
 

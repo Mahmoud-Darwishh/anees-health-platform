@@ -191,5 +191,27 @@ export async function listMedicationAdministrationRecords(
     _sort: '-_lastUpdated',
   })) as MedplumMedicationAdministrationResource[];
 
-  return resources.map(mapSummary).filter((entry): entry is MedicationAdministrationSummary => !!entry);
+  return resources
+    .filter((resource) => resource.status !== 'entered-in-error')
+    .map(mapSummary)
+    .filter((entry): entry is MedicationAdministrationSummary => !!entry);
+}
+
+/**
+ * Marks a MAR entry as entered-in-error (recording mistake). Filtered out of the
+ * list; never hard-deleted, preserving the clinical audit trail.
+ */
+export async function markMedicationAdministrationEnteredInError(
+  administrationId: string,
+): Promise<MedplumMedicationAdministrationResource> {
+  const medplum = await getMedplumClient();
+  const existing = (await medplum.readResource(
+    'MedicationAdministration',
+    administrationId,
+  )) as MedplumMedicationAdministrationResource;
+
+  return (await medplum.updateResource({
+    ...existing,
+    status: 'entered-in-error',
+  } as never)) as MedplumMedicationAdministrationResource;
 }

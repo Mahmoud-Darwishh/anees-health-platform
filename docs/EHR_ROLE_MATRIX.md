@@ -131,6 +131,141 @@ This is enforced **server-side** in `actions.ts`. A nurse calling `signMedicalNo
 
 ---
 
+## 4A. How this matrix is enforced in code
+
+This section is the **bridge between the human-readable matrix above and the
+runtime code** that enforces it. Read this section before changing any RBAC
+behavior.
+
+### The three files that implement the matrix
+
+```
+src/lib/auth/
+  ├── actions.ts    ← THE ACTION CATALOG
+  │                   Every permission-bearing action as a typed string with a
+  │                   description, discipline tag, and runtime constraints.
+  │                   ~80 actions today. Adding one here is a type-level
+  │                   change that forces matrix.ts to also be updated.
+  │
+  ├── matrix.ts     ← THE ROLE → ACTION MATRIX
+  │                   Canonical mapping of role → allowed actions. Mirrors
+  │                   § 3 above. Edited by hand. Anything not listed is
+  │                   DENIED BY DEFAULT (allowlist model).
+  │
+  └── can.ts        ← THE CENTRAL `can()` FUNCTION
+                      One function, called by every server action. Applies
+                      all 4 enforcement layers, writes audit on deny, and
+                      returns { allow, reason, detail }.
+```
+
+Plus the existing helpers in `src/lib/auth/rbac.ts` (`canSignClinical`,
+`isLicensedMedOps`, etc.) — `can()` reuses these; do not duplicate the logic.
+
+### The 4 enforcement layers (every call to `can()` runs all 4)
+
+1. **Role guard (Layer 1).** Does the role's matrix entry include the action?
+   `roleAllowsAction(role, action)`. Wildcard for `superadmin` only.
+
+2. **Resource scope (Layer 2).** For case-scoped roles acting on a specific
+   patient/visit/document, the user must be on the patient's active FHIR
+   `CareTeam`. Global-scope roles (admin, compliance, insurance coord,
+   hospital partner admin, viewer, superadmin) bypass this.
+
+3. **Action constraints (Layer 3).** Layered checks based on the action
+   definition in `actions.ts`:
+     - **License gate.** If `requiresLicense && discipline`, the actor's
+       license must be valid as of NOW and match the discipline. Uses
+       `canSignClinical()` from `rbac.ts`.
+     - **Restricted-tier gate.** If the resource is a restricted-tier
+       patient and the role is not in `STANDING_RESTRICTED_ACCESS_ROLES`
+       (compliance officer, superadmin), the actor needs a reason — and
+       for non-treating clinicians, a valid `DestructiveApprovalToken`.
+     - **Two-person rule.** If `requiresTwoPerson`, a second approver
+       staff ID or a break-glass token must be present.
+     - **Tenant scope.** Placeholder today — query-layer WHERE clauses
+       enforce tenant isolation; row-level security is a future hardening.
+
+4. **Audit (Layer 4).** Every deny is logged with action key + reason via
+   `AuditAction.access_denied`. Sensitive allows (break-glass, restricted
+   reads, PHI exports, audit-log reads) are logged with `access` / `override`
+   / `export`. Best-effort writes — audit never blocks the request.
+
+### How to call `can()` from a server action
+
+```ts
+import { getSessionUser } from '@/lib/auth/rbac';
+import { can, must } from '@/lib/auth/can';
+
+export async function signNursingNoteAction(input: SignNoteInput) {
+  const user = await getSessionUser();
+
+  // Throws Error with code='RBAC_<REASON>' if denied — auto-audited.
+  await must(user, 'note.nursing.sign', {
+    type: 'patient',
+    id: input.patientId,
+    medplumPatientId: input.medplumPatientId,
+    privacyTier: input.privacyTier,
+  }, {
+    reason: input.signatureContext,         // optional but recommended
+  });
+
+  // ... perform the signed-note write ...
+}
+```
+
+Or for a non-throwing decision (e.g. to choose which UI to render):
+
+```ts
+const decision = await can(user, 'note.medical.sign', resource);
+if (!decision.allow) {
+  return { error: decision.detail };       // safe to show in UI
+}
+```
+
+### How to ADD or CHANGE a permission
+
+1. **Edit `actions.ts`** — add or update the action definition (key, description,
+   discipline, constraints).
+2. **Edit `matrix.ts`** — add the new action to every role that should have it.
+   TypeScript will tell you if you forgot a role.
+3. **Edit § 3 of this document** — keep the human-readable matrix in sync.
+4. **Run `npm run lint:rbac`** — the lint script will regenerate § 22 (the
+   machine-readable appendix at the bottom of this file). CI fails if you
+   commit without regenerating.
+5. **Add a test case** when the RBAC test suite lands.
+
+### The audit contract — what `can()` writes
+
+| Outcome | `AuditAction` value | When |
+|---|---|---|
+| Allow (normal) | none — too noisy | Most reads. Skipped to keep the table small. |
+| Allow (sensitive) | `read` | Restricted-tier read with reason. |
+| Allow (break-glass) | `override` | Action exercised with a `DestructiveApprovalToken`. |
+| Allow (export) | `export` | PHI export — PDF download, audit-log export. |
+| Allow (audit ops) | `read` | `audit.read` / `audit.export`. |
+| Deny (any reason) | `access_denied` | ALWAYS logged. Reason carried in `newData.rbac`. |
+
+This means a compliance officer reviewing `AuditLog` can answer "who tried to
+access patient X and was denied?" with one query — `WHERE recordId = X AND
+action = 'access_denied'`.
+
+### Stage 2 — migrate the matrix to Postgres (only when a hospital needs overrides)
+
+The matrix lives in TypeScript today because it is the simplest thing that
+works for one tenant. When the first hospital partner needs tenant-specific
+permissions, the migration is:
+
+1. Create `Permission`, `Role`, `RolePermission`, `TenantOverride` tables.
+2. Seed from `matrix.ts` (the TS file becomes the canonical SEED).
+3. Build `/admin/compliance/permissions` UI for the compliance officer to edit.
+4. Change `roleAllowsAction()` in `matrix.ts` to read from the cached DB tables.
+5. Every edit writes `AuditLog` with `action='update'` against table `permissions`.
+
+The `can()` function does not change. That is the entire point of having one
+central function.
+
+---
+
 ## 5. Solo-visit standing orders
 
 Home care in Egypt frequently runs solo visits. The clinician on site must be empowered to close the visit alone — without breaking the licensure boundary.
@@ -879,6 +1014,127 @@ model Visit {
 5. **Before merging a PR that touches `rbac.ts`, `actions.ts`, or a Medplum module:** confirm the change matches this doc.
 
 This doc is meant to be read by a senior engineer, a medical director, and an insurance auditor and produce the same understanding. If any of those three would walk away confused, fix the doc.
+
+---
+
+## 22. Code-canonical action permissions — AUTO-GENERATED
+
+> ⚠️ **DO NOT EDIT THIS SECTION BY HAND.** It is regenerated by
+> `npm run lint:rbac` from `src/lib/auth/policy/ehr-matrix.ts` (the readable
+> module × role grid). CI fails if the section here differs from what the script
+> would generate.
+>
+> If you need to change permissions, edit `ehr-matrix.ts` (and § 3 above), then
+> run `npm run lint:rbac:fix`. Each module yields `*.read` / `*.write` / `*.sign`
+> rows by capability; rows where no role reaches a level are omitted.
+
+<!-- RBAC_MATRIX:BEGIN -->
+
+### Action × Role allow matrix
+
+**93 actions × 12 roles. ✅ = allowed. blank = denied. ★ = wildcard role.**
+
+_Derived from the module grid: each module yields `*.read` / `*.write` / `*.sign` rows by capability._
+
+| Action | admin | compliance_officer | doctor | finance | hospital_partner_admin | insurance_coordinator | medical_ops | nurse | operator | physiotherapist | superadmin | viewer |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `patient_demographics.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ | ✅ |
+| `patient_demographics.write` | ✅ |  |  |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `patient_banner.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `allergies.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `allergies.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `allergies.sign` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `vitals.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `vitals.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `vitals.sign` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `nursing_notes.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `nursing_notes.write` |  |  |  |  |  |  | ✅ | ✅ | ✅ |  | ★ |  |
+| `nursing_notes.sign` |  |  |  |  |  |  | ✅ | ✅ | ✅ |  | ★ |  |
+| `physio_notes.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `physio_notes.write` |  |  |  |  |  |  | ✅ |  | ✅ | ✅ | ★ |  |
+| `physio_notes.sign` |  |  |  |  |  |  | ✅ |  | ✅ | ✅ | ★ |  |
+| `medical_notes.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `medical_notes.write` |  |  | ✅ |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `medical_notes.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `nursing_diagnoses.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `nursing_diagnoses.write` |  |  |  |  |  |  | ✅ | ✅ | ✅ |  | ★ |  |
+| `nursing_diagnoses.sign` |  |  |  |  |  |  | ✅ | ✅ | ✅ |  | ★ |  |
+| `pt_diagnoses.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `pt_diagnoses.write` |  |  |  |  |  |  | ✅ |  | ✅ | ✅ | ★ |  |
+| `pt_diagnoses.sign` |  |  |  |  |  |  | ✅ |  | ✅ | ✅ | ★ |  |
+| `medical_diagnoses.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `medical_diagnoses.write` |  |  | ✅ |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `medical_diagnoses.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `medication_prescribe.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ |  | ✅ |  | ★ |  |
+| `medication_prescribe.write` |  |  | ✅ |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `medication_prescribe.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `medication_administer.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `medication_administer.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ |  | ★ |  |
+| `medication_administer.sign` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ |  | ★ |  |
+| `medication_reconciliation.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `medication_reconciliation.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `medication_reconciliation.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `lab_order.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `lab_order.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `lab_order.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `lab_interpret.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `lab_interpret.write` |  |  | ✅ |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `lab_interpret.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `care_plan.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `care_plan.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `care_plan.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `assessments.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `assessments.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `assessments.sign` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `care_team.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `care_team.write` | ✅ |  |  |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `tasks.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `tasks.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `visits_schedule.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ | ✅ |
+| `visits_schedule.write` | ✅ |  |  |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `visit_checkin_checkout.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ | ✅ |
+| `visit_checkin_checkout.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `dispatch_board.read` | ✅ | ✅ |  |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `documents.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `documents.write` | ✅ |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `documents.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `escalations.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `escalations.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `incident_reports.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `incident_reports.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `incident_reports.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `communications.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `communications.write` |  |  | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `consent_records.read` | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `consent_records.write` | ✅ |  |  |  |  |  | ✅ |  | ✅ |  | ★ |  |
+| `restricted_tier.read` |  | ✅ | ✅ |  |  |  |  | ✅ |  | ✅ | ★ |  |
+| `standing_orders.read` | ✅ | ✅ | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `standing_orders.write` |  |  | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `standing_orders.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `controlled_substance_ledger.read` | ✅ | ✅ | ✅ |  |  |  |  | ✅ |  |  | ★ |  |
+| `controlled_substance_ledger.write` |  |  | ✅ |  |  |  |  | ✅ |  |  | ★ |  |
+| `controlled_substance_ledger.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `billing_invoices.read` | ✅ | ✅ |  | ✅ |  | ✅ | ✅ |  | ✅ |  | ★ |  |
+| `billing_invoices.write` | ✅ |  |  | ✅ |  | ✅ |  |  |  |  | ★ |  |
+| `billing_invoices.sign` | ✅ |  |  | ✅ |  |  |  |  |  |  | ★ |  |
+| `provider_payouts.read` | ✅ | ✅ | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `provider_payouts.write` | ✅ |  |  | ✅ |  |  |  |  |  |  | ★ |  |
+| `provider_payouts.sign` | ✅ |  |  | ✅ |  |  |  |  |  |  | ★ |  |
+| `insurance_claims.read` | ✅ | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `insurance_claims.write` | ✅ |  | ✅ |  |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ |  |
+| `insurance_claims.sign` |  |  | ✅ |  |  |  |  |  |  |  | ★ |  |
+| `promocodes_pricing.read` | ✅ | ✅ |  | ✅ |  |  | ✅ |  | ✅ |  | ★ |  |
+| `promocodes_pricing.write` | ✅ |  |  |  |  |  |  |  |  |  | ★ |  |
+| `audit_log.read` | ✅ | ✅ |  |  |  |  |  |  |  |  | ★ |  |
+| `staff_user_mgmt.read` | ✅ | ✅ |  |  |  |  |  |  |  |  | ★ |  |
+| `staff_user_mgmt.write` | ✅ |  |  |  |  |  |  |  |  |  | ★ |  |
+| `staff_user_mgmt.sign` | ✅ |  |  |  |  |  |  |  |  |  | ★ |  |
+| `aggregate_kpis.read` | ✅ | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ | ✅ | ✅ | ★ | ✅ |
+| `physio_workspace.read` | ✅ |  |  |  |  |  |  |  |  | ✅ | ★ |  |
+
+_Generated by `npm run lint:rbac` from `src/lib/auth/policy/ehr-matrix.ts`. Do not edit by hand._
+
+<!-- RBAC_MATRIX:END -->
 
 ---
 

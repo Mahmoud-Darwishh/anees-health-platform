@@ -1,59 +1,54 @@
 import type { StaffRole } from '@prisma/client';
 
 export type WorkspaceTab =
-  | 'overview'
-  | 'clinical'
+  | 'snapshot'
+  | 'problems-risks'
+  | 'medications-mar'
+  | 'care-plan-goals'
+  | 'visits-encounters'
+  | 'measurements'
+  | 'notes-reports'
   | 'documents'
   | 'labs'
-  | 'assessments'
-  | 'consent'
-  | 'visits'
-  | 'vitals'
-  | 'notes'
-  | 'care-team'
-  | 'coordination'
-  | 'scheduling'
-  | 'tasks'
-  | 'reports';
+  | 'care-team-consent'
+  | 'orders-tasks'
+  | 'activity-audit';
 
 const NURSING_TABS: WorkspaceTab[] = [
-  'overview',
-  'clinical',
-  'visits',
-  'vitals',
-  'notes',
-  'coordination',
-  'tasks',
-  'reports',
+  'snapshot',
+  'problems-risks',
+  'medications-mar',
+  'care-plan-goals',
+  'visits-encounters',
+  'measurements',
+  'notes-reports',
+  'orders-tasks',
 ];
 
 const PHYSIO_TABS: WorkspaceTab[] = [
-  'overview',
-  'clinical',
-  'visits',
-  'vitals',
-  'notes',
-  'tasks',
-  'reports',
-  'coordination',
-  'scheduling',
+  'snapshot',
+  'problems-risks',
+  'medications-mar',
+  'care-plan-goals',
+  'visits-encounters',
+  'measurements',
+  'notes-reports',
+  'orders-tasks',
 ];
 
 const FULL_CLINICAL_TABS: WorkspaceTab[] = [
-  'overview',
-  'clinical',
+  'snapshot',
+  'problems-risks',
+  'medications-mar',
+  'care-plan-goals',
+  'visits-encounters',
+  'measurements',
+  'notes-reports',
   'documents',
   'labs',
-  'assessments',
-  'consent',
-  'visits',
-  'vitals',
-  'notes',
-  'care-team',
-  'coordination',
-  'scheduling',
-  'tasks',
-  'reports',
+  'care-team-consent',
+  'orders-tasks',
+  'activity-audit',
 ];
 
 export function getWorkspaceTabsForRole(role: StaffRole | null): WorkspaceTab[] {

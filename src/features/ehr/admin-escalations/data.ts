@@ -1,6 +1,9 @@
 import 'server-only';
 
-import { CLINICAL_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
+import { isCaseScopedClinicalRole } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
+import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 import { listEscalationTasks } from '@/lib/medplum/tasks';
 import { listMedplumPatients } from '@/lib/medplum/patients';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
@@ -17,9 +20,15 @@ function patientCode(patient: { identifier?: Array<{ system?: string; value?: st
 }
 
 export async function loadAdminEscalationsData(): Promise<AdminEscalationsData> {
-  const user = await getStaffUser(CLINICAL_ROLES);
-
-  if (!user?.staffId || !user.staffRole) {
+  let user: Awaited<ReturnType<typeof requireStaffCan>>['user'];
+  try {
+    ({ user } = await requireStaffCan('escalation.read', {
+      audit: {
+        tableName: 'escalations',
+        recordId: 'admin_escalations',
+      },
+    }));
+  } catch {
     return {
       error: 'Unauthorized',
       items: [],
@@ -87,8 +96,27 @@ export async function loadAdminEscalationsData(): Promise<AdminEscalationsData> 
         )
       : new Map<string, { name: string; code: string | null }>();
 
+  const tenantScopedPatientIds = await prisma.patient.findMany({
+    where: {
+      tenantId: sessionTenantId(user),
+      deletedAt: null,
+      medplumPatientId: {
+        not: null,
+      },
+    },
+    select: {
+      medplumPatientId: true,
+    },
+  });
+  const tenantScopedIdSet = new Set(
+    tenantScopedPatientIds
+      .map((row) => row.medplumPatientId)
+      .filter((value): value is string => typeof value === 'string' && value.length > 0),
+  );
+
   const items: EscalationQueueItem[] = taskResult.value
     .filter((task) => !!task.patientId)
+    .filter((task) => (user.staffRole === 'superadmin' ? true : (task.patientId ? tenantScopedIdSet.has(task.patientId) : false)))
     .filter((task) => !visiblePatientIdsSet || (task.patientId ? visiblePatientIdsSet.has(task.patientId) : false))
     .map((task) => {
       const patientProfile = task.patientId ? patientMap.get(task.patientId) : null;

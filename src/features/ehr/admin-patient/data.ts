@@ -1,6 +1,4 @@
 import 'server-only';
-import { cookies } from 'next/headers';
-
 import { getMedplumPatient } from '@/lib/medplum/patients';
 import { listPatientEncounters } from '@/lib/medplum/encounters';
 import { listRecentPatientVitals } from '@/lib/medplum/observations';
@@ -18,14 +16,15 @@ import { listPatientLabOrders, listPatientDiagnosticReports } from '@/lib/medplu
 import { listPatientAssessments } from '@/lib/medplum/assessments';
 import { listPatientCommunications } from '@/lib/medplum/communications';
 import { listPatientAppointments } from '@/lib/medplum/appointments';
+import { listPatientCarePlans } from '@/lib/medplum/care-plans';
+import { listPatientGoalsFromMedplum } from '@/lib/medplum/goals';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { CLINICAL_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
 import { prisma } from '@/lib/db/prisma';
-import {
-  ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE,
-} from './constants';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 import type { AdminPatientDetailData } from './types';
 import { toCareTeamRole } from './helpers';
+import { type AdminWorkspaceTab, resolveCurrentWorkspaceTab } from './workspace-tabs';
 
 type RestrictedAccessCookiePayload = {
   patientId: string;
@@ -93,13 +92,13 @@ async function readLocalVisitTimeline(
   try {
     const rows = await prisma.$queryRaw<LocalVisitTransitionRow[]>`
       SELECT
-        to_state::text AS "toState",
-        created_at AS "createdAt",
-        is_override AS "isOverride",
-        override_method AS "overrideMethod"
+        "toState"::text AS "toState",
+        "createdAt" AS "createdAt",
+        "isOverride" AS "isOverride",
+        "overrideMethod" AS "overrideMethod"
       FROM visit_state_transitions
-      WHERE visit_id = ${visitId}
-      ORDER BY created_at DESC
+      WHERE "visitId" = ${visitId}
+      ORDER BY "createdAt" DESC
       LIMIT 5
     `;
 
@@ -134,25 +133,53 @@ function canBypassRestrictedReason(role: AdminPatientDetailData['staffRole']): b
   return role === 'compliance_officer' || role === 'superadmin';
 }
 
-async function getRestrictedAccessGrant(patientId: string): Promise<RestrictedAccessCookiePayload | null> {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE)?.value;
-  if (!raw) {
+async function getRestrictedAccessGrant(
+  patientId: string,
+  staffId: string,
+): Promise<RestrictedAccessCookiePayload | null> {
+  const token = await prisma.destructiveApprovalToken.findFirst({
+    where: {
+      medplumPatientId: patientId,
+      actionType: {
+        in: ['restricted_read', 'break_glass_restricted_read'],
+      },
+      status: 'consumed',
+      consumedBy: staffId,
+      expiresAt: {
+        gt: new Date(),
+      },
+    },
+    orderBy: {
+      consumedAt: 'desc',
+    },
+    select: {
+      payload: true,
+      consumedAt: true,
+    },
+  });
+
+  if (!token) {
     return null;
   }
 
-  try {
-    const parsed = JSON.parse(raw) as RestrictedAccessCookiePayload;
-    if (!parsed?.patientId || parsed.patientId !== patientId || !parsed.reason) {
-      return null;
-    }
-    return parsed;
-  } catch {
+  const payload = token.payload && typeof token.payload === 'object' && !Array.isArray(token.payload)
+    ? token.payload as Record<string, unknown>
+    : {};
+  const reason = typeof payload.reason === 'string' ? payload.reason : null;
+  if (!reason) {
     return null;
   }
+  return {
+    patientId,
+    reason,
+    grantedAt: token.consumedAt?.toISOString() ?? new Date().toISOString(),
+  };
 }
 
-export async function loadAdminPatientDetailData(id: string): Promise<AdminPatientDetailData> {
+export async function loadAdminPatientDetailData(
+  id: string,
+  activeTab?: string,
+): Promise<AdminPatientDetailData> {
   const user = await getStaffUser(CLINICAL_ROLES);
 
   if (!user?.staffId || !user.staffRole) {
@@ -199,6 +226,10 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       communicationsError: null,
       appointments: [],
       appointmentsError: null,
+      carePlans: [],
+      carePlansError: null,
+      goals: [],
+      goalsError: null,
       nurseShiftAssignments: [],
       nurseShiftAssignmentsError: null,
       localVisits: [],
@@ -210,6 +241,13 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     };
   }
 
+  // Tab-aware loading: resolve the active tab exactly as the view does, then load
+  // only the datasets that tab renders (plus the always-needed core). Lazy datasets
+  // here feed ONLY their own tab — never the safety header or restricted-access
+  // banner — so an inactive tab can never hide clinical data or a restricted flag.
+  const currentTab = resolveCurrentWorkspaceTab(user.staffRole, activeTab);
+  const wants = (...tabs: AdminWorkspaceTab[]): boolean => tabs.includes(currentTab);
+
   let patient: Awaited<ReturnType<typeof getMedplumPatient>> | null = null;
   let error: string | null = null;
 
@@ -217,6 +255,21 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     patient = await getMedplumPatient(id);
   } catch (e) {
     error = e instanceof Error ? e.message : 'Failed to load patient from Medplum';
+  }
+
+  if (patient?.id) {
+    const tenantBridge = await prisma.patient.findFirst({
+      where: {
+        medplumPatientId: patient.id,
+        tenantId: sessionTenantId(user),
+        deletedAt: null,
+      },
+      select: { id: true },
+    });
+    if (!tenantBridge) {
+      patient = null;
+      error = 'Access denied: patient is outside your tenant.';
+    }
   }
 
   if (patient?.id && isCaseScopedClinicalRole(user.staffRole)) {
@@ -277,6 +330,10 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       communicationsError: null,
       appointments: [],
       appointmentsError: null,
+      carePlans: [],
+      carePlansError: null,
+      goals: [],
+      goalsError: null,
       nurseShiftAssignments: [],
       nurseShiftAssignmentsError: null,
       localVisits: [],
@@ -288,8 +345,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     };
   }
 
-  const localPatientPromise = prisma.patient.findUnique({
-    where: { medplumPatientId: patient.id },
+  const localPatientPromise = prisma.patient.findFirst({
+    where: { medplumPatientId: patient.id, tenantId: sessionTenantId(user) },
     select: {
       id: true,
       code: true,
@@ -310,8 +367,10 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
 
   const localVisitsPromise = prisma.visit.findMany({
     where: {
+      tenantId: sessionTenantId(user),
       patient: {
         medplumPatientId: patient.id,
+        tenantId: sessionTenantId(user),
       },
     },
     orderBy: [{ scheduledDate: 'desc' }, { updatedAt: 'desc' }],
@@ -340,34 +399,38 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     },
   });
 
-  const standingOrdersPromise = prisma.standingOrder.findMany({
-    where: {
-      patient: {
-        medplumPatientId: patient.id,
-      },
-    },
-    orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
-    take: 60,
-    include: {
-      executions: {
-        orderBy: {
-          executedAt: 'desc',
+  const standingOrdersPromise = wants('care-plan-goals')
+    ? prisma.standingOrder.findMany({
+        where: {
+          patient: {
+            medplumPatientId: patient.id,
+            tenantId: sessionTenantId(user),
+          },
         },
-        take: 1,
-        select: {
-          executedAt: true,
+        orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
+        take: 60,
+        include: {
+          executions: {
+            orderBy: {
+              executedAt: 'desc',
+            },
+            take: 1,
+            select: {
+              executedAt: true,
+            },
+          },
+          _count: {
+            select: {
+              executions: true,
+            },
+          },
         },
-      },
-      _count: {
-        select: {
-          executions: true,
-        },
-      },
-    },
-  });
+      })
+    : Promise.resolve([]);
 
   const staffPromise = prisma.staff.findMany({
     where: {
+      tenantId: sessionTenantId(user),
       status: 'active',
       role: {
         in: ['doctor', 'nurse', 'physiotherapist', 'medical_ops', 'operator', 'admin', 'superadmin', 'finance'],
@@ -399,6 +462,8 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     assessmentsResult,
     communicationsResult,
     appointmentsResult,
+    carePlansResult,
+    goalsResult,
     nurseShiftAssignmentsResult,
     localVisitsResult,
     standingOrdersResult,
@@ -412,53 +477,58 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
       listPatientClinicalNotes(patient.id, 30),
       getActivePatientCareTeam(patient.id),
       listPatientTasks(patient.id, 40),
-      listPatientCareReports(patient.id, 80),
+      wants('notes-reports') ? listPatientCareReports(patient.id, 80) : Promise.resolve([]),
       listPatientConditions(patient.id, 80),
       listPatientAllergies(patient.id, 40),
       listPatientMedications(patient.id, 80),
-      listMedicationAdministrationRecords(patient.id, 120),
+      wants('medications-mar') ? listMedicationAdministrationRecords(patient.id, 120) : Promise.resolve([]),
       listPatientDocuments(patient.id, 40),
       listPatientLabOrders(patient.id, 30),
       listPatientDiagnosticReports(patient.id, 30),
-      listPatientAssessments(patient.id, 40),
-      listPatientCommunications(patient.id, 80),
-      listPatientAppointments(patient.id, 40),
-      prisma.nurseShiftAssignment.findMany({
-        where: {
-          patient: {
-            medplumPatientId: patient.id,
-          },
-        },
-        orderBy: {
-          shiftStartAt: 'desc',
-        },
-        take: 50,
-        select: {
-          id: true,
-          shiftStartAt: true,
-          shiftEndAt: true,
-          status: true,
-          primaryNurseStaffId: true,
-          incomingNurseStaffId: true,
-          acknowledgedAt: true,
-          escalationTaskId: true,
-          notes: true,
-          primaryNurse: {
-            select: {
-              name: true,
+      wants('measurements') ? listPatientAssessments(patient.id, 40) : Promise.resolve([]),
+      wants('orders-tasks') ? listPatientCommunications(patient.id, 80) : Promise.resolve([]),
+      wants('visits-encounters') ? listPatientAppointments(patient.id, 40) : Promise.resolve([]),
+      wants('care-plan-goals') ? listPatientCarePlans(patient.id, 20) : Promise.resolve([]),
+      wants('care-plan-goals') ? listPatientGoalsFromMedplum(patient.id, 50) : Promise.resolve([]),
+      wants('orders-tasks')
+        ? prisma.nurseShiftAssignment.findMany({
+            where: {
+              patient: {
+                medplumPatientId: patient.id,
+                tenantId: sessionTenantId(user),
+              },
             },
-          },
-          incomingNurse: {
-            select: {
-              name: true,
+            orderBy: {
+              shiftStartAt: 'desc',
             },
-          },
-        },
-      }),
+            take: 50,
+            select: {
+              id: true,
+              shiftStartAt: true,
+              shiftEndAt: true,
+              status: true,
+              primaryNurseStaffId: true,
+              incomingNurseStaffId: true,
+              acknowledgedAt: true,
+              escalationTaskId: true,
+              notes: true,
+              primaryNurse: {
+                select: {
+                  name: true,
+                },
+              },
+              incomingNurse: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          })
+        : Promise.resolve([]),
       localVisitsPromise,
       standingOrdersPromise,
       staffPromise,
-      listPatientCaregiverPortalConsents(patient.id),
+      wants('care-team-consent') ? listPatientCaregiverPortalConsents(patient.id) : Promise.resolve([]),
       localPatientPromise,
     ]);
 
@@ -495,7 +565,10 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
     restrictedInLabOrders.length > 0 ||
     restrictedInLabResults.length > 0;
 
-  const restrictedGrant = hasRestrictedContent ? await getRestrictedAccessGrant(patient.id) : null;
+  const restrictedGrant =
+    hasRestrictedContent && user.staffId
+      ? await getRestrictedAccessGrant(patient.id, user.staffId)
+      : null;
   const requiresReason =
     hasRestrictedContent &&
     !canBypassRestrictedReason(user.staffRole) &&
@@ -738,6 +811,20 @@ export async function loadAdminPatientDetailData(id: string): Promise<AdminPatie
         ? appointmentsResult.reason instanceof Error
           ? appointmentsResult.reason.message
           : 'Failed to load patient appointments from Medplum'
+        : null,
+    carePlans: carePlansResult.status === 'fulfilled' ? carePlansResult.value : [],
+    carePlansError:
+      carePlansResult.status === 'rejected'
+        ? carePlansResult.reason instanceof Error
+          ? carePlansResult.reason.message
+          : 'Failed to load patient care plans from Medplum'
+        : null,
+    goals: goalsResult.status === 'fulfilled' ? goalsResult.value : [],
+    goalsError:
+      goalsResult.status === 'rejected'
+        ? goalsResult.reason instanceof Error
+          ? goalsResult.reason.message
+          : 'Failed to load patient goals from Medplum'
         : null,
     nurseShiftAssignments:
       nurseShiftAssignmentsResult.status === 'fulfilled'

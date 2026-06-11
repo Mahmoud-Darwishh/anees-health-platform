@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import type { NextAuthRequest } from 'next-auth';
 import createIntlMiddleware from 'next-intl/middleware';
 import { locales } from '@/i18n/request';
+import { canAccessRoute, homeRouteForRole } from '@/lib/auth/route-access';
+import type { StaffRole } from '@prisma/client';
 
 const DEFAULT_LOCALE = 'en';
 
@@ -33,24 +35,22 @@ export default auth((req: NextAuthRequest) => {
     return NextResponse.next();
   }
 
-  // ── Admin shell (English-only, no locale prefix) ─────────────────────────
-  // Staff-authenticated only. Unauthenticated visitors are sent to the staff
-  // login. The layout re-checks the session server-side as defence in depth.
-  if (pathname.startsWith('/admin')) {
+  // ── Staff surfaces: /admin/* and /clinician/* (English-only, no locale) ──
+  // Two gates, in order:
+  //   1. Authenticated staff only — unauthenticated visitors go to staff login.
+  //   2. Role gate — the role must be allowed in this URL family (route-access).
+  //      A wrong role is bounced to its own home section (no redirect loops).
+  // Page + loader guards still run server-side as defence in depth.
+  if (pathname.startsWith('/admin') || pathname.startsWith('/clinician')) {
     if (!session?.user?.staffId) {
       const loginUrl = new URL(`/${DEFAULT_LOCALE}/auth/login`, req.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
-    return NextResponse.next();
-  }
 
-  // ── Clinician workspace (staff only, no locale prefix) ─────────────────
-  if (pathname.startsWith('/clinician')) {
-    if (!session?.user?.staffId) {
-      const loginUrl = new URL(`/${DEFAULT_LOCALE}/auth/login`, req.url);
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginUrl);
+    const role = (session.user.staffRole ?? null) as StaffRole | null;
+    if (!canAccessRoute(pathname, role)) {
+      return NextResponse.redirect(new URL(homeRouteForRole(role), req.url));
     }
     return NextResponse.next();
   }

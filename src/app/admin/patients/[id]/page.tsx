@@ -14,7 +14,7 @@ export default async function AdminPatientDetailPage({
   const { id } = await params;
   const { tab } = await searchParams;
   const [data, flash] = await Promise.all([
-    loadAdminPatientDetailData(id),
+    loadAdminPatientDetailData(id, tab),
     consumeAdminPatientFlash(),
   ]);
 

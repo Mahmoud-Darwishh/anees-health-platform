@@ -21,7 +21,7 @@ export default async function LoginPage({ params }: Props) {
     redirect(`/${locale}/portal`);
   }
   if (session?.user.role === 'staff') {
-    redirect('/admin/clinician');
+    redirect('/admin');
   }
 
   return (

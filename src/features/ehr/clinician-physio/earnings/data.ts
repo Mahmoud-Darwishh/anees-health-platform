@@ -1,8 +1,9 @@
 import 'server-only';
 
 import type { VisitStatus } from '@prisma/client';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 
 export type EarningsVisitItem = {
   id: string;
@@ -80,10 +81,7 @@ function formatDateLabel(value: Date | null): string | null {
 }
 
 export async function getClinicianEarningsData(): Promise<ClinicianEarningsData> {
-  const user = await getStaffUser(['physiotherapist', 'admin', 'superadmin']);
-  if (!user?.staffId) {
-    throw new Error('Unauthorized');
-  }
+  const { user } = await requireStaffCan('workspace.physio.access');
 
   const staff = await prisma.staff.findUnique({
     where: { id: user.staffId },
@@ -118,6 +116,7 @@ export async function getClinicianEarningsData(): Promise<ClinicianEarningsData>
     : new Date(now.getFullYear(), now.getMonth() + 1, 3);
 
   const settledFilter = {
+    tenantId: sessionTenantId(user),
     providerId: staff.providerId,
     OR: [{ status: 'completed' as const }, { checkOutAt: { not: null } }],
   };
@@ -160,6 +159,7 @@ export async function getClinicianEarningsData(): Promise<ClinicianEarningsData>
     }),
     prisma.visit.findMany({
       where: {
+        tenantId: sessionTenantId(user),
         providerId: staff.providerId,
       },
       orderBy: [{ scheduledDate: 'desc' }, { updatedAt: 'desc' }],

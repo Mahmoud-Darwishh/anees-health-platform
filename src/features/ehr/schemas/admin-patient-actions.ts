@@ -1,11 +1,12 @@
 import { z } from 'zod';
 
 const optionalTrimmedString = z
-  .string()
-  .trim()
-  .optional()
-  .or(z.literal(''))
-  .transform((value) => (value ? value : undefined));
+  .union([z.string(), z.null(), z.undefined()])
+  .transform((value) => {
+    if (value === null || value === undefined) return undefined;
+    const trimmed = value.trim();
+    return trimmed ? trimmed : undefined;
+  });
 
 const optionalHttpsUrl = z
   .union([z.string(), z.null(), z.undefined()])
@@ -531,10 +532,30 @@ export const createConditionSchema = z.object({
 export const createAllergySchema = z.object({
   medplumPatientId: requiredPatientId,
   allergen: z.string().trim().min(1, 'Allergy substance is required'),
-  allergyReaction: optionalTrimmedString,
   allergySeverity: optionalSeverity,
-  allergyOnsetDate: optionalDate,
   allergyNote: optionalTrimmedString,
+});
+
+export const retireConditionSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  conditionId: z.string().trim().min(1, 'Condition id is required'),
+});
+
+export const retireAllergySchema = z.object({
+  medplumPatientId: requiredPatientId,
+  allergyId: z.string().trim().min(1, 'Allergy id is required'),
+});
+
+export const updateConditionStatusSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  conditionId: z.string().trim().min(1, 'Condition id is required'),
+  conditionStatus: z.enum(['active', 'resolved', 'inactive', 'remission']),
+});
+
+export const updateAllergyStatusSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  allergyId: z.string().trim().min(1, 'Allergy id is required'),
+  allergyStatus: z.enum(['active', 'inactive', 'resolved']),
 });
 
 export const createMedicationSchema = z.object({
@@ -543,9 +564,8 @@ export const createMedicationSchema = z.object({
   dosageText: optionalTrimmedString,
   routeText: optionalTrimmedString,
   frequencyText: optionalTrimmedString,
-  medicationStatus: z.enum(['active', 'completed', 'stopped', 'entered-in-error', 'intended', 'not-taken', 'on-hold']).default('active'),
   startDate: optionalDate,
-  endDate: optionalDate,
+  medicationDurationDays: optionalNumber,
   medicationNote: optionalTrimmedString,
 });
 
@@ -556,9 +576,25 @@ export const createMedicationAdministrationSchema = z.object({
   encounterId: optionalTrimmedString,
   administrationStatus: z.enum(['given', 'refused', 'held']).default('given'),
   scheduledAt: optionalDate,
-  administeredAt: requiredDate,
+  administeredAt: optionalDate,
   administrationReason: optionalTrimmedString,
   administrationNote: optionalTrimmedString,
+});
+
+export const updateMedicationStatusSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  medicationId: z.string().trim().min(1, 'Medication id is required'),
+  medicationManageStatus: z.enum(['active', 'on-hold', 'completed', 'stopped']),
+});
+
+export const retireMedicationSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  medicationId: z.string().trim().min(1, 'Medication id is required'),
+});
+
+export const retireMedicationAdministrationSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  administrationId: z.string().trim().min(1, 'Administration id is required'),
 });
 
 export const createDocumentSchema = z.object({
@@ -736,6 +772,9 @@ export const updatePatientDemographicsSchema = z.object({
   emergencyContactName: optionalTrimmedString,
   emergencyContactPhone: optionalTrimmedString,
   emergencyContactRelation: optionalTrimmedString,
+  secondaryEmergencyContactName: optionalTrimmedString,
+  secondaryEmergencyContactPhone: optionalTrimmedString,
+  secondaryEmergencyContactRelation: optionalTrimmedString,
 });
 
 export const upsertCaregiverConsentSchema = z
@@ -894,25 +933,29 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     conditionCode: formData.get('conditionCode'),
     conditionOnsetDate: formData.get('conditionOnsetDate'),
     conditionNote: formData.get('conditionNote'),
+    conditionId: formData.get('conditionId'),
+    conditionStatus: formData.get('conditionStatus'),
     allergen: formData.get('allergen'),
-    allergyReaction: formData.get('allergyReaction'),
     allergySeverity: formData.get('allergySeverity'),
-    allergyOnsetDate: formData.get('allergyOnsetDate'),
     allergyNote: formData.get('allergyNote'),
+    allergyId: formData.get('allergyId'),
+    allergyStatus: formData.get('allergyStatus'),
     medicationName: formData.get('medicationName'),
     dosageText: formData.get('dosageText'),
     routeText: formData.get('routeText'),
     frequencyText: formData.get('frequencyText'),
-    medicationStatus: formData.get('medicationStatus'),
     startDate: formData.get('startDate'),
-    endDate: formData.get('endDate'),
+    medicationDurationDays: formData.get('medicationDurationDays'),
     medicationNote: formData.get('medicationNote'),
+    medicationId: formData.get('medicationId'),
+    medicationManageStatus: formData.get('medicationManageStatus'),
     medicationStatementId: formData.get('medicationStatementId'),
     administrationStatus: formData.get('administrationStatus'),
     scheduledAt: formData.get('scheduledAt'),
     administeredAt: formData.get('administeredAt'),
     administrationReason: formData.get('administrationReason'),
     administrationNote: formData.get('administrationNote'),
+    administrationId: formData.get('administrationId'),
     documentTitle: formData.get('documentTitle'),
     documentId: formData.get('documentId'),
     approvalTokenId: formData.get('approvalTokenId'),
@@ -983,6 +1026,9 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     addressDetail: formData.get('addressDetail'),
     landmark: formData.get('landmark'),
     addressMapUrl: formData.get('addressMapUrl'),
+    emergencyContactName: formData.get('emergencyContactName'),
+    emergencyContactPhone: formData.get('emergencyContactPhone'),
+    emergencyContactRelation: formData.get('emergencyContactRelation'),
     consentId: formData.get('consentId'),
     consentVersionId: formData.get('consentVersionId'),
     caregiverPhone: formData.get('caregiverPhone'),
@@ -993,5 +1039,8 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     scopeVitals: formData.get('scopeVitals'),
     scopeNotes: formData.get('scopeNotes'),
     scopeTasks: formData.get('scopeTasks'),
+    secondaryEmergencyContactName: formData.get('secondaryEmergencyContactName'),
+    secondaryEmergencyContactPhone: formData.get('secondaryEmergencyContactPhone'),
+    secondaryEmergencyContactRelation: formData.get('secondaryEmergencyContactRelation'),
   };
 }

@@ -1,26 +1,33 @@
 import { redirect } from 'next/navigation';
 import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
+import { rolesForRoute } from '@/lib/auth/route-access';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminInsuranceWorkspacePage() {
-  const user = await getStaffUser([
-    'superadmin',
-    'admin',
-    'insurance_coordinator',
-  ]);
+  const user = await getStaffUser(rolesForRoute('/admin/insurance'));
 
   if (!user) {
     redirect('/admin/patients');
   }
+  await requireStaffCan('insurance.read', {
+    audit: {
+      tableName: 'insurance',
+      recordId: 'admin_insurance',
+    },
+  });
+  const tenantId = sessionTenantId(user);
 
   const [insurerCount, coverageCount, priorAuthCount, claimCount, recentClaims, recentPriorAuths, recentCoverages] = await Promise.all([
     prisma.insurerProfile.count({ where: { isActive: true } }),
-    prisma.coverage.count(),
-    prisma.priorAuth.count(),
-    prisma.claim.count(),
+    prisma.coverage.count({ where: { tenantId } }),
+    prisma.priorAuth.count({ where: { tenantId } }),
+    prisma.claim.count({ where: { tenantId } }),
     prisma.claim.findMany({
+      where: { tenantId },
       orderBy: { createdAt: 'desc' },
       take: 20,
       select: {
@@ -35,6 +42,7 @@ export default async function AdminInsuranceWorkspacePage() {
       },
     }),
     prisma.priorAuth.findMany({
+      where: { tenantId },
       orderBy: { createdAt: 'desc' },
       take: 20,
       select: {
@@ -48,6 +56,7 @@ export default async function AdminInsuranceWorkspacePage() {
       },
     }),
     prisma.coverage.findMany({
+      where: { tenantId },
       orderBy: { updatedAt: 'desc' },
       take: 20,
       select: {

@@ -1,16 +1,12 @@
 import { redirect } from 'next/navigation';
 import { getStaffUser } from '@/lib/auth/rbac';
+import { rolesForRoute } from '@/lib/auth/route-access';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOpsWorkspacePage() {
-  const user = await getStaffUser([
-    'superadmin',
-    'admin',
-    'medical_ops',
-    'operator',
-  ]);
+  const user = await getStaffUser(rolesForRoute('/admin/ops'));
 
   if (!user) {
     redirect('/admin/patients');

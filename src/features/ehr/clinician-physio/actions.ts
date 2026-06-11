@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
 import type { StaffRole } from '@prisma/client';
 import {
@@ -18,8 +18,6 @@ import {
   disputeVisitAction as disputeVisitAdminAction,
 } from '@/features/ehr/admin-patient/actions';
 
-const PHYSIO_WORKSPACE_ROLES = ['physiotherapist', 'admin', 'superadmin'] as const;
-
 type PhysioWorkspaceContext = {
   staffId: string;
   staffRole: StaffRole;
@@ -27,19 +25,19 @@ type PhysioWorkspaceContext = {
 };
 
 async function assertPhysioWorkspaceAccess(): Promise<PhysioWorkspaceContext> {
-  const staff = await getStaffUser([...PHYSIO_WORKSPACE_ROLES]);
-  if (!staff?.staffId || !staff.staffRole) {
-    throw new Error('Unauthorized');
-  }
+  // One matrix-backed gate. Throws 'Unauthorized' unless the caller may enter
+  // the physio workspace. Per-visit case scope is still enforced below in
+  // `withTrustedVisitFormData`.
+  const { user } = await requireStaffCan('workspace.physio.access');
 
   const staffRecord = await prisma.staff.findUnique({
-    where: { id: staff.staffId },
+    where: { id: user.staffId! },
     select: { providerId: true },
   });
 
   return {
-    staffId: staff.staffId,
-    staffRole: staff.staffRole,
+    staffId: user.staffId!,
+    staffRole: user.staffRole!,
     providerId: staffRecord?.providerId ?? null,
   };
 }

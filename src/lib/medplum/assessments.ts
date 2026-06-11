@@ -80,7 +80,7 @@ export async function listPatientAssessments(patientId: string, count = 50): Pro
   const responses = (await medplum.searchResources('QuestionnaireResponse', {
     subject: `Patient/${patientId}`,
     _count: String(count),
-    _sort: '-authored',
+    _sort: '-_lastUpdated',
   })) as QuestionnaireResponseResource[];
 
   return responses.map(normalizeAssessment).filter((item): item is AssessmentSummary => !!item);

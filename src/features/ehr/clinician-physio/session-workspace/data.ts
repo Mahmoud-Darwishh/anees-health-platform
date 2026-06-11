@@ -2,8 +2,9 @@ import 'server-only';
 
 import { type VisitStatus } from '@prisma/client';
 import { notFound } from 'next/navigation';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
 import { careReportCode, careReportComponentText, listPatientCareReports } from '@/lib/medplum/care-reports';
 
@@ -127,10 +128,7 @@ export async function getPhysioSessionWorkspaceData(
   visitId: string,
   rankingWindow: RankingWindow = 'all',
 ): Promise<PhysioSessionWorkspaceData> {
-  const user = await getStaffUser(['physiotherapist', 'admin', 'superadmin']);
-  if (!user?.staffId) {
-    throw new Error('Unauthorized');
-  }
+  const { user } = await requireStaffCan('workspace.physio.access');
 
   const staff = await prisma.staff.findUnique({
     where: { id: user.staffId },
@@ -144,8 +142,10 @@ export async function getPhysioSessionWorkspaceData(
   const visit = await prisma.visit.findFirst({
     where: {
       id: visitId,
+      tenantId: sessionTenantId(user),
       providerId: staff.providerId,
       patient: {
+        tenantId: sessionTenantId(user),
         deletedAt: null,
       },
     },

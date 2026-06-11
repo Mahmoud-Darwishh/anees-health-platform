@@ -1,0 +1,12 @@
+{
+  "//": "ts-node config for repo scripts. Forces CommonJS so `node`/`ts-node` can run them directly (the root tsconfig is ESM/bundler, for Next.js).",
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "5.0",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmit": false,
+    "incremental": false
+  },
+  "include": ["./**/*.ts"]
+}

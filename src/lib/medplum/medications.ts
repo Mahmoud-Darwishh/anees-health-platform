@@ -82,7 +82,10 @@ export async function listPatientMedications(patientId: string, count = 50): Pro
     _sort: '-_lastUpdated',
   })) as MedicationStatementResource[];
 
-  return resources.map(normalizeMedication).filter((item): item is MedicationSummary => !!item);
+  return resources
+    .filter((resource) => resource.status !== 'entered-in-error')
+    .map(normalizeMedication)
+    .filter((item): item is MedicationSummary => !!item);
 }
 
 export async function createPatientMedication(input: CreateMedicationInput): Promise<MedicationStatementResource> {
@@ -111,5 +114,42 @@ export async function createPatientMedication(input: CreateMedicationInput): Pro
         timing: input.frequency ? { code: { text: input.frequency } } : undefined,
       },
     ],
+  } as never)) as MedicationStatementResource;
+}
+
+/**
+ * Medication-order lifecycle states a clinician can move an order through.
+ * Distinct from `markMedicationEnteredInError`, which removes an order that was
+ * never valid (data-entry mistake) rather than one that has been clinically
+ * discontinued or completed.
+ */
+export type MedicationManageStatus = 'active' | 'on-hold' | 'completed' | 'stopped';
+
+export async function setMedicationStatus(
+  medicationId: string,
+  status: MedicationManageStatus,
+): Promise<MedicationStatementResource> {
+  const medplum = await getMedplumClient();
+  const existing = (await medplum.readResource('MedicationStatement', medicationId)) as MedicationStatementResource;
+
+  return (await medplum.updateResource({
+    ...existing,
+    status,
+  } as never)) as MedicationStatementResource;
+}
+
+/**
+ * Marks a medication order as entered-in-error (data-entry mistake). Filtered out
+ * of the active list; never hard-deleted, preserving the clinical audit trail.
+ */
+export async function markMedicationEnteredInError(
+  medicationId: string,
+): Promise<MedicationStatementResource> {
+  const medplum = await getMedplumClient();
+  const existing = (await medplum.readResource('MedicationStatement', medicationId)) as MedicationStatementResource;
+
+  return (await medplum.updateResource({
+    ...existing,
+    status: 'entered-in-error',
   } as never)) as MedicationStatementResource;
 }

@@ -14,7 +14,13 @@
       "Bash(find src/features/ehr -type f)",
       "Bash(grep -n \"'whatsapp'\\\\|whatsapp\\\\\\\\.\" \"C:/Users/madyo/Desktop/Anees NXTJS/anees-health-platform/src/components/common/WhatsAppButton.tsx\")",
       "Bash(grep -E \"\\\\.\\(mjs|js|json|md|ts\\)$\")",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "PowerShell(npx tsc --noEmit)",
+      "Bash(Select-Object -First 5)",
+      "Bash(Write-Output \"---gitignore scripts?---\")",
+      "Bash(Select-String -Path .gitignore -Pattern \"scripts\" -SimpleMatch)",
+      "Bash(node tmp-parse-icd10.cjs)",
+      "Bash(curl -s -m 60 -o tmp-icd10-src.csv -w \"download HTTP %{http_code}, bytes %{size_download}\\\\n\" \"https://raw.githubusercontent.com/k4m1113/ICD-10-CSV/master/codes.csv\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\madyo\\Desktop\\Anees NXTJS\\anees-health-platform\\src\\app\\[locale]\\payment\\mock"

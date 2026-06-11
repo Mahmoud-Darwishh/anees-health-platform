@@ -1,12 +1,9 @@
 import 'server-only';
 
-import type { StaffRole } from '@prisma/client';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listTasksByOwner, type MedplumTaskResource } from '@/lib/medplum/tasks';
-
-const PHYSIO_WORKSPACE_ROLES: StaffRole[] = ['physiotherapist', 'admin', 'superadmin'];
 
 type TaskStatus = MedplumTaskResource['status'];
 
@@ -44,10 +41,7 @@ function isUrgentPriority(priority: MedplumTaskResource['priority'] | undefined)
 }
 
 export async function getClinicianTasksData(): Promise<ClinicianTasksData> {
-  const staff = await getStaffUser(PHYSIO_WORKSPACE_ROLES);
-  if (!staff?.staffId || !staff.staffRole) {
-    throw new Error('Unauthorized');
-  }
+  const { user: staff } = await requireStaffCan('workspace.physio.access');
 
   const staffRecord = await prisma.staff.findUnique({
     where: { id: staff.staffId },

@@ -16,7 +16,10 @@ export default function LoginForm() {
   const rawCallbackUrl = searchParams.get('callbackUrl');
   const safeCallbackUrl = rawCallbackUrl?.startsWith('/') ? rawCallbackUrl : null;
   const patientDefaultUrl = `/${locale}/portal`;
-  const staffDefaultUrl = '/admin/clinician';
+  // Staff land on the `/admin` dispatcher, which forwards each role to its own
+  // home section. Never hardcode a single workspace here — it caused redirect
+  // bounces (and wrong landings) for non-physio roles.
+  const staffDefaultUrl = '/admin';
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');

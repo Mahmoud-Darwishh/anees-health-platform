@@ -1,8 +1,9 @@
 import 'server-only';
 
 import { type DnrStatus, type VisitStatus } from '@prisma/client';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 
 export type PhysioVisitFlowState =
   | 'scheduled'
@@ -206,10 +207,7 @@ async function readVisitTimeline(visitId: string): Promise<PhysioTodayVisit['tra
 }
 
 export async function getPhysioTodayData(): Promise<PhysioTodayData> {
-  const staff = await getStaffUser(['physiotherapist', 'admin', 'superadmin']);
-  if (!staff?.staffId) {
-    throw new Error('Unauthorized');
-  }
+  const { user: staff } = await requireStaffCan('workspace.physio.access');
 
   const staffRecord = await prisma.staff.findUnique({
     where: { id: staff.staffId },
@@ -236,12 +234,14 @@ export async function getPhysioTodayData(): Promise<PhysioTodayData> {
 
   const visits = await prisma.visit.findMany({
     where: {
+      tenantId: sessionTenantId(staff),
       providerId: staffRecord.providerId,
       scheduledDate: {
         gte: start,
         lte: end,
       },
       patient: {
+        tenantId: sessionTenantId(staff),
         deletedAt: null,
       },
     },

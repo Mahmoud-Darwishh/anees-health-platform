@@ -1436,7 +1436,7 @@ async function main() {
     where: { id: 101 },
     update: {
       slug: 'reem-ragab',
-      image: 'assets/img/doctor-grid-optimized/Reem Rajab.webp',
+      image: 'assets/img/doctor-grid-optimized/reem-rajab.webp',
       rating: 0,
       gender: 'Female',
       location: 'Cairo, Egypt',
@@ -1500,7 +1500,7 @@ async function main() {
     create: {
       id: 101,
       slug: 'reem-ragab',
-      image: 'assets/img/doctor-grid-optimized/Reem Rajab.webp',
+      image: 'assets/img/doctor-grid-optimized/reem-rajab.webp',
       rating: 0,
       gender: 'Female',
       location: 'Cairo, Egypt',
@@ -1567,7 +1567,7 @@ async function main() {
     where: { id: 102 },
     update: {
       slug: 'menna-m-yahia',
-      image: 'assets/img/doctor-grid-optimized/Menna Yahia.webp',
+      image: 'assets/img/doctor-grid-optimized/menna-yahia.webp',
       rating: 0,
       gender: 'Female',
       location: 'Cairo, Egypt',
@@ -1623,7 +1623,7 @@ async function main() {
     create: {
       id: 102,
       slug: 'menna-m-yahia',
-      image: 'assets/img/doctor-grid-optimized/Menna Yahia.webp',
+      image: 'assets/img/doctor-grid-optimized/menna-yahia.webp',
       rating: 0,
       gender: 'Female',
       location: 'Cairo, Egypt',
@@ -1682,7 +1682,7 @@ async function main() {
     where: { id: 103 },
     update: {
       slug: 'mohamed-mahmoud-hamza',
-      image: 'assets/img/doctor-grid-optimized/Hamza.webp',
+      image: 'assets/img/doctor-grid-optimized/hamza.webp',
       rating: 0,
       gender: 'Male',
       location: 'Cairo, Egypt',
@@ -1739,7 +1739,7 @@ async function main() {
     create: {
       id: 103,
       slug: 'mohamed-mahmoud-hamza',
-      image: 'assets/img/doctor-grid-optimized/Hamza.webp',
+      image: 'assets/img/doctor-grid-optimized/hamza.webp',
       rating: 0,
       gender: 'Male',
       location: 'Cairo, Egypt',

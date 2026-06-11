@@ -309,6 +309,17 @@ See `.env.local` template in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) and [DE
 | `HASH_SALT` rotation strategy not defined | Low | Engineering | Backlog |
 | Medplum self-hosted on shared VPS today | Medium | Ops | Migration to OVH (in flight) |
 
+### 11.1 Postgres RLS rollout gate
+
+RLS is intentionally deferred until app-layer tenant controls are stable and fully audited. The rollout gate is:
+
+1. `tenantId` filtering coverage is verified on all tenant-scoped Prisma reads and writes (automated sweep + manual sign-off).
+2. Access-denied and override audits are green for at least two consecutive release cycles.
+3. Break-glass approval queue has explicit approve/reject workflow in `/admin/compliance`.
+4. A staged RLS migration plan exists with rollback SQL, tenant smoke tests, and production dry-run metrics.
+
+When these criteria are met, implement RLS in phases: read policies first, then write policies, then restrictive defaults with explicit allow-list for service roles.
+
 ---
 
 ## 12. See also

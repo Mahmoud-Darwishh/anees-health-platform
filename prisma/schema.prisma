@@ -1607,3 +1607,18 @@ model PatientGoal {
   @@index([authorStaffId])
   @@map("patient_goals")
 }
+
+// ============================================================================
+// TERMINOLOGY — ICD-10 reference data (NOT PHI)
+// ============================================================================
+// Full ICD-10-CM classification powering the EHR problem-list picker. Medplum's
+// built-in ICD-10 CodeSystem ships empty and is write-protected for our client,
+// so we own the value set here. Seed with `npm run db:seed:icd10`.
+model Icd10Code {
+  code      String   @id // dotted, e.g. "E11.9", "S72.001A"
+  display   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([display])
+  @@map("icd10_codes")
+}

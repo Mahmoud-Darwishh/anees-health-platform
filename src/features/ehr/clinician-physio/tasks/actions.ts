@@ -1,16 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { updatePatientTaskStatus } from '@/lib/medplum/tasks';
 
-const PHYSIO_WORKSPACE_ROLES = ['physiotherapist', 'admin', 'superadmin'] as const;
-
 async function assertAccess(): Promise<void> {
-  const staff = await getStaffUser([...PHYSIO_WORKSPACE_ROLES]);
-  if (!staff?.staffId) {
-    throw new Error('Unauthorized');
-  }
+  await requireStaffCan('workspace.physio.access');
 }
 
 export async function startTaskAction(formData: FormData): Promise<void> {

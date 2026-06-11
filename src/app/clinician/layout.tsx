@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { getSessionUser } from '@/lib/auth/rbac';
+import { staffCan } from '@/lib/auth/policy/enforce';
 import { ClinicianBottomNav } from './ui/ClinicianBottomNav';
 import { ClinicianTopbarActions } from './ui/ClinicianTopbarActions';
 import './clinician-shell.scss';
@@ -11,13 +12,16 @@ export default async function ClinicianLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getStaffUser(['physiotherapist', 'admin', 'superadmin']);
+  // Route gate: derives the allowed roles from the permission matrix, not a
+  // hard-coded list. A non-physio staff member is bounced to the `/admin`
+  // dispatcher, which sends them to their own home section.
+  const user = await getSessionUser();
 
-  if (!user) {
-    redirect('/admin/patients');
+  if (!(await staffCan('workspace.physio.access'))) {
+    redirect('/admin');
   }
 
-  const staffName = user.name ?? user.email ?? 'Clinician';
+  const staffName = user?.name ?? user?.email ?? 'Clinician';
 
   return (
     <div className="clinician-shell">

@@ -82,6 +82,9 @@ type UpdateMedplumPatientDemographicsInput = {
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
   emergencyContactRelation?: string | null;
+  secondaryEmergencyContactName?: string | null;
+  secondaryEmergencyContactPhone?: string | null;
+  secondaryEmergencyContactRelation?: string | null;
 };
 
 type FhirExtension = NonNullable<MedplumPatientResource['extension']>[number];
@@ -174,6 +177,34 @@ function buildEmergencyContact(input: {
   const name = toOptionalString(input.emergencyContactName);
   const phone = toOptionalString(input.emergencyContactPhone);
   const relation = toOptionalString(input.emergencyContactRelation);
+
+  if (!name && !phone && !relation) {
+    return null;
+  }
+
+  return {
+    name: name ? { text: name } : undefined,
+    telecom: phone
+      ? [
+          {
+            system: 'phone',
+            value: phone,
+            use: 'mobile',
+          },
+        ]
+      : undefined,
+    relationship: relation ? [{ text: relation }] : undefined,
+  };
+}
+
+function buildSecondaryEmergencyContact(input: {
+  secondaryEmergencyContactName?: string | null;
+  secondaryEmergencyContactPhone?: string | null;
+  secondaryEmergencyContactRelation?: string | null;
+}): FhirContact | null {
+  const name = toOptionalString(input.secondaryEmergencyContactName);
+  const phone = toOptionalString(input.secondaryEmergencyContactPhone);
+  const relation = toOptionalString(input.secondaryEmergencyContactRelation);
 
   if (!name && !phone && !relation) {
     return null;
@@ -301,13 +332,13 @@ export async function updateMedplumPatientDemographics(
 
   const nextHomeAddress = buildHomeAddress(input);
   const nextEmergencyContact = buildEmergencyContact(input);
+  const nextSecondaryEmergencyContact = buildSecondaryEmergencyContact(input);
   const existingAddresses = existing.address ?? [];
   const homeAddressIndex = existingAddresses.findIndex((address) => address.use === 'home');
   const nextAddresses = [...existingAddresses];
 
   const existingContacts = existing.contact ?? [];
-  const emergencyContactIndex = existingContacts.length > 0 ? 0 : -1;
-  const nextContacts = [...existingContacts];
+  const nextContacts = [] as FhirContact[];
 
   if (nextHomeAddress) {
     if (homeAddressIndex >= 0) {
@@ -329,18 +360,14 @@ export async function updateMedplumPatientDemographics(
   }
 
   if (nextEmergencyContact) {
-    if (emergencyContactIndex >= 0) {
-      const currentEmergencyContact = nextContacts[emergencyContactIndex] ?? {};
-      nextContacts[emergencyContactIndex] = {
-        ...currentEmergencyContact,
-        ...nextEmergencyContact,
-      };
-    } else {
-      nextContacts.push(nextEmergencyContact);
-    }
-  } else if (emergencyContactIndex >= 0) {
-    nextContacts.splice(emergencyContactIndex, 1);
+    nextContacts.push(nextEmergencyContact);
   }
+
+  if (nextSecondaryEmergencyContact) {
+    nextContacts.push(nextSecondaryEmergencyContact);
+  }
+
+  nextContacts.push(...existingContacts.slice(2));
 
   return (await medplum.updateResource(
     {

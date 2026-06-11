@@ -53,6 +53,8 @@ Anees is a production-grade bilingual (EN/AR) home-care platform serving Egypt t
 | [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) | "Where do we stand against HIPAA §164.308/310/312 and Egypt DPL 151/2020? What's a gap? What needs an outside lawyer? **What does the owner do this week?**" |
 | [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) | "What's the defense-in-depth picture? Edge → Identity → Application → Data → Audit → Secrets → Vuln mgmt → Incident Response. Every control points to its code." |
 | [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) | "How do we deploy? How do we rotate secrets? How do we restore from backup? What's the migration plan? What do we do at 3am when the site is on fire?" |
+| [AGENT_INSTRUCTIONS.md](AGENT_INSTRUCTIONS.md) | "What must an AI or new engineer know before answering or coding in this repo?" |
+| [ARCHITECTURE_SECURITY_AUDIT.md](ARCHITECTURE_SECURITY_AUDIT.md) | "Are we secure, PHI-aware, HIPAA-ready, scalable, and well-architected, or are we drifting into spaghetti?" |
 
 ---
 

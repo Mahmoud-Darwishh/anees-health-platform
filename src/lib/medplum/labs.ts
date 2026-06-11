@@ -164,7 +164,7 @@ export async function listPatientDiagnosticReports(patientId: string, count = 20
   const resources = (await medplum.searchResources('DiagnosticReport', {
     subject: `Patient/${patientId}`,
     _count: String(count),
-    _sort: '-effective-date',
+    _sort: '-_lastUpdated',
   })) as DiagnosticReportResource[];
 
   return resources

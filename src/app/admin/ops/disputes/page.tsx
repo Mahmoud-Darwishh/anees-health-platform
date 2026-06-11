@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
+import { rolesForRoute } from '@/lib/auth/route-access';
 import { prisma } from '@/lib/db/prisma';
+import { sessionTenantId } from '@/lib/db/tenant-scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,10 +24,17 @@ type DisputeQueueRow = {
 };
 
 export default async function AdminOpsDisputesPage() {
-  const user = await getStaffUser(['superadmin', 'admin', 'medical_ops', 'operator']);
+  const user = await getStaffUser(rolesForRoute('/admin/ops/disputes'));
   if (!user) {
     redirect('/admin/patients');
   }
+  await requireStaffCan('ops.disputes.read', {
+    audit: {
+      tableName: 'visits',
+      recordId: 'admin_ops_disputes',
+    },
+  });
+  const tenantId = sessionTenantId(user);
 
   const disputedVisits = await prisma.$queryRaw<DisputeQueueRow[]>`
     SELECT
@@ -44,6 +54,8 @@ export default async function AdminOpsDisputesPage() {
     INNER JOIN patients p ON p.id = v.patient_id
     LEFT JOIN providers pr ON pr.id = v.provider_id
     WHERE p.deleted_at IS NULL
+      AND v."tenantId" = ${tenantId}
+      AND p."tenantId" = ${tenantId}
       AND (v.state::text = 'disputed' OR v.primary_disruption_code IS NOT NULL)
     ORDER BY v.updated_at DESC, v.scheduled_date DESC
     LIMIT 100

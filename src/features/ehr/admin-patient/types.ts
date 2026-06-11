@@ -16,6 +16,8 @@ import type { LabOrderSummary, LabResultSummary } from '@/lib/medplum/labs';
 import type { AssessmentSummary } from '@/lib/medplum/assessments';
 import type { CommunicationSummary } from '@/lib/medplum/communications';
 import type { AppointmentSummary } from '@/lib/medplum/appointments';
+import type { listPatientCarePlans } from '@/lib/medplum/care-plans';
+import type { listPatientGoalsFromMedplum } from '@/lib/medplum/goals';
 
 export type AssignableStaff = {
   id: string;
@@ -87,6 +89,10 @@ export type AdminPatientDetailData = {
   communicationsError: string | null;
   appointments: AppointmentSummary[];
   appointmentsError: string | null;
+  carePlans: Awaited<ReturnType<typeof listPatientCarePlans>>;
+  carePlansError: string | null;
+  goals: Awaited<ReturnType<typeof listPatientGoalsFromMedplum>>;
+  goalsError: string | null;
   nurseShiftAssignments: Array<{
     id: string;
     shiftStartAt: string;

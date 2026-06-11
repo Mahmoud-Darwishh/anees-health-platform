@@ -2,8 +2,9 @@
 
 import { AuditAction } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
-import { getStaffUser } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
+import { assertTenantMatch, sessionTenantId } from '@/lib/db/tenant-scope';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
@@ -15,8 +16,6 @@ import {
   parseMarkPatientGoalMetForm,
   parseUpdatePatientGoalProgressForm,
 } from './goal-discharge-schemas';
-
-const PHYSIO_WORKSPACE_ROLES = ['physiotherapist', 'admin', 'superadmin'] as const;
 
 function revalidateClinicianPatientsViews(): void {
   revalidatePath('/clinician/today');
@@ -50,10 +49,7 @@ async function writePatientGoalAudit(params: {
 }
 
 async function assertPatientScope(patientId: string): Promise<ScopedStaffContext> {
-  const staff = await getStaffUser([...PHYSIO_WORKSPACE_ROLES]);
-  if (!staff?.staffId || !staff.staffRole) {
-    throw new Error('Unauthorized');
-  }
+  const { user: staff } = await requireStaffCan('workspace.physio.access');
 
   const ownStaffRecord = await prisma.staff.findUnique({
     where: { id: staff.staffId },
@@ -62,6 +58,7 @@ async function assertPatientScope(patientId: string): Promise<ScopedStaffContext
       name: true,
       email: true,
       role: true,
+      tenantId: true,
     },
   });
 
@@ -107,12 +104,16 @@ async function assertPatientScope(patientId: string): Promise<ScopedStaffContext
 
   const patient = await prisma.patient.findUnique({
     where: { id: patientId },
-    select: { medplumPatientId: true },
+    select: { medplumPatientId: true, tenantId: true },
   });
 
   if (!patient?.medplumPatientId || !caseScopedMedplumIds.includes(patient.medplumPatientId)) {
     throw new Error('This patient is outside your case scope.');
   }
+  assertTenantMatch({
+    actorTenantId: sessionTenantId(staff),
+    targetTenantId: patient.tenantId,
+  });
 
   context.practitionerReference = practitioner.reference;
   context.practitionerDisplay = practitioner.display;

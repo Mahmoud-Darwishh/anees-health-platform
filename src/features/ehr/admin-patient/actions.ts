@@ -2,7 +2,6 @@
 
 import { randomUUID } from 'crypto';
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
 import { AuditAction, VisitStatus, type StaffRole } from '@prisma/client';
 import { ZodError } from 'zod';
 import { calculateCancellationFee, type DisruptionCode } from '@/lib/billing/cancellation-policy';
@@ -16,7 +15,7 @@ import { getActivePatientCareTeam } from '@/lib/medplum/care-teams';
 import { createPatientTask, listPatientTasks, updatePatientTaskStatus } from '@/lib/medplum/tasks';
 import { createPatientCommunication, listPatientCommunications } from '@/lib/medplum/communications';
 import { createPatientAppointment } from '@/lib/medplum/appointments';
-import { createMedicationAdministrationRecord } from '@/lib/medplum/medication-administrations';
+import { createMedicationAdministrationRecord, markMedicationAdministrationEnteredInError } from '@/lib/medplum/medication-administrations';
 import {
   careReportCode,
   careReportComponentText,
@@ -26,9 +25,9 @@ import {
   listPatientCareReports,
 } from '@/lib/medplum/care-reports';
 import { upsertCaregiverPortalConsent } from '@/lib/medplum/consents';
-import { createPatientCondition } from '@/lib/medplum/conditions';
-import { createPatientAllergy } from '@/lib/medplum/allergies';
-import { createPatientMedication } from '@/lib/medplum/medications';
+import { createPatientCondition, markConditionEnteredInError, setConditionClinicalStatus } from '@/lib/medplum/conditions';
+import { createPatientAllergy, markAllergyEnteredInError, setAllergyClinicalStatus } from '@/lib/medplum/allergies';
+import { createPatientMedication, setMedicationStatus, markMedicationEnteredInError } from '@/lib/medplum/medications';
 import { createPatientDocument, deletePatientDocument } from '@/lib/medplum/documents';
 import { createPatientLabOrder, createPatientDiagnosticReport } from '@/lib/medplum/labs';
 import { createPatientAssessment } from '@/lib/medplum/assessments';
@@ -36,16 +35,24 @@ import { listPatientAssessments } from '@/lib/medplum/assessments';
 import { updateMedplumPatientDemographics } from '@/lib/medplum/patients';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import {
+  assertMedplumTerminologyValue,
+  extractPreferredCode,
+} from '@/lib/medplum/terminology';
+import { resolveProblemTerminology } from '@/features/ehr/catalogs/icd10-problems';
+import {
   ESCALATION_SLA_ACK_MINUTES,
   NURSING_SHIFT_ACK_WINDOW_MINUTES,
 } from '@/lib/config/nursing-ops-policy';
-import { CLINICAL_WRITE_ROLES, canSignClinical, getStaffUser } from '@/lib/auth/rbac';
+import { canSignClinical, getSessionUser, isStaff } from '@/lib/auth/rbac';
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
+import type { ActionName } from '@/lib/auth/policy/actions';
 import { evaluatePatientGeoPresence } from '@/lib/geo/presence-policy';
 import {
   evaluateVitalsThresholdBreaches,
   formatVitalsThresholdBreachSummary,
 } from '@/lib/ehr/nursing-alerts';
 import { prisma } from '@/lib/db/prisma';
+import { writeAuditLog } from '@/lib/utils/audit';
 import {
   assignCareTeamSchema,
   requestRestrictedAccessSchema,
@@ -62,8 +69,15 @@ import {
   createPhysioReportSchema,
   createConditionSchema,
   createAllergySchema,
+  retireConditionSchema,
+  retireAllergySchema,
+  updateConditionStatusSchema,
+  updateAllergyStatusSchema,
   createMedicationSchema,
   createMedicationAdministrationSchema,
+  updateMedicationStatusSchema,
+  retireMedicationSchema,
+  retireMedicationAdministrationSchema,
   createDocumentSchema,
   deleteDocumentSchema,
   createLabOrderSchema,
@@ -102,7 +116,6 @@ import {
 } from '@/features/ehr/schemas/admin-patient-actions';
 import { canEditDemographics, canWriteClinicalCondition, canWriteMedication } from './role-scope';
 import {
-  ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE,
   ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES,
 } from './constants';
 import { toCareTeamRole } from './helpers';
@@ -125,19 +138,7 @@ const RESTRICTED_OVERRIDE_WEEKLY_THRESHOLD = 5;
 const RESTRICTED_OVERRIDE_COMPLIANCE_MARKER = '[restricted-override-threshold]';
 const DOCUMENT_DELETE_APPROVAL_TTL_MINUTES = 30;
 
-const COORDINATION_WRITE_ROLES: StaffRole[] = [
-  'superadmin',
-  'admin',
-  'medical_ops',
-  'operator',
-  'doctor',
-  'physiotherapist',
-  'nurse',
-  'finance',
-];
-
 const NURSING_SHIFT_WRITE_ROLES: StaffRole[] = ['superadmin', 'admin', 'nurse'];
-const NURSING_REPORT_WRITE_ROLES: StaffRole[] = ['superadmin', 'admin', 'nurse'];
 
 type LocalPatientGeoPolicy = {
   localPatientId: string;
@@ -192,9 +193,35 @@ async function failAction(formData: FormData, error: unknown): Promise<void> {
   }
 }
 
+function noteDraftActionForDiscipline(discipline: 'nursing' | 'physiotherapy' | 'medical'): ActionName {
+  if (discipline === 'nursing') return 'note.nursing.create_draft';
+  if (discipline === 'physiotherapy') return 'note.physio.create_draft';
+  return 'note.medical.create_draft';
+}
+
+function noteSignActionForDiscipline(discipline: 'nursing' | 'physiotherapy' | 'medical'): ActionName {
+  if (discipline === 'nursing') return 'note.nursing.sign';
+  if (discipline === 'physiotherapy') return 'note.physio.sign';
+  return 'note.medical.sign';
+}
+
+async function requireAdminPatientAction(
+  action: ActionName,
+  medplumPatientId: string,
+  auditTableName = 'admin_patient_action',
+): Promise<void> {
+  await requireStaffCan(action, {
+    targetPatientMedplumId: medplumPatientId,
+    audit: {
+      tableName: auditTableName,
+      recordId: medplumPatientId,
+    },
+  });
+}
+
 async function getClinicalWriterWithPractitioner() {
-  const staff = await getStaffUser(CLINICAL_WRITE_ROLES);
-  if (!staff?.staffId) {
+  const staff = await getSessionUser();
+  if (!isStaff(staff) || !staff.staffId || !staff.staffRole) {
     throw new Error('Unauthorized');
   }
 
@@ -210,8 +237,8 @@ async function getClinicalWriterWithPractitioner() {
 }
 
 async function getCoordinationWriterWithPractitioner() {
-  const staff = await getStaffUser(COORDINATION_WRITE_ROLES);
-  if (!staff?.staffId) {
+  const staff = await getSessionUser();
+  if (!isStaff(staff) || !staff.staffId || !staff.staffRole) {
     throw new Error('Unauthorized');
   }
 
@@ -413,19 +440,19 @@ async function persistWorkflowStateTransition(params: {
   try {
     await prisma.$executeRaw`
       INSERT INTO visit_state_transitions (
-        id,
-        visit_id,
-        from_state,
-        to_state,
-        actor_staff_id,
-        actor_system,
-        reason_code,
-        reason_note,
-        latitude,
-        longitude,
-        accuracy_meters,
-        is_override,
-        override_method
+        "id",
+        "visitId",
+        "fromState",
+        "toState",
+        "actorStaffId",
+        "actorSystem",
+        "reasonCode",
+        "reasonNote",
+        "latitude",
+        "longitude",
+        "accuracyMeters",
+        "isOverride",
+        "overrideMethod"
       )
       VALUES (
         ${randomUUID()},
@@ -854,10 +881,6 @@ async function resolveAdminOwnerReferences(): Promise<Array<{ reference: string;
     }));
 }
 
-function isAdminApprovalRole(role: StaffRole | null | undefined): boolean {
-  return role === 'admin' || role === 'superadmin' || role === 'compliance_officer';
-}
-
 async function hasOpenCoSignTaskForNote(patientId: string, compositionId: string): Promise<boolean> {
   const tasks = await listPatientTasks(patientId, 120);
   return tasks.some((task) => {
@@ -1114,6 +1137,7 @@ export async function recordVisitAction(formData: FormData): Promise<void> {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = recordVisitSchema.parse(formDataToInput(formData));
     const medplumPatientId = input.medplumPatientId;
+    await requireAdminPatientAction('visit.schedule.update', medplumPatientId, 'visits');
     const status = input.status as MedplumEncounterStatus;
 
     const encounter = await createMedplumEncounter({
@@ -1145,6 +1169,7 @@ export async function acknowledgeVisitAction(formData: FormData): Promise<void> 
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = acknowledgeVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.acknowledge', input.medplumPatientId, 'visits');
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -1184,6 +1209,7 @@ export async function startTravelAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = startTravelSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.start_travel', input.medplumPatientId, 'visits');
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -1227,6 +1253,7 @@ export async function markArrivedAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = markArrivedSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.mark_arrived', input.medplumPatientId, 'visits');
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -1270,6 +1297,7 @@ export async function checkInVisitAction(formData: FormData): Promise<void> {
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = checkInVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.check_in', input.medplumPatientId, 'visits');
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -1382,6 +1410,7 @@ export async function checkOutVisitAction(formData: FormData): Promise<void> {
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = checkOutVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.check_out', input.medplumPatientId, 'visits');
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -1537,6 +1566,7 @@ export async function cancelVisitByPatientAction(formData: FormData): Promise<vo
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = cancelVisitByPatientSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.schedule.update', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1560,6 +1590,7 @@ export async function cancelVisitByMedOpsAction(formData: FormData): Promise<voi
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = cancelVisitByMedOpsSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.schedule.update', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1583,6 +1614,7 @@ export async function declineVisitAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = declineVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.decline', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1606,6 +1638,7 @@ export async function reassignVisitAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = reassignVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.schedule.update', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1630,6 +1663,7 @@ export async function markRefusedAtDoorAction(formData: FormData): Promise<void>
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = markRefusedAtDoorSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.mark_refused_at_door', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1653,6 +1687,7 @@ export async function markPatientNotHomeAction(formData: FormData): Promise<void
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = markPatientNotHomeSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.mark_patient_not_home', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1676,6 +1711,7 @@ export async function divertVisitAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = divertVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.schedule.update', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1699,6 +1735,7 @@ export async function interruptSessionAction(formData: FormData): Promise<void> 
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = interruptSessionSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.workflow.update', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1722,6 +1759,7 @@ export async function rescheduleInPlaceAction(formData: FormData): Promise<void>
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = rescheduleInPlaceSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.schedule.update', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1747,6 +1785,7 @@ export async function disputeVisitAction(formData: FormData): Promise<void> {
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = disputeVisitSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('visit.dispute', input.medplumPatientId, 'visits');
 
     await applyVisitDisruptionTransition({
       medplumPatientId: input.medplumPatientId,
@@ -1780,6 +1819,7 @@ export async function recordVitalsAction(formData: FormData): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = recordVitalsSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('vitals.record', input.medplumPatientId, 'vitals');
 
     await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, input.recordedAt);
 
@@ -1874,9 +1914,10 @@ export async function createClinicalNoteDraftAction(formData: FormData): Promise
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createClinicalNoteSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction(noteDraftActionForDiscipline(input.noteDiscipline), input.medplumPatientId, 'clinical_note');
 
     const isMedicalOpsCompat = staff.staffRole === 'medical_ops' || staff.staffRole === 'operator';
-    if (!isMedicalOpsCompat && !canSignClinical({ staffRole: staff.staffRole }, input.noteDiscipline)) {
+    if (!isMedicalOpsCompat && !canSignClinical(staff, input.noteDiscipline)) {
       throw new Error(`Your role cannot author ${input.noteDiscipline} clinical notes.`);
     }
 
@@ -1909,6 +1950,7 @@ export async function signClinicalNoteAction(formData: FormData): Promise<void> 
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = signClinicalNoteSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction(noteSignActionForDiscipline(input.noteDiscipline), input.medplumPatientId, 'clinical_note');
 
     const staffLicense = await prisma.staff.findUnique({
       where: { id: staff.staffId ?? '' },
@@ -1999,6 +2041,7 @@ export async function amendClinicalNoteAction(formData: FormData): Promise<void>
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = amendClinicalNoteSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction(noteSignActionForDiscipline(input.noteDiscipline), input.medplumPatientId, 'clinical_note');
 
     const staffLicense = await prisma.staff.findUnique({
       where: { id: staff.staffId ?? '' },
@@ -2057,33 +2100,42 @@ export async function requestRestrictedAccessAction(formData: FormData): Promise
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = requestRestrictedAccessSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('restricted.read', input.medplumPatientId, 'restricted_clinical_access');
 
-    const cookieStore = await cookies();
-    const payload = {
-      patientId: input.medplumPatientId,
-      reason: input.restrictedAccessReason,
-      grantedAt: new Date().toISOString(),
-      requestedBy: staff.staffRole ?? 'unknown',
-    };
-
-    cookieStore.set(ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE, JSON.stringify(payload), {
-      path: '/admin',
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES * 60,
-    });
-
-    await prisma.auditLog.create({
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES * 60 * 1000);
+    const token = await prisma.destructiveApprovalToken.create({
       data: {
-        tableName: 'restricted_clinical_access',
-        recordId: input.medplumPatientId,
-        action: 'override',
-        changedFields: {
+        medplumPatientId: input.medplumPatientId,
+        actionType: 'restricted_read',
+        targetRecordId: input.medplumPatientId,
+        payload: {
           reason: input.restrictedAccessReason,
           role: staff.staffRole,
+          accessType: 'reasoned_restricted_read',
         },
-        changedBy,
+        requestedBy: changedBy,
+        approvedBy: changedBy,
+        approvedAt: now,
+        consumedBy: changedBy,
+        consumedAt: now,
+        expiresAt,
+        status: 'consumed',
       },
+    });
+
+    await writeAuditLog({
+      tableName: 'restricted_clinical_access',
+      recordId: input.medplumPatientId,
+      action: 'override',
+      changedFields: {
+        reason: input.restrictedAccessReason,
+        role: staff.staffRole,
+        tokenId: token.id,
+        accessType: 'reasoned_restricted_read',
+        expiresAt: expiresAt.toISOString(),
+      },
+      changedBy,
     });
 
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -2112,7 +2164,7 @@ export async function requestRestrictedAccessAction(formData: FormData): Promise
       });
     }
 
-    await setAdminPatientFlash({ type: 'success', message: 'Restricted-tier access granted for this session.' });
+    await setAdminPatientFlash({ type: 'success', message: 'Restricted-tier access granted temporarily and audited.' });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);
@@ -2123,35 +2175,38 @@ export async function requestBreakGlassAccessAction(formData: FormData): Promise
   try {
     const { staff, practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = requestBreakGlassAccessSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('break_glass.request', input.medplumPatientId, 'restricted_clinical_access');
 
-    const cookieStore = await cookies();
-    const payload = {
-      patientId: input.medplumPatientId,
-      reason: input.breakGlassReason,
-      grantedAt: new Date().toISOString(),
-      requestedBy: staff.staffRole ?? 'unknown',
-      mode: 'break-glass',
-    };
-
-    cookieStore.set(ADMIN_PATIENT_RESTRICTED_ACCESS_COOKIE, JSON.stringify(payload), {
-      path: '/admin',
-      httpOnly: true,
-      sameSite: 'lax',
-      maxAge: ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES * 60,
-    });
-
-    await prisma.auditLog.create({
+    const expiresAt = new Date(Date.now() + ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES * 60 * 1000);
+    const token = await prisma.destructiveApprovalToken.create({
       data: {
-        tableName: 'restricted_clinical_access',
-        recordId: input.medplumPatientId,
-        action: 'override',
-        changedFields: {
+        medplumPatientId: input.medplumPatientId,
+        actionType: 'break_glass_restricted_read',
+        targetRecordId: input.medplumPatientId,
+        payload: {
           reason: input.breakGlassReason,
           role: staff.staffRole,
-          mode: 'break-glass',
+          accessType: 'break_glass',
         },
-        changedBy,
+        requestedBy: changedBy,
+        expiresAt,
+        status: 'pending',
       },
+    });
+
+    await writeAuditLog({
+      tableName: 'restricted_clinical_access',
+      recordId: input.medplumPatientId,
+      action: 'override',
+      changedFields: {
+        reason: input.breakGlassReason,
+        role: staff.staffRole,
+        mode: 'break-glass',
+        tokenId: token.id,
+        status: 'pending_approval',
+        expiresAt: expiresAt.toISOString(),
+      },
+      changedBy,
     });
 
     const complianceOwner = await resolveComplianceOwnerReference();
@@ -2166,7 +2221,7 @@ export async function requestBreakGlassAccessAction(formData: FormData): Promise
         patientId: input.medplumPatientId,
         category: 'escalation',
         priority: 'stat',
-        message: `Break-the-glass invoked by ${staff.name ?? changedBy}. Reason: ${input.breakGlassReason}`,
+        message: `Break-glass approval requested by ${staff.name ?? changedBy}. Token: ${token.id}. Reason: ${input.breakGlassReason}`,
         senderReference: practitioner.reference,
         senderDisplay: practitioner.display,
         recipientReference: recipient.reference,
@@ -2177,15 +2232,15 @@ export async function requestBreakGlassAccessAction(formData: FormData): Promise
     await createPatientReviewTask({
       medplumPatientId: input.medplumPatientId,
       taskCode: 'compliance-review',
-      marker: `[break-glass]:${changedBy}`,
+      marker: `[break-glass]:${token.id}`,
       title: 'Break-glass access review required',
-      description: `Immediate review required for break-glass invocation by ${staff.name ?? changedBy}.`,
+      description: `Approve or reject break-glass token ${token.id} for ${staff.name ?? changedBy}.`,
       changedBy,
       ownerReference: complianceOwner?.reference ?? null,
       ownerDisplay: complianceOwner?.display ?? null,
     });
 
-    await setAdminPatientFlash({ type: 'success', message: 'Break-glass access granted and compliance/admin alerts were sent.' });
+    await setAdminPatientFlash({ type: 'success', message: 'Break-glass request submitted for approval. Compliance/admin alerts were sent.' });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);
@@ -2196,6 +2251,7 @@ export async function createStandingOrderAction(formData: FormData): Promise<voi
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = createStandingOrderSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('standing_order.create', input.medplumPatientId, 'standing_orders');
 
     if (!['doctor', 'admin', 'superadmin', 'medical_ops', 'operator'].includes(staff.staffRole ?? 'viewer')) {
       throw new Error('Only doctor/admin/medical-ops roles can create standing orders.');
@@ -2246,6 +2302,7 @@ export async function executeStandingOrderAction(formData: FormData): Promise<vo
   try {
     const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = executeStandingOrderSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('standing_order.execute', input.medplumPatientId, 'standing_orders');
 
     if (!['doctor', 'nurse', 'physiotherapist', 'medical_ops', 'operator', 'admin', 'superadmin'].includes(staff.staffRole ?? 'viewer')) {
       throw new Error('Your role cannot execute standing orders.');
@@ -2317,6 +2374,7 @@ export async function assignCareTeamMemberAction(formData: FormData): Promise<vo
   try {
     const { changedBy } = await getClinicalWriterWithPractitioner();
     const input = assignCareTeamSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('care_team.assign', input.medplumPatientId, 'care_team');
 
     const staff = await prisma.staff.findUnique({ where: { id: input.staffId } });
     if (!staff || staff.status !== 'active') {
@@ -2366,6 +2424,7 @@ export async function unassignCareTeamMemberAction(formData: FormData): Promise<
   try {
     const { changedBy } = await getClinicalWriterWithPractitioner();
     const input = unassignCareTeamSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('care_team.assign', input.medplumPatientId, 'care_team');
 
     const careTeam = await unassignStaffFromPatientCareTeam(input.medplumPatientId, input.practitionerReference, {
       expectedVersionId: input.careTeamVersionId ?? null,
@@ -2390,6 +2449,7 @@ export async function createCareTaskAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getClinicalWriterWithPractitioner();
     const input = createCareTaskSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('task.create', input.medplumPatientId, 'tasks');
 
     const task = await createPatientTask({
       patientId: input.medplumPatientId,
@@ -2418,6 +2478,7 @@ export async function updateCareTaskStatusAction(formData: FormData): Promise<vo
   try {
     const { changedBy } = await getClinicalWriterWithPractitioner();
     const input = updateCareTaskStatusSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('task.update', input.medplumPatientId, 'tasks');
 
     const task = await updatePatientTaskStatus(input.taskId, input.nextStatus, {
       expectedVersionId: input.taskVersionId ?? null,
@@ -2440,19 +2501,9 @@ export async function updateCareTaskStatusAction(formData: FormData): Promise<vo
 
 export async function createNursingReportAction(formData: FormData): Promise<void> {
   try {
-    const staff = await getStaffUser(NURSING_REPORT_WRITE_ROLES);
-    if (!staff?.staffId || !staff.staffRole) {
-      throw new Error('Unauthorized');
-    }
-
-    const changedBy = staff.staffId;
-    const practitioner = await ensureCachedMedplumPractitionerForStaff({
-      staffId: staff.staffId,
-      name: staff.name ?? staff.email ?? `Staff ${staff.staffId}`,
-      email: staff.email,
-      role: staff.staffRole,
-    });
     const input = createNursingReportSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('nursing_report.create', input.medplumPatientId, 'nursing_report');
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
 
     await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, new Date());
 
@@ -2526,19 +2577,9 @@ export async function createNursingReportAction(formData: FormData): Promise<voi
 
 export async function createNursingShiftHandoffAction(formData: FormData): Promise<void> {
   try {
-    const staff = await getStaffUser(NURSING_SHIFT_WRITE_ROLES);
-    if (!staff?.staffId || !staff.staffRole) {
-      throw new Error('Unauthorized');
-    }
-
-    const practitioner = await ensureCachedMedplumPractitionerForStaff({
-      staffId: staff.staffId,
-      name: staff.name ?? staff.email ?? `Staff ${staff.staffId}`,
-      email: staff.email,
-      role: staff.staffRole,
-    });
-
     const input = createNursingShiftHandoffSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('nursing_shift.manage', input.medplumPatientId, 'nursing_handoff');
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
 
     await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, input.shiftEndAt);
 
@@ -2652,7 +2693,7 @@ export async function createNursingShiftHandoffAction(formData: FormData): Promi
       recordId: handoff.id ?? `${input.medplumPatientId}:${Date.now()}`,
       action: AuditAction.create,
       changedFields: ['code', 'subject', 'encounter', 'performer', 'effectiveDateTime', 'component', 'note', 'geofence.distance'],
-      changedBy: staff.staffId,
+      changedBy,
     });
 
     await setAdminPatientFlash({ type: 'success', message: 'Nursing shift handoff submitted successfully.' });
@@ -2666,6 +2707,7 @@ export async function createPhysioReportAction(formData: FormData): Promise<void
   try {
     const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createPhysioReportSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('note.physio_session.create', input.medplumPatientId, 'physio_report');
 
     const report = await createPhysioSessionReport({
       patientId: input.medplumPatientId,
@@ -2745,6 +2787,11 @@ export async function createConditionAction(formData: FormData): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createConditionSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction(
+      input.conditionCategory === 'physical_therapy' ? 'condition.pt.create' : 'condition.medical.create',
+      input.medplumPatientId,
+      'conditions',
+    );
 
     if (!canWriteClinicalCondition(staff.staffRole ?? null, input.conditionCategory)) {
       if (input.conditionCategory === 'physical_therapy') {
@@ -2753,11 +2800,30 @@ export async function createConditionAction(formData: FormData): Promise<void> {
       throw new Error('Medical diagnoses can be authored by doctors, admins, or superadmins only.');
     }
 
+    // Coded-only: a problem MUST resolve to a valid ICD-10 code from the app-owned
+    // catalog. Free-text problems are rejected — this keeps the problem list
+    // analysable and error-free.
+    const terminology = await resolveProblemTerminology({
+      label: input.conditionLabel,
+      explicitIcd10: input.conditionCode ?? null,
+    });
+
+    if (!terminology) {
+      throw new Error(
+        'Select a coded problem from the ICD-10 suggestions. Free-text problems are not allowed.',
+      );
+    }
+
+    const canonicalLabel = terminology.canonicalLabel;
+    const resolvedIcd10 = terminology.icd10;
+    const resolvedCodings = terminology.codings;
+
     const condition = await createPatientCondition({
       patientId: input.medplumPatientId,
       category: input.conditionCategory,
-      label: input.conditionLabel,
-      code: input.conditionCode ?? null,
+      label: canonicalLabel,
+      code: resolvedIcd10,
+      codings: resolvedCodings,
       onsetDate: input.conditionOnsetDate ?? null,
       note: input.conditionNote ?? null,
       recordedByReference: practitioner.reference,
@@ -2772,7 +2838,10 @@ export async function createConditionAction(formData: FormData): Promise<void> {
       changedBy,
     });
 
-    await setAdminPatientFlash({ type: 'success', message: 'Problem added successfully.' });
+    await setAdminPatientFlash({
+      type: 'success',
+      message: `Problem added (ICD-10 ${resolvedIcd10}).`,
+    });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);
@@ -2783,13 +2852,14 @@ export async function createAllergyAction(formData: FormData): Promise<void> {
   try {
     const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createAllergySchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('allergy.create', input.medplumPatientId, 'allergies');
 
+    // Allergies are free text by design — a short typed allergen is enough
+    // for point-of-care safety; no coded terminology lookup is required here.
     const allergy = await createPatientAllergy({
       patientId: input.medplumPatientId,
       allergen: input.allergen,
-      reaction: input.allergyReaction ?? null,
       severity: input.allergySeverity ?? null,
-      onsetDate: input.allergyOnsetDate ?? null,
       note: input.allergyNote ?? null,
       recordedByReference: practitioner.reference,
       recordedByDisplay: practitioner.display,
@@ -2799,7 +2869,7 @@ export async function createAllergyAction(formData: FormData): Promise<void> {
       tableName: 'MedplumAllergyIntolerance',
       recordId: allergy.id ?? `${input.medplumPatientId}:${Date.now()}`,
       action: AuditAction.create,
-      changedFields: ['clinicalStatus', 'verificationStatus', 'code', 'reaction', 'note'],
+      changedFields: ['clinicalStatus', 'verificationStatus', 'code', 'note'],
       changedBy,
     });
 
@@ -2810,13 +2880,113 @@ export async function createAllergyAction(formData: FormData): Promise<void> {
   }
 }
 
+export async function retireConditionAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getClinicalWriterWithPractitioner();
+    const input = retireConditionSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('condition.retire', input.medplumPatientId, 'conditions');
+
+    const condition = await markConditionEnteredInError(input.conditionId);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumCondition',
+      recordId: condition.id ?? input.conditionId,
+      action: AuditAction.update,
+      changedFields: ['verificationStatus', 'clinicalStatus'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Problem deleted (marked entered-in-error).' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function retireAllergyAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getClinicalWriterWithPractitioner();
+    const input = retireAllergySchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('allergy.retire', input.medplumPatientId, 'allergies');
+
+    const allergy = await markAllergyEnteredInError(input.allergyId);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumAllergyIntolerance',
+      recordId: allergy.id ?? input.allergyId,
+      action: AuditAction.update,
+      changedFields: ['verificationStatus', 'clinicalStatus'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Allergy deleted (marked entered-in-error).' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function updateConditionStatusAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getClinicalWriterWithPractitioner();
+    const input = updateConditionStatusSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('condition.retire', input.medplumPatientId, 'conditions');
+
+    const condition = await setConditionClinicalStatus(input.conditionId, input.conditionStatus);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumCondition',
+      recordId: condition.id ?? input.conditionId,
+      action: AuditAction.update,
+      changedFields: ['clinicalStatus'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: `Problem marked as ${input.conditionStatus}.` });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function updateAllergyStatusAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getClinicalWriterWithPractitioner();
+    const input = updateAllergyStatusSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('allergy.retire', input.medplumPatientId, 'allergies');
+
+    const allergy = await setAllergyClinicalStatus(input.allergyId, input.allergyStatus);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumAllergyIntolerance',
+      recordId: allergy.id ?? input.allergyId,
+      action: AuditAction.update,
+      changedFields: ['clinicalStatus'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: `Allergy marked as ${input.allergyStatus}.` });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
 export async function createMedicationAction(formData: FormData): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = createMedicationSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('medication.prescribe', input.medplumPatientId, 'medications');
     if (!canWriteMedication(staff.staffRole ?? null)) {
       throw new Error('Only doctors and admins can add medications.');
     }
-    const input = createMedicationSchema.parse(formDataToInput(formData));
+
+    // Duration drives the end date: end = start + N days. If a duration is chosen
+    // without an explicit start, anchor the start to today so the end is meaningful.
+    const durationDays = input.medicationDurationDays ?? null;
+    const startDate = input.startDate ?? (durationDays ? new Date() : null);
+    const endDate =
+      durationDays && startDate ? new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000) : null;
 
     const medication = await createPatientMedication({
       patientId: input.medplumPatientId,
@@ -2824,9 +2994,9 @@ export async function createMedicationAction(formData: FormData): Promise<void> 
       dosage: input.dosageText ?? null,
       route: input.routeText ?? null,
       frequency: input.frequencyText ?? null,
-      status: input.medicationStatus,
-      startDate: input.startDate ?? null,
-      endDate: input.endDate ?? null,
+      status: 'active',
+      startDate,
+      endDate,
       note: input.medicationNote ?? null,
       recordedByReference: practitioner.reference,
       recordedByDisplay: practitioner.display,
@@ -2847,12 +3017,68 @@ export async function createMedicationAction(formData: FormData): Promise<void> 
   }
 }
 
+export async function updateMedicationStatusAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = updateMedicationStatusSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('medication.reconcile', input.medplumPatientId, 'medications');
+    if (!canWriteMedication(staff.staffRole ?? null)) {
+      throw new Error('Only doctors and admins can manage medications.');
+    }
+
+    const medication = await setMedicationStatus(input.medicationId, input.medicationManageStatus);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumMedicationStatement',
+      recordId: medication.id ?? input.medicationId,
+      action: AuditAction.update,
+      changedFields: ['status'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: `Medication marked as ${input.medicationManageStatus}.` });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function retireMedicationAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = retireMedicationSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('medication.reconcile', input.medplumPatientId, 'medications');
+    if (!canWriteMedication(staff.staffRole ?? null)) {
+      throw new Error('Only doctors and admins can manage medications.');
+    }
+
+    const medication = await markMedicationEnteredInError(input.medicationId);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumMedicationStatement',
+      recordId: medication.id ?? input.medicationId,
+      action: AuditAction.update,
+      changedFields: ['status'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Medication deleted (marked entered-in-error).' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
 export async function createMedicationAdministrationAction(formData: FormData): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createMedicationAdministrationSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('medication.administer', input.medplumPatientId, 'medication_administration');
 
-    await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, input.administeredAt);
+    // The MAR checklist records "now"; only the ad-hoc form may supply a specific time.
+    const administeredAt = input.administeredAt ?? new Date();
+
+    await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, administeredAt);
 
     const administration = await createMedicationAdministrationRecord({
       patientId: input.medplumPatientId,
@@ -2860,7 +3086,7 @@ export async function createMedicationAdministrationAction(formData: FormData): 
       medicationName: input.medicationName,
       encounterId: input.encounterId ?? null,
       scheduledAt: input.scheduledAt ?? null,
-      administeredAt: input.administeredAt,
+      administeredAt,
       administrationStatus: input.administrationStatus,
       reason: input.administrationReason ?? null,
       note: input.administrationNote ?? null,
@@ -2883,10 +3109,34 @@ export async function createMedicationAdministrationAction(formData: FormData): 
   }
 }
 
+export async function retireMedicationAdministrationAction(formData: FormData): Promise<void> {
+  try {
+    const { changedBy } = await getClinicalWriterWithPractitioner();
+    const input = retireMedicationAdministrationSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('medication.administer', input.medplumPatientId, 'medication_administration');
+
+    const administration = await markMedicationAdministrationEnteredInError(input.administrationId);
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumMedicationAdministration',
+      recordId: administration.id ?? input.administrationId,
+      action: AuditAction.update,
+      changedFields: ['status'],
+      changedBy,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'MAR entry deleted (marked entered-in-error).' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
 export async function createIncidentReportAction(formData: FormData): Promise<void> {
   try {
     const { practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = createIncidentReportSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('incident_report.create', input.medplumPatientId, 'incident_reports');
 
     const message = [
       `Incident type: ${input.incidentType}`,
@@ -2947,6 +3197,7 @@ export async function createDocumentAction(formData: FormData): Promise<void> {
   try {
     const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createDocumentSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('document.create', input.medplumPatientId, 'documents');
     const file = formData.get('documentFile');
 
     if (!(file instanceof File) || file.size <= 0) {
@@ -2989,17 +3240,138 @@ export async function createDocumentAction(formData: FormData): Promise<void> {
 }
 
 export async function requestDocumentDeleteApprovalAction(formData: FormData): Promise<void> {
-  await failAction(formData, new Error('Delete approval tokens are no longer used. Delete documents directly.'));
+  try {
+    const { staff, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = requestDocumentDeleteApprovalSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('document.delete', input.medplumPatientId, 'documents');
+
+    const expiresAt = new Date(Date.now() + DOCUMENT_DELETE_APPROVAL_TTL_MINUTES * 60 * 1000);
+    const token = await prisma.destructiveApprovalToken.create({
+      data: {
+        medplumPatientId: input.medplumPatientId,
+        actionType: 'document_delete',
+        targetRecordId: input.documentId,
+        payload: {
+          reason: input.deleteApprovalReason,
+          role: staff.staffRole,
+        },
+        requestedBy: changedBy,
+        expiresAt,
+        status: 'pending',
+      },
+    });
+
+    await writeAuditLog({
+      tableName: 'destructive_approval_tokens',
+      recordId: token.id,
+      action: 'override',
+      changedBy,
+      changedFields: {
+        actionType: 'document_delete',
+        targetRecordId: input.documentId,
+        status: 'pending',
+        expiresAt: expiresAt.toISOString(),
+      },
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Document delete approval requested.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
 }
 
 export async function approveDestructiveTokenAction(formData: FormData): Promise<void> {
-  await failAction(formData, new Error('Delete approval tokens are no longer used. Delete documents directly.'));
+  try {
+    const input = approveDestructiveTokenSchema.parse(formDataToInput(formData));
+    const token = await prisma.destructiveApprovalToken.findFirst({
+      where: {
+        id: input.approvalTokenId,
+        medplumPatientId: input.medplumPatientId,
+        status: 'pending',
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      select: {
+        id: true,
+        requestedBy: true,
+        actionType: true,
+      },
+    });
+
+    if (!token) {
+      throw new Error('Approval token is missing, expired, or already consumed.');
+    }
+
+    const { user: approver } = await requireStaffCan('break_glass.approve', {
+      targetPatientMedplumId: input.medplumPatientId,
+      audit: {
+        tableName: 'destructive_approval_tokens',
+        recordId: token.id,
+      },
+    });
+
+    const now = new Date();
+    const consumedBy =
+      token.actionType === 'break_glass_restricted_read'
+        ? token.requestedBy
+        : approver.staffId;
+
+    await prisma.destructiveApprovalToken.update({
+      where: { id: token.id },
+      data: {
+        approvedBy: approver.staffId,
+        approvedAt: now,
+        consumedBy,
+        consumedAt: now,
+        status: 'consumed',
+      },
+    });
+
+    await writeAuditLog({
+      tableName: 'destructive_approval_tokens',
+      recordId: token.id,
+      action: 'override',
+      changedBy: approver.staffId,
+      changedFields: {
+        actionType: token.actionType,
+        approvedBy: approver.staffId,
+        consumedBy,
+        status: 'consumed',
+      },
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Approval token approved and consumed.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
 }
 
 export async function deleteDocumentAction(formData: FormData): Promise<void> {
   try {
     const { changedBy } = await getClinicalWriterWithPractitioner();
     const input = deleteDocumentSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('document.delete', input.medplumPatientId, 'documents');
+
+    const approval = await prisma.destructiveApprovalToken.findFirst({
+      where: {
+        medplumPatientId: input.medplumPatientId,
+        actionType: 'document_delete',
+        targetRecordId: input.documentId,
+        status: 'consumed',
+        consumedBy: changedBy,
+        expiresAt: {
+          gt: new Date(),
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!approval) {
+      throw new Error('Document delete requires an approved, unexpired destructive approval token.');
+    }
 
     const deleted = await deletePatientDocument(input.documentId);
 
@@ -3022,12 +3394,16 @@ export async function createLabOrderAction(formData: FormData): Promise<void> {
   try {
     const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createLabOrderSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('lab.order', input.medplumPatientId, 'lab_orders');
+
+    const validatedLabOrder = await assertMedplumTerminologyValue('lab-order', input.labOrderTitle);
+    const labCode = extractPreferredCode(validatedLabOrder, ['loinc', 'code', 'local']);
 
     const order = await createPatientLabOrder({
       patientId: input.medplumPatientId,
-      title: input.labOrderTitle,
+      title: validatedLabOrder.label,
       category: input.labOrderCategory,
-      code: input.labOrderCode ?? null,
+      code: labCode ?? input.labOrderCode ?? null,
       note: input.labOrderNote ?? null,
       requestedOn: input.labOrderDate ?? null,
       requestedByReference: practitioner.reference,
@@ -3053,10 +3429,13 @@ export async function createDiagnosticReportAction(formData: FormData): Promise<
   try {
     const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createDiagnosticReportSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('lab.interpret', input.medplumPatientId, 'diagnostic_reports');
+
+    const validatedDiagnostic = await assertMedplumTerminologyValue('diagnostic-report', input.diagnosticTitle);
 
     const report = await createPatientDiagnosticReport({
       patientId: input.medplumPatientId,
-      title: input.diagnosticTitle,
+      title: validatedDiagnostic.label,
       category: input.diagnosticCategory,
       status: input.diagnosticStatus,
       conclusion: input.diagnosticConclusion ?? null,
@@ -3087,6 +3466,7 @@ export async function createAssessmentAction(formData: FormData): Promise<void> 
   try {
     const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createAssessmentSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('assessment.create', input.medplumPatientId, 'assessments');
 
     const assessment = await createPatientAssessment({
       patientId: input.medplumPatientId,
@@ -3119,6 +3499,7 @@ export async function createCommunicationAction(formData: FormData): Promise<voi
   try {
     const { practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = createCommunicationSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('communication.create', input.medplumPatientId, 'communications');
 
     const recipient = await resolvePractitionerFromStaffId(input.communicationRecipientStaffId ?? null);
 
@@ -3154,6 +3535,7 @@ export async function createEscalationAction(formData: FormData): Promise<void> 
   try {
     const { practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = createEscalationSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('escalation.update', input.medplumPatientId, 'escalations');
 
     const owner = await resolvePractitionerFromStaffId(input.escalationOwnerStaffId ?? null);
 
@@ -3209,6 +3591,7 @@ export async function createAppointmentAction(formData: FormData): Promise<void>
   try {
     const { changedBy } = await getCoordinationWriterWithPractitioner();
     const input = createAppointmentSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('appointment.create', input.medplumPatientId, 'appointments');
 
     const owner = await resolvePractitionerFromStaffId(input.appointmentOwnerStaffId ?? null);
 
@@ -3245,6 +3628,7 @@ export async function createNurseShiftAssignmentAction(formData: FormData): Prom
     }
 
     const input = createNurseShiftAssignmentSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('nursing_shift.manage', input.medplumPatientId, 'nurse_shift_assignments');
     const localPatient = await prisma.patient.findUnique({
       where: { medplumPatientId: input.medplumPatientId },
       select: { id: true },
@@ -3324,6 +3708,7 @@ export async function acknowledgeIncomingNurseAction(formData: FormData): Promis
   try {
     const { staff, practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = acknowledgeIncomingNurseSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('nursing_shift.manage', input.medplumPatientId, 'nurse_shift_assignments');
 
     const assignment = await prisma.nurseShiftAssignment.findUnique({
       where: { id: input.assignmentId },
@@ -3422,6 +3807,7 @@ export async function updatePatientGeoPolicyAction(formData: FormData): Promise<
     }
 
     const input = updatePatientGeoPolicySchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('patient.demographics.update', input.medplumPatientId, 'patients');
 
     await prisma.patient.updateMany({
       where: { medplumPatientId: input.medplumPatientId },
@@ -3464,6 +3850,7 @@ export async function runEscalationSlaSweepAction(formData: FormData): Promise<v
     if (!medplumPatientId) {
       throw new Error('Patient id is required.');
     }
+    await requireAdminPatientAction('escalation.update', medplumPatientId, 'escalations');
 
     const sender = {
       reference: practitioner.reference,
@@ -3491,6 +3878,7 @@ export async function upsertCaregiverConsentAction(formData: FormData): Promise<
   try {
     const { changedBy } = await getClinicalWriterWithPractitioner();
     const input = upsertCaregiverConsentSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('consent.write', input.medplumPatientId, 'consents');
 
     const consent = await upsertCaregiverPortalConsent({
       patientMedplumId: input.medplumPatientId,
@@ -3527,6 +3915,7 @@ export async function updatePatientDemographicsAction(formData: FormData): Promi
     }
     const demographicSection = String(formData.get('demographicSection') ?? '').trim();
     const input = updatePatientDemographicsSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('patient.demographics.update', input.medplumPatientId, 'patients');
 
     const patient = await updateMedplumPatientDemographics({
       patientId: input.medplumPatientId,
@@ -3537,6 +3926,9 @@ export async function updatePatientDemographicsAction(formData: FormData): Promi
       emergencyContactName: input.emergencyContactName ?? null,
       emergencyContactPhone: input.emergencyContactPhone ?? null,
       emergencyContactRelation: input.emergencyContactRelation ?? null,
+      secondaryEmergencyContactName: input.secondaryEmergencyContactName ?? null,
+      secondaryEmergencyContactPhone: input.secondaryEmergencyContactPhone ?? null,
+      secondaryEmergencyContactRelation: input.secondaryEmergencyContactRelation ?? null,
     });
 
     await prisma.patient.updateMany({
@@ -3548,6 +3940,7 @@ export async function updatePatientDemographicsAction(formData: FormData): Promi
         emergencyContactName: input.emergencyContactName ?? null,
         emergencyContactPhone: input.emergencyContactPhone ?? null,
         emergencyContactRelation: input.emergencyContactRelation ?? null,
+        // secondaryEmergency* fields are stored only in Medplum (FHIR contact[1]) — no Postgres columns.
       },
     });
 
@@ -3563,6 +3956,7 @@ export async function updatePatientDemographicsAction(formData: FormData): Promi
           'emergencyContactName',
           'emergencyContactPhone',
           'emergencyContactRelation',
+          // secondaryEmergency* stored in Medplum only, audited by writeMedplumAuditMirror.
         ],
         changedBy,
       },
