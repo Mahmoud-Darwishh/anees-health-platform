@@ -380,32 +380,35 @@ loops. Touched: `lib/auth/route-access.ts` (deny-by-default + exact rules),
   enforced only for `medical_ops` / `operator` via `isLicensedMedOps`. This
   contradicts CLAUDE.md's claim that "expired licences cannot sign." Pre-existing;
   not changed in Phase 0. Decide whether expiry should hard-block the named roles.
-- **The `scripts/` directory is missing from the repo.** `package.json` still
-  declares `lint:rbac`, `lint:rbac:fix`, `test:security-policy`, `ehr:audit-gap`,
-  and `ehr:audit-backfill`, all pointing at `scripts/*.ts|cjs` files that **do not
-  exist** in the working tree. Running any of them fails. Either the directory was
-  never committed or was removed. Action item: restore/author these scripts before
-  wiring `lint:rbac` into CI (step 12), or strip the dead entries from
-  `package.json`. Until then, treat "matrix ↔ doc drift" as a manual review.
+- **The `scripts/` 
+  (2026-06-11). All backing files are present again: `lint-rbac.ts`,
+  `security-policy-selftest.cjs`, `ehr-audit-gap-report.ts`, `ehr-audit-backfill.ts`,
+  `migrate-medplum-binaries-to-r2.ts`, `backfill-patient-goals-to-fhir.ts` +
+  `run-backfill-patient-goals-to-fhir.cjs`, `trigger-document-scan.cjs`, plus
+  `tsconfig.json` and `server-only-stub.js`. `scripts/tsconfig.json` previously set
+  `"ignoreDeprecations": "6.0"`, which TypeScript 5.9 rejects (`TS5103`); corrected
+  to `"5.0"`. `lint:rbac` and `test:security-policy` now run green. Remaining action
+  item: wire `lint:rbac` into CI (step 12).
 
 ---
 
 ## 14a. RBAC scripts & commands (current reality)
 
-The npm scripts intended to support RBAC. **⚠️ marks ones whose backing file is
-currently absent (`scripts/` directory missing) — they will fail until restored.**
+The npm scripts intended to support RBAC. The `scripts/` directory was restored on
+2026-06-11 and `scripts/tsconfig.json` was fixed (`ignoreDeprecations` `"6.0"` →
+`"5.0"`), so all backing files now exist and execute.
 
 | Command | Intent | State |
 |---|---|---|
-| `npm run lint:rbac` | Assert the code matrix matches `EHR_ROLE_MATRIX.md`; fail the build on drift (step 12). | ⚠️ file missing |
-| `npm run lint:rbac:fix` | Regenerate the doc tables from the code matrix. | ⚠️ file missing |
-| `npm run test:security-policy` | Self-test of the security/decision policy. | ⚠️ file missing |
-| `npm run ehr:audit-gap` | Report operational Postgres mutations lacking an `AuditLog` row. | ⚠️ file missing |
-| `npm run ehr:audit-backfill` | Backfill audit rows for historical mutations. | ⚠️ file missing |
+| `npm run lint:rbac` | Assert the code matrix matches `EHR_ROLE_MATRIX.md`; fail the build on drift (step 12). | ✅ runs (green) |
+| `npm run lint:rbac:fix` | Regenerate the doc tables from the code matrix. | ✅ runs |
+| `npm run test:security-policy` | Self-test of the security/decision policy. | ✅ runs (all checks passed) |
+| `npm run ehr:audit-gap` | Report operational Postgres mutations lacking an `AuditLog` row. | ✅ file present |
+| `npm run ehr:audit-backfill` | Backfill audit rows for historical mutations. | ✅ file present |
 | `npm run lint` | ESLint (`next/core-web-vitals` + TS). | ✅ works |
 | `npm run build` | `prisma generate` + `next build` — the real type/route gate. | ✅ works |
 
-**How RBAC is verified TODAY (until the scripts return):**
+**How RBAC is verified TODAY:**
 1. `npx tsc --noEmit` — the action catalog (`actions.ts`) is `satisfies
    Record<string, ActionDefinition>` and `ModuleKey` is a union, so a typo in a
    module name or action is a **compile error**.
