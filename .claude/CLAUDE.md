@@ -385,7 +385,7 @@ All models live in `prisma/schema.prisma`. Reference the file before writing que
 
 - **Path alias:** `@/*` → `src/*`. Use it always — no `../../` relative imports across folders.
 - **Server-first:** Default to server components. Add `'use client'` only when interactivity is required.
-- **Server actions:** Most EHR writes are Next.js server actions, not API routes. See `src/features/ehr/admin-patient/actions.ts` and `src/features/ehr/clinician-physio/actions.ts`.
+- **Server actions:** Most EHR writes are Next.js server actions, not API routes. See `src/features/ehr/admin-patient/actions/` (domain-split: one file per clinical domain, `index.ts` barrel, internal helpers in `shared.ts`) and `src/features/ehr/clinician-physio/actions.ts`. Matching Zod schemas live in `src/features/ehr/schemas/admin-patient/` (barrel: `schemas/admin-patient-actions.ts`). New admin-patient actions go in the matching domain file, never a new monolith.
 - **DB access:** Always `import { prisma } from '@/lib/db/prisma'`. Never `new PrismaClient()` in app code — it leaks connections in dev hot-reload.
 - **Medplum access:** Always import via `getMedplumClient()` from `@/lib/medplum/client`. Module-scoped helpers (e.g. `listPatientEncounters`) are preferred over raw client use.
 - **R2 access:** Always go through `src/lib/storage/r2-medical.ts`. Never construct S3 clients ad-hoc. Object keys must be deterministic (`buildObjectKey`) and filenames sanitised (`sanitizeFilename`).

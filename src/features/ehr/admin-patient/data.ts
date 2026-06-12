@@ -32,17 +32,6 @@ type RestrictedAccessCookiePayload = {
   grantedAt: string;
 };
 
-type LocalVisitStateRow = {
-  state: string | null;
-};
-
-type LocalVisitTransitionRow = {
-  toState: string;
-  createdAt: Date;
-  isOverride: boolean;
-  overrideMethod: string | null;
-};
-
 function deriveLocalVisitStateFallback(visit: {
   status: string;
   acknowledgedAt: Date | null;
@@ -73,44 +62,34 @@ function deriveLocalVisitStateFallback(visit: {
 }
 
 async function readLocalVisitState(visitId: string): Promise<string | null> {
-  try {
-    const rows = await prisma.$queryRaw<LocalVisitStateRow[]>`
-      SELECT state::text AS state
-      FROM visits
-      WHERE id = ${visitId}
-      LIMIT 1
-    `;
-    return rows[0]?.state ?? null;
-  } catch {
-    return null;
-  }
+  const visit = await prisma.visit.findUnique({
+    where: { id: visitId },
+    select: { state: true },
+  });
+  return visit?.state ?? null;
 }
 
 async function readLocalVisitTimeline(
   visitId: string,
 ): Promise<Array<{ toState: string; createdAt: string; isOverride: boolean; overrideMethod: string | null }>> {
-  try {
-    const rows = await prisma.$queryRaw<LocalVisitTransitionRow[]>`
-      SELECT
-        "toState"::text AS "toState",
-        "createdAt" AS "createdAt",
-        "isOverride" AS "isOverride",
-        "overrideMethod" AS "overrideMethod"
-      FROM visit_state_transitions
-      WHERE "visitId" = ${visitId}
-      ORDER BY "createdAt" DESC
-      LIMIT 5
-    `;
+  const rows = await prisma.visitStateTransition.findMany({
+    where: { visitId },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+    select: {
+      toState: true,
+      createdAt: true,
+      isOverride: true,
+      overrideMethod: true,
+    },
+  });
 
-    return rows.map((row) => ({
-      toState: row.toState,
-      createdAt: new Date(row.createdAt).toISOString(),
-      isOverride: Boolean(row.isOverride),
-      overrideMethod: row.overrideMethod,
-    }));
-  } catch {
-    return [];
-  }
+  return rows.map((row) => ({
+    toState: row.toState,
+    createdAt: row.createdAt.toISOString(),
+    isOverride: row.isOverride,
+    overrideMethod: row.overrideMethod,
+  }));
 }
 
 function hasRestrictedSignal(text: string): boolean {

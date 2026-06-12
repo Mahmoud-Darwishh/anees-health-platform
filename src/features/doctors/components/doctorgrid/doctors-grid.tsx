@@ -59,10 +59,15 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
   // Keep the search in sync when the URL `?search=` changes while already on this
   // page (e.g. the header search bar is used again). Typing in the sidebar updates
   // local state directly and does not touch the URL, so it is never clobbered here.
+  // This uses React's "adjust state while rendering" pattern (tracking the previous
+  // URL value) rather than an effect, so the sync happens before paint with no
+  // cascading re-render. See https://react.dev/learn/you-might-not-need-an-effect
   const urlSearch = searchParams.get('search') ?? '';
-  useEffect(() => {
+  const [lastSyncedUrlSearch, setLastSyncedUrlSearch] = useState(urlSearch);
+  if (urlSearch !== lastSyncedUrlSearch) {
+    setLastSyncedUrlSearch(urlSearch);
     setFilters((prev) => (prev.searchText === urlSearch ? prev : { ...prev, searchText: urlSearch }));
-  }, [urlSearch]);
+  }
 
   const [sortOrder, setSortOrder] = useState<SortOrder>('none');
   const [showMobileFilters, setShowMobileFilters] = useState(false);

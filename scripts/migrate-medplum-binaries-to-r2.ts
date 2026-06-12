@@ -367,18 +367,14 @@ async function run(): Promise<void> {
   }
 
   const mode = options.apply ? 'APPLY' : 'DRY-RUN';
-  // eslint-disable-next-line no-console
   console.log(`[${mode}] Medplum Binary -> R2 migration summary`);
-  // eslint-disable-next-line no-console
   console.table(stats);
-  // eslint-disable-next-line no-console
   console.log(
     `Flags: --apply=${options.apply} --delete-legacy-binaries=${options.deleteLegacyBinaries} --batch-size=${options.batchSize} --limit=${options.maxDocuments}`,
   );
 }
 
 run().catch((error) => {
-  // eslint-disable-next-line no-console
   console.error('Migration failed:', error);
   process.exitCode = 1;
 });

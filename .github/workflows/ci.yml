@@ -1,0 +1,144 @@
+name: CI
+
+# Quality gate for every push and pull request.
+# - quality:    lint + type-check (fast, no database, no secrets)
+# - migrations: guard against schema/migration drift (throwaway Postgres)
+# - build:      production `next build` against a throwaway Postgres
+#
+# No real secrets are used anywhere. The build job points at a disposable
+# Postgres service container and uses placeholder values for Medplum/R2 —
+# public pages never call those services at build time. The production
+# database is NEVER touched by CI.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  quality:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci # postinstall runs `prisma generate`, so tsc sees the client
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+  migrations:
+    name: Migration drift guard
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: anees
+          POSTGRES_PASSWORD: anees
+          POSTGRES_DB: anees_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U anees"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://anees:anees@localhost:5432/anees_ci
+      SHADOW_DATABASE_URL: postgresql://anees:anees@localhost:5432/anees_shadow
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create shadow database
+        run: PGPASSWORD=anees psql -h localhost -U anees -d anees_ci -c 'CREATE DATABASE anees_shadow;'
+
+      - name: Guard against schema/migration drift
+        # Fails (exit 2) if prisma/schema.prisma has changes not captured in a
+        # committed migration — i.e. someone edited the schema without running
+        # `npm run db:migrate`.
+        run: npm run ci:migration-guard
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: anees
+          POSTGRES_PASSWORD: anees
+          POSTGRES_DB: anees_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U anees"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://anees:anees@localhost:5432/anees_ci
+      # Build-time placeholders only — never real secrets. Public pages that are
+      # prerendered at build time read Postgres only; Medplum/R2 are not called.
+      AUTH_SECRET: ci-build-placeholder-secret
+      MEDPLUM_BASE_URL: https://medplum.invalid/
+      MEDPLUM_CLIENT_ID: ci-build-placeholder
+      MEDPLUM_CLIENT_SECRET: ci-build-placeholder
+      R2_ACCOUNT_ID: ci-build-placeholder
+      R2_BUCKET: ci-build-placeholder
+      R2_ACCESS_KEY_ID: ci-build-placeholder
+      R2_SECRET_ACCESS_KEY: ci-build-placeholder
+      EHR_MALWARE_SCAN_BACKEND: mock_clean
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply migrations
+        run: npm run db:migrate:deploy
+
+      - name: Seed public catalog (doctors)
+        # Gives generateStaticParams real doctor slugs so the build prerenders
+        # the same public pages it would in production.
+        run: npm run db:seed:doctors
+
+      - name: Build
+        run: npm run build

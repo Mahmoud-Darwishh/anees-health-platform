@@ -36,30 +36,42 @@ export default async function AdminOpsDisputesPage() {
   });
   const tenantId = sessionTenantId(user);
 
-  const disputedVisits = await prisma.$queryRaw<DisputeQueueRow[]>`
-    SELECT
-      v.id,
-      v.code,
-      v.status::text AS status,
-      v.state::text AS state,
-      v.scheduled_date AS "scheduledDate",
-      v.scheduled_time AS "scheduledTime",
-      v.primary_disruption_code::text AS "primaryDisruptionCode",
-      v.updated_at AS "updatedAt",
-      p.full_name AS "patientFullName",
-      p.arabic_name AS "patientArabicName",
-      p.medplum_patient_id AS "medplumPatientId",
-      pr.full_name AS "providerFullName"
-    FROM visits v
-    INNER JOIN patients p ON p.id = v.patient_id
-    LEFT JOIN providers pr ON pr.id = v.provider_id
-    WHERE p.deleted_at IS NULL
-      AND v."tenantId" = ${tenantId}
-      AND p."tenantId" = ${tenantId}
-      AND (v.state::text = 'disputed' OR v.primary_disruption_code IS NOT NULL)
-    ORDER BY v.updated_at DESC, v.scheduled_date DESC
-    LIMIT 100
-  `;
+  const rows = await prisma.visit.findMany({
+    where: {
+      tenantId,
+      patient: { is: { deletedAt: null, tenantId } },
+      OR: [{ state: 'disputed' }, { primaryDisruptionCode: { not: null } }],
+    },
+    orderBy: [{ updatedAt: 'desc' }, { scheduledDate: 'desc' }],
+    take: 100,
+    select: {
+      id: true,
+      code: true,
+      status: true,
+      state: true,
+      scheduledDate: true,
+      scheduledTime: true,
+      primaryDisruptionCode: true,
+      updatedAt: true,
+      patient: { select: { fullName: true, arabicName: true, medplumPatientId: true } },
+      provider: { select: { fullName: true } },
+    },
+  });
+
+  const disputedVisits: DisputeQueueRow[] = rows.map((visit) => ({
+    id: visit.id,
+    code: visit.code,
+    status: visit.status,
+    state: visit.state,
+    scheduledDate: visit.scheduledDate,
+    scheduledTime: visit.scheduledTime,
+    primaryDisruptionCode: visit.primaryDisruptionCode,
+    updatedAt: visit.updatedAt,
+    providerFullName: visit.provider?.fullName ?? null,
+    medplumPatientId: visit.patient.medplumPatientId,
+    patientFullName: visit.patient.fullName,
+    patientArabicName: visit.patient.arabicName,
+  }));
 
   return (
     <div className="card bg-white">

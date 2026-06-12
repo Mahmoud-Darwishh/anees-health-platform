@@ -60,17 +60,6 @@ export type PhysioTodayVisit = {
   };
 };
 
-type VisitStateRow = {
-  state: string | null;
-};
-
-type VisitTransitionRow = {
-  toState: string;
-  createdAt: Date;
-  isOverride: boolean;
-  overrideMethod: string | null;
-};
-
 export type PhysioTodayData = {
   dateLabel: string;
   totalVisits: number;
