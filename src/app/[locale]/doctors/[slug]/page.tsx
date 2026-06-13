@@ -7,6 +7,7 @@
  */
 
 import { Metadata } from 'next';
+import Script from 'next/script';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getDoctorBySlug, getAllDoctorSlugs, getDoctorCanonicalSlugById } from '@/lib/api/doctors';
 import {
@@ -20,6 +21,8 @@ import { doctorFaqs } from '@/lib/seo/faqs';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 import { config } from '@/lib/config';
 import DoctorProfileContent from '@/features/doctors/components/profile/DoctorProfileContent';
+// Route-scoped styles — only the doctor profile page ships this CSS.
+import '@/assets/scss/pages/doctor-profile.scss';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -125,15 +128,18 @@ export default async function DoctorProfilePage({
 
   return (
     <>
-      <script
+      <Script
+        id="doctor-physician-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(physicianLd) }}
       />
-      <script
+      <Script
+        id="doctor-breadcrumb-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbsLd) }}
       />
-      <script
+      <Script
+        id="doctor-faq-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(faqLd) }}
       />

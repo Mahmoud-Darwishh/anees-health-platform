@@ -118,7 +118,7 @@
   }
 
   .owl-nav.nav-bottom .owl-next {
-    margin-left: 14px;
+    margin-inline-start: 14px;
   }
 
   .doctor-section {
@@ -174,7 +174,6 @@
       // In RTL, keep text on the right and push the icon to the opposite side (left).
       display: flex;
       align-items: center;
-      text-align: right;
 
       &::after {
         margin-inline-start: auto;

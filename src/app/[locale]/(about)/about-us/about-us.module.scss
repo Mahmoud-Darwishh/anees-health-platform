@@ -165,98 +165,151 @@ $cream: #faf8f3;
 
 // ─── 2. TRUST BAND ──────────────────────────────────────────────────
 .trust {
-  padding: 28px 0;
+  padding: 42px 0 46px;
   background: $white;
   border-top: 1px solid $hairline;
   border-bottom: 1px solid $hairline;
 }
 
-.trustGrid {
-  display: grid;
-  grid-template-columns: minmax(0, auto) 1fr;
+.trustHeader {
+  display: flex;
   align-items: center;
-  gap: 36px;
+  justify-content: center;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.trustTitle {
+  margin: 0;
+  color: $ink;
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: $font-weight-semibold;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.trustMarkGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 14px;
+
+  @include respond-below(xl) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 
   @include respond-below(custom991) {
-    grid-template-columns: 1fr;
-    gap: 18px;
-    text-align: center;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @include respond-below(custom575) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-.trustLicensing {
+.trustMarkCard {
+  min-height: 148px;
+  padding: 16px 12px 14px;
+  border: 1px solid #e8edf5;
+  border-radius: 12px;
+  background: #fff;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
   gap: 12px;
+  text-align: center;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba($primary, 0.36);
+    box-shadow: 0 14px 30px rgba($ink, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.trustMarkCardFeatured {
+  border-color: rgba($primary, 0.35);
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba($primary, 0.12), transparent 58%),
+    #fff;
+}
+
+.trustMarkLogo {
+  width: 100%;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $ink;
+}
+
+.trustMarkText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 42px;
+
+  strong {
+    font-size: 13px;
+    font-weight: $font-weight-semibold;
+    color: $ink;
+    line-height: 1.25;
+  }
+
+  span {
+    font-size: 11px;
+    color: $muted-soft;
+    line-height: 1.25;
+  }
+}
+
+.trustMarkLogo_licensed {
+  gap: 8px;
+  color: $primary;
 
   i {
-    color: $primary;
-    font-size: 18px;
+    font-size: 30px;
   }
 
-  @include respond-below(custom991) {
-    justify-content: center;
-  }
-}
-
-.trustLicensingLabel {
-  display: block;
-  font-size: 10.5px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: $primary;
-  margin-bottom: 2px;
-}
-
-.trustLicensingText {
-  font-size: 13.5px;
-  color: $ink;
-  font-weight: $font-weight-medium;
-  line-height: 1.45;
-}
-
-.trustPartners {
-  display: flex;
-  align-items: center;
-  gap: 8px 28px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-
-  @include respond-below(custom991) {
-    justify-content: center;
+  span {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: $ink;
   }
 }
 
-.trustPartnersLabel {
-  font-size: 10.5px;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: $muted-soft;
-  inset-inline-end: 12px;
+.trustMarkImage {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
-.trustPartner {
-  font-size: 13.5px;
-  color: $ink;
-  font-weight: $font-weight-semibold;
-  letter-spacing: 0.01em;
-  position: relative;
+.trustMarkImage_onc {
+  max-width: 150px;
+  max-height: 48px;
+}
 
-  & + & {
-    padding-inline-start: 28px;
+.trustMarkImage_soc {
+  max-width: 78px;
+  max-height: 78px;
+}
 
-    &::before {
-      content: '';
-      position: absolute;
-      inset-inline-start: 0;
-      top: 4px;
-      bottom: 4px;
-      width: 1px;
-      background: $hairline;
-    }
-  }
+.trustMarkImage_hitrust {
+  max-width: 92px;
+  max-height: 54px;
+}
+
+.trustMarkImage_hipaa,
+.trustMarkImage_cfr {
+  max-width: 72px;
+  max-height: 72px;
+}
+
+.trustMarkImage_epcs {
+  max-width: 76px;
+  max-height: 76px;
 }
 
 // ─── 3. STORY ───────────────────────────────────────────────────────

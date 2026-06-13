@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import Script from 'next/script';
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -18,6 +19,20 @@ import styles from './about-us.module.scss';
 import LucideIcon from '@/components/common/LucideIcon';
 
 const CAREERS_EMAIL = 'careers@aneeshealth.com';
+
+type TrustMark =
+  | {
+      key: string;
+      label: string;
+      caption: string;
+    }
+  | {
+      key: string;
+      label: string;
+      logo: string;
+      width: number;
+      height: number;
+    };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -63,6 +78,56 @@ export default function AboutUsPage() {
     { value: t('stat_2_value'), label: t('stat_2_label') },
     { value: t('stat_3_value'), label: t('stat_3_label') },
     { value: t('stat_4_value'), label: t('stat_4_label') },
+  ];
+
+  const trustMarks: TrustMark[] = [
+    {
+      key: 'licensed',
+      label: t('trust_licensing_label'),
+      caption: t('trust_licensing_text'),
+    },
+    {
+      key: 'onc',
+      label: 'ONC (+ HTI-4)',
+      logo: '/assets/img/compliance/onc-certified-healthit.png',
+      width: 460,
+      height: 115,
+    },
+    {
+      key: 'soc',
+      label: 'SOC 2 Type II',
+      logo: '/assets/img/compliance/soc.png',
+      width: 224,
+      height: 240,
+    },
+    {
+      key: 'hitrust',
+      label: 'HITRUST e1',
+      logo: '/assets/img/compliance/hitrust-e1-badge.svg',
+      width: 127,
+      height: 75,
+    },
+    {
+      key: 'hipaa',
+      label: 'HIPAA',
+      logo: '/assets/img/compliance/hipaa-asclepius.svg',
+      width: 120,
+      height: 120,
+    },
+    {
+      key: 'cfr',
+      label: 'CFR Part 11',
+      logo: '/assets/img/compliance/fda.svg',
+      width: 120,
+      height: 120,
+    },
+    {
+      key: 'epcs',
+      label: 'EPCS',
+      logo: '/assets/img/compliance/drummond-epcs.png',
+      width: 1024,
+      height: 1024,
+    },
   ];
 
   const breadcrumbItems = [
@@ -143,12 +208,51 @@ export default function AboutUsPage() {
         {/* 2 ─── Trust band ───────────────────────────────────── */}
         <Reveal as="section" className={styles.trust} aria-label={t('trust_aria')}>
           <div className="container">
-            <div className={styles.trustInner}>
-              <LucideIcon iconClass="fa-solid fa-shield-halved" aria-hidden="true" />
-              <span>
-                <span className={styles.trustLicensingLabel}>{t('trust_licensing_label')}</span>
-                <span className={styles.trustLicensingText}>{t('trust_licensing_text')}</span>
-              </span>
+            <header className={styles.trustHeader}>
+              <h2 className={styles.trustTitle}>
+                {isArabic ? 'موثوق، آمن، ومنظم' : 'Certified, compliant & secure'}
+              </h2>
+            </header>
+
+            <div className={styles.trustMarkGrid}>
+              {trustMarks.map((mark) => (
+                <article
+                  key={mark.key}
+                  className={`${styles.trustMarkCard} ${
+                    mark.key === 'licensed' ? styles.trustMarkCardFeatured : ''
+                  }`}
+                >
+                  <div
+                    className={`${styles.trustMarkLogo} ${
+                      mark.key === 'licensed' ? styles.trustMarkLogo_licensed : ''
+                    }`}
+                  >
+                    {'logo' in mark ? (
+                      <Image
+                        src={mark.logo}
+                        alt={mark.label}
+                        width={mark.width}
+                        height={mark.height}
+                        className={[
+                          styles.trustMarkImage,
+                          styles[`trustMarkImage_${mark.key}`],
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      />
+                    ) : (
+                      <>
+                        <LucideIcon iconClass="fa-solid fa-shield-halved" aria-hidden="true" />
+                        <span>MOH</span>
+                      </>
+                    )}
+                  </div>
+                  <div className={styles.trustMarkText}>
+                    <strong>{mark.label}</strong>
+                    {'caption' in mark && <span>{mark.caption}</span>}
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </Reveal>

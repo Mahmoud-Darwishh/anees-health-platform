@@ -105,10 +105,6 @@
   width: 100%;
   gap: 1rem;
   min-width: 0;
-
-  [dir='rtl'] & {
-    text-align: right;
-  }
 }
 
 .totalBadge {
@@ -120,13 +116,8 @@
   font-size: 0.875rem;
   font-weight: $font-weight-bold;
   white-space: nowrap;
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
   flex-shrink: 0;
-
-  [dir='rtl'] & {
-    margin-left: 0;
-    margin-right: 0.5rem;
-  }
 }
 
 .toggleIcon {
@@ -235,7 +226,6 @@
   overflow-wrap: anywhere;
 
   [dir='rtl'] & {
-    text-align: right;
     letter-spacing: 0;
   }
 }
@@ -251,7 +241,6 @@
   min-width: 0;
 
   [dir='rtl'] & {
-    text-align: right;
     line-height: 1.5;
   }
 
@@ -282,10 +271,6 @@
   color: #6b7280;
   min-width: 0;
   overflow-wrap: anywhere;
-
-  [dir='rtl'] & {
-    text-align: right;
-  }
 }
 
 .pricingValue {
@@ -295,30 +280,16 @@
   flex-shrink: 0;
 }
 
-.currency {
-  margin-left: 0.25rem;
-
-  [dir='rtl'] & {
-    margin-left: 0;
-    margin-right: 0.25rem;
-  }
-}
-
 .priceBox {
   background: #f8fbff;
   padding: 0.9rem;
   border-radius: 12px;
-  border-left: 3px solid #102845;
+  border-inline-start: 3px solid #102845;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   margin-top: 1rem;
-
-  [dir='rtl'] & {
-    border-left: none;
-    border-right: 4px solid $primary;
-  }
 }
 
 .priceLabel {
@@ -327,10 +298,6 @@
   color: #374151;
   min-width: 0;
   overflow-wrap: anywhere;
-
-  [dir='rtl'] & {
-    text-align: right;
-  }
 }
 
 .priceValue {
@@ -347,12 +314,7 @@
   font-size: 0.85rem;
   font-weight: $font-weight-semibold;
   color: #6b7280;
-  margin-left: 0.25rem;
-
-  [dir='rtl'] & {
-    margin-left: 0;
-    margin-right: 0.25rem;
-  }
+  margin-inline-start: 0.25rem;
 }
 
 /* ============================================================================
@@ -524,16 +486,6 @@
     letter-spacing: 0.2px;
   }
 
-  [dir='rtl'] {
-    .toggleLabel,
-    .sectionTitle,
-    .detailsLabel,
-    .detailsValue,
-    .pricingLabel,
-    .priceLabel {
-      text-align: right;
-    }
-  }
 }
 
 @media (max-width: map.get($breakpoints, custom360)) {
@@ -606,11 +558,7 @@
 
   .priceBox {
     padding: 0.875rem;
-    border-left-width: 3px;
-
-    [dir='rtl'] & {
-      border-right-width: 3px;
-    }
+    border-inline-start-width: 3px;
   }
 
   .whatsappButton {
@@ -643,41 +591,6 @@
     .whatsappButton {
       line-height: 1.35;
     }
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .summaryContainer {
-    background: $white; // Force white background regardless of dark mode
-  }
-
-  .sectionTitle {
-    color: $dark; // Keep dark color consistent
-  }
-
-  .detailsLabel {
-    color: $dark; // Keep dark color consistent
-  }
-
-  .detailsValue {
-    color: $dark; // Keep original dark text color
-  }
-
-  .priceBox {
-    background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($Crayola-Gold, 0.05) 100%);
-    color: $dark; // Keep original color
-  }
-
-  .priceLabel {
-    color: #374151; // Keep original color
-  }
-
-  .detailsList {
-    border-color: #e5e7eb; // Keep original border color
-  }
-
-  .summarySection {
-    border-bottom-color: #e5e7eb; // Keep original border color
   }
 }
 

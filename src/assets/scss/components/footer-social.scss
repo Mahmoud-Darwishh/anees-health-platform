@@ -1,4 +1,3 @@
-@use "../base/colors";
 @use "../base/typography";
 @use "../utils/mixins";
 @use "../utils/variables";
@@ -29,8 +28,8 @@
 					display: flex !important;
 					align-items: center !important;
 					justify-content: center !important;
-					background-color: colors.$white !important;
-					color: colors.$primarycolor !important;
+					background-color: variables.$white !important;
+					color: variables.$primary !important;
 					border-radius: 50% !important;
 					text-decoration: none !important;
 					font-size: 14px !important;
@@ -43,7 +42,7 @@
 						display: flex;
 						align-items: center;
 						justify-content: center;
-						color: colors.$primarycolor !important;
+						color: variables.$primary !important;
 						font-size: 14px !important;
 						margin: 0 !important;
 						padding: 0 !important;
@@ -51,18 +50,18 @@
 					}
 					
 					&:hover {
-						background-color: colors.$primarycolor !important;
-						color: colors.$white !important;
+						background-color: variables.$primary !important;
+						color: variables.$white !important;
 						@include mixins.transform(scale(1.1));
 						
 						i {
-							color: colors.$white !important;
+							color: variables.$white !important;
 							@include mixins.transform(rotateY(360deg));
 						}
 					}
 					
 					&:focus-visible {
-						outline: 2px solid colors.$primarycolor;
+						outline: 2px solid variables.$primary;
 						outline-offset: 3px;
 					}
 				}

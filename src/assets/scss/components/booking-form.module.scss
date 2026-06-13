@@ -295,12 +295,11 @@
   background-repeat: no-repeat;
   background-position: calc(100% - 0.75rem) center;
   background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
+  padding-inline-end: 2.5rem;
 
   [dir='rtl'] & {
+    // background-position has no logical equivalent — flip the arrow manually.
     background-position: calc(0% + 0.75rem) center;
-    padding-right: 1rem;
-    padding-left: 2.5rem;
   }
 }
 
@@ -338,7 +337,7 @@
   width: auto;
   padding: 0.875rem 0.75rem;
   border: none;
-  border-right: 2px solid #e5e7eb;
+  border-inline-end: 2px solid #e5e7eb;
   border-radius: 0;
   appearance: none;
   background: transparent;
@@ -361,11 +360,6 @@
     background: transparent;
     cursor: not-allowed;
     opacity: 0.6;
-  }
-
-  [dir='rtl'] & {
-    border-right: none;
-    border-left: 2px solid #e5e7eb;
   }
 }
 
@@ -545,7 +539,6 @@
     flex-direction: row-reverse;
 
     label {
-      text-align: right;
       justify-content: flex-end;
     }
   }
@@ -581,10 +574,6 @@
   flex-direction: column;
   gap: 0;
   min-width: 0;
-
-  [dir='rtl'] & {
-    text-align: right;
-  }
 }
 
 .optionTitle {
@@ -617,12 +606,7 @@
   font-size: 0.85rem;
   font-weight: $font-weight-semibold;
   white-space: nowrap;
-  margin-left: auto;
-
-  [dir='rtl'] & {
-    margin-left: 0;
-    margin-right: auto;
-  }
+  margin-inline-start: auto;
 }
 
 /* ============================================================================
@@ -759,19 +743,6 @@
     min-width: 0;
     font-size: 0.95rem;
   }
-
-  [dir='rtl'] {
-    .sectionTitle,
-    .subLegend,
-    .label,
-    .errorText {
-      text-align: right;
-    }
-
-    .phoneNumberInput {
-      text-align: right;
-    }
-  }
 }
 
 @media (max-width: map.get($breakpoints, custom360)) {
@@ -869,7 +840,6 @@
     .optionTitle,
     .optionSubtitle,
     .errorText {
-      text-align: right;
       letter-spacing: 0;
     }
 

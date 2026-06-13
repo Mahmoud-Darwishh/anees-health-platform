@@ -38,7 +38,8 @@
     "upload": "Upload",
     "download": "Download",
     "print": "Print",
-    "share": "Share"
+    "share": "Share",
+    "loadingRecords": "Loading your health records…"
   },
   "header": {
     "title": "Anees Health",
@@ -266,9 +267,12 @@
     "careTeamTitle": "Care Team",
     "engagementTitle": "Next Appointment",
     "medicalHistory": {
-      "title": "Medical History",
-      "empty": "No medical history records are available yet.",
-      "onset": "Onset"
+      "title": "Past Medical History",
+      "condition": "Condition",
+      "onset": "Onset",
+      "status": "Status",
+      "notes": "Notes",
+      "empty": "No past medical history recorded."
     },
     "diagnoses": {
       "title": "Diagnoses",
@@ -293,14 +297,6 @@
     "allergies": {
       "title": "Allergies",
       "empty": "No allergy records available."
-    },
-    "medicalHistory": {
-      "title": "Past Medical History",
-      "condition": "Condition",
-      "onset": "Onset",
-      "status": "Status",
-      "notes": "Notes",
-      "empty": "No past medical history recorded."
     },
     "doctorNotes": {
       "title": "Doctor Notes",
@@ -793,10 +789,22 @@
     "stats": {
       "badge": "By the numbers",
       "items": [
-        { "value": "1,000+", "label": "Patients served" },
-        { "value": "8+", "label": "Hospital partners" },
-        { "value": "4.8★", "label": "Average rating" },
-        { "value": "24/7", "label": "Care coordination" }
+        {
+          "value": "1,000+",
+          "label": "Patients served"
+        },
+        {
+          "value": "8+",
+          "label": "Hospital partners"
+        },
+        {
+          "value": "4.8★",
+          "label": "Average rating"
+        },
+        {
+          "value": "24/7",
+          "label": "Care coordination"
+        }
       ]
     },
     "howItWorks": {
@@ -1434,7 +1442,6 @@
   "aboutPage": {
     "title": "About Anees Health",
     "meta_description": "Anees Health is a clinician-led home healthcare team in Egypt, founded by Dr. Mahmoud Darwish and Dr. Ahmed Oraby. One accountable team — doctors, nurses, physio and labs — from first call to last visit.",
-
     "hero_badge": "About Anees",
     "hero_title": "One accountable team. Care at home.",
     "hero_subtitle": "We're a clinician-led home healthcare team in Egypt. Doctors, nurses, physio and labs — one coordinated team that owns your care from first call to last visit.",
@@ -1442,23 +1449,19 @@
     "hero_cta_secondary": "Get in touch",
     "hero_founded_label": "Founded by",
     "hero_founded_value": "Dr. Mahmoud Darwish & Dr. Ahmed Oraby",
-
     "trust_aria": "Licensing",
     "trust_licensing_label": "Licensed practice",
     "trust_licensing_text": "Operating under Egyptian Ministry of Health regulations.",
-
     "story_eyebrow": "Our story",
     "story_title": "Why Anees exists",
     "story_paragraph_1": "Families were stitching care together from WhatsApp contacts, clinic queues and Google Drive folders. Notes lived in one place, labs in another, follow-up nowhere. The patient — usually the most vulnerable person in the room — paid for that gap.",
     "story_paragraph_2": "So we built one team. Doctors, nurses, physio and lab staff who work on a single medical record, escalate to hospital partners when it matters, and follow up until the outcome is stable. No marketplaces. No phone trees. Just clinicians who answer.",
     "story_pull": "If a family has to chase the next step, we've already failed at the first one.",
-
     "founders_search_statement": "Anees Health was founded by Dr. Mahmoud Darwish and Dr. Ahmed Oraby in Egypt.",
     "founder_1_name": "Dr. Mahmoud Darwish",
     "founder_1_credentials": "Co-founder · Clinician · Internal medicine",
     "founder_2_name": "Dr. Ahmed Oraby",
     "founder_2_credentials": "Co-founder · Physician · Family medicine",
-
     "pillars_eyebrow": "Why families choose us",
     "pillars_title": "Care that's actually accountable",
     "pillars_subtitle": "Most platforms hand you a contact list. We hand you a team — and stay with you until you're better.",
@@ -1470,7 +1473,6 @@
     "pillar_3_text": "Coordinated with Andalusia, Cleopatra, Cairo University and more. Escalation when it matters.",
     "pillar_4_title": "Continuous follow-up",
     "pillar_4_text": "Care doesn't end at the door. We check in until your outcome is stable.",
-
     "notdo_eyebrow": "Honest about scope",
     "notdo_title": "What we're not",
     "notdo_subtitle": "Clarity matters more than coverage. Here's what Anees isn't built to do.",
@@ -1480,7 +1482,6 @@
     "notdo_2_text": "You get a clinical team — doctor, nurses, physio, lab — coordinating on one record. No one operates alone.",
     "notdo_3_title": "Not an emergency service",
     "notdo_3_text": "For life-threatening situations, call 123 or go to the nearest ER. Anees plans the visit before and the follow-up after.",
-
     "ops_eyebrow": "How we operate",
     "ops_title": "Three promises we measure ourselves on",
     "ops_subtitle": "If we miss one of these, the case gets escalated internally — same day.",
@@ -1493,12 +1494,10 @@
     "ops_3_value": "1 doctor",
     "ops_3_title": "Named owner per case",
     "ops_3_text": "One physician owns your file. You'll know their name, and they'll know yours.",
-
     "coverage_eyebrow": "Where we work",
     "coverage_title": "Greater Cairo, today",
     "coverage_text": "Active routes across New Cairo, 5th Settlement, Maadi, Heliopolis, Zamalek and surrounding districts.",
     "coverage_link": "See full coverage",
-
     "stats_aria": "Anees Health by the numbers",
     "stat_1_value": "1,000+",
     "stat_1_label": "Families served",
@@ -1508,7 +1507,6 @@
     "stat_3_label": "Coordinator response",
     "stat_4_value": "24/7",
     "stat_4_label": "Care coordination",
-
     "band_aria": "Privacy and careers",
     "privacy_label": "Privacy",
     "privacy_title": "Your medical record stays yours",
@@ -1519,7 +1517,6 @@
     "careers_text": "We're hiring doctors, nurses and physiotherapists who want to practise medicine without the cracks.",
     "careers_link": "Email careers@aneeshealth.com",
     "careers_email_subject": "Joining Anees Health",
-
     "cta_title": "Need care at home?",
     "cta_text": "Tell us what's going on. A coordinator picks up in minutes and a clinician designs the plan — usually before the day closes.",
     "cta_primary": "Talk on WhatsApp",
@@ -1529,18 +1526,15 @@
   "contactPage": {
     "title": "Contact Us",
     "meta_description": "Talk to an Anees Health coordinator on WhatsApp. Real humans, no phone trees — typical response under ten minutes.",
-
     "hero_badge": "Contact",
     "hero_title": "Talk to a real coordinator.",
     "hero_subtitle": "No phone trees, no marketplaces. Message us on WhatsApp and a clinical coordinator picks up — most replies land in under ten minutes.",
     "hero_response_note": "Coordinator response in under 10 minutes during operating hours.",
     "hero_whatsapp_message": "Hello Anees Health,\n\nI'd like to talk about home care for a family member.",
-
     "cta_whatsapp": "Chat on WhatsApp",
     "cta_call": "Call us",
     "cta_whatsapp_aria": "Open WhatsApp chat with Anees Health",
     "cta_call_aria": "Call Anees Health directly",
-
     "info_aria": "Contact details and message form",
     "info_title": "How to reach us",
     "address_label": "Address",
@@ -1550,13 +1544,11 @@
     "phone_raw": "+201055164595",
     "email_label": "Email",
     "email_text": "info@aneeshealth.com",
-
     "hours_title": "Operating hours",
     "hours_weekdays_label": "Saturday – Thursday",
     "hours_weekdays_time": "9:00 AM – 10:00 PM",
     "hours_weekend_label": "Friday",
     "hours_weekend_time": "2:00 PM – 10:00 PM",
-
     "form_eyebrow": "Send a message",
     "form_title": "Tell us what's going on",
     "form_subtitle": "Fill this in and we'll open WhatsApp with your message ready to send. A coordinator replies from the same chat.",
@@ -1579,7 +1571,6 @@
     "form_submit": "Send via WhatsApp",
     "form_submit_aria": "Send this message to Anees Health on WhatsApp",
     "form_privacy_note": "We don't store this form. Your message goes straight to our WhatsApp coordinator.",
-
     "wa_greeting": "Hello Anees Health,",
     "wa_field_name": "Name",
     "wa_field_service": "Service",

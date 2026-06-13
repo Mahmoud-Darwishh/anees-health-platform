@@ -1,0 +1,125 @@
+@use '../../assets/scss/utils/variables' as v;
+
+// Mirrors the visual language of the 404 page (not-found.module.scss) so an
+// error screen feels like part of the product, not a system fault page. The
+// accent leans on the brand gold/blue — reassuring, not alarming red — because
+// patients should feel held, not panicked, when something breaks.
+
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 22%, rgba(v.$Crayola-Gold, 0.26), transparent 46%),
+    radial-gradient(circle at 86% 80%, rgba(v.$primary, 0.18), transparent 48%),
+    linear-gradient(180deg, #fffdf8 0%, #fdf9f0 45%, #f8efdc 100%);
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.inner {
+  position: relative;
+  max-width: 720px;
+  padding: 2.25rem 1.5rem;
+  border: 1px solid rgba(v.$primary, 0.22);
+  border-radius: 1.5rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 249, 236, 0.92) 100%);
+  box-shadow:
+    0 24px 48px rgba(v.$bony, 0.16),
+    0 2px 0 rgba(255, 255, 255, 0.65) inset;
+}
+
+.iconWrapper {
+  width: 78px;
+  height: 78px;
+  background: linear-gradient(135deg, v.$primary 0%, v.$Crayola-Gold 100%);
+  color: #ffffff;
+  font-size: 1.75rem;
+  box-shadow: 0 12px 24px rgba(v.$primary, 0.28);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(v.$Crayola-Gold, 0.34);
+  color: v.$bony;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.heading {
+  margin: 0 auto;
+  max-width: 20ch;
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  line-height: 1.15;
+  color: v.$brand-dark-blue;
+}
+
+.body {
+  margin: 0 auto;
+  max-width: 56ch;
+  font-size: 1.05rem;
+  color: rgba(v.$brand-dark-blue, 0.82);
+}
+
+.actions :global(.btn) {
+  min-width: 160px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.65rem 1.15rem;
+}
+
+.actions :global(.btn-primary) {
+  border: 0;
+  color: #ffffff;
+  background: linear-gradient(135deg, v.$primary 0%, v.$Crayola-Gold 100%);
+  box-shadow: 0 12px 24px rgba(v.$primary, 0.28);
+}
+
+.actions :global(.btn-outline-primary) {
+  color: v.$brand-dark-blue;
+  border: 1px solid rgba(v.$primary, 0.55);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.reference {
+  margin-top: 1.5rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: rgba(v.$brand-dark-blue, 0.55);
+
+  code {
+    color: rgba(v.$brand-dark-blue, 0.78);
+    font-size: 0.8rem;
+  }
+}
+
+.glow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  width: 520px;
+  height: 220px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(v.$Crayola-Gold, 0.42), rgba(v.$Crayola-Gold, 0));
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .inner {
+    padding: 1.7rem 1rem;
+  }
+
+  .actions :global(.btn) {
+    width: 100%;
+  }
+}

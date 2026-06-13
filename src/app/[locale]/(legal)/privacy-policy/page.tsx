@@ -1,6 +1,8 @@
 import { useLocale, useTranslations } from 'next-intl';
 import Script from 'next/script';
 import Breadcrumb from '@/components/layout/Breadcrumb';
+// Route-scoped styles — shared by the two (legal) pages, loaded only on them.
+import '@/assets/scss/pages/privacy-policy.scss';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { buildLegalMetadata } from '@/lib/seo/metadata';

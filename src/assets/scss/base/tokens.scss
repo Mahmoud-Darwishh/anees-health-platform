@@ -1,0 +1,82 @@
+@use '../utils/variables' as v;
+
+// ============================================================================
+// Design tokens — THE single runtime token system for the whole site.
+// ----------------------------------------------------------------------------
+// One naming scheme, one place. Brand colours are generated from the Sass
+// source of truth (utils/variables.scss) via #{…} so the two layers can't drift.
+// Shared runtime values live here so component styles do not drift from the
+// brand system.
+//
+//   Brand     --color-brand-*          Semantic  --color-success|warning|danger|info
+//   Surfaces  --surface-base|elevated|soft|muted|inverse
+//   Text      --text-strong|soft|muted Borders   --border-soft|strong
+//
+// Components should consume var(--…) for shared runtime values. Sass $-tokens
+// remain only where Sass must compute (color.adjust/rgba).
+// ============================================================================
+
+:root {
+  color-scheme: light;
+
+  // Brand (from Sass source of truth)
+  --color-brand-dark-blue: #{v.$brand-dark-blue};
+  --color-brand-gold: #{v.$primary};
+
+  // Semantic status
+  --color-success: #{v.$success};
+  --color-warning: #{v.$warning};
+  --color-danger: #{v.$danger};
+  --color-info: #{v.$info};
+
+  // Surfaces
+  --surface-base: #fbf8f1;
+  --surface-elevated: #fffdf8;
+  --surface-soft: #f4efe5;
+  --surface-muted: #efe9de;
+  --surface-inverse: #132c4d;
+
+  // Text
+  --text-strong: #132c4d;
+  --text-soft: #556377;
+  --text-muted: #7b8698;
+
+  // Borders & effects
+  --border-soft: #e6ddcd;
+  --border-strong: #d5c7ae;
+  --ring-focus: rgba(166, 131, 65, 0.42);
+  --shadow-soft: 0 10px 30px -24px rgba(19, 44, 77, 0.28);
+  --shadow-elevated: 0 22px 55px -35px rgba(19, 44, 77, 0.3);
+
+  // Radius
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-control: var(--radius-md);
+
+  // Typography
+  --font-sans-en: var(--font-plus-jakarta), 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-sans-ar: var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic', 'Tahoma', sans-serif;
+  --font-body-size-mobile: 1rem;
+  --font-body-size-tablet: 1.075rem;
+  --font-body-size-desktop: 1.125rem;
+  --font-body-line-height: 1.78;
+  --font-body-line-height-ar: 1.98;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  // Motion / layout
+  --reveal-duration: 0.36s;
+  --reveal-ease: cubic-bezier(0.22, 0.7, 0.3, 1);
+  --reveal-distance: 12px;
+  --reveal-delay: 0ms;
+  --mobile-bottom-nav-height: 58px;
+  --mobile-bottom-nav-offset: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+
+  // Bootstrap bridge
+  --bs-body-bg: var(--surface-base);
+  --bs-body-color: var(--text-soft);
+  --bs-primary: var(--color-brand-dark-blue);
+  --bs-secondary: var(--color-brand-gold);
+}

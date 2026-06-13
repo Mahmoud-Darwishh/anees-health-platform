@@ -19,7 +19,6 @@ import { getCoverageAreas } from '@/lib/seo/coverage';
 import type { SupportedLocale } from '@/lib/seo/site';
 import SessionProvider from '@/components/common/SessionProvider';
 import '@/styles/globals.scss';
-import '@/styles/legacy.scss';
 
 export async function generateMetadata({
   params,
@@ -69,15 +68,18 @@ export default async function LocaleLayout({
             schema blocks from the root layout. Per-route JSON-LD (breadcrumb,
             FAQ, Physician, MedicalProcedure, Place) is emitted by each
             individual page. */}
-        <script
+        <Script
+          id="organization-json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: renderJsonLd(orgSchema) }}
         />
-        <script
+        <Script
+          id="local-business-json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: renderJsonLd(lbSchema) }}
         />
-        <script
+        <Script
+          id="website-json-ld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: renderJsonLd(wsSchema) }}
         />

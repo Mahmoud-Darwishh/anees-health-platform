@@ -5,19 +5,28 @@
  * Fully responsive
  */
 
-// ======= VARIABLES & COLORS =======
-$primary: #aa8642;
-$primary-dark: #8b6f3d;
-$primary-light: #c9a960;
+@use 'sass:color';
+@use '../utils/variables' as tokens;
+
+// ======= DESIGN TOKENS =======
+// Brand + semantic colors flow from the SINGLE source of truth
+// (src/assets/scss/utils/variables.scss) so this page stays on-brand and a
+// rebrand updates everywhere at once — no private palette to drift out of sync.
+$primary: tokens.$primary; // brand gold
+$primary-dark: color.adjust(tokens.$primary, $lightness: -8%);
+$primary-light: color.adjust(tokens.$primary, $lightness: 12%);
+$success: tokens.$success; // brand green
+$warning: tokens.$warning; // brand amber
+$danger: tokens.$danger; // brand red
+$info: tokens.$cyan; // brand cyan accent
+$white: tokens.$white;
+
+// Page-local neutral greys / surfaces — UI scaffolding, intentionally not brand
+// tokens (the brand set has no direct neutral-grey equivalents).
 $secondary: #f8f9fa;
-$success: #28a745;
-$warning: #ffc107;
-$danger: #dc3545;
-$info: #17a2b8;
 $text-dark: #212529;
 $text-muted: #6c757d;
 $border-color: #dee2e6;
-$white: #ffffff;
 $gray-light: #f0f2f5;
 
 // ======= DOCTOR PROFILE PAGE CONTAINER =======
@@ -404,13 +413,8 @@ $gray-light: #f0f2f5;
       max-width: 900px;
       padding: 1.5rem;
       background: $white;
-      border-left: 4px solid $primary;
+      border-inline-start: 4px solid $primary;
       border-radius: 8px;
-
-      [dir='rtl'] & {
-        border-left: none;
-        border-right: 4px solid $primary;
-      }
     }
   }
 }
@@ -586,13 +590,8 @@ $gray-light: #f0f2f5;
     gap: 1rem;
     padding: 1rem;
     background: rgba($success, 0.05);
-    border-left: 4px solid $success;
+    border-inline-start: 4px solid $success;
     border-radius: 8px;
-
-    [dir='rtl'] & {
-      border-left: none;
-      border-right: 4px solid $success;
-    }
 
     i {
       font-size: 1.5rem;
@@ -852,7 +851,7 @@ $gray-light: #f0f2f5;
     }
 
     .status-pill {
-      margin-left: auto;
+      margin-inline-start: auto;
       background: rgba($text-muted, 0.12);
       color: $text-muted;
       padding: 0.5rem 0.9rem;
@@ -872,7 +871,7 @@ $gray-light: #f0f2f5;
       align-items: flex-start;
 
       .status-pill {
-        margin-left: 0;
+        margin-inline-start: 0;
       }
     }
   }
@@ -997,8 +996,7 @@ $gray-light: #f0f2f5;
       color: rgba($white, 0.95);
       max-width: 600px;
       line-height: 1.72;
-      margin-left: auto;
-      margin-right: auto;
+      margin-inline: auto;
     }
 
     .btn-xl {

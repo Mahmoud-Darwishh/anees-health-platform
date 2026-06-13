@@ -1,18 +1,24 @@
 ﻿// Load component-specific styles (Sass @use)
 @use '../assets/scss/utils/variables';
+// Runtime design tokens (:root CSS custom properties) — generated from the Sass
+// tokens, emitted once here so var(--color-*) is available site-wide.
+@use '../assets/scss/base/tokens';
 @use './components';
-// Doctor grid legacy styling (service chips, cards, filters)
-@use '../assets/scss/pages/doctor-grid';
-// Doctor profile page styling
-@use '../assets/scss/pages/doctor-profile';
-// Legal pages styling (privacy policy, terms)
-@use '../assets/scss/pages/privacy-policy';
 // Shared list utilities
 @use '../assets/scss/utils/lists';
+
+// NOTE: Page-specific stylesheets (doctor-grid, doctor-profile, privacy-policy)
+// are NOT loaded here — they are imported directly by their own routes so each
+// page ships only the CSS it actually uses (route-level code splitting):
+//   - doctor-grid.scss    → src/app/[locale]/doctors/page.tsx
+//   - doctor-profile.scss → src/app/[locale]/doctors/[slug]/page.tsx
+//   - privacy-policy.scss → the two (legal) route pages
 // Banner section styling
 @use '../assets/scss/sections/banner';
 // Footer social icons styling
 @use '../assets/scss/components/footer-social';
+// Shared card styles used by the doctors listing and the home carousel
+@use '../assets/scss/components/doctor-card';
 // Header mobile menu (elite refresh) — overrides legacy drawer styles
 @use '../assets/scss/components/header';
 // Footer layout styling (includes footer-three gradient)
@@ -115,11 +121,12 @@
   }
 }
 
-// RTL support
+// RTL support. Text alignment is handled once, logically, on `body`
+// (`text-align: start`) so it flips with `dir` automatically — no per-direction
+// rules needed. Only genuinely non-logical fixes (icon mirroring) live here.
 [dir='rtl'] {
   direction: rtl;
-  text-align: right;
-  
+
   // Breadcrumb RTL fix
   .breadcrumb-bar {
     .page-breadcrumb {
@@ -127,14 +134,12 @@
         display: flex;
         flex-direction: row-reverse;
       }
-      
+
       .breadcrumb-item + .breadcrumb-item {
-        padding-left: 0;
-        padding-right: 0;
-        
+        padding-inline: 0;
+
         &::before {
-          padding-left: 12px;
-          padding-right: 12px;
+          padding-inline: 12px;
           display: inline-block;
           transform: scaleX(-1);
         }
@@ -145,7 +150,6 @@
 
 [dir='ltr'] {
   direction: ltr;
-  text-align: left;
 }
 
 // Global resets and base styles
@@ -161,6 +165,8 @@ body {
   // `clip` (not `hidden`) prevents horizontal overflow without creating a
   // scroll container — which would break `position: sticky` on the header.
   overflow-x: clip;
+  // Logical alignment — resolves to left in LTR, right in RTL automatically.
+  text-align: start;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -176,9 +182,17 @@ body {
   font-size: var(--font-body-size-mobile);
   line-height: var(--font-body-line-height-current);
   font-weight: var(--font-weight-regular);
-  color: variables.$text-color;
+  color: var(--text-soft);
   background: var(--surface-base);
   text-rendering: optimizeLegibility;
+  // Smooth the light/dark hand-off (instant for reduced-motion users).
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -228,7 +242,7 @@ h6 {
   font-weight: var(--font-weight-medium);
   line-height: 1.18;
   margin-bottom: 0.6em;
-  color: variables.$title-color;
+  color: var(--text-strong);
   text-wrap: balance;
 }
 
@@ -285,48 +299,8 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-:root {
-  --color-brand-dark-blue: #{variables.$brand-dark-blue};
-  --color-brand-gold: #{variables.$primary};
-  --surface-base: #fbf8f1;
-  --surface-elevated: #fffdf8;
-  --surface-soft: #f4efe5;
-  --surface-muted: #efe9de;
-  --surface-inverse: #132c4d;
-  --text-strong: #132c4d;
-  --text-soft: #556377;
-  --text-muted: #7b8698;
-  --border-soft: #e6ddcd;
-  --border-strong: #d5c7ae;
-  --ring-focus: rgba(166, 131, 65, 0.42);
-  --shadow-soft: 0 10px 30px -24px rgba(19, 44, 77, 0.28);
-  --shadow-elevated: 0 22px 55px -35px rgba(19, 44, 77, 0.3);
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-control: var(--radius-md);
-  --font-sans-en: var(--font-plus-jakarta), 'Avenir Next', 'Segoe UI', sans-serif;
-  --font-sans-ar: var(--font-ibm-plex-sans-arabic), 'IBM Plex Sans Arabic', 'Tahoma', sans-serif;
-  --font-body-size-mobile: 1rem;
-  --font-body-size-tablet: 1.075rem;
-  --font-body-size-desktop: 1.125rem;
-  --font-body-line-height: 1.78;
-  --font-body-line-height-ar: 1.98;
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --reveal-duration: 0.36s;
-  --reveal-ease: cubic-bezier(0.22, 0.7, 0.3, 1);
-  --reveal-distance: 12px;
-  --reveal-delay: 0ms;
-  --mobile-bottom-nav-height: 58px;
-  --mobile-bottom-nav-offset: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
-
-  --bs-body-bg: var(--surface-base);
-  --bs-body-color: var(--text-soft);
-  --bs-primary: var(--color-brand-dark-blue);
-  --bs-secondary: var(--color-brand-gold);
-}
+// Design tokens live in the single token file:
+// src/assets/scss/base/tokens.scss (loaded via @use at the top of this file).
 
 main,
 section {

@@ -1,4 +1,5 @@
 import { useLocale, useTranslations } from 'next-intl';
+import Script from 'next/script';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -34,7 +35,8 @@ export default function ContactUsPage() {
 
   return (
     <>
-      <script
+      <Script
+        id="contact-page-json-ld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: renderJsonLd(contactLd) }}
       />

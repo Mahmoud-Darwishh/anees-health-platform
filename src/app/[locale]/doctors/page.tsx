@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Script from 'next/script';
 import DoctorGrid from '@/features/doctors/components/doctorgrid/doctors-grid';
 import { buildDoctorsMetadata } from '@/lib/seo/metadata';
+// Route-scoped styles — only the doctors listing page ships this CSS.
+import '@/assets/scss/pages/doctor-grid.scss';
 import {
   physiciansItemListSchema,
   breadcrumbSchema,
