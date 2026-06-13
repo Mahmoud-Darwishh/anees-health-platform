@@ -1,17 +1,19 @@
 @use '@/assets/scss/utils/variables' as *;
 
 .anees-admin-shell {
+  // Brand custom-properties flow from the canonical Anees anchors in
+  // utils/variables.scss (navy / gold) — never re-hardcode the brand hexes here.
   --anees-surface: #fffefb;
   --anees-surface-soft: #fcfaf5;
-  --anees-ink: #132c4d;
+  --anees-ink: #{$brand-navy};
   --anees-ink-muted: #526276;
-  --anees-accent: #a68341;
-  --anees-accent-strong: #8f6f34;
-  --anees-border: rgba(19, 44, 77, 0.12);
+  --anees-accent: #{$brand-gold};
+  --anees-accent-strong: #{$primary-900};
+  --anees-border: #{rgba($brand-navy, 0.12)};
   --anees-radius-card: 12px;
   --anees-radius-control: 8px;
   --anees-radius-pill: 8px;
-  --anees-shadow-soft: 0 10px 24px rgba(19, 44, 77, 0.07);
+  --anees-shadow-soft: 0 10px 24px #{rgba($brand-navy, 0.07)};
   --anees-space-1: 0.35rem;
   --anees-space-2: 0.55rem;
   --anees-space-3: 0.75rem;

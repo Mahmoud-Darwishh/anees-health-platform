@@ -2,6 +2,13 @@ import 'server-only';
 
 import { getMedplumClient } from '@/lib/medplum/client';
 import { MEDPLUM_CODE_SYSTEMS } from '@/lib/medplum/constants';
+import {
+  booleanComponent,
+  compactComponents,
+  integerComponent,
+  requiredStringComponent,
+  stringComponent,
+} from '@/lib/medplum/care-report-components';
 
 type FhirReference = {
   reference?: string;
@@ -136,50 +143,11 @@ export async function createNursingReport(input: CreateNursingReportInput): Prom
       ],
       text: 'Nursing Daily Report',
     },
-    component: [
-      input.conditionSummary
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'condition-summary',
-                  display: 'Condition Summary',
-                },
-              ],
-            },
-            valueString: input.conditionSummary,
-          }
-        : undefined,
-      typeof input.escalationNeeded === 'boolean'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'escalation-needed',
-                  display: 'Escalation Needed',
-                },
-              ],
-            },
-            valueString: input.escalationNeeded ? 'yes' : 'no',
-          }
-        : undefined,
-      input.followUpPlan
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'follow-up-plan',
-                  display: 'Follow-up Plan',
-                },
-              ],
-            },
-            valueString: input.followUpPlan,
-          }
-        : undefined,
-    ].filter(Boolean) as NonNullable<CareReportResource['component']>,
+    component: compactComponents([
+      stringComponent('condition-summary', 'Condition Summary', input.conditionSummary),
+      booleanComponent('escalation-needed', 'Escalation Needed', input.escalationNeeded),
+      stringComponent('follow-up-plan', 'Follow-up Plan', input.followUpPlan),
+    ]),
   } as never)) as CareReportResource;
 }
 
@@ -199,358 +167,33 @@ export async function createPhysioSessionReport(input: CreatePhysioReportInput):
       ],
       text: 'Physiotherapy Session Report',
     },
-    component: [
-      input.sessionTemplate
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'session-template',
-                  display: 'Session Template',
-                },
-              ],
-            },
-            valueString: input.sessionTemplate,
-          }
-        : undefined,
-      input.sessionNumberLabel
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'session-number-label',
-                  display: 'Session Number Label',
-                },
-              ],
-            },
-            valueString: input.sessionNumberLabel,
-          }
-        : undefined,
-      input.subjectiveFunction
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'subjective-function',
-                  display: 'Subjective Function',
-                },
-              ],
-            },
-            valueString: input.subjectiveFunction,
-          }
-        : undefined,
-      input.objectiveSummary
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'objective-summary',
-                  display: 'Objective Summary',
-                },
-              ],
-            },
-            valueString: input.objectiveSummary,
-          }
-        : undefined,
-      typeof input.postOpKneeFlexionDeg === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'post-op-knee-flexion-deg',
-                  display: 'Post-op Knee Flexion (deg)',
-                },
-              ],
-            },
-            valueInteger: input.postOpKneeFlexionDeg,
-          }
-        : undefined,
-      typeof input.postOpKneeExtensionDeg === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'post-op-knee-extension-deg',
-                  display: 'Post-op Knee Extension (deg)',
-                },
-              ],
-            },
-            valueInteger: input.postOpKneeExtensionDeg,
-          }
-        : undefined,
-      input.postOpKneeEffusionGrade
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'post-op-knee-effusion-grade',
-                  display: 'Post-op Knee Effusion Grade',
-                },
-              ],
-            },
-            valueString: input.postOpKneeEffusionGrade,
-          }
-        : undefined,
-      input.postOpKneeGaitPhase
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'post-op-knee-gait-phase',
-                  display: 'Post-op Knee Gait Phase',
-                },
-              ],
-            },
-            valueString: input.postOpKneeGaitPhase,
-          }
-        : undefined,
-      typeof input.strokeAshworthScore === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'stroke-ashworth-score',
-                  display: 'Stroke Ashworth Score',
-                },
-              ],
-            },
-            valueInteger: input.strokeAshworthScore,
-          }
-        : undefined,
-      typeof input.strokeBergScore === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'stroke-berg-score',
-                  display: 'Stroke Berg Score',
-                },
-              ],
-            },
-            valueInteger: input.strokeBergScore,
-          }
-        : undefined,
-      typeof input.strokeFunctionalReachCm === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'stroke-functional-reach-cm',
-                  display: 'Stroke Functional Reach (cm)',
-                },
-              ],
-            },
-            valueInteger: input.strokeFunctionalReachCm,
-          }
-        : undefined,
-      typeof input.lowBackSlrLeftDeg === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'low-back-slr-left-deg',
-                  display: 'Low Back SLR Left (deg)',
-                },
-              ],
-            },
-            valueInteger: input.lowBackSlrLeftDeg,
-          }
-        : undefined,
-      typeof input.lowBackSlrRightDeg === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'low-back-slr-right-deg',
-                  display: 'Low Back SLR Right (deg)',
-                },
-              ],
-            },
-            valueInteger: input.lowBackSlrRightDeg,
-          }
-        : undefined,
-      typeof input.lowBackSchoberCm === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'low-back-schober-cm',
-                  display: 'Low Back Schober (cm)',
-                },
-              ],
-            },
-            valueInteger: input.lowBackSchoberCm,
-          }
-        : undefined,
-      typeof input.lowBackPainWithMovement === 'boolean'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'low-back-pain-with-movement',
-                  display: 'Low Back Pain with Movement',
-                },
-              ],
-            },
-            valueString: input.lowBackPainWithMovement ? 'yes' : 'no',
-          }
-        : undefined,
-      typeof input.geriatricTugSeconds === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'geriatric-tug-seconds',
-                  display: 'Geriatric TUG (seconds)',
-                },
-              ],
-            },
-            valueInteger: input.geriatricTugSeconds,
-          }
-        : undefined,
-      typeof input.geriatricTinettiScore === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'geriatric-tinetti-score',
-                  display: 'Geriatric Tinetti Score',
-                },
-              ],
-            },
-            valueInteger: input.geriatricTinettiScore,
-          }
-        : undefined,
-      input.geriatricFallRiskClass
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'geriatric-fall-risk-class',
-                  display: 'Geriatric Fall Risk Class',
-                },
-              ],
-            },
-            valueString: input.geriatricFallRiskClass,
-          }
-        : undefined,
-      input.interventions
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'interventions',
-                  display: 'Interventions',
-                },
-              ],
-            },
-            valueString: input.interventions,
-          }
-        : undefined,
-      typeof input.painBefore === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'pain-before',
-                  display: 'Pain Before',
-                },
-              ],
-            },
-            valueInteger: input.painBefore,
-          }
-        : undefined,
-      typeof input.painAfter === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'pain-after',
-                  display: 'Pain After',
-                },
-              ],
-            },
-            valueInteger: input.painAfter,
-          }
-        : undefined,
-      input.responseSummary
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'response-summary',
-                  display: 'Response Summary',
-                },
-              ],
-            },
-            valueString: input.responseSummary,
-          }
-        : undefined,
-      input.homePlan
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'home-plan',
-                  display: 'Home Plan',
-                },
-              ],
-            },
-            valueString: input.homePlan,
-          }
-        : undefined,
-      input.nextSessionFocus
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'next-session-focus',
-                  display: 'Next Session Focus',
-                },
-              ],
-            },
-            valueString: input.nextSessionFocus,
-          }
-        : undefined,
-      input.dischargeReadiness
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'discharge-readiness',
-                  display: 'Discharge Readiness',
-                },
-              ],
-            },
-            valueString: input.dischargeReadiness,
-          }
-        : undefined,
-    ].filter(Boolean) as NonNullable<CareReportResource['component']>,
+    component: compactComponents([
+      stringComponent('session-template', 'Session Template', input.sessionTemplate),
+      stringComponent('session-number-label', 'Session Number Label', input.sessionNumberLabel),
+      stringComponent('subjective-function', 'Subjective Function', input.subjectiveFunction),
+      stringComponent('objective-summary', 'Objective Summary', input.objectiveSummary),
+      integerComponent('post-op-knee-flexion-deg', 'Post-op Knee Flexion (deg)', input.postOpKneeFlexionDeg),
+      integerComponent('post-op-knee-extension-deg', 'Post-op Knee Extension (deg)', input.postOpKneeExtensionDeg),
+      stringComponent('post-op-knee-effusion-grade', 'Post-op Knee Effusion Grade', input.postOpKneeEffusionGrade),
+      stringComponent('post-op-knee-gait-phase', 'Post-op Knee Gait Phase', input.postOpKneeGaitPhase),
+      integerComponent('stroke-ashworth-score', 'Stroke Ashworth Score', input.strokeAshworthScore),
+      integerComponent('stroke-berg-score', 'Stroke Berg Score', input.strokeBergScore),
+      integerComponent('stroke-functional-reach-cm', 'Stroke Functional Reach (cm)', input.strokeFunctionalReachCm),
+      integerComponent('low-back-slr-left-deg', 'Low Back SLR Left (deg)', input.lowBackSlrLeftDeg),
+      integerComponent('low-back-slr-right-deg', 'Low Back SLR Right (deg)', input.lowBackSlrRightDeg),
+      integerComponent('low-back-schober-cm', 'Low Back Schober (cm)', input.lowBackSchoberCm),
+      booleanComponent('low-back-pain-with-movement', 'Low Back Pain with Movement', input.lowBackPainWithMovement),
+      integerComponent('geriatric-tug-seconds', 'Geriatric TUG (seconds)', input.geriatricTugSeconds),
+      integerComponent('geriatric-tinetti-score', 'Geriatric Tinetti Score', input.geriatricTinettiScore),
+      stringComponent('geriatric-fall-risk-class', 'Geriatric Fall Risk Class', input.geriatricFallRiskClass),
+      stringComponent('interventions', 'Interventions', input.interventions),
+      integerComponent('pain-before', 'Pain Before', input.painBefore),
+      integerComponent('pain-after', 'Pain After', input.painAfter),
+      stringComponent('response-summary', 'Response Summary', input.responseSummary),
+      stringComponent('home-plan', 'Home Plan', input.homePlan),
+      stringComponent('next-session-focus', 'Next Session Focus', input.nextSessionFocus),
+      stringComponent('discharge-readiness', 'Discharge Readiness', input.dischargeReadiness),
+    ]),
   } as never)) as CareReportResource;
 }
 
@@ -570,166 +213,33 @@ export async function createNursingShiftHandoffReport(input: CreateNursingShiftH
       ],
       text: 'Nursing Shift Handoff',
     },
-    component: [
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'shift-start-at',
-              display: 'Shift Start Time',
-            },
-          ],
-        },
-        valueString: input.shiftStartAt.toISOString(),
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'shift-end-at',
-              display: 'Shift End Time',
-            },
-          ],
-        },
-        valueString: input.shiftEndAt.toISOString(),
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'patient-status-summary',
-              display: 'Patient Status Summary',
-            },
-          ],
-        },
-        valueString: input.patientStatusSummary,
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'pending-tasks-summary',
-              display: 'Pending Tasks Summary',
-            },
-          ],
-        },
-        valueString: input.pendingTasksSummary,
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'medication-safety-summary',
-              display: 'Medication Safety Summary',
-            },
-          ],
-        },
-        valueString: input.medicationSafetySummary,
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'escalation-status',
-              display: 'Escalation Status',
-            },
-          ],
-        },
-        valueString: input.escalationStatus,
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'next-shift-focus',
-              display: 'Next Shift Focus',
-            },
-          ],
-        },
-        valueString: input.nextShiftFocus,
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'handoff-latitude',
-              display: 'Handoff Latitude',
-            },
-          ],
-        },
-        valueString: String(input.handoffLatitude),
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'handoff-longitude',
-              display: 'Handoff Longitude',
-            },
-          ],
-        },
-        valueString: String(input.handoffLongitude),
-      },
-      typeof input.handoffAccuracyMeters === 'number'
-        ? {
-            code: {
-              coding: [
-                {
-                  system: MEDPLUM_CODE_SYSTEMS.reportType,
-                  code: 'handoff-location-accuracy-m',
-                  display: 'Handoff Location Accuracy (m)',
-                },
-              ],
-            },
-            valueString: String(Math.round(input.handoffAccuracyMeters)),
-          }
-        : undefined,
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'distance-from-patient-m',
-              display: 'Distance From Patient Location (m)',
-            },
-          ],
-        },
-        valueString: String(Math.round(input.distanceFromPatientMeters)),
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'within-patient-location-radius',
-              display: 'Within Patient Location Radius',
-            },
-          ],
-        },
-        valueString: input.withinPatientRadius ? 'yes' : 'no',
-      },
-      {
-        code: {
-          coding: [
-            {
-              system: MEDPLUM_CODE_SYSTEMS.reportType,
-              code: 'handoff-attestation',
-              display: 'Handoff Attestation',
-            },
-          ],
-        },
-        valueString: input.handoffAttestation,
-      },
-    ].filter(Boolean) as NonNullable<CareReportResource['component']>,
+    component: compactComponents([
+      requiredStringComponent('shift-start-at', 'Shift Start Time', input.shiftStartAt.toISOString()),
+      requiredStringComponent('shift-end-at', 'Shift End Time', input.shiftEndAt.toISOString()),
+      requiredStringComponent('patient-status-summary', 'Patient Status Summary', input.patientStatusSummary),
+      requiredStringComponent('pending-tasks-summary', 'Pending Tasks Summary', input.pendingTasksSummary),
+      requiredStringComponent('medication-safety-summary', 'Medication Safety Summary', input.medicationSafetySummary),
+      requiredStringComponent('escalation-status', 'Escalation Status', input.escalationStatus),
+      requiredStringComponent('next-shift-focus', 'Next Shift Focus', input.nextShiftFocus),
+      requiredStringComponent('handoff-latitude', 'Handoff Latitude', String(input.handoffLatitude)),
+      requiredStringComponent('handoff-longitude', 'Handoff Longitude', String(input.handoffLongitude)),
+      stringComponent(
+        'handoff-location-accuracy-m',
+        'Handoff Location Accuracy (m)',
+        typeof input.handoffAccuracyMeters === 'number' ? String(Math.round(input.handoffAccuracyMeters)) : null,
+      ),
+      requiredStringComponent(
+        'distance-from-patient-m',
+        'Distance From Patient Location (m)',
+        String(Math.round(input.distanceFromPatientMeters)),
+      ),
+      requiredStringComponent(
+        'within-patient-location-radius',
+        'Within Patient Location Radius',
+        input.withinPatientRadius ? 'yes' : 'no',
+      ),
+      requiredStringComponent('handoff-attestation', 'Handoff Attestation', input.handoffAttestation),
+    ]),
   } as never)) as CareReportResource;
 }
 

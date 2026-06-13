@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../utils/variables' as v;
 
 // ============================================================================
@@ -19,9 +20,10 @@
 :root {
   color-scheme: light;
 
-  // Brand (from Sass source of truth)
-  --color-brand-dark-blue: #{v.$brand-dark-blue};
-  --color-brand-gold: #{v.$primary};
+  // Brand — the three canonical anchors, from the Sass source of truth.
+  --color-brand-dark-blue: #{v.$brand-navy};
+  --color-brand-gold: #{v.$brand-gold};
+  --color-brand-cream: #{v.$brand-cream};
 
   // Semantic status
   --color-success: #{v.$success};
@@ -29,24 +31,24 @@
   --color-danger: #{v.$danger};
   --color-info: #{v.$info};
 
-  // Surfaces
+  // Surfaces — cream-family wash; the soft + inverse surfaces are the brand anchors.
   --surface-base: #fbf8f1;
   --surface-elevated: #fffdf8;
-  --surface-soft: #f4efe5;
+  --surface-soft: #{v.$brand-cream};
   --surface-muted: #efe9de;
-  --surface-inverse: #132c4d;
+  --surface-inverse: #{v.$brand-navy};
 
-  // Text
-  --text-strong: #132c4d;
+  // Text — strong text is the navy anchor.
+  --text-strong: #{v.$brand-navy};
   --text-soft: #556377;
   --text-muted: #7b8698;
 
-  // Borders & effects
+  // Borders & effects — focus ring + shadows derive from the gold/navy anchors.
   --border-soft: #e6ddcd;
   --border-strong: #d5c7ae;
-  --ring-focus: rgba(166, 131, 65, 0.42);
-  --shadow-soft: 0 10px 30px -24px rgba(19, 44, 77, 0.28);
-  --shadow-elevated: 0 22px 55px -35px rgba(19, 44, 77, 0.3);
+  --ring-focus: #{rgba(v.$brand-gold, 0.42)};
+  --shadow-soft: 0 10px 30px -24px #{rgba(v.$brand-navy, 0.28)};
+  --shadow-elevated: 0 22px 55px -35px #{rgba(v.$brand-navy, 0.3)};
 
   // Radius
   --radius-sm: 10px;

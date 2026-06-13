@@ -1620,5 +1620,6 @@ model Icd10Code {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([display])
+  @@index([display(ops: raw("gin_trgm_ops"))], type: Gin, map: "icd10_codes_display_trgm_idx")
   @@map("icd10_codes")
 }

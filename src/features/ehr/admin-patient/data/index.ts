@@ -22,138 +22,21 @@ import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitio
 import { CLINICAL_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
 import { prisma } from '@/lib/db/prisma';
 import { sessionTenantId } from '@/lib/db/tenant-scope';
-import type { AdminPatientDetailData } from './types';
-import { toCareTeamRole } from './helpers';
-import { type AdminWorkspaceTab, resolveCurrentWorkspaceTab } from './workspace-tabs';
-
-type RestrictedAccessCookiePayload = {
-  patientId: string;
-  reason: string;
-  grantedAt: string;
-};
-
-function deriveLocalVisitStateFallback(visit: {
-  status: string;
-  acknowledgedAt: Date | null;
-  enRouteAt: Date | null;
-  arrivedAt: Date | null;
-  checkInAt: Date | null;
-  checkOutAt: Date | null;
-}): string {
-  if (visit.status === 'cancelled' || visit.status === 'no_show' || visit.status === 'completed') {
-    return visit.status;
-  }
-  if (visit.checkOutAt) {
-    return 'checked_out';
-  }
-  if (visit.checkInAt) {
-    return 'checked_in';
-  }
-  if (visit.arrivedAt) {
-    return 'arrived';
-  }
-  if (visit.enRouteAt) {
-    return 'en_route';
-  }
-  if (visit.acknowledgedAt) {
-    return 'acknowledged';
-  }
-  return 'scheduled';
-}
-
-async function readLocalVisitState(visitId: string): Promise<string | null> {
-  const visit = await prisma.visit.findUnique({
-    where: { id: visitId },
-    select: { state: true },
-  });
-  return visit?.state ?? null;
-}
-
-async function readLocalVisitTimeline(
-  visitId: string,
-): Promise<Array<{ toState: string; createdAt: string; isOverride: boolean; overrideMethod: string | null }>> {
-  const rows = await prisma.visitStateTransition.findMany({
-    where: { visitId },
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-    select: {
-      toState: true,
-      createdAt: true,
-      isOverride: true,
-      overrideMethod: true,
-    },
-  });
-
-  return rows.map((row) => ({
-    toState: row.toState,
-    createdAt: row.createdAt.toISOString(),
-    isOverride: row.isOverride,
-    overrideMethod: row.overrideMethod,
-  }));
-}
-
-function hasRestrictedSignal(text: string): boolean {
-  const keywords = ['hiv', 'sti', 'mental', 'psychi', 'reproductive', 'domestic violence', 'substance'];
-  const normalized = text.toLowerCase();
-  return keywords.some((keyword) => normalized.includes(keyword));
-}
-
-function isRestrictedTierItem(params: {
-  structuredFlag?: boolean;
-  fallbackText?: string;
-}): boolean {
-  if (params.structuredFlag) {
-    return true;
-  }
-  return params.fallbackText ? hasRestrictedSignal(params.fallbackText) : false;
-}
-
-function canBypassRestrictedReason(role: AdminPatientDetailData['staffRole']): boolean {
-  return role === 'compliance_officer' || role === 'superadmin';
-}
-
-async function getRestrictedAccessGrant(
-  patientId: string,
-  staffId: string,
-): Promise<RestrictedAccessCookiePayload | null> {
-  const token = await prisma.destructiveApprovalToken.findFirst({
-    where: {
-      medplumPatientId: patientId,
-      actionType: {
-        in: ['restricted_read', 'break_glass_restricted_read'],
-      },
-      status: 'consumed',
-      consumedBy: staffId,
-      expiresAt: {
-        gt: new Date(),
-      },
-    },
-    orderBy: {
-      consumedAt: 'desc',
-    },
-    select: {
-      payload: true,
-      consumedAt: true,
-    },
-  });
-
-  if (!token) {
-    return null;
-  }
-
-  const payload = token.payload && typeof token.payload === 'object' && !Array.isArray(token.payload)
-    ? token.payload as Record<string, unknown>
-    : {};
-  const reason = typeof payload.reason === 'string' ? payload.reason : null;
-  if (!reason) {
-    return null;
-  }
-  return {
-    patientId,
-    reason,
-    grantedAt: token.consumedAt?.toISOString() ?? new Date().toISOString(),
-  };
-}
+import type { AdminPatientDetailData } from '../types';
+import { toCareTeamRole } from '../helpers';
+import { type AdminWorkspaceTab, resolveCurrentWorkspaceTab } from '../workspace-tabs';
+import { emptyAdminPatientDetailData } from './empty-state';
+import { settledValue, settledError } from './settled';
+import {
+  deriveLocalVisitStateFallback,
+  readLocalVisitState,
+  readLocalVisitTimeline,
+} from './local-visit-state';
+import {
+  canBypassRestrictedReason,
+  getRestrictedAccessGrant,
+  isRestrictedTierItem,
+} from './restricted-access';
 
 export async function loadAdminPatientDetailData(
   id: string,
@@ -162,62 +45,7 @@ export async function loadAdminPatientDetailData(
   const user = await getStaffUser(CLINICAL_ROLES);
 
   if (!user?.staffId || !user.staffRole) {
-    return {
-      staffRole: null,
-      restrictedAccess: {
-        hasRestrictedContent: false,
-        requiresReason: false,
-        reasonPreview: null,
-      },
-      patient: null,
-      localPatient: null,
-      error: 'Unauthorized',
-      encounters: [],
-      encountersError: null,
-      vitals: [],
-      vitalsError: null,
-      clinicalNotes: [],
-      clinicalNotesError: null,
-      careTeam: null,
-      careTeamError: null,
-      assignableStaff: [],
-      tasks: [],
-      tasksError: null,
-      careReports: [],
-      careReportsError: null,
-      conditions: [],
-      conditionsError: null,
-      allergies: [],
-      allergiesError: null,
-      medications: [],
-      medicationsError: null,
-      medicationAdministrations: [],
-      medicationAdministrationsError: null,
-      documents: [],
-      documentsError: null,
-      labOrders: [],
-      labOrdersError: null,
-      labResults: [],
-      labResultsError: null,
-      assessments: [],
-      assessmentsError: null,
-      communications: [],
-      communicationsError: null,
-      appointments: [],
-      appointmentsError: null,
-      carePlans: [],
-      carePlansError: null,
-      goals: [],
-      goalsError: null,
-      nurseShiftAssignments: [],
-      nurseShiftAssignmentsError: null,
-      localVisits: [],
-      localVisitsError: null,
-      standingOrders: [],
-      standingOrdersError: null,
-      caregiverConsents: [],
-      caregiverConsentsError: null,
-    };
+    return emptyAdminPatientDetailData({ staffRole: null, error: 'Unauthorized' });
   }
 
   // Tab-aware loading: resolve the active tab exactly as the view does, then load
@@ -266,62 +94,7 @@ export async function loadAdminPatientDetailData(
   }
 
   if (!patient?.id) {
-    return {
-      staffRole: user.staffRole,
-      restrictedAccess: {
-        hasRestrictedContent: false,
-        requiresReason: false,
-        reasonPreview: null,
-      },
-      patient: null,
-      localPatient: null,
-      error,
-      encounters: [],
-      encountersError: null,
-      vitals: [],
-      vitalsError: null,
-      clinicalNotes: [],
-      clinicalNotesError: null,
-      careTeam: null,
-      careTeamError: null,
-      assignableStaff: [],
-      tasks: [],
-      tasksError: null,
-      careReports: [],
-      careReportsError: null,
-      conditions: [],
-      conditionsError: null,
-      allergies: [],
-      allergiesError: null,
-      medications: [],
-      medicationsError: null,
-      medicationAdministrations: [],
-      medicationAdministrationsError: null,
-      documents: [],
-      documentsError: null,
-      labOrders: [],
-      labOrdersError: null,
-      labResults: [],
-      labResultsError: null,
-      assessments: [],
-      assessmentsError: null,
-      communications: [],
-      communicationsError: null,
-      appointments: [],
-      appointmentsError: null,
-      carePlans: [],
-      carePlansError: null,
-      goals: [],
-      goalsError: null,
-      nurseShiftAssignments: [],
-      nurseShiftAssignmentsError: null,
-      localVisits: [],
-      localVisitsError: null,
-      standingOrders: [],
-      standingOrdersError: null,
-      caregiverConsents: [],
-      caregiverConsentsError: null,
-    };
+    return emptyAdminPatientDetailData({ staffRole: user.staffRole, error });
   }
 
   const localPatientPromise = prisma.patient.findFirst({
@@ -511,11 +284,13 @@ export async function loadAdminPatientDetailData(
       localPatientPromise,
     ]);
 
-  const baseConditions = conditionsResult.status === 'fulfilled' ? conditionsResult.value : [];
-  const baseClinicalNotes = clinicalNotesResult.status === 'fulfilled' ? clinicalNotesResult.value : [];
-  const baseDocuments = documentsResult.status === 'fulfilled' ? documentsResult.value : [];
-  const baseLabOrders = labOrdersResult.status === 'fulfilled' ? labOrdersResult.value : [];
-  const baseLabResults = labResultsResult.status === 'fulfilled' ? labResultsResult.value : [];
+  // Restricted-tier gating: computed from the always-loaded CORE datasets so the
+  // safety banner and masking are independent of which tab is active.
+  const baseConditions = settledValue(conditionsResult, []);
+  const baseClinicalNotes = settledValue(clinicalNotesResult, []);
+  const baseDocuments = settledValue(documentsResult, []);
+  const baseLabOrders = settledValue(labOrdersResult, []);
+  const baseLabResults = settledValue(labResultsResult, []);
   const restrictedInConditions = baseConditions.filter((item) =>
     isRestrictedTierItem({
       structuredFlag: item.restrictedTier,
@@ -672,196 +447,77 @@ export async function loadAdminPatientDetailData(
           }
         : null,
     error,
-    encounters: encountersResult.status === 'fulfilled' ? encountersResult.value : [],
-    encountersError:
-      encountersResult.status === 'rejected'
-        ? encountersResult.reason instanceof Error
-          ? encountersResult.reason.message
-          : 'Failed to load patient visits from Medplum'
-        : null,
-    vitals: vitalsResult.status === 'fulfilled' ? vitalsResult.value : [],
-    vitalsError:
-      vitalsResult.status === 'rejected'
-        ? vitalsResult.reason instanceof Error
-          ? vitalsResult.reason.message
-          : 'Failed to load patient vitals from Medplum'
-        : null,
+    encounters: settledValue(encountersResult, []),
+    encountersError: settledError(encountersResult, 'Failed to load patient visits from Medplum'),
+    vitals: settledValue(vitalsResult, []),
+    vitalsError: settledError(vitalsResult, 'Failed to load patient vitals from Medplum'),
     clinicalNotes: visibleClinicalNotes,
-    clinicalNotesError:
-      clinicalNotesResult.status === 'rejected'
-        ? clinicalNotesResult.reason instanceof Error
-          ? clinicalNotesResult.reason.message
-          : 'Failed to load clinical notes from Medplum'
-        : null,
-    careTeam: careTeamResult.status === 'fulfilled' ? careTeamResult.value : null,
-    careTeamError:
-      careTeamResult.status === 'rejected'
-        ? careTeamResult.reason instanceof Error
-          ? careTeamResult.reason.message
-          : 'Failed to load care team from Medplum'
-        : null,
-    assignableStaff:
-      staffRows.status === 'fulfilled'
-        ? staffRows.value.filter((staff) => !!toCareTeamRole(staff.role))
-        : [],
-    tasks: tasksResult.status === 'fulfilled' ? tasksResult.value : [],
-    tasksError:
-      tasksResult.status === 'rejected'
-        ? tasksResult.reason instanceof Error
-          ? tasksResult.reason.message
-          : 'Failed to load care tasks from Medplum'
-        : null,
-    careReports: careReportsResult.status === 'fulfilled' ? careReportsResult.value : [],
-    careReportsError:
-      careReportsResult.status === 'rejected'
-        ? careReportsResult.reason instanceof Error
-          ? careReportsResult.reason.message
-          : 'Failed to load care reports from Medplum'
-        : null,
+    clinicalNotesError: settledError(clinicalNotesResult, 'Failed to load clinical notes from Medplum'),
+    careTeam: settledValue(careTeamResult, null),
+    careTeamError: settledError(careTeamResult, 'Failed to load care team from Medplum'),
+    assignableStaff: settledValue(staffRows, []).filter((staff) => !!toCareTeamRole(staff.role)),
+    tasks: settledValue(tasksResult, []),
+    tasksError: settledError(tasksResult, 'Failed to load care tasks from Medplum'),
+    careReports: settledValue(careReportsResult, []),
+    careReportsError: settledError(careReportsResult, 'Failed to load care reports from Medplum'),
     conditions: visibleConditions,
-    conditionsError:
-      conditionsResult.status === 'rejected'
-        ? conditionsResult.reason instanceof Error
-          ? conditionsResult.reason.message
-          : 'Failed to load patient problems from Medplum'
-        : null,
-    allergies: allergiesResult.status === 'fulfilled' ? allergiesResult.value : [],
-    allergiesError:
-      allergiesResult.status === 'rejected'
-        ? allergiesResult.reason instanceof Error
-          ? allergiesResult.reason.message
-          : 'Failed to load patient allergies from Medplum'
-        : null,
-    medications: medicationsResult.status === 'fulfilled' ? medicationsResult.value : [],
-    medicationsError:
-      medicationsResult.status === 'rejected'
-        ? medicationsResult.reason instanceof Error
-          ? medicationsResult.reason.message
-          : 'Failed to load patient medications from Medplum'
-        : null,
-    medicationAdministrations:
-      medicationAdministrationsResult.status === 'fulfilled'
-        ? medicationAdministrationsResult.value
-        : [],
-    medicationAdministrationsError:
-      medicationAdministrationsResult.status === 'rejected'
-        ? medicationAdministrationsResult.reason instanceof Error
-          ? medicationAdministrationsResult.reason.message
-          : 'Failed to load medication administration records from Medplum'
-        : null,
+    conditionsError: settledError(conditionsResult, 'Failed to load patient problems from Medplum'),
+    allergies: settledValue(allergiesResult, []),
+    allergiesError: settledError(allergiesResult, 'Failed to load patient allergies from Medplum'),
+    medications: settledValue(medicationsResult, []),
+    medicationsError: settledError(medicationsResult, 'Failed to load patient medications from Medplum'),
+    medicationAdministrations: settledValue(medicationAdministrationsResult, []),
+    medicationAdministrationsError: settledError(
+      medicationAdministrationsResult,
+      'Failed to load medication administration records from Medplum',
+    ),
     documents: visibleDocuments,
-    documentsError:
-      documentsResult.status === 'rejected'
-        ? documentsResult.reason instanceof Error
-          ? documentsResult.reason.message
-          : 'Failed to load patient documents from Medplum'
-        : null,
+    documentsError: settledError(documentsResult, 'Failed to load patient documents from Medplum'),
     labOrders: visibleLabOrders,
-    labOrdersError:
-      labOrdersResult.status === 'rejected'
-        ? labOrdersResult.reason instanceof Error
-          ? labOrdersResult.reason.message
-          : 'Failed to load lab orders from Medplum'
-        : null,
+    labOrdersError: settledError(labOrdersResult, 'Failed to load lab orders from Medplum'),
     labResults: visibleLabResults,
-    labResultsError:
-      labResultsResult.status === 'rejected'
-        ? labResultsResult.reason instanceof Error
-          ? labResultsResult.reason.message
-          : 'Failed to load diagnostic reports from Medplum'
-        : null,
-    assessments: assessmentsResult.status === 'fulfilled' ? assessmentsResult.value : [],
-    assessmentsError:
-      assessmentsResult.status === 'rejected'
-        ? assessmentsResult.reason instanceof Error
-          ? assessmentsResult.reason.message
-          : 'Failed to load patient assessments from Medplum'
-        : null,
-    communications: communicationsResult.status === 'fulfilled' ? communicationsResult.value : [],
-    communicationsError:
-      communicationsResult.status === 'rejected'
-        ? communicationsResult.reason instanceof Error
-          ? communicationsResult.reason.message
-          : 'Failed to load clinical communications from Medplum'
-        : null,
-    appointments: appointmentsResult.status === 'fulfilled' ? appointmentsResult.value : [],
-    appointmentsError:
-      appointmentsResult.status === 'rejected'
-        ? appointmentsResult.reason instanceof Error
-          ? appointmentsResult.reason.message
-          : 'Failed to load patient appointments from Medplum'
-        : null,
-    carePlans: carePlansResult.status === 'fulfilled' ? carePlansResult.value : [],
-    carePlansError:
-      carePlansResult.status === 'rejected'
-        ? carePlansResult.reason instanceof Error
-          ? carePlansResult.reason.message
-          : 'Failed to load patient care plans from Medplum'
-        : null,
-    goals: goalsResult.status === 'fulfilled' ? goalsResult.value : [],
-    goalsError:
-      goalsResult.status === 'rejected'
-        ? goalsResult.reason instanceof Error
-          ? goalsResult.reason.message
-          : 'Failed to load patient goals from Medplum'
-        : null,
-    nurseShiftAssignments:
-      nurseShiftAssignmentsResult.status === 'fulfilled'
-        ? nurseShiftAssignmentsResult.value.map((assignment) => ({
-            id: assignment.id,
-            shiftStartAt: assignment.shiftStartAt.toISOString(),
-            shiftEndAt: assignment.shiftEndAt.toISOString(),
-            status: assignment.status,
-            primaryNurseName: assignment.primaryNurse.name,
-            primaryNurseStaffId: assignment.primaryNurseStaffId,
-            incomingNurseName: assignment.incomingNurse?.name ?? null,
-            incomingNurseStaffId: assignment.incomingNurseStaffId ?? null,
-            acknowledgedAt: assignment.acknowledgedAt?.toISOString() ?? null,
-            escalationTaskId: assignment.escalationTaskId ?? null,
-            notes: assignment.notes ?? null,
-          }))
-        : [],
-    nurseShiftAssignmentsError:
-      nurseShiftAssignmentsResult.status === 'rejected'
-        ? nurseShiftAssignmentsResult.reason instanceof Error
-          ? nurseShiftAssignmentsResult.reason.message
-          : 'Failed to load shift roster'
-        : null,
+    labResultsError: settledError(labResultsResult, 'Failed to load diagnostic reports from Medplum'),
+    assessments: settledValue(assessmentsResult, []),
+    assessmentsError: settledError(assessmentsResult, 'Failed to load patient assessments from Medplum'),
+    communications: settledValue(communicationsResult, []),
+    communicationsError: settledError(communicationsResult, 'Failed to load clinical communications from Medplum'),
+    appointments: settledValue(appointmentsResult, []),
+    appointmentsError: settledError(appointmentsResult, 'Failed to load patient appointments from Medplum'),
+    carePlans: settledValue(carePlansResult, []),
+    carePlansError: settledError(carePlansResult, 'Failed to load patient care plans from Medplum'),
+    goals: settledValue(goalsResult, []),
+    goalsError: settledError(goalsResult, 'Failed to load patient goals from Medplum'),
+    nurseShiftAssignments: settledValue(nurseShiftAssignmentsResult, []).map((assignment) => ({
+      id: assignment.id,
+      shiftStartAt: assignment.shiftStartAt.toISOString(),
+      shiftEndAt: assignment.shiftEndAt.toISOString(),
+      status: assignment.status,
+      primaryNurseName: assignment.primaryNurse.name,
+      primaryNurseStaffId: assignment.primaryNurseStaffId,
+      incomingNurseName: assignment.incomingNurse?.name ?? null,
+      incomingNurseStaffId: assignment.incomingNurseStaffId ?? null,
+      acknowledgedAt: assignment.acknowledgedAt?.toISOString() ?? null,
+      escalationTaskId: assignment.escalationTaskId ?? null,
+      notes: assignment.notes ?? null,
+    })),
+    nurseShiftAssignmentsError: settledError(nurseShiftAssignmentsResult, 'Failed to load shift roster'),
     localVisits: resolvedLocalVisits,
-    localVisitsError:
-      localVisitsResult.status === 'rejected'
-        ? localVisitsResult.reason instanceof Error
-          ? localVisitsResult.reason.message
-          : 'Failed to load local visit workflow records'
-        : null,
-    standingOrders:
-      standingOrdersResult.status === 'fulfilled'
-        ? standingOrdersResult.value.map((order) => ({
-            id: order.id,
-            discipline: order.discipline,
-            title: order.title,
-            instructions: order.instructions,
-            isActive: order.isActive,
-            validFrom: order.validFrom?.toISOString() ?? null,
-            validUntil: order.validUntil?.toISOString() ?? null,
-            createdAt: order.createdAt.toISOString(),
-            createdByStaffId: order.createdByStaffId,
-            lastExecutionAt: order.executions[0]?.executedAt?.toISOString() ?? null,
-            executionCount: order._count.executions,
-          }))
-        : [],
-    standingOrdersError:
-      standingOrdersResult.status === 'rejected'
-        ? standingOrdersResult.reason instanceof Error
-          ? standingOrdersResult.reason.message
-          : 'Failed to load standing orders'
-        : null,
-    caregiverConsents: consentsResult.status === 'fulfilled' ? consentsResult.value : [],
-    caregiverConsentsError:
-      consentsResult.status === 'rejected'
-        ? consentsResult.reason instanceof Error
-          ? consentsResult.reason.message
-          : 'Failed to load caregiver consents from Medplum'
-        : null,
+    localVisitsError: settledError(localVisitsResult, 'Failed to load local visit workflow records'),
+    standingOrders: settledValue(standingOrdersResult, []).map((order) => ({
+      id: order.id,
+      discipline: order.discipline,
+      title: order.title,
+      instructions: order.instructions,
+      isActive: order.isActive,
+      validFrom: order.validFrom?.toISOString() ?? null,
+      validUntil: order.validUntil?.toISOString() ?? null,
+      createdAt: order.createdAt.toISOString(),
+      createdByStaffId: order.createdByStaffId,
+      lastExecutionAt: order.executions[0]?.executedAt?.toISOString() ?? null,
+      executionCount: order._count.executions,
+    })),
+    standingOrdersError: settledError(standingOrdersResult, 'Failed to load standing orders'),
+    caregiverConsents: settledValue(consentsResult, []),
+    caregiverConsentsError: settledError(consentsResult, 'Failed to load caregiver consents from Medplum'),
   };
 }

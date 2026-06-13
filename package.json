@@ -16,7 +16,7 @@
     "lint:css:list": "node scripts/guard-logical-css.cjs --list",
     "lint:css:update": "node scripts/guard-logical-css.cjs --update",
     "typecheck": "tsc --noEmit",
-    "ci:migration-guard": "prisma migrate diff --from-migrations ./prisma/migrations --to-schema-datamodel ./prisma/schema.prisma --shadow-database-url $SHADOW_DATABASE_URL --exit-code",
+    "ci:migration-guard": "node scripts/prisma-migration-guard.cjs",
     "test:security-policy": "ts-node --transpile-only --project scripts/tsconfig.json scripts/security-policy-selftest.cjs",
     "lint:rbac": "ts-node --transpile-only --project scripts/tsconfig.json scripts/lint-rbac.ts",
     "lint:rbac:fix": "ts-node --transpile-only --project scripts/tsconfig.json scripts/lint-rbac.ts --fix",
@@ -32,12 +32,12 @@
     "db:push": "node scripts/guard-db-push.cjs && prisma db push",
     "db:push:unsafe": "node scripts/guard-db-push.cjs --allow-prod && prisma db push",
     "db:seed": "prisma db seed",
-    "db:seed:doctors": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed-doctors.ts",
-    "db:seed:icd10": "ts-node --transpile-only --compiler-options {\"module\":\"CommonJS\",\"moduleResolution\":\"node\"} prisma/seed-icd10.ts",
+    "db:seed:doctors": "ts-node --project scripts/tsconfig.json prisma/seed-doctors.ts",
+    "db:seed:icd10": "ts-node --transpile-only --project scripts/tsconfig.json prisma/seed-icd10.ts",
     "db:studio": "prisma studio"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "ts-node --project scripts/tsconfig.json prisma/seed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

@@ -16,20 +16,29 @@ $font-family-primary: var(--font-sans);
 $font-awesome: "Fontawesome";
 $font-iconsax: 'iconsax';
 
-// Anees palette variables
-$bony: #684507;
-$primary: #a68341;
-$deer: #ac9055;
-$Crayola-Gold: #E1C582;
-$brand-dark-blue: #132c4d;
-$royal-blue: $brand-dark-blue;
-$indigo-blue: $brand-dark-blue;
-$metallic-blue: $brand-dark-blue;
+// ============================================================================
+// Anees brand — the three canonical anchors (SINGLE source of truth)
+// ----------------------------------------------------------------------------
+//   $brand-navy   deep navy blue  — headings, text, inverse surfaces
+//   $brand-gold   antique gold    — primary actions, links, accents
+//   $brand-cream  warm cream      — soft light surfaces / page wash
+// Everything else in this file (and the runtime tokens in base/tokens.scss)
+// derives from these three. Never hard-code the brand hexes elsewhere.
+// ============================================================================
+$brand-navy: #132c4d;
+$brand-gold: #a68341;
+$brand-cream: #f4efe4;
 
+// Backwards-compatible aliases — existing code references these names.
+$primary: $brand-gold;
+$brand-dark-blue: $brand-navy;
 
+// Supporting gold shades (derived tints of the gold anchor).
+$bony: #684507; // deep gold — text on light-gold fills
+$deer: #ac9055; // muted gold
+$Crayola-Gold: #E1C582; // light gold tint
 
 // Theme Colors Variables
-$primary: #a68341;
 $primary-hover: color.adjust($primary, $lightness: -10%);
 $secondary: $brand-dark-blue;
 $secondary-hover: color.adjust($secondary, $lightness: -10%);
@@ -42,7 +51,7 @@ $warning-hover: color.adjust($warning, $lightness: -10%);
 $danger: #FF0000;
 $danger-hover: color.adjust($danger, $lightness: -10%);
 $dark: #0f243f;
-$light: #f4efe4;
+$light: $brand-cream;
 $white: #FFF;
 $black: #000;
 $purple: #6938EF;
