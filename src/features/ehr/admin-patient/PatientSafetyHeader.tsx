@@ -136,62 +136,69 @@ export function PatientSafetyHeader({
     : 'Restricted - no signal';
 
   return (
-    <section id="patient-safety-header" className="card bg-white border-danger-subtle anees-patient-safety-header" aria-label="Patient safety header">
+    <section id="patient-safety-header" className="card bg-white anees-patient-safety-header" aria-label={`Patient safety header for ${patientName}`}>
       <div className="card-body">
         <div className="anees-safety-topline">
           <div className="anees-safety-heading">
-            <p className="text-muted small mb-1">Patient safety header</p>
-            <h2 className="h5 mb-1">{patientName}</h2>
+            <p className="anees-safety-eyebrow">Patient safety header</p>
             <div className="anees-safety-identity">
-              <span>{patientCode ?? 'No case ID'}</span>
+              <span className="anees-safety-id">{patientCode ?? 'No case ID'}</span>
               <span>{formatGenderAge(patientGender, patientBirthDate)}</span>
             </div>
           </div>
 
-          <div className="anees-safety-badges" aria-label="Critical patient safety indicators">
-            <Link href={links.allergies} className={`anees-safety-badge ${hasAllergies ? 'is-critical' : 'is-muted'}`}>
-              Allergies: {allergies.length}
-            </Link>
-            <Link href={links.dnr} className={`anees-safety-badge ${dnrTone(dnrStatus)}`}>
-              {dnrLabel(dnrStatus)}
-            </Link>
-            <Link href={links.restricted} className={`anees-safety-badge ${restrictedAccess.hasRestrictedContent ? 'is-locked' : 'is-muted'}`}>
-              {restrictedLabel}
-            </Link>
+          <div className="anees-safety-badges-group" aria-label="Critical patient safety alerts">
+            <span className="anees-safety-cluster-label">Critical alerts</span>
+            <div className="anees-safety-badges">
+              <Link href={links.allergies} className={`anees-safety-badge ${hasAllergies ? 'is-critical' : 'is-muted'}`}>
+                <span className="anees-safety-badge-key">Allergies</span>
+                <span className="anees-safety-badge-val">{hasAllergies ? allergyPreview || allergies.length : 'None'}</span>
+              </Link>
+              <Link href={links.dnr} className={`anees-safety-badge ${dnrTone(dnrStatus)}`}>
+                <span className="anees-safety-badge-key">Code status</span>
+                <span className="anees-safety-badge-val">{dnrLabel(dnrStatus)}</span>
+              </Link>
+              <Link href={links.restricted} className={`anees-safety-badge ${restrictedAccess.hasRestrictedContent ? 'is-locked' : 'is-muted'}`}>
+                <span className="anees-safety-badge-key">Access</span>
+                <span className="anees-safety-badge-val">{restrictedLabel.replace('Restricted - ', '')}</span>
+              </Link>
+            </div>
           </div>
         </div>
 
-        <div className="anees-safety-strip" aria-label="Patient safety summary">
-          <Link href={links.problems} className="anees-safety-item">
-            <span>Problems</span>
-            <strong>{diagnosisPreview}</strong>
-          </Link>
+        <div className="anees-safety-summary" aria-label="Clinical summary">
+          <span className="anees-safety-cluster-label">Clinical summary</span>
+          <div className="anees-safety-strip">
+            <Link href={links.problems} className="anees-safety-item" data-tone="clinical">
+              <span>Problems</span>
+              <strong>{diagnosisPreview}</strong>
+            </Link>
 
-          <Link href={links.medications} className="anees-safety-item">
-            <span>Meds</span>
-            <strong>{activeMedicationCount}</strong>
-            {hasAllergies && <em>{allergyPreview}</em>}
-          </Link>
+            <Link href={links.medications} className="anees-safety-item" data-tone="therapy">
+              <span>Medications</span>
+              <strong>{activeMedicationCount === 0 ? 'None active' : `${activeMedicationCount} active`}</strong>
+            </Link>
 
-          <Link href={links.visits} className="anees-safety-item">
-            <span>Visit</span>
-            <strong>{latestVisit ? latestVisit.effectiveState.replaceAll('_', ' ') : 'none'}</strong>
-          </Link>
+            <Link href={links.measurements} className="anees-safety-item" data-tone="vitals">
+              <span>Latest vitals</span>
+              <strong>{vitalsSummary(latestVitals)}</strong>
+            </Link>
 
-          <Link href={links.measurements} className="anees-safety-item">
-            <span>Vitals</span>
-            <strong>{vitalsSummary(latestVitals)}</strong>
-          </Link>
+            <Link href={links.visits} className="anees-safety-item" data-tone="coordination">
+              <span>Visit</span>
+              <strong>{latestVisit ? latestVisit.effectiveState.replaceAll('_', ' ') : 'None scheduled'}</strong>
+            </Link>
 
-          <Link href={links.tasks} className="anees-safety-item">
-            <span>Tasks</span>
-            <strong>{openTaskCount}</strong>
-          </Link>
+            <Link href={links.tasks} className="anees-safety-item" data-tone="coordination">
+              <span>Open tasks</span>
+              <strong>{openTaskCount}</strong>
+            </Link>
 
-          <Link href={links.careTeam} className="anees-safety-item">
-            <span>Team</span>
-            <strong>{careTeamCount}</strong>
-          </Link>
+            <Link href={links.careTeam} className="anees-safety-item" data-tone="coordination">
+              <span>Care team</span>
+              <strong>{careTeamCount === 0 ? 'Unassigned' : `${careTeamCount} member${careTeamCount === 1 ? '' : 's'}`}</strong>
+            </Link>
+          </div>
         </div>
 
         {restrictedAccess.hasRestrictedContent && restrictedAccess.requiresReason && (

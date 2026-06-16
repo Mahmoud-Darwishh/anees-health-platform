@@ -52,7 +52,7 @@
   font-weight: $font-weight-semibold;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 16px;
 
   &::before {
@@ -61,7 +61,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $primary;
+    background: var(--color-primary);
     margin-inline-end: 10px;
     vertical-align: middle;
     transform: translateY(-1px);
@@ -71,7 +71,7 @@
 .heading {
   font-size: 36px;
   font-weight: $font-weight-semibold;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   letter-spacing: -0.025em;
   line-height: 1.28;
   margin: 0;
@@ -118,7 +118,7 @@
     height: 46px;
     border-radius: 50%;
     background: $white;
-    color: $brand-dark-blue;
+    color: var(--color-secondary);
     border: 1px solid rgba($primary, 0.35);
     display: inline-flex;
     align-items: center;
@@ -137,9 +137,9 @@
 
     &:hover,
     &:focus-visible {
-      background: $primary;
+      background: var(--color-primary);
       color: $white;
-      border-color: $primary;
+      border-color: var(--color-primary);
       transform: translateY(-2px);
       box-shadow: 0 10px 22px rgba($primary, 0.28);
     }

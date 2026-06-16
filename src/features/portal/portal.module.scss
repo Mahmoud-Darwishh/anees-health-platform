@@ -6,7 +6,7 @@
   --anees-surface: #fffefb;
   --anees-surface-soft: #fcfaf5;
   --anees-ink: #{$brand-navy};
-  --anees-ink-muted: #526276;
+  --anees-ink-muted: var(--text-soft);
   --anees-accent: #{$brand-gold};
   --anees-border: #{rgba($brand-navy, 0.12)};
   --anees-radius-card: 16px;
@@ -37,7 +37,7 @@
   justify-content: space-between;
   gap: 1rem;
   border-radius: var(--anees-radius-card);
-  background: linear-gradient(135deg, #132c4d 0%, #1f436f 68%, #31567f 100%);
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #1f436f 68%, #31567f 100%);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #eef4fb;
   padding: 1.15rem 1.3rem;
@@ -171,12 +171,12 @@
 
   &:hover {
     border-color: rgba(166, 131, 65, 0.45);
-    color: #132c4d;
+    color: var(--color-secondary);
   }
 }
 
 .tabLinkActive {
-  border-color: #a68341;
+  border-color: var(--color-primary);
   background: #f4ecdc;
   color: #6f5321;
 }
@@ -196,7 +196,7 @@
     font-size: 0.74rem;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: #132c4d;
+    color: var(--color-secondary);
     background: #f6eddd;
     border-bottom-color: rgba(19, 44, 77, 0.15);
   }
@@ -337,7 +337,7 @@
       font-size: 0.68rem;
       letter-spacing: 0.02em;
       text-transform: uppercase;
-      color: #5f6c7f;
+      color: var(--text-muted);
       font-weight: 700;
     }
   }

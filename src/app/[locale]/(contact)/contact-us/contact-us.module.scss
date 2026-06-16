@@ -7,9 +7,9 @@
 // ═══════════════════════════════════════════════════════════════════
 
 $ink: $brand-dark-blue;
-$muted: #5a6b80;
-$muted-soft: #6a7585;
-$hairline: #ecebe6;
+$muted: var(--text-soft);
+$muted-soft: var(--text-muted);
+$hairline: var(--border-soft);
 $cream: #faf8f3;
 
 $whatsapp-green: #25d366;
@@ -34,7 +34,7 @@ $whatsapp-green-dark: #1ebe57;
   font-weight: $font-weight-semibold;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   background: rgba($primary, 0.08);
   padding: 6px 14px;
   border-radius: 999px;
@@ -108,7 +108,7 @@ $whatsapp-green-dark: #1ebe57;
 }
 
 .heroCtaCall {
-  background: $primary;
+  background: var(--color-primary);
   color: $white;
   box-shadow: 0 8px 22px -10px rgba($primary, 0.55);
 
@@ -129,7 +129,7 @@ $whatsapp-green-dark: #1ebe57;
   margin: 0;
 
   i {
-    color: $primary;
+    color: var(--color-primary);
     font-size: 14px;
   }
 }
@@ -165,7 +165,7 @@ $whatsapp-green-dark: #1ebe57;
   font-weight: $font-weight-semibold;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin: 0 0 4px;
 }
 
@@ -196,12 +196,12 @@ $whatsapp-green-dark: #1ebe57;
   border-color: rgba($primary, 0.28);
 
   .infoIcon {
-    background: $primary;
+    background: var(--color-primary);
     color: $white;
   }
 
   .infoValue {
-    color: $primary;
+    color: var(--color-primary);
     font-weight: $font-weight-bold;
     font-size: 16px;
   }
@@ -221,7 +221,7 @@ $whatsapp-green-dark: #1ebe57;
   height: 38px;
   border-radius: 10px;
   background: rgba($primary, 0.1);
-  color: $primary;
+  color: var(--color-primary);
   font-size: 16px;
   flex-shrink: 0;
 }
@@ -266,7 +266,7 @@ $whatsapp-green-dark: #1ebe57;
   font-weight: $font-weight-semibold;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin: 0 0 14px;
 
   i {
@@ -321,7 +321,7 @@ $whatsapp-green-dark: #1ebe57;
   font-weight: $font-weight-semibold;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 8px;
 }
 
@@ -361,7 +361,7 @@ $whatsapp-green-dark: #1ebe57;
   letter-spacing: 0.01em;
 
   span {
-    color: $primary;
+    color: var(--color-primary);
     margin-inline-start: 2px;
   }
 }

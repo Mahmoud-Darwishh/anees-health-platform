@@ -351,17 +351,20 @@ input[type='button'] {
   transition: background-color 0.24s ease, color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
 }
 
-/* Site-wide button curvature contract: soft luxury semi-rounded controls */
+/* Site-wide button curvature contract: soft luxury semi-rounded controls.
+   `:where()` keeps this at zero specificity so it's a DEFAULT — any component
+   that wants a different shape (e.g. pill CTAs at radius 999px) simply sets its
+   own border-radius and wins, with no !important war. The broad [class*='Btn']
+   substring matchers were removed Jun 2026: they silently flattened intentional
+   pills like `.contactBtn`. */
 :where(
   button,
   .btn,
   input[type='submit'],
   input[type='button'],
-  a[role='button'],
-  [class*='btn'],
-  [class*='Btn']
+  a[role='button']
 ) {
-  border-radius: var(--radius-control) !important;
+  border-radius: var(--radius-control);
 }
 
 .btn-primary,
@@ -384,9 +387,9 @@ button.btn-primary:focus-visible {
 
 .btn-secondary,
 button.btn-secondary {
-  background: #a68341;
-  border-color: #a68341;
-  color: #132c4d;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-secondary);
 }
 
 .btn-secondary:hover,
@@ -395,7 +398,7 @@ button.btn-secondary:hover,
 button.btn-secondary:focus-visible {
   background: #927239;
   border-color: #927239;
-  color: #132c4d;
+  color: var(--color-secondary);
 }
 
 .btn-outline-primary {

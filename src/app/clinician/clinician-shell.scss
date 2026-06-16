@@ -1,4 +1,8 @@
 @use '@/assets/scss/utils/variables' as *;
+// The clinician shell does NOT load globals.scss, so it emits the runtime token
+// :root block itself — otherwise var(--status-*) / var(--color-*) resolve to
+// nothing. Keeps the whole app on one token system.
+@use '@/assets/scss/base/tokens';
 
 .clinician-shell {
   min-height: 100vh;
@@ -185,8 +189,8 @@
 }
 
 .clinician-filter-chip.is-active {
-  background: rgba(194, 157, 90, 0.2);
-  border-color: rgba(194, 157, 90, 0.5);
+  background: rgba(166, 131, 65, 0.2);
+  border-color: rgba(166, 131, 65, 0.5);
   color: #173653;
 }
 
@@ -231,7 +235,7 @@
   border-color: rgba(22, 49, 73, 0.18);
   background:
     linear-gradient(160deg, rgba(247, 251, 255, 0.96) 0%, rgba(255, 255, 255, 0.98) 46%),
-    radial-gradient(circle at top right, rgba(194, 157, 90, 0.09) 0%, rgba(194, 157, 90, 0) 62%);
+    radial-gradient(circle at top right, rgba(166, 131, 65, 0.09) 0%, rgba(166, 131, 65, 0) 62%);
 }
 
 .clinician-profile-header {
@@ -336,26 +340,28 @@
   background: #f4f8fc;
 }
 
+// Status chips share the site-wide status palette (tokens.scss) so amber/blue/
+// green read identically here, in admin, and on the public site.
 .clinician-chip.is-active {
-  border-color: rgba(194, 157, 90, 0.45);
-  color: #6f5427;
-  background: #fff7e6;
+  border-color: var(--status-warning-border);
+  color: var(--status-warning-fg);
+  background: var(--status-warning-bg);
 }
 
 .clinician-chip.is-progress {
-  border-color: rgba(38, 104, 143, 0.38);
-  color: #1c5478;
-  background: #eaf5fd;
+  border-color: var(--status-info-border);
+  color: var(--status-info-fg);
+  background: var(--status-info-bg);
 }
 
 .clinician-chip.is-done {
-  border-color: rgba(45, 121, 84, 0.35);
-  color: #1f6a44;
-  background: #eaf7f1;
+  border-color: var(--status-success-border);
+  color: var(--status-success-fg);
+  background: var(--status-success-bg);
 }
 
 .clinician-form-error {
-  color: #a43131;
+  color: var(--status-danger-fg);
   font-size: 0.78rem;
 }
 
@@ -562,7 +568,7 @@
 }
 
 .clinician-nav-link.is-active {
-  background: rgba(194, 157, 90, 0.2);
+  background: rgba(166, 131, 65, 0.2);
   color: #173653;
 }
 

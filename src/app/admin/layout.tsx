@@ -4,13 +4,18 @@ import { redirect } from 'next/navigation';
 import { getSessionUser, isStaff } from '@/lib/auth/rbac';
 import { getAdminNavItems } from '@/lib/auth/admin-nav-policy';
 import { AdminNav } from './AdminNav';
+import { LastRefreshed, BackToTop } from './AdminFooterClient';
+import packageJson from '../../../package.json';
 import './admin-theme.scss';
 
 export const dynamic = 'force-dynamic';
 
+const appVersion = packageJson.version;
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
   const visibleNavItems = getAdminNavItems(user?.staffRole);
+  const renderedAt = Date.now();
 
   // Defence in depth — proxy.ts already gates /admin, but never trust it alone.
   if (!isStaff(user)) {
@@ -45,7 +50,29 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </span>
         </div>
       </nav>
+
+      <div className="anees-admin-subbar">
+        <div className="container anees-admin-subbar-inner">
+          <LastRefreshed renderedAt={renderedAt} />
+        </div>
+      </div>
+
       <main className="container py-4 anees-admin-page">{children}</main>
+
+      <footer className="anees-admin-footer" role="contentinfo">
+        <div className="container anees-admin-footer-inner">
+          <p className="anees-admin-footer-notice">
+            <span aria-hidden="true">🔒</span>
+            Contains Protected Health Information — access is monitored and audited.
+          </p>
+          <div className="anees-admin-footer-meta">
+            <span>Anees Clinical Operations Console · v{appVersion}</span>
+            <span>© {new Date().getFullYear()} Anees Health</span>
+          </div>
+        </div>
+      </footer>
+
+      <BackToTop />
     </div>
   );
 }

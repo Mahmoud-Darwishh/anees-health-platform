@@ -164,7 +164,7 @@
 .subLegend {
   font-size: 0.95rem;
   font-weight: $font-weight-medium;
-  color: #374151;
+  color: var(--text-soft);
   margin-bottom: 1rem;
   display: block;
 }
@@ -215,7 +215,7 @@
 .input,
 .select {
   padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-soft);
   border-radius: 10px;
   font-size: 1rem;
   font-family: inherit;
@@ -233,26 +233,26 @@
   }
 
   &:hover:not(:disabled) {
-    border-color: #d1d5db;
+    border-color: var(--border-strong);
   }
 
   &:focus {
     outline: none;
-    border-color: $primary;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba($primary, 0.12), inset 0 0 0 1px rgba($primary, 0.1);
   }
 
   &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
+    background: var(--surface-muted);
+    color: var(--text-muted);
     cursor: not-allowed;
-    border-color: #f3f4f6;
+    border-color: var(--surface-muted);
   }
 }
 
 .textarea {
   padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-soft);
   border-radius: 10px;
   font-size: 1rem;
   font-family: inherit;
@@ -263,20 +263,20 @@
   resize: vertical;
 
   &:hover:not(:disabled) {
-    border-color: #d1d5db;
+    border-color: var(--border-strong);
   }
 
   &:focus {
     outline: none;
-    border-color: $primary;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba($primary, 0.12), inset 0 0 0 1px rgba($primary, 0.1);
   }
 
   &:disabled {
-    background: #f9fafb;
-    color: #9ca3af;
+    background: var(--surface-muted);
+    color: var(--text-muted);
     cursor: not-allowed;
-    border-color: #f3f4f6;
+    border-color: var(--surface-muted);
   }
 
   &.inputError {
@@ -310,14 +310,14 @@
 .phoneInputWrapper {
   display: flex;
   align-items: center;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-soft);
   border-radius: 10px;
   background: $white;
   transition: all 0.3s ease;
   overflow: hidden;
 
   &:has(.phoneNumberInput:focus) {
-    border-color: $primary;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba($primary, 0.12), inset 0 0 0 1px rgba($primary, 0.1);
   }
 
@@ -337,7 +337,7 @@
   width: auto;
   padding: 0.875rem 0.75rem;
   border: none;
-  border-inline-end: 2px solid #e5e7eb;
+  border-inline-end: 2px solid var(--border-soft);
   border-radius: 0;
   appearance: none;
   background: transparent;
@@ -389,12 +389,12 @@
 
   &:disabled {
     background: transparent;
-    color: #9ca3af;
+    color: var(--text-muted);
     cursor: not-allowed;
   }
 
   &::placeholder {
-    color: #d1d5db;
+    color: var(--border-strong);
   }
 }
 
@@ -513,7 +513,7 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-soft);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -526,7 +526,7 @@
   input[type='radio'] {
     margin-top: 0.25rem;
     cursor: pointer;
-    accent-color: $primary;
+    accent-color: var(--color-primary);
     flex-shrink: 0;
 
     &:focus {
@@ -558,7 +558,7 @@
   }
 
   &:has(input:checked) {
-    border-color: $primary;
+    border-color: var(--color-primary);
     background-color: rgba($primary, 0.05);
     box-shadow: 0 10px 24px rgba($primary, 0.15);
   }
@@ -586,7 +586,7 @@
 
 .optionSubtitle {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-muted);
   line-height: 1.4;
   display: block;
   margin-top: 0;
@@ -932,7 +932,7 @@ button:focus-visible {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4f6280;
+  color: var(--text-soft);
 }
 
 .formIntroTitle {
@@ -946,7 +946,7 @@ button:focus-visible {
   margin: 0;
   font-size: 0.86rem;
   line-height: 1.55;
-  color: #52627b;
+  color: var(--text-soft);
 }
 
 .progressRail {
@@ -967,7 +967,7 @@ button:focus-visible {
   padding: 0.4rem 0.6rem;
   border-radius: 999px;
   background: #f3f6fb;
-  color: #52627b;
+  color: var(--text-soft);
   white-space: nowrap;
 }
 
@@ -1029,7 +1029,7 @@ button:focus-visible {
 
   &:focus-visible {
     outline: none;
-    border-color: $primary;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba($primary, 0.18);
   }
 
@@ -1053,8 +1053,8 @@ button:focus-visible {
   position: absolute;
   top: -9px;
   inset-inline-start: 12px;
-  background: $brand-dark-blue;
-  color: $primary;
+  background: var(--color-secondary);
+  color: var(--color-primary);
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -1081,7 +1081,7 @@ button:focus-visible {
 
 .svcSubtitle {
   font-size: 0.8rem;
-  color: #52647d;
+  color: var(--text-soft);
   line-height: 1.4;
 }
 
@@ -1124,7 +1124,7 @@ button:focus-visible {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
@@ -1142,7 +1142,7 @@ button:focus-visible {
 .svcPriceUnit {
   font-size: 0.7rem;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 /* Duration pills */
@@ -1177,7 +1177,7 @@ button:focus-visible {
 
   &:focus-visible {
     outline: none;
-    border-color: $primary;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba($primary, 0.15);
   }
 }
@@ -1190,13 +1190,13 @@ button:focus-visible {
 .durationLabel {
   font-size: 0.95rem;
   font-weight: 600;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
 }
 
 .durationPrice {
   font-size: 0.85rem;
   font-weight: 700;
-  color: $primary;
+  color: var(--color-primary);
 }
 
 /* Contact step grid */
@@ -1214,7 +1214,7 @@ button:focus-visible {
 /* Text input ï¿½ matches existing .select styling */
 .input {
   padding: 0.875rem 1rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--border-soft);
   border-radius: 10px;
   font-size: 1rem;
   font-family: inherit;
@@ -1225,11 +1225,11 @@ button:focus-visible {
   width: 100%;
   box-sizing: border-box;
 
-  &:hover:not(:disabled) { border-color: #d1d5db; }
+  &:hover:not(:disabled) { border-color: var(--border-strong); }
 
   &:focus {
     outline: none;
-    border-color: $primary;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 4px rgba($primary, 0.12);
   }
 }
@@ -1267,21 +1267,21 @@ button:focus-visible {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #6b7280;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .mobileBarValue {
   font-size: 1.1rem;
   font-weight: 700;
-  color: $primary;
+  color: var(--color-primary);
   line-height: 1.1;
 }
 
 .mobileBarUnit {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .mobileBarCta {
@@ -1376,7 +1376,7 @@ button:focus-visible {
   .svcHighlight {
     font-size: 0.72rem;
     line-height: 1.3;
-    color: #3d567a;
+    color: var(--text-soft);
   }
 
   .mobileBarLabel {

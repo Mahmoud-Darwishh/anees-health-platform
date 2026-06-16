@@ -33,7 +33,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 16px;
 
   &::before {
@@ -41,7 +41,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $primary;
+    background: var(--color-primary);
   }
 }
 
@@ -51,7 +51,7 @@
   line-height: 1.15;
   font-weight: 600;
   letter-spacing: -0.025em;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   margin: 0 0 16px;
 
   @include respond-below(custom991) { font-size: 32px; }
@@ -62,7 +62,7 @@
   font-family: $font-family-primary;
   font-size: 16px;
   line-height: 1.7;
-  color: #6a7585;
+  color: var(--text-muted);
   margin: 0 auto;
   max-width: 620px;
 }
@@ -79,7 +79,7 @@
 .sanadCard {
   position: relative;
   background: #faf8f3;
-  border: 1px solid #e8e1d2;
+  border: 1px solid var(--border-soft);
   border-radius: 24px;
   padding: 56px;
   display: grid;
@@ -109,7 +109,7 @@
     inset-inline-start: 56px;
     width: 64px;
     height: 2px;
-    background: $primary;
+    background: var(--color-primary);
     border-radius: 0 0 2px 2px;
 
     @include respond-below(custom991) { inset-inline-start: 36px; }
@@ -132,7 +132,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 18px;
 
   &::before {
@@ -140,7 +140,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $primary;
+    background: var(--color-primary);
   }
 }
 
@@ -150,7 +150,7 @@
   line-height: 1.05;
   font-weight: 600;
   letter-spacing: -0.025em;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   margin: 0 0 10px;
   display: flex;
   align-items: baseline;
@@ -161,10 +161,10 @@
   @include respond-below(custom575) { font-size: 30px; gap: 8px; }
 }
 
-.sanadNameEn { color: $brand-dark-blue; }
+.sanadNameEn { color: var(--color-secondary); }
 
 .sanadNameAr {
-  color: $primary;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -174,7 +174,7 @@
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #8a8f99;
+  color: var(--text-muted);
   margin: 0 0 28px;
 
   @include respond-below(custom575) { font-size: 12px; margin-bottom: 22px; }
@@ -186,13 +186,13 @@
   gap: 14px;
   padding: 18px 20px;
   background: $white;
-  border: 1px solid #ecebe6;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   margin-bottom: 14px;
 
   i {
     font-size: 22px;
-    color: $primary;
+    color: var(--color-primary);
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -202,7 +202,7 @@
     font-size: 17px;
     font-weight: 600;
     line-height: 1.45;
-    color: $brand-dark-blue;
+    color: var(--color-secondary);
     letter-spacing: -0.01em;
   }
 
@@ -216,7 +216,7 @@
   font-family: $font-family-primary;
   font-size: 15px;
   line-height: 1.65;
-  color: #6a7585;
+  color: var(--text-muted);
   margin: 0 0 28px;
 
   @include respond-below(custom575) { font-size: 14px; margin-bottom: 22px; }
@@ -244,11 +244,11 @@
   font-family: $font-family-primary;
   font-size: 14px;
   line-height: 1.55;
-  color: #5a6573;
+  color: var(--text-soft);
 
   i {
     font-size: 16px;
-    color: $primary;
+    color: var(--color-primary);
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -262,7 +262,7 @@
 
 .pricingPanel {
   background: $white;
-  border: 1px solid #ecebe6;
+  border: 1px solid var(--border-soft);
   border-radius: 18px;
   padding: 32px 28px;
   display: flex;
@@ -278,7 +278,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #8a8f99;
+  color: var(--text-muted);
   margin: 0 0 20px;
 }
 
@@ -288,7 +288,7 @@
   justify-content: space-between;
   gap: 14px;
   padding: 16px 18px;
-  border: 1px solid #ecebe6;
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   background: $white;
   margin-bottom: 12px;
@@ -305,7 +305,7 @@
   background: linear-gradient(180deg, rgba($primary, 0.04) 0%, rgba($primary, 0) 100%);
 
   &:hover {
-    border-color: $primary;
+    border-color: var(--color-primary);
   }
 }
 
@@ -320,7 +320,7 @@
   font-family: $font-family-primary;
   font-size: 14px;
   font-weight: 600;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   letter-spacing: -0.005em;
 }
 
@@ -330,7 +330,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
 }
 
 .planRight {
@@ -344,7 +344,7 @@
   font-family: $font-family-primary;
   font-size: 22px;
   font-weight: 600;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   letter-spacing: -0.02em;
   font-feature-settings: 'tnum';
 }
@@ -353,7 +353,7 @@
   font-family: $font-family-primary;
   font-size: 12px;
   font-weight: 600;
-  color: #8a8f99;
+  color: var(--text-muted);
   letter-spacing: 0.08em;
 }
 
@@ -365,7 +365,7 @@
   gap: 10px;
   width: 100%;
   padding: 16px 24px;
-  background: $brand-dark-blue;
+  background: var(--color-secondary);
   color: $white;
   font-family: $font-family-primary;
   font-size: 15px;
@@ -392,7 +392,7 @@
   text-align: center;
   font-family: $font-family-primary;
   font-size: 12px;
-  color: #8a8f99;
+  color: var(--text-muted);
   margin: 14px 0 0;
 }
 
@@ -408,7 +408,7 @@
 .subDivider {
   flex: 0 0 60px;
   height: 1px;
-  background: #ecebe6;
+  background: var(--border-soft);
 }
 
 .subLabel {
@@ -417,7 +417,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #8a8f99;
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -459,7 +459,7 @@
 
 .packageCard {
   background: $white;
-  border: 1px solid #ecebe6;
+  border: 1px solid var(--border-soft);
   border-radius: 16px;
   padding: 28px 26px;
   display: flex;
@@ -479,7 +479,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin: 0 0 8px;
 }
 
@@ -488,7 +488,7 @@
   font-size: 26px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   margin: 0 0 6px;
   display: flex;
   align-items: baseline;
@@ -496,10 +496,10 @@
   flex-wrap: wrap;
 }
 
-.packageNameEn { color: $brand-dark-blue; }
+.packageNameEn { color: var(--color-secondary); }
 
 .packageNameAr {
-  color: $primary;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -509,13 +509,13 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8a8f99;
+  color: var(--text-muted);
   margin: 0 0 18px;
 }
 
 .packageDivider {
   height: 1px;
-  background: #ecebe6;
+  background: var(--border-soft);
   margin: 0 0 18px;
 }
 
@@ -524,7 +524,7 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 1.55;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   margin: 0 0 18px;
 }
 
@@ -545,11 +545,11 @@
   font-family: $font-family-primary;
   font-size: 13.5px;
   line-height: 1.55;
-  color: #5a6573;
+  color: var(--text-soft);
 
   i {
     font-size: 15px;
-    color: $primary;
+    color: var(--color-primary);
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -563,7 +563,7 @@
   width: 100%;
   padding: 12px 18px;
   background: transparent;
-  color: $primary;
+  color: var(--color-primary);
   font-family: $font-family-primary;
   font-size: 14px;
   font-weight: 600;
@@ -575,8 +575,8 @@
 
   &:hover {
     background: rgba($primary, 0.06);
-    border-color: $primary;
-    color: $primary;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
 }
 
@@ -597,7 +597,7 @@
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #d6d6d2;
+  background: var(--border-soft);
   border: none;
   padding: 0;
   cursor: pointer;
@@ -606,7 +606,7 @@
 
 .dotActive {
   width: 22px;
-  background: $primary;
+  background: var(--color-primary);
 }
 
 /* ─── Footer note + contact CTA ─── */
@@ -620,7 +620,7 @@
 .footerNote {
   font-family: $font-family-primary;
   font-size: 14px;
-  color: #6a7585;
+  color: var(--text-muted);
   margin: 0 0 18px;
 }
 
@@ -630,7 +630,7 @@
   gap: 8px;
   padding: 12px 26px;
   background: transparent;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   font-family: $font-family-primary;
   font-size: 14px;
   font-weight: 600;
@@ -642,7 +642,7 @@
   i { font-size: 16px; }
 
   &:hover {
-    background: $brand-dark-blue;
+    background: var(--color-secondary);
     color: $white;
   }
 }

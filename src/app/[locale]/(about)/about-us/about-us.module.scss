@@ -9,9 +9,9 @@
 // ═══════════════════════════════════════════════════════════════════
 
 $ink: $brand-dark-blue;
-$muted: #5a6b80;
-$muted-soft: #6a7585;
-$hairline: #ecebe6;
+$muted: var(--text-soft);
+$muted-soft: var(--text-muted);
+$hairline: var(--border-soft);
 $cream: #faf8f3;
 
 .page {
@@ -36,7 +36,7 @@ $cream: #faf8f3;
   font-weight: $font-weight-semibold;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 16px;
 
   &::before {
@@ -45,7 +45,7 @@ $cream: #faf8f3;
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $primary;
+    background: var(--color-primary);
     margin-inline-end: 10px;
     vertical-align: middle;
     transform: translateY(-1px);
@@ -134,7 +134,7 @@ $cream: #faf8f3;
     height: 28px;
     border-radius: 50%;
     background: rgba($primary, 0.14);
-    color: $primary;
+    color: var(--color-primary);
     font-size: 13px;
   }
 
@@ -148,7 +148,7 @@ $cream: #faf8f3;
     font-weight: $font-weight-semibold;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: $primary;
+    color: var(--color-primary);
   }
 
   &__value {
@@ -265,7 +265,7 @@ $cream: #faf8f3;
 
 .trustMarkLogo_licensed {
   gap: 8px;
-  color: $primary;
+  color: var(--color-primary);
 
   i {
     font-size: 30px;
@@ -437,7 +437,7 @@ $cream: #faf8f3;
   border-radius: 50%;
   background: $cream;
   border: 1px solid rgba($primary, 0.35);
-  color: $primary;
+  color: var(--color-primary);
   font-size: 12.5px;
   font-weight: $font-weight-semibold;
   font-feature-settings: 'tnum' 1;
@@ -567,7 +567,7 @@ $cream: #faf8f3;
   display: block;
   font-size: 32px;
   font-weight: $font-weight-semibold;
-  color: $primary;
+  color: var(--color-primary);
   letter-spacing: -0.02em;
   line-height: 1.05;
   font-feature-settings: 'tnum' 1;
@@ -741,7 +741,7 @@ $cream: #faf8f3;
 
 .statLabel {
   font-size: 12px;
-  color: #8a8f99;
+  color: var(--text-muted);
   font-weight: $font-weight-medium;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -795,7 +795,7 @@ $cream: #faf8f3;
   height: 40px;
   border-radius: 10px;
   background: rgba($primary, 0.1);
-  color: $primary;
+  color: var(--color-primary);
   font-size: 17px;
   flex-shrink: 0;
 }
@@ -813,7 +813,7 @@ $cream: #faf8f3;
   font-weight: $font-weight-semibold;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
 }
 
 .bandTitle {
@@ -838,7 +838,7 @@ $cream: #faf8f3;
   gap: 6px;
   font-size: 13px;
   font-weight: $font-weight-semibold;
-  color: $primary;
+  color: var(--color-primary);
   margin-top: 4px;
 
   i { font-size: 12px; transition: transform 0.2s ease; }
@@ -956,9 +956,9 @@ $cream: #faf8f3;
 }
 
 .btnPrimary {
-  background: $primary;
+  background: var(--color-primary);
   color: $white;
-  border-color: $primary;
+  border-color: var(--color-primary);
 
   &:hover,
   &:focus-visible {

@@ -5,7 +5,6 @@ import { listRecentPatientVitals } from '@/lib/medplum/observations';
 import { listPatientClinicalNotes } from '@/lib/medplum/clinical-notes';
 import { getActivePatientCareTeam, listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
 import { listPatientTasks } from '@/lib/medplum/tasks';
-import { listPatientCareReports } from '@/lib/medplum/care-reports';
 import { listPatientCaregiverPortalConsents } from '@/lib/medplum/consents';
 import { listPatientConditions } from '@/lib/medplum/conditions';
 import { listPatientAllergies } from '@/lib/medplum/allergies';
@@ -14,6 +13,7 @@ import { listMedicationAdministrationRecords } from '@/lib/medplum/medication-ad
 import { listPatientDocuments } from '@/lib/medplum/documents';
 import { listPatientLabOrders, listPatientDiagnosticReports } from '@/lib/medplum/labs';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
+import { listGlucoseReadings } from '@/lib/medplum/glucose';
 import { listPatientCommunications } from '@/lib/medplum/communications';
 import { listPatientAppointments } from '@/lib/medplum/appointments';
 import { listPatientCarePlans } from '@/lib/medplum/care-plans';
@@ -203,7 +203,6 @@ export async function loadAdminPatientDetailData(
     clinicalNotesResult,
     careTeamResult,
     tasksResult,
-    careReportsResult,
     conditionsResult,
     allergiesResult,
     medicationsResult,
@@ -222,6 +221,7 @@ export async function loadAdminPatientDetailData(
     staffRows,
     consentsResult,
     localPatientResult,
+    glucoseReadingsResult,
   ] =
     await Promise.allSettled([
       listPatientEncounters(patient.id, 30),
@@ -229,7 +229,6 @@ export async function loadAdminPatientDetailData(
       listPatientClinicalNotes(patient.id, 30),
       getActivePatientCareTeam(patient.id),
       listPatientTasks(patient.id, 40),
-      wants('notes-reports') ? listPatientCareReports(patient.id, 80) : Promise.resolve([]),
       listPatientConditions(patient.id, 80),
       listPatientAllergies(patient.id, 40),
       listPatientMedications(patient.id, 80),
@@ -282,6 +281,7 @@ export async function loadAdminPatientDetailData(
       staffPromise,
       wants('care-team-consent') ? listPatientCaregiverPortalConsents(patient.id) : Promise.resolve([]),
       localPatientPromise,
+      wants('measurements') ? listGlucoseReadings(patient.id, 200, { daysBack: 120 }) : Promise.resolve([]),
     ]);
 
   // Restricted-tier gating: computed from the always-loaded CORE datasets so the
@@ -458,8 +458,6 @@ export async function loadAdminPatientDetailData(
     assignableStaff: settledValue(staffRows, []).filter((staff) => !!toCareTeamRole(staff.role)),
     tasks: settledValue(tasksResult, []),
     tasksError: settledError(tasksResult, 'Failed to load care tasks from Medplum'),
-    careReports: settledValue(careReportsResult, []),
-    careReportsError: settledError(careReportsResult, 'Failed to load care reports from Medplum'),
     conditions: visibleConditions,
     conditionsError: settledError(conditionsResult, 'Failed to load patient problems from Medplum'),
     allergies: settledValue(allergiesResult, []),
@@ -479,6 +477,8 @@ export async function loadAdminPatientDetailData(
     labResultsError: settledError(labResultsResult, 'Failed to load diagnostic reports from Medplum'),
     assessments: settledValue(assessmentsResult, []),
     assessmentsError: settledError(assessmentsResult, 'Failed to load patient assessments from Medplum'),
+    glucoseReadings: settledValue(glucoseReadingsResult, []),
+    glucoseReadingsError: settledError(glucoseReadingsResult, 'Failed to load glucose readings from Medplum'),
     communications: settledValue(communicationsResult, []),
     communicationsError: settledError(communicationsResult, 'Failed to load clinical communications from Medplum'),
     appointments: settledValue(appointmentsResult, []),

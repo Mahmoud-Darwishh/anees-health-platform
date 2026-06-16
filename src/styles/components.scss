@@ -1,107 +1,11 @@
-// Component-specific styles for sections
-
-.hero-section {
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(145deg, #132c4d 0%, #1a3b64 100%);
-  color: #f8f3e6;
-
-  .hero-title {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
-  }
-
-  .hero-subtitle {
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    color: rgba(248, 243, 230, 0.9);
-  }
-
-  .cta-button {
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    background: #f8f2e6;
-    color: #132c4d;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: transform 0.24s ease, box-shadow 0.24s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 28px -20px rgba(19, 44, 77, 0.45);
-    }
-  }
-}
-
-.features-section,
-.services-section,
-.about-section,
-.contact-section {
-  padding: 4rem 2rem;
-
-  .section-title {
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 1rem;
-    color: #132c4d;
-  }
-
-  .section-description {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #5b6778;
-    margin-bottom: 3rem;
-  }
-}
-
-.features-section {
-  background: #f6f1e7;
-
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
-  }
-
-  .feature-card {
-    background: #fffdf8;
-    padding: 2rem;
-    border-radius: 14px;
-    border: 1px solid #e6ddcd;
-    box-shadow: 0 10px 26px -22px rgba(19, 44, 77, 0.34);
-    text-align: center;
-    transition: transform 0.24s ease, box-shadow 0.24s ease;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 34px -24px rgba(19, 44, 77, 0.36);
-    }
-  }
-
-  .feature-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
-
-  .feature-title {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    color: #132c4d;
-  }
-
-  .feature-description {
-    color: #5b6778;
-    line-height: 1.6;
-  }
-}
+// Component-specific styles for sections.
+//
+// NOTE: the legacy `.hero-section` / `.features-section` / generic
+// `.feature-card` blocks were removed Jun 2026 — they were unreferenced by any
+// component (dead template scaffolding) yet shipped on every page. The home
+// sections each own their styling via CSS modules under
+// src/components/sections/home/. What remains below are genuinely-global hooks
+// for third-party markup (owl carousel nav, Bootstrap accordion).
 
 // ─── Doctor section mobile fixes ────────────────────────────────
 // Touch-target compliant nav buttons on mobile

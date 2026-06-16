@@ -1,5 +1,4 @@
 export {
-  recordVisitAction,
   acknowledgeVisitAction,
   startTravelAction,
   markArrivedAction,
@@ -21,10 +20,8 @@ export {
   createAssessmentAction,
 } from './vitals-assessments';
 export {
-  createClinicalNoteDraftAction,
-  signClinicalNoteAction,
-  amendClinicalNoteAction,
-} from './clinical-notes';
+  recordGlucoseReadingAction,
+} from './glucose';
 export {
   requestRestrictedAccessAction,
   requestBreakGlassAccessAction,
@@ -43,7 +40,6 @@ export {
   createAppointmentAction,
 } from './care-coordination';
 export {
-  createNursingReportAction,
   createNursingShiftHandoffAction,
   createPhysioReportAction,
 } from './reports-handoffs';

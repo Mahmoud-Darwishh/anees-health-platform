@@ -86,10 +86,6 @@ export function taskDueDate(task: { executionPeriod?: { end?: string } }): strin
   return task.executionPeriod?.end ? new Date(task.executionPeriod.end).toLocaleDateString('en-GB') : '—';
 }
 
-export function reportCode(report: { code?: { coding?: Array<{ code?: string }> } }): string {
-  return report.code?.coding?.[0]?.code ?? 'unknown';
-}
-
 export function appointmentTypeLabel(type?: string | null): string {
   switch (type) {
     case 'in_home':
@@ -101,23 +97,6 @@ export function appointmentTypeLabel(type?: string | null): string {
     default:
       return type ?? '—';
   }
-}
-
-export function reportComponentText(
-  report: {
-    component?: Array<{
-      code?: { coding?: Array<{ code?: string }> };
-      valueString?: string;
-      valueInteger?: number;
-    }>;
-  },
-  code: string,
-): string | null {
-  const component = report.component?.find((entry) => entry.code?.coding?.[0]?.code === code);
-  if (!component) return null;
-  if (typeof component.valueString === 'string' && component.valueString.trim()) return component.valueString;
-  if (typeof component.valueInteger === 'number') return String(component.valueInteger);
-  return null;
 }
 
 export function toCareTeamRole(

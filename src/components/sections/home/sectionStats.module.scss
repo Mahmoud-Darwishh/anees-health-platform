@@ -8,8 +8,8 @@
 .section {
   padding: 36px 0;
   background: $white;
-  border-top: 1px solid #ecebe6;
-  border-bottom: 1px solid #ecebe6;
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
 
   @include respond-below(custom767) {
     padding: 28px 0;
@@ -44,7 +44,7 @@
     top: 14%;
     bottom: 14%;
     width: 1px;
-    background: #ecebe6;
+    background: var(--border-soft);
 
     @include respond-below(custom767) {
       display: none;
@@ -55,7 +55,7 @@
 .value {
   font-size: 30px;
   font-weight: $font-weight-semibold;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   line-height: 1.1;
   letter-spacing: -0.02em;
   font-feature-settings: 'tnum' 1;
@@ -67,7 +67,7 @@
 
 .label {
   font-size: 12px;
-  color: #8a8f99;
+  color: var(--text-muted);
   font-weight: $font-weight-medium;
   letter-spacing: 0.6px;
   text-transform: uppercase;

@@ -1,15 +1,21 @@
 @use '@/assets/scss/utils/variables' as *;
+// The admin shell does NOT load globals.scss, so it must emit the runtime token
+// :root block itself — otherwise var(--color-*/--status-*/--text-*) here resolve
+// to nothing. This makes the ONE token system available on admin too.
+@use '@/assets/scss/base/tokens';
 
 .anees-admin-shell {
-  // Brand custom-properties flow from the canonical Anees anchors in
-  // utils/variables.scss (navy / gold) — never re-hardcode the brand hexes here.
-  --anees-surface: #fffefb;
+  // Local --anees-* names are the admin shell's vocabulary, but their VALUES are
+  // routed to the shared design tokens (src/assets/scss/base/tokens.scss) so the
+  // dashboard can never drift from the brand. Only admin-specific density values
+  // (denser radii) stay local.
+  --anees-surface: var(--surface-elevated);
   --anees-surface-soft: #fcfaf5;
-  --anees-ink: #{$brand-navy};
-  --anees-ink-muted: #526276;
-  --anees-accent: #{$brand-gold};
+  --anees-ink: var(--text-strong);
+  --anees-ink-muted: var(--text-soft);
+  --anees-accent: var(--color-primary);
   --anees-accent-strong: #{$primary-900};
-  --anees-border: #{rgba($brand-navy, 0.12)};
+  --anees-border: var(--status-neutral-border);
   --anees-radius-card: 12px;
   --anees-radius-control: 8px;
   --anees-radius-pill: 8px;
@@ -21,10 +27,275 @@
   --anees-space-5: 1.2rem;
   --anees-space-6: 1.5rem;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background:
     radial-gradient(1200px 520px at -8% -18%, rgba(166, 131, 65, 0.09), transparent 62%),
     radial-gradient(1000px 460px at 102% 0%, rgba(19, 44, 77, 0.08), transparent 60%),
     #f7f3e8;
+
+  > main {
+    flex: 1 0 auto;
+  }
+}
+
+// Thin freshness bar under the header — "Data as of …" sits where a clinician
+// sees it without scrolling, the standard place for a data-freshness signal.
+.anees-admin-subbar {
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(19, 44, 77, 0.06);
+  background: transparent;
+  padding-block: 0.5rem;
+}
+
+.anees-admin-subbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.anees-admin-footer {
+  flex-shrink: 0;
+  margin-top: var(--anees-space-6);
+  border-top: 1px solid var(--anees-border);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+  padding-block: 0.7rem;
+}
+
+.anees-admin-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+}
+
+.anees-admin-footer-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  color: #5a6675;
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.anees-admin-footer-meta {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.7rem;
+  color: #7a8696;
+  font-size: 0.72rem;
+}
+
+.anees-admin-refreshed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.22rem 0.72rem 0.22rem 0.58rem;
+  background: #fff;
+  border: 1px solid rgba(19, 44, 77, 0.1);
+  color: #6a7688;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.anees-admin-refreshed:hover:not(:disabled) {
+  border-color: rgba(166, 131, 65, 0.5);
+  color: var(--anees-ink);
+  box-shadow: 0 1px 3px rgba(19, 44, 77, 0.08);
+}
+
+.anees-admin-refreshed:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.anees-admin-refreshed-icon {
+  flex-shrink: 0;
+}
+
+.anees-admin-refreshed.is-refreshing .anees-admin-refreshed-icon {
+  animation: anees-spin 0.8s linear infinite;
+}
+
+.anees-admin-refreshed-text {
+  font-size: 0.74rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes anees-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anees-admin-refreshed.is-refreshing .anees-admin-refreshed-icon {
+    animation: none;
+  }
+}
+
+// Status toast — fixed top-trailing, visible regardless of scroll position.
+.anees-toast {
+  position: fixed;
+  inset-block-start: 84px;
+  inset-inline-end: 1rem;
+  z-index: 1090;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  max-width: 380px;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--anees-border);
+  border-inline-start: 4px solid #2c6c50;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(19, 44, 77, 0.2);
+  animation: anees-toast-in 0.22s ease;
+}
+
+.anees-toast.is-error {
+  border-inline-start-color: #cf233f;
+}
+
+.anees-toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  background: #2c6c50;
+}
+
+.anees-toast.is-error .anees-toast-icon {
+  background: #cf233f;
+}
+
+.anees-toast-msg {
+  flex: 1;
+  color: var(--anees-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.anees-toast-close {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: #8593a6;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0 0.1rem;
+  cursor: pointer;
+}
+
+.anees-toast-close:hover {
+  color: var(--anees-ink);
+}
+
+@keyframes anees-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 575.98px) {
+  .anees-toast {
+    inset-block-start: 0.7rem;
+    inset-inline: 0.6rem;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anees-toast {
+    animation: none;
+  }
+}
+
+// Floating back-to-top — hidden until scrolled, never blocks above-the-fold UI.
+.anees-back-to-top {
+  position: fixed;
+  inset-block-end: 1.15rem;
+  inset-inline-end: 1.15rem;
+  z-index: 1030;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: $brand-navy;
+  color: #f3f7fc;
+  font-size: 1.2rem;
+  line-height: 1;
+  box-shadow: 0 10px 22px rgba(19, 44, 77, 0.28);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.18s ease;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: $primary-900;
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--anees-accent);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anees-back-to-top {
+    transition: opacity 0.2s ease;
+    transform: none;
+
+    &.is-visible {
+      transform: none;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .anees-admin-footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .anees-back-to-top {
+    inset-block-end: 0.9rem;
+    inset-inline-end: 0.9rem;
+    width: 42px;
+    height: 42px;
+  }
 }
 
 .anees-admin-navbar {
@@ -37,7 +308,7 @@
 }
 
 .anees-admin-brand {
-  color: #132c4d !important;
+  color: var(--color-secondary) !important;
   letter-spacing: 0.02em;
   font-weight: 600;
 }
@@ -67,7 +338,7 @@
 
 .anees-admin-brand-title {
   font-size: 0.95rem;
-  color: #132c4d;
+  color: var(--color-secondary);
   font-weight: 700;
 }
 
@@ -173,7 +444,7 @@
 }
 
 .anees-mobile-kv-value {
-  color: #132c4d;
+  color: var(--color-secondary);
   font-weight: 600;
   text-align: end;
 }
@@ -302,7 +573,7 @@
   }
 
   .table thead th {
-    color: #132c4d;
+    color: var(--color-secondary);
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -337,17 +608,17 @@
     font-size: 0.74rem;
     font-weight: 600;
     background: #f4ecdc;
-    color: #745724;
+    color: var(--status-warning-fg);
     border: 1px solid rgba(166, 131, 65, 0.25);
   }
 
   .anees-banner {
     border-radius: var(--anees-radius-card);
-    background: linear-gradient(135deg, #132c4d 0%, #1f436f 68%, #31567f 100%);
+    background: $brand-navy;
     color: #eef4fb;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     padding: 1.15rem 1.25rem;
-    box-shadow: 0 14px 28px rgba(19, 44, 77, 0.2);
+    box-shadow: 0 14px 28px rgba(19, 44, 77, 0.18);
   }
 
   .anees-banner .text-muted {
@@ -392,11 +663,11 @@
 
     &:hover {
       border-color: rgba(166, 131, 65, 0.45);
-      color: #132c4d;
+      color: var(--color-secondary);
     }
 
     &.is-active {
-      border-color: #a68341;
+      border-color: var(--color-primary);
       background: #f4ecdc;
       color: #6f5321;
     }
@@ -410,21 +681,24 @@
 
   .anees-patient-safety-header {
     scroll-margin-top: 1rem;
-    border-color: rgba(19, 44, 77, 0.1) !important;
-    box-shadow: 0 6px 14px rgba(19, 44, 77, 0.035);
+    border-color: rgba(19, 44, 77, 0.12) !important;
+    box-shadow: 0 6px 14px rgba(19, 44, 77, 0.05);
+    // Clinical-alert spine: a thin red edge marks this as the safety anchor.
+    border-inline-start: 3px solid #cf233f !important;
   }
 
   .anees-patient-safety-header .card-body {
-    padding: 1rem 1.05rem;
+    padding: 1rem 1.1rem;
   }
 
+  // ── Topline: identity (2nd identifier) + critical alerts ──────────────
   .anees-safety-topline {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 0.75rem;
-    padding-bottom: 0.62rem;
-    margin-bottom: 0.62rem;
+    gap: 1rem;
+    padding-bottom: 0.72rem;
+    margin-bottom: 0.72rem;
     border-bottom: 1px solid rgba(19, 44, 77, 0.08);
   }
 
@@ -432,85 +706,127 @@
     min-width: 0;
   }
 
-  .anees-safety-heading h2 {
-    color: var(--anees-ink);
-    font-size: 0.98rem;
-    font-weight: 650;
-    line-height: 1.25;
-  }
-
-  .anees-safety-heading p {
-    color: #69778a !important;
-    font-size: 0.72rem;
-    font-weight: 500;
+  .anees-safety-eyebrow {
+    margin-bottom: 0.32rem;
+    color: #8593a6 !important;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .anees-safety-identity {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
-    color: #637286;
-    font-size: 0.74rem;
-    font-weight: 500;
+    align-items: center;
+    gap: 0.4rem;
+    color: #4c5b70;
+    font-size: 0.82rem;
+    font-weight: 600;
   }
 
   .anees-safety-identity span {
     border-radius: 6px;
-    background: #f7f8fa;
-    padding: 0.13rem 0.38rem;
+    background: #f4f6f9;
+    border: 1px solid rgba(19, 44, 77, 0.07);
+    padding: 0.18rem 0.5rem;
+  }
+
+  .anees-safety-identity .anees-safety-id {
+    color: var(--anees-ink);
+    background: #eef1f6;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
+  // ── Cluster labels (Critical alerts / Clinical summary) ───────────────
+  .anees-safety-cluster-label {
+    display: block;
+    margin-bottom: 0.36rem;
+    color: #8593a6;
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .anees-safety-badges-group {
+    min-width: 0;
+  }
+
+  .anees-safety-badges-group .anees-safety-cluster-label {
+    text-align: end;
   }
 
   .anees-safety-badges {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 0.36rem;
+    gap: 0.4rem;
   }
 
   .anees-safety-badge {
     display: inline-flex;
-    align-items: center;
-    min-height: 28px;
-    padding: 0.22rem 0.48rem;
-    border-radius: 7px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.05rem;
+    min-height: 40px;
+    padding: 0.28rem 0.56rem;
+    border-radius: 8px;
     border: 1px solid rgba(19, 44, 77, 0.12);
     background: #f8fafc;
     color: #3d4f65;
-    font-size: 0.72rem;
-    font-weight: 650;
     line-height: 1.2;
     text-decoration: none;
     white-space: nowrap;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  }
+
+  .anees-safety-badge-key {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.72;
+  }
+
+  .anees-safety-badge-val {
+    font-size: 0.8rem;
+    font-weight: 700;
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .anees-safety-badge:hover,
   .anees-safety-badge:focus-visible {
-    color: #132c4d;
     border-color: rgba(166, 131, 65, 0.55);
+    box-shadow: 0 4px 10px rgba(19, 44, 77, 0.08);
+    transform: translateY(-1px);
   }
 
   .anees-safety-badge.is-critical {
-    color: #a5162f;
-    background: #fff1f3;
-    border-color: rgba(207, 35, 63, 0.3);
+    color: var(--status-danger-fg);
+    background: var(--status-danger-bg);
+    border-color: rgba(207, 35, 63, 0.32);
   }
 
   .anees-safety-badge.is-warning {
-    color: #745724;
-    background: #fff7df;
-    border-color: rgba(166, 131, 65, 0.32);
+    color: var(--status-warning-fg);
+    background: var(--status-warning-bg);
+    border-color: rgba(166, 131, 65, 0.34);
   }
 
   .anees-safety-badge.is-locked {
     color: #243142;
     background: #eef1f5;
-    border-color: rgba(36, 49, 66, 0.24);
+    border-color: rgba(36, 49, 66, 0.26);
   }
 
   .anees-safety-badge.is-ok {
-    color: #2c6c50;
-    background: #f0faf5;
-    border-color: rgba(44, 108, 80, 0.18);
+    color: var(--status-success-fg);
+    background: var(--status-success-bg);
+    border-color: rgba(44, 108, 80, 0.2);
   }
 
   .anees-safety-badge.is-muted {
@@ -519,68 +835,68 @@
     border-color: rgba(19, 44, 77, 0.1);
   }
 
+  // ── Clinical summary: categorized quick-nav tiles ─────────────────────
   .anees-safety-strip {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
   }
 
   .anees-safety-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.34rem;
-    min-height: 36px;
-    max-width: 100%;
-    padding: 0.38rem 0.56rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0.42rem 0.56rem 0.42rem 0.66rem;
     border: 1px solid rgba(19, 44, 77, 0.1);
+    border-inline-start: 3px solid #c8d2de;
     border-radius: var(--anees-radius-control);
     background: #fff;
     color: var(--anees-ink);
     text-decoration: none;
     line-height: 1.2;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
   }
 
   .anees-safety-item:hover,
   .anees-safety-item:focus-visible {
-    border-color: rgba(166, 131, 65, 0.38);
-    background: #fbfaf7;
+    box-shadow: 0 4px 10px rgba(19, 44, 77, 0.07);
+    transform: translateY(-1px);
     color: var(--anees-ink);
   }
 
   .anees-safety-item span {
-    color: #68778a;
-    font-size: 0.69rem;
-    font-weight: 500;
+    color: #76839a;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   .anees-safety-item strong {
     color: var(--anees-ink);
-    font-size: 0.76rem;
-    font-weight: 600;
-    max-width: 28ch;
+    font-size: 0.82rem;
+    font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .anees-safety-item em {
-    color: #a5162f;
-    font-size: 0.68rem;
-    font-style: normal;
-    font-weight: 500;
-    max-width: 16ch;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+  // Category accents — colour the spine by clinical domain.
+  .anees-safety-item[data-tone='clinical'] { border-inline-start-color: #cf233f; }
+  .anees-safety-item[data-tone='therapy'] { border-inline-start-color: #2f6f8f; }
+  .anees-safety-item[data-tone='vitals'] { border-inline-start-color: #2c6c50; }
+  .anees-safety-item[data-tone='coordination'] { border-inline-start-color: var(--color-primary); }
 
   .anees-safety-restricted-note {
-    margin-top: 0.52rem;
+    margin-top: 0.72rem;
     border: 1px solid rgba(32, 42, 54, 0.12);
+    border-inline-start: 3px solid #c4302b;
     border-radius: var(--anees-radius-control);
-    background: #f8fafc;
-    color: #526276;
-    padding: 0.45rem 0.56rem;
+    background: #fdf6f6;
+    color: #6b3a38;
+    padding: 0.5rem 0.62rem;
     font-size: 0.72rem;
     font-weight: 500;
   }
@@ -662,7 +978,7 @@
 
   .anees-clinical-distribution-segment {
     height: 100%;
-    background: linear-gradient(90deg, #a68341 0%, #c4a25d 100%);
+    background: linear-gradient(90deg, var(--color-primary) 0%, #c4a25d 100%);
   }
 
   .anees-clinical-distribution-segment:nth-child(even) {
@@ -777,15 +1093,19 @@
     .anees-safety-topline {
       align-items: flex-start;
       flex-direction: column;
-      gap: 0.65rem;
+      gap: 0.85rem;
+    }
+
+    .anees-safety-badges-group .anees-safety-cluster-label {
+      text-align: start;
     }
 
     .anees-safety-badges {
       justify-content: flex-start;
     }
 
-    .anees-safety-item {
-      flex: 1 1 180px;
+    .anees-safety-strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .anees-banner {
@@ -858,38 +1178,25 @@
 
     .anees-safety-badges {
       width: 100%;
-      gap: 0.34rem;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 0.12rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      gap: 0.4rem;
     }
 
     .anees-safety-badge {
-      flex: 0 0 auto;
-      justify-content: center;
-      white-space: nowrap;
-      text-align: center;
-      font-size: 0.7rem;
-      min-height: 27px;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .anees-safety-badge-val {
+      max-width: 100%;
     }
 
     .anees-safety-strip {
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 0.22rem;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.42rem;
     }
 
     .anees-safety-item {
-      flex: 0 0 auto;
-      min-height: 34px;
-    }
-
-    .anees-safety-item strong {
-      max-width: 20ch;
+      min-height: 46px;
     }
 
     .anees-clinical-overview {
@@ -1081,6 +1388,736 @@
       .anees-doc-actions-wrap {
         width: 100%;
       }
+    }
+  }
+}
+
+// ── Visit workflow cards (Visits & Encounters) ─────────────────────────
+.anees-admin-page {
+  .anees-visit-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .anees-visit-card {
+    display: grid;
+    gap: 0.7rem;
+    border: 1px solid var(--anees-border);
+    border-inline-start: 3px solid #c8d2de;
+    border-radius: var(--anees-radius-card);
+    background: #fff;
+    padding: 0.9rem 1rem;
+    box-shadow: 0 4px 12px rgba(19, 44, 77, 0.05);
+  }
+
+  .anees-visit-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .anees-visit-card-id {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .anees-visit-card-id strong {
+    color: var(--anees-ink);
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .anees-visit-card-id span {
+    color: #69778a;
+    font-size: 0.74rem;
+    font-weight: 500;
+  }
+
+  .anees-visit-state {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.24rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .anees-visit-state.is-ok {
+    color: var(--status-success-fg);
+    background: var(--status-success-bg);
+    border-color: rgba(44, 108, 80, 0.22);
+  }
+
+  .anees-visit-state.is-active {
+    color: var(--status-warning-fg);
+    background: var(--status-warning-bg);
+    border-color: rgba(166, 131, 65, 0.32);
+  }
+
+  .anees-visit-state.is-danger {
+    color: var(--status-danger-fg);
+    background: var(--status-danger-bg);
+    border-color: rgba(207, 35, 63, 0.3);
+  }
+
+  .anees-visit-state.is-muted {
+    color: #68778a;
+    background: #f6f8fa;
+    border-color: rgba(19, 44, 77, 0.12);
+  }
+
+  // Lifecycle stepper — horizontal on desktop, stacked rows on mobile.
+  .anees-visit-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .anees-visit-timeline li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.14rem;
+    padding: 0.45rem 0.55rem;
+    border-radius: 8px;
+    border: 1px solid rgba(19, 44, 77, 0.08);
+    background: #f6f8fa;
+  }
+
+  .anees-visit-timeline li.is-done {
+    background: var(--status-success-bg);
+    border-color: rgba(44, 108, 80, 0.2);
+  }
+
+  // Waiting / not-yet-reached steps read as amber ("waiting"), not dead grey.
+  .anees-visit-timeline li.is-pending {
+    background: var(--status-warning-bg);
+    border-color: rgba(166, 131, 65, 0.34);
+  }
+
+  .anees-visit-step-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #5a687b;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .anees-visit-step-label::before {
+    content: '○';
+    font-size: 0.7rem;
+    opacity: 0.5;
+  }
+
+  .anees-visit-timeline li.is-done .anees-visit-step-label {
+    color: var(--status-success-fg);
+  }
+
+  .anees-visit-timeline li.is-done .anees-visit-step-label::before {
+    content: '✓';
+    opacity: 1;
+  }
+
+  .anees-visit-timeline li.is-pending .anees-visit-step-label {
+    color: #8a6d2e;
+  }
+
+  .anees-visit-timeline li.is-pending .anees-visit-step-label::before {
+    content: '○';
+    color: #c79a3a;
+    opacity: 0.95;
+  }
+
+  .anees-visit-step-time {
+    color: var(--anees-ink);
+    font-size: 0.74rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .anees-visit-timeline li.is-pending .anees-visit-step-time {
+    color: #9a7b2e;
+    font-weight: 600;
+  }
+
+  .anees-visit-geo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .anees-visit-geo-chip {
+    border-radius: 6px;
+    border: 1px solid rgba(19, 44, 77, 0.08);
+    background: #f4f6f9;
+    color: #4f5f74;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.16rem 0.46rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .anees-visit-recent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.16rem;
+    color: #76839a;
+    font-size: 0.7rem;
+  }
+
+  // Inline info affordance — carries an explanation in a tooltip, not in prose.
+  .anees-info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(19, 44, 77, 0.3);
+    color: #5a687b;
+    font-size: 0.64rem;
+    font-weight: 700;
+    font-style: normal;
+    line-height: 1;
+    cursor: help;
+    flex-shrink: 0;
+  }
+
+  .anees-info:hover,
+  .anees-info:focus-visible {
+    border-color: var(--anees-accent);
+    color: var(--anees-ink);
+  }
+
+  // ── Visit board filter chips ────────────────────────────────────────
+  .anees-visit-board {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .anees-visit-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.42rem;
+  }
+
+  .anees-visit-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.34rem 0.7rem;
+    border: 1px solid var(--anees-border);
+    border-radius: 999px;
+    background: #fff;
+    color: #41506b;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .anees-visit-filter:hover {
+    border-color: rgba(166, 131, 65, 0.5);
+    color: var(--color-secondary);
+  }
+
+  .anees-visit-filter.is-active {
+    border-color: var(--anees-accent-strong);
+    background: $brand-navy;
+    color: #eef4fb;
+  }
+
+  .anees-visit-filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.3rem;
+    height: 1.3rem;
+    padding: 0 0.34rem;
+    border-radius: 999px;
+    background: rgba(19, 44, 77, 0.08);
+    color: #41506b;
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .anees-visit-filter.is-active .anees-visit-filter-count {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+  }
+
+  // ── Visit board toolbar: view switch + search + sort ────────────────
+  .anees-visit-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .anees-visit-viewswitch {
+    display: inline-flex;
+    padding: 0.18rem;
+    border: 1px solid var(--anees-border);
+    border-radius: 9px;
+    background: #f4f6f9;
+    gap: 0.16rem;
+  }
+
+  .anees-visit-viewbtn {
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #41506b;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.34rem 0.78rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .anees-visit-viewbtn:hover {
+    color: var(--color-secondary);
+  }
+
+  .anees-visit-viewbtn.is-active {
+    background: #fff;
+    color: var(--anees-ink);
+    box-shadow: 0 1px 3px rgba(19, 44, 77, 0.12);
+  }
+
+  .anees-visit-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    flex-wrap: wrap;
+  }
+
+  .anees-visit-search {
+    width: 200px;
+    max-width: 100%;
+  }
+
+  .anees-visit-sort {
+    width: auto;
+  }
+
+  .anees-visit-sortdir {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(19, 44, 77, 0.18);
+    border-radius: 7px;
+    background: #fff;
+    color: #284262;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .anees-visit-sortdir:hover {
+    border-color: rgba(166, 131, 65, 0.5);
+  }
+
+  // ── Compact rows + agenda ───────────────────────────────────────────
+  .anees-visit-rows {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .anees-visit-row {
+    border: 1px solid var(--anees-border);
+    border-inline-start: 3px solid #c8d2de;
+    border-radius: var(--anees-radius-control);
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .anees-visit-row.is-open {
+    border-inline-start-color: var(--anees-accent);
+    box-shadow: 0 4px 12px rgba(19, 44, 77, 0.06);
+  }
+
+  .anees-visit-row-main {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.52rem 0.7rem;
+    border: 0;
+    background: transparent;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .anees-visit-row-main:hover {
+    background: #fbfaf7;
+  }
+
+  .anees-visit-row-chevron {
+    color: #7a8696;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .anees-visit-row-code {
+    color: var(--anees-ink);
+    font-size: 0.84rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .anees-visit-row-meta {
+    flex: 1;
+    min-width: 0;
+    color: #69778a;
+    font-size: 0.74rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .anees-visit-row-main .anees-visit-state {
+    flex-shrink: 0;
+  }
+
+  .anees-visit-row-detail {
+    display: grid;
+    gap: 0.7rem;
+    padding: 0.2rem 0.8rem 0.85rem;
+    border-top: 1px solid rgba(19, 44, 77, 0.07);
+  }
+
+  .anees-visit-agenda {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .anees-visit-agenda-group {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .anees-visit-agenda-heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0;
+    padding: 0.3rem 0.1rem;
+    color: var(--anees-ink);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: linear-gradient(180deg, var(--anees-surface) 65%, rgba(255, 255, 255, 0));
+    border-bottom: 1px solid rgba(19, 44, 77, 0.08);
+  }
+
+  // ── Visit workflow action panel (client) ────────────────────────────
+  .anees-vwa {
+    display: grid;
+    gap: 0.6rem;
+    border-top: 1px solid rgba(19, 44, 77, 0.08);
+    padding-top: 0.72rem;
+  }
+
+  .anees-vwa-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .anees-vwa-title {
+    color: #5a687b;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .anees-vwa-override {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.36rem;
+    margin: 0;
+    padding: 0.18rem 0.5rem;
+    border: 1px solid var(--anees-border);
+    border-radius: 999px;
+    color: #6b6071;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .anees-vwa-override:has(input:checked) {
+    color: var(--status-warning-fg);
+    background: var(--status-warning-bg);
+    border-color: rgba(166, 131, 65, 0.4);
+  }
+
+  .anees-vwa-override input {
+    cursor: pointer;
+  }
+
+  .anees-vwa-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .anees-vwa-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.08rem;
+    min-height: 46px;
+    padding: 0.4rem 1rem;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  .anees-vwa-btn.is-instant {
+    background: $brand-navy;
+    color: #eef4fb;
+  }
+
+  .anees-vwa-btn.is-geo {
+    background: #2c6c50;
+    color: #f0faf5;
+  }
+
+  .anees-vwa-btn:hover:not(:disabled) {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
+
+  .anees-vwa-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .anees-vwa-btn-hint {
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    opacity: 0.82;
+  }
+
+  .anees-vwa-btn-force {
+    margin-top: 0.1rem;
+    padding: 0 0.34rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.22);
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .anees-vwa-note {
+    margin: 0;
+    padding: 0.42rem 0.58rem;
+    border-radius: 6px;
+    background: #f6f8fa;
+    color: #5a687b;
+    font-size: 0.74rem;
+  }
+
+  .anees-vwa-error {
+    margin: 0;
+    padding: 0.45rem 0.58rem;
+    border: 1px solid rgba(207, 35, 63, 0.25);
+    border-radius: 6px;
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+    font-size: 0.74rem;
+    line-height: 1.45;
+  }
+
+  .anees-vwa-manual {
+    display: grid;
+    gap: 0.42rem;
+    padding: 0.6rem 0.65rem;
+    border: 1px dashed rgba(166, 131, 65, 0.42);
+    border-radius: 8px;
+    background: #fffdf7;
+  }
+
+  .anees-vwa-manual-title {
+    margin: 0;
+    color: var(--status-warning-fg);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .anees-vwa-manual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .anees-vwa-manual-hint {
+    margin: 0;
+    color: #8a7448;
+    font-size: 0.66rem;
+    line-height: 1.4;
+  }
+}
+
+// Generic responsive table: real table on desktop, labeled cards on mobile.
+@media (max-width: 767.98px) {
+  .anees-admin-page {
+    .table.anees-stack-table {
+      min-width: 100%;
+      border: 0;
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100%;
+      }
+
+      tbody {
+        display: grid;
+        gap: 0.7rem;
+      }
+
+      tr.anees-stack-row {
+        border: 1px solid var(--anees-border);
+        border-radius: var(--anees-radius-control);
+        background: #fff;
+        padding: 0.65rem 0.72rem;
+        box-shadow: 0 6px 14px rgba(19, 44, 77, 0.06);
+      }
+
+      tr.anees-stack-row td {
+        border: 0;
+        padding: 0.3rem 0;
+        display: grid;
+        grid-template-columns: minmax(92px, 38%) 1fr;
+        column-gap: 0.65rem;
+        align-items: start;
+      }
+
+      tr.anees-stack-row td::before {
+        content: attr(data-label);
+        font-size: 0.66rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #5f6c7f;
+        font-weight: 700;
+      }
+    }
+
+    // Visit cards: collapse the multi-column grids to a single column.
+    .anees-visit-timeline {
+      grid-template-columns: 1fr;
+      gap: 0.32rem;
+    }
+
+    .anees-visit-timeline li {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .anees-visit-card-head {
+      flex-wrap: wrap;
+    }
+
+    .anees-visit-filters {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.2rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .anees-visit-filter {
+      flex: 0 0 auto;
+    }
+
+    .anees-visit-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .anees-visit-viewswitch {
+      justify-content: space-between;
+    }
+
+    .anees-visit-viewbtn {
+      flex: 1 1 0;
+    }
+
+    .anees-visit-tools {
+      width: 100%;
+    }
+
+    .anees-visit-search {
+      flex: 1 1 auto;
+      width: auto;
+    }
+
+    .anees-visit-row-meta {
+      flex-basis: 100%;
+      order: 3;
+      white-space: normal;
+    }
+
+    // Field use is thumb-driven: give rows + action buttons big tap targets.
+    .anees-visit-row-main {
+      min-height: 48px;
+      padding-block: 0.6rem;
+    }
+
+    .anees-visit-sort {
+      flex: 1 1 auto;
+    }
+
+    // The next action is the point of the card — make it full-width + tall so
+    // a clinician can hit it one-handed. Override mode stacks all steps too.
+    .anees-vwa-buttons {
+      flex-direction: column;
+    }
+
+    .anees-vwa-btn {
+      width: 100%;
+      min-height: 50px;
+    }
+
+    .anees-vwa-head {
+      flex-wrap: wrap;
+      gap: 0.45rem;
     }
   }
 }

@@ -23,11 +23,11 @@ $white: tokens.$white;
 
 // Page-local neutral greys / surfaces — UI scaffolding, intentionally not brand
 // tokens (the brand set has no direct neutral-grey equivalents).
-$secondary: #f8f9fa;
-$text-dark: #212529;
-$text-muted: #6c757d;
-$border-color: #dee2e6;
-$gray-light: #f0f2f5;
+$secondary: var(--surface-muted);
+$text-dark: var(--text-soft);
+$text-muted: var(--text-muted);
+$border-color: var(--border-soft);
+$gray-light: var(--surface-muted);
 
 // ======= DOCTOR PROFILE PAGE CONTAINER =======
 .doctor-profile-page {
@@ -43,7 +43,7 @@ $gray-light: #f0f2f5;
 .doctor-profile-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(135deg, var(--surface-muted) 0%, #ffffff 100%);
   padding: 3rem 0;
 
   .hero-bg-gradient {
@@ -129,7 +129,7 @@ $gray-light: #f0f2f5;
 
     .professional-title {
       font-size: 1.1rem;
-      color: $primary;
+      color: var(--color-primary);
       font-weight: 600;
       margin-bottom: 0.5rem;
 
@@ -177,12 +177,12 @@ $gray-light: #f0f2f5;
 
       i {
         font-size: 1.05rem;
-        color: $primary;
+        color: var(--color-primary);
       }
 
       &.verified {
         background: rgba($primary, 0.12);
-        color: $primary;
+        color: var(--color-primary);
       }
 
       &.availability {
@@ -213,12 +213,12 @@ $gray-light: #f0f2f5;
 
     i {
       font-size: 1rem;
-      color: $primary;
+      color: var(--color-primary);
     }
 
     &.verified {
       background: rgba($primary, 0.12);
-      color: $primary;
+      color: var(--color-primary);
     }
 
     &.availability {
@@ -241,7 +241,7 @@ $gray-light: #f0f2f5;
 
     i {
       font-size: 1.1rem;
-      color: $primary;
+      color: var(--color-primary);
     }
 
     span {
@@ -281,7 +281,7 @@ $gray-light: #f0f2f5;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: $primary;
+    border-color: var(--color-primary);
     background: linear-gradient(135deg, rgba($primary, 0.05), transparent);
     transform: translateY(-4px);
   }
@@ -289,7 +289,7 @@ $gray-light: #f0f2f5;
   .stat-value {
     font-size: 1.15rem;
     font-weight: 800;
-    color: $primary;
+    color: var(--color-primary);
     margin-bottom: 0.15rem;
   }
 
@@ -343,8 +343,8 @@ $gray-light: #f0f2f5;
 
     &.btn-outline-primary {
       background: transparent;
-      color: $primary;
-      border-color: $primary;
+      color: var(--color-primary);
+      border-color: var(--color-primary);
 
       &:hover {
         background: rgba($primary, 0.05);
@@ -443,7 +443,7 @@ $gray-light: #f0f2f5;
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: $primary;
+      border-color: var(--color-primary);
       transform: translateY(-8px);
       box-shadow: 0 12px 40px rgba($primary, 0.2);
 
@@ -464,7 +464,7 @@ $gray-light: #f0f2f5;
       background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary, 0.05));
       border-radius: 50%;
       font-size: 2.1rem;
-      color: $primary;
+      color: var(--color-primary);
       transition: all 0.3s ease;
     }
 
@@ -479,7 +479,7 @@ $gray-light: #f0f2f5;
     .service-price {
       font-size: 1.5rem;
       font-weight: 700;
-      color: $primary;
+      color: var(--color-primary);
       margin-bottom: 0.35rem;
 
       &.is-unavailable {
@@ -545,7 +545,7 @@ $gray-light: #f0f2f5;
       justify-content: center;
       background: linear-gradient(135deg, rgba($primary, 0.15), rgba($primary, 0.05));
       border-radius: 50%;
-      color: $primary;
+      color: var(--color-primary);
       font-size: 1.5rem;
     }
 
@@ -569,7 +569,7 @@ $gray-light: #f0f2f5;
       .year {
         display: inline-block;
         background: $gray-light;
-        color: $primary;
+        color: var(--color-primary);
         padding: 0.2rem 0.65rem;
         border-radius: 20px;
         font-size: 0.8rem;
@@ -625,7 +625,7 @@ $gray-light: #f0f2f5;
     border-radius: 999px;
     border: 1px solid rgba($primary, 0.3);
     background: rgba($primary, 0.06);
-    color: $primary;
+    color: var(--color-primary);
     font-size: 0.85rem;
     font-weight: 600;
 
@@ -652,7 +652,7 @@ $gray-light: #f0f2f5;
     transition: all 0.3s ease;
 
     &:hover {
-      border-color: $primary;
+      border-color: var(--color-primary);
       box-shadow: 0 8px 24px rgba($primary, 0.15);
       transform: translateY(-4px);
     }
@@ -696,7 +696,7 @@ $gray-light: #f0f2f5;
         font-size: 0.95rem;
 
         i {
-          color: $primary;
+          color: var(--color-primary);
           font-size: 1.25rem;
           flex-shrink: 0;
         }
@@ -789,7 +789,7 @@ $gray-light: #f0f2f5;
 
       .rating-number {
         font-weight: 700;
-        color: $primary;
+        color: var(--color-primary);
         font-size: 1rem;
       }
     }
@@ -831,7 +831,7 @@ $gray-light: #f0f2f5;
       align-items: center;
       justify-content: center;
       background: rgba($primary, 0.12);
-      color: $primary;
+      color: var(--color-primary);
       font-size: 1.4rem;
       flex-shrink: 0;
     }
@@ -952,7 +952,7 @@ $gray-light: #f0f2f5;
     justify-content: center;
     border-radius: 8px;
     background: rgba($primary, 0.12);
-    color: $primary;
+    color: var(--color-primary);
     flex-shrink: 0;
     margin-top: 0.1rem;
 
@@ -1003,7 +1003,7 @@ $gray-light: #f0f2f5;
       padding: 1.05rem 2.5rem;
       font-size: 0.95rem;
       background: $white;
-      color: $primary;
+      color: var(--color-primary);
       font-weight: 700;
       border: none;
       border-radius: 12px;

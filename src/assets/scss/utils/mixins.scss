@@ -1,6 +1,11 @@
 @use "sass:map";
 @use "@/assets/scss/utils/variables";
 
+// Breakpoint scale. The xs–xxl tiers are the canonical Bootstrap-aligned scale —
+// prefer them. The `customNNN` aliases below are the legacy max-width edges that
+// existing modules still pass to respond-below(); only the ones actually in use
+// are kept (10 dead aliases were pruned Jun 2026). Don't add new customNNN keys —
+// reach for the named tiers instead.
 $breakpoints: (
   xs: 0,
   sm: 576px,
@@ -8,24 +13,15 @@ $breakpoints: (
   lg: 992px,
   xl: 1200px,
   xxl: 1400px,
+  // Legacy max-width aliases still referenced by modules:
   custom360: 353.98px,
   custom479: 479.98px,
   custom575: 575.98px,
   custom767: 767.98px,
-  custom768: 768px,
   custom991: 991.98px,
-  custom849: 849.98px,
   custom992: 992px,
-  custom1399: 1399.98px,
-  custom1300: 1299.98px,
-  custom1199: 1199.98px,
   custom1023: 1023.98px,
-  custom1024: 1024.98px,
-  custom1200: 1200.98px,
-  custom1280: 1280.98px,
-  custom1400: 1400.98px,
-  custom1440: 1440.98px,
-  custom2000: 1999.98px,
+  custom1199: 1199.98px,
 );
 
 // Respond Above

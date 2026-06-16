@@ -26,7 +26,7 @@
   font-weight: $font-weight-semibold;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 18px;
 
   &::before {
@@ -35,7 +35,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $primary;
+    background: var(--color-primary);
     margin-inline-end: 10px;
     vertical-align: middle;
     transform: translateY(-1px);
@@ -45,7 +45,7 @@
 .heading {
   font-size: 40px;
   font-weight: $font-weight-semibold;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   letter-spacing: -0.025em;
   line-height: 1.28;
   margin: 0 0 14px;
@@ -61,7 +61,7 @@
 
 .subtitle {
   font-size: 16px;
-  color: #6a7585;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.75;
 }
@@ -111,7 +111,7 @@
   font-family: Georgia, "Times New Roman", serif;
   font-size: 56px;
   line-height: 1;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 4px;
   user-select: none;
 
@@ -124,7 +124,7 @@
   margin: 0 auto 40px;
   padding: 0;
   font-size: 22px;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   line-height: 1.68;
   font-weight: 400;
   letter-spacing: -0.005em;
@@ -150,7 +150,7 @@
   gap: 12px;
   margin: 0 auto;
   padding-top: 18px;
-  border-top: 1px solid #ecebe6;
+  border-top: 1px solid var(--border-soft);
 }
 
 .avatar {
@@ -163,7 +163,7 @@
   border-radius: 50%;
   background: $white;
   border: 1px solid rgba($primary, 0.4);
-  color: $primary;
+  color: var(--color-primary);
   font-weight: $font-weight-semibold;
   font-size: 14px;
   letter-spacing: 0.5px;
@@ -179,12 +179,12 @@
 .name {
   font-size: 14px;
   font-weight: $font-weight-medium;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
 }
 
 .meta {
   font-size: 12px;
-  color: #8a8f99;
+  color: var(--text-muted);
   margin-top: 2px;
 }
 
@@ -197,9 +197,9 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1px solid #e2dfd6;
+  border: 1px solid var(--border-soft);
   background: $white;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   font-size: 14px;
   cursor: pointer;
   display: inline-flex;
@@ -214,8 +214,8 @@
 
   &:hover,
   &:focus-visible {
-    color: $primary;
-    border-color: $primary;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
   }
 
   &:focus-visible {
@@ -269,7 +269,7 @@
   padding: 0;
   border-radius: 50%;
   border: none;
-  background: #d2cec3;
+  background: var(--border-soft);
   cursor: pointer;
   transition: background 0.2s ease, width 0.3s ease;
 
@@ -286,9 +286,9 @@
 .dotActive {
   width: 22px;
   border-radius: 3px;
-  background: $primary;
+  background: var(--color-primary);
 
   &:hover {
-    background: $primary;
+    background: var(--color-primary);
   }
 }

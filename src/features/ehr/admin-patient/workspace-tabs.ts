@@ -14,7 +14,6 @@ export type AdminWorkspaceTab =
   | 'care-plan-goals'
   | 'visits-encounters'
   | 'measurements'
-  | 'notes-reports'
   | 'documents'
   | 'labs'
   | 'care-team-consent'
@@ -28,7 +27,6 @@ export const ADMIN_WORKSPACE_TAB_LIST: Array<{ id: AdminWorkspaceTab; label: str
   { id: 'care-plan-goals', label: 'Care Plan & Goals' },
   { id: 'visits-encounters', label: 'Visits & Encounters' },
   { id: 'measurements', label: 'Measurements' },
-  { id: 'notes-reports', label: 'Notes & Reports' },
   { id: 'labs', label: 'Labs & Imaging' },
   { id: 'documents', label: 'Documents' },
   { id: 'care-team-consent', label: 'Care Team & Consent' },
@@ -45,12 +43,10 @@ export const ADMIN_WORKSPACE_TAB_ALIASES: Record<string, AdminWorkspaceTab> = {
   consent: 'care-team-consent',
   visits: 'visits-encounters',
   vitals: 'measurements',
-  notes: 'notes-reports',
   'care-team': 'care-team-consent',
   coordination: 'orders-tasks',
   scheduling: 'visits-encounters',
   tasks: 'orders-tasks',
-  reports: 'notes-reports',
 };
 
 export function resolveAllowedWorkspaceTab(

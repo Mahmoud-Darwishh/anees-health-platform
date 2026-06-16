@@ -30,7 +30,7 @@
 
 .description {
   max-width: 760px;
-  color: #5f6368;
+  color: var(--text-muted);
   font-size: 1.05rem;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .copy {
-  color: #5f6368;
+  color: var(--text-muted);
 }
 
 .actions {

@@ -2,90 +2,13 @@
 
 import { AuditAction } from '@prisma/client';
 import { listRecentPatientVitals } from '@/lib/medplum/observations';
-import { createPatientTask, listPatientTasks } from '@/lib/medplum/tasks';
-import { createPatientCommunication } from '@/lib/medplum/communications';
-import { careReportCode, careReportComponentText, createNursingReport, createNursingShiftHandoffReport, createPhysioSessionReport, listPatientCareReports } from '@/lib/medplum/care-reports';
+import { listPatientTasks } from '@/lib/medplum/tasks';
+import { careReportCode, careReportComponentText, createNursingShiftHandoffReport, createPhysioSessionReport, listPatientCareReports } from '@/lib/medplum/care-reports';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import { evaluatePatientGeoPresence } from '@/lib/geo/presence-policy';
-import { createNursingReportSchema, createNursingShiftHandoffSchema, createPhysioReportSchema, formDataToInput } from '@/features/ehr/schemas/admin-patient-actions';
+import { createNursingShiftHandoffSchema, createPhysioReportSchema, formDataToInput } from '@/features/ehr/schemas/admin-patient-actions';
 import { setAdminPatientFlash } from '../flash';
 import { NURSING_HANDOFF_DEFAULT_RADIUS_METERS, NURSING_HANDOFF_MAX_ACCURACY_METERS, PHYSIO_DISCHARGE_REVIEW_MARKER, refreshClinicalPaths, failAction, requireAdminPatientAction, getClinicalWriterWithPractitioner, getLocalPatientGeoPolicy, createPatientReviewTask, maybeCreatePhysioRedFlagEscalation, assertRosteredNurseForPatientIfNurse } from './shared';
-
-export async function createNursingReportAction(formData: FormData): Promise<void> {
-  try {
-    const input = createNursingReportSchema.parse(formDataToInput(formData));
-    await requireAdminPatientAction('nursing_report.create', input.medplumPatientId, 'nursing_report');
-    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
-
-    await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, new Date());
-
-    if (input.escalationNeeded === true && (input.followUpPlan ?? '').trim().length < 10) {
-      throw new Error('When escalation is needed, include a clear follow-up plan.');
-    }
-
-    if (input.escalationNeeded === true) {
-      const activeEscalation = (await listPatientTasks(input.medplumPatientId, 80)).find(
-        (task) =>
-          task.code?.coding?.[0]?.code === 'escalation' &&
-          !['completed', 'cancelled'].includes(task.status),
-      );
-
-      if (!activeEscalation) {
-        const escalationTask = await createPatientTask({
-          patientId: input.medplumPatientId,
-          encounterId: input.encounterId ?? null,
-          title: 'Nursing safety escalation',
-          description: input.followUpPlan ?? input.noteBody,
-          priority: 'urgent',
-          taskCode: 'escalation',
-        });
-
-        await createPatientCommunication({
-          patientId: input.medplumPatientId,
-          encounterId: input.encounterId ?? null,
-          category: 'escalation',
-          priority: 'urgent',
-          message: input.followUpPlan ?? input.noteBody,
-          senderReference: practitioner.reference,
-          senderDisplay: practitioner.display,
-          basedOnTaskId: escalationTask.id ?? null,
-        });
-
-        await writeMedplumAuditMirror({
-          tableName: 'MedplumEscalationTask',
-          recordId: escalationTask.id ?? `${input.medplumPatientId}:${Date.now()}`,
-          action: AuditAction.create,
-          changedFields: ['status', 'priority', 'code', 'description', 'for'],
-          changedBy,
-        });
-      }
-    }
-
-    const report = await createNursingReport({
-      patientId: input.medplumPatientId,
-      encounterId: input.encounterId ?? null,
-      performerReference: practitioner.reference,
-      performerDisplay: practitioner.display,
-      noteBody: input.noteBody,
-      conditionSummary: input.conditionSummary ?? '',
-      escalationNeeded: input.escalationNeeded,
-      followUpPlan: input.followUpPlan ?? '',
-    });
-
-    await writeMedplumAuditMirror({
-      tableName: 'MedplumNursingReport',
-      recordId: report.id ?? `${input.medplumPatientId}:${Date.now()}`,
-      action: AuditAction.create,
-      changedFields: ['code', 'subject', 'encounter', 'performer', 'component', 'note'],
-      changedBy,
-    });
-
-    await setAdminPatientFlash({ type: 'success', message: 'Nursing report saved.' });
-    refreshClinicalPaths(input.medplumPatientId);
-  } catch (error) {
-    await failAction(formData, error);
-  }
-}
 
 export async function createNursingShiftHandoffAction(formData: FormData): Promise<void> {
   try {

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { requestRestrictedAccessAction, requestBreakGlassAccessAction } from './actions';
 import { ADMIN_WORKSPACE_TAB_LIST } from './workspace-tabs';
 import { PatientSafetyHeader } from './PatientSafetyHeader';
+import { FlashToast } from './FlashToast';
 import type { AdminPatientDetailData, AdminPatientFlash } from './types';
 import { buildAdminPatientViewContext } from './view-context';
 import { SnapshotSections } from './views/snapshot-sections';
@@ -11,10 +12,10 @@ import { MedicationsMarSections } from './views/medications-mar-sections';
 import { DocumentsSections } from './views/documents-sections';
 import { LabsSections } from './views/labs-sections';
 import { MeasurementsSections } from './views/measurements-sections';
+import { GlucoseSections } from './views/glucose-sections';
 import { CareTeamConsentSections } from './views/care-team-consent-sections';
 import { VisitsEncountersSections } from './views/visits-encounters-sections';
 import { CarePlanGoalsSections } from './views/care-plan-goals-sections';
-import { NotesReportsSections } from './views/notes-reports-sections';
 import { OrdersTasksSections } from './views/orders-tasks-sections';
 
 export function AdminPatientDetailView({
@@ -52,16 +53,11 @@ export function AdminPatientDetailView({
         <div>
           <p className="mb-1 small opacity-75">Anees EHR · Patient Workspace</p>
           <h1 className="h5 mb-0">{patient?.name?.[0]?.text ?? 'Patient profile'}</h1>
-          <p className="small mb-0 mt-1 text-muted">Unified workspace for structured documentation, care coordination, and clinical continuity.</p>
         </div>
         <span className="anees-chip">Case-scoped access active</span>
       </div>
 
-      {flash && (
-        <div className={`alert ${flash.type === 'success' ? 'alert-success' : 'alert-danger'}`} role="alert">
-          {flash.message}
-        </div>
-      )}
+      {flash && <FlashToast flash={flash} />}
 
       {error && (
         <div className="alert alert-danger" role="alert">
@@ -167,10 +163,10 @@ export function AdminPatientDetailView({
           <DocumentsSections ctx={ctx} />
           <LabsSections ctx={ctx} />
           <MeasurementsSections ctx={ctx} />
+          <GlucoseSections ctx={ctx} />
           <CareTeamConsentSections ctx={ctx} />
           <VisitsEncountersSections ctx={ctx} />
           <CarePlanGoalsSections ctx={ctx} />
-          <NotesReportsSections ctx={ctx} />
           <OrdersTasksSections ctx={ctx} />
         </div>
       )}

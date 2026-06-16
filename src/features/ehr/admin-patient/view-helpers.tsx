@@ -200,16 +200,6 @@ export const INCIDENT_ACTION_OPTIONS = [
   'Escalation task created',
 ] as const;
 
-export const VISIT_NOTE_OPTIONS = [
-  'Routine home visit',
-  'Medication review performed',
-  'Vitals and safety review performed',
-  'Wound care visit',
-  'Physiotherapy session',
-  'Post-discharge follow-up',
-  'Family education provided',
-] as const;
-
 export const COMMUNICATION_MESSAGE_OPTIONS = [
   'Clinical update documented; no action required.',
   'Family update requested.',
@@ -299,11 +289,28 @@ export function appointmentStatusLabel(status: string): string {
   }
 }
 
+// Discipline-neutral overrides for states whose enum names are physio-era.
+// The visit workflow serves every clinician (nurse, doctor, physio), so the
+// labels must not say "physio".
+const WORKFLOW_STATE_LABEL_OVERRIDES: Record<string, string> = {
+  declined_by_physio: 'Declined by clinician',
+  reassigned_to_other_physio: 'Reassigned to clinician',
+  cancelled_by_med_ops: 'Cancelled by Med Ops',
+  patient_not_home: 'Patient not home',
+  refused_at_door: 'Refused at door',
+  session_interrupted: 'Session interrupted',
+  rescheduled_in_place: 'Rescheduled',
+  diverted_in_transit: 'Diverted in transit',
+};
+
 export function workflowStateLabel(state: string): string {
-  return state
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
+  return (
+    WORKFLOW_STATE_LABEL_OVERRIDES[state] ??
+    state
+      .split('_')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ')
+  );
 }
 
 export function formatClinicalDate(value: string | Date | null | undefined): string {

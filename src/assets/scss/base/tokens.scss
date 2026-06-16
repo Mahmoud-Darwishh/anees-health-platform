@@ -25,11 +25,37 @@
   --color-brand-gold: #{v.$brand-gold};
   --color-brand-cream: #{v.$brand-cream};
 
-  // Semantic status
+  // Documented public aliases — the names components should reach for.
+  // (CLAUDE.md references var(--color-primary)/--color-text/--color-surface.)
+  --color-primary: var(--color-brand-gold);
+  --color-secondary: var(--color-brand-dark-blue);
+  --color-text: var(--text-strong);
+  --color-surface: var(--surface-base);
+
+  // Semantic status — the single hue per concept. Everything (public, admin,
+  // clinician) routes here so "success green" / "danger red" mean one thing.
   --color-success: #{v.$success};
   --color-warning: #{v.$warning};
   --color-danger: #{v.$danger};
   --color-info: #{v.$info};
+
+  // Status foreground / surface / border triplets — tuned, accessible pairs
+  // shared by chips, badges, alerts and visit-state pills across all surfaces.
+  --status-success-fg: #2c6c50;
+  --status-success-bg: #f0faf5;
+  --status-success-border: #{rgba(#2c6c50, 0.22)};
+  --status-warning-fg: #745724;
+  --status-warning-bg: #fff7df;
+  --status-warning-border: #{rgba(v.$brand-gold, 0.34)};
+  --status-danger-fg: #a5162f;
+  --status-danger-bg: #fff1f3;
+  --status-danger-border: #{rgba(#cf233f, 0.32)};
+  --status-info-fg: #1c5478;
+  --status-info-bg: #eaf5fd;
+  --status-info-border: #{rgba(#2f6f8f, 0.3)};
+  --status-neutral-fg: #41506b;
+  --status-neutral-bg: #f6f8fa;
+  --status-neutral-border: #{rgba(v.$brand-navy, 0.12)};
 
   // Surfaces — cream-family wash; the soft + inverse surfaces are the brand anchors.
   --surface-base: #fbf8f1;
@@ -42,6 +68,9 @@
   --text-strong: #{v.$brand-navy};
   --text-soft: #556377;
   --text-muted: #7b8698;
+  // Text on dark/brand surfaces (navy buttons, inverse banners).
+  --text-on-dark: #f7f2e7;
+  --text-on-gold: #{v.$brand-navy};
 
   // Borders & effects — focus ring + shadows derive from the gold/navy anchors.
   --border-soft: #e6ddcd;
@@ -50,10 +79,12 @@
   --shadow-soft: 0 10px 30px -24px #{rgba(v.$brand-navy, 0.28)};
   --shadow-elevated: 0 22px 55px -35px #{rgba(v.$brand-navy, 0.3)};
 
-  // Radius
+  // Radius — the canonical scale for the whole site. New code uses these;
+  // legacy Sass $border-radius-* survive only where they're already wired.
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
+  --radius-pill: 999px;
   --radius-control: var(--radius-md);
 
   // Typography

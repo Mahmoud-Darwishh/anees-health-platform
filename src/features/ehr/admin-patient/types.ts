@@ -5,7 +5,6 @@ import type { listRecentPatientVitals } from '@/lib/medplum/observations';
 import type { listPatientClinicalNotes } from '@/lib/medplum/clinical-notes';
 import type { getActivePatientCareTeam } from '@/lib/medplum/care-teams';
 import type { listPatientTasks } from '@/lib/medplum/tasks';
-import type { listPatientCareReports } from '@/lib/medplum/care-reports';
 import type { PortalConsentSummary } from '@/lib/medplum/consents';
 import type { AllergySummary } from '@/lib/medplum/allergies';
 import type { ConditionSummary } from '@/lib/medplum/conditions';
@@ -18,6 +17,7 @@ import type { CommunicationSummary } from '@/lib/medplum/communications';
 import type { AppointmentSummary } from '@/lib/medplum/appointments';
 import type { listPatientCarePlans } from '@/lib/medplum/care-plans';
 import type { listPatientGoalsFromMedplum } from '@/lib/medplum/goals';
+import type { listGlucoseReadings } from '@/lib/medplum/glucose';
 
 export type AssignableStaff = {
   id: string;
@@ -67,8 +67,6 @@ export type AdminPatientDetailData = {
   assignableStaff: AssignableStaff[];
   tasks: Awaited<ReturnType<typeof listPatientTasks>>;
   tasksError: string | null;
-  careReports: Awaited<ReturnType<typeof listPatientCareReports>>;
-  careReportsError: string | null;
   conditions: ConditionSummary[];
   conditionsError: string | null;
   allergies: AllergySummary[];
@@ -85,6 +83,8 @@ export type AdminPatientDetailData = {
   labResultsError: string | null;
   assessments: AssessmentSummary[];
   assessmentsError: string | null;
+  glucoseReadings: Awaited<ReturnType<typeof listGlucoseReadings>>;
+  glucoseReadingsError: string | null;
   communications: CommunicationSummary[];
   communicationsError: string | null;
   appointments: AppointmentSummary[];

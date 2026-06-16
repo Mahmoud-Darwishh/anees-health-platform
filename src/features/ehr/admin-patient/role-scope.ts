@@ -7,7 +7,6 @@ export type WorkspaceTab =
   | 'care-plan-goals'
   | 'visits-encounters'
   | 'measurements'
-  | 'notes-reports'
   | 'documents'
   | 'labs'
   | 'care-team-consent'
@@ -21,7 +20,6 @@ const NURSING_TABS: WorkspaceTab[] = [
   'care-plan-goals',
   'visits-encounters',
   'measurements',
-  'notes-reports',
   'orders-tasks',
 ];
 
@@ -32,7 +30,6 @@ const PHYSIO_TABS: WorkspaceTab[] = [
   'care-plan-goals',
   'visits-encounters',
   'measurements',
-  'notes-reports',
   'orders-tasks',
 ];
 
@@ -43,7 +40,6 @@ const FULL_CLINICAL_TABS: WorkspaceTab[] = [
   'care-plan-goals',
   'visits-encounters',
   'measurements',
-  'notes-reports',
   'documents',
   'labs',
   'care-team-consent',

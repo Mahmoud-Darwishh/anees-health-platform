@@ -60,14 +60,14 @@
   h1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: $brand-dark-blue;
+    color: var(--color-secondary);
     margin: 0 0 0.3rem;
     line-height: 1.25;
   }
 
   p {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: var(--text-muted);
     margin: 0;
     line-height: 1.5;
   }
@@ -81,18 +81,18 @@
   gap: 0.625rem;
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid var(--border-soft);
   border-radius: 12px;
   background: #fff;
-  color: #374151;
+  color: var(--text-soft);
   font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 
   &:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
+    background: var(--surface-muted);
+    border-color: var(--border-strong);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   }
 
@@ -114,7 +114,7 @@
   align-items: center;
   gap: 0.75rem;
   margin: 1.25rem 0;
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.8125rem;
 
   &::before,
@@ -122,7 +122,7 @@
     content: '';
     flex: 1;
     height: 1px;
-    background: #e5e7eb;
+    background: var(--border-soft);
   }
 }
 
@@ -142,27 +142,27 @@
   label {
     font-size: 0.8125rem;
     font-weight: 600;
-    color: $brand-dark-blue;
+    color: var(--color-secondary);
     letter-spacing: 0.01em;
   }
 
   input {
     padding: 0.72rem 0.9rem;
-    border: 1.5px solid #e5e7eb;
+    border: 1.5px solid var(--border-soft);
     border-radius: 10px;
     font-size: 0.9375rem;
     color: #111827;
-    background: #fafafa;
+    background: var(--surface-muted);
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     width: 100%;
 
     &::placeholder {
-      color: #adb5bd;
+      color: var(--text-muted);
     }
 
     &:focus {
-      border-color: $primary;
+      border-color: var(--color-primary);
       background: #fff;
       box-shadow: 0 0 0 3px rgba($primary, 0.12);
     }
@@ -175,7 +175,7 @@
 
   .hint {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--text-muted);
     line-height: 1.4;
   }
 }
@@ -197,7 +197,7 @@
 
   a {
     font-size: 0.8125rem;
-    color: $primary;
+    color: var(--color-primary);
     text-decoration: none;
     font-weight: 500;
 
@@ -250,10 +250,10 @@
   text-align: center;
   margin-top: 1.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-muted);
 
   a {
-    color: $primary;
+    color: var(--color-primary);
     font-weight: 600;
     text-decoration: none;
 

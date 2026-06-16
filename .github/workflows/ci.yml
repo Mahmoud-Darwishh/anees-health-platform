@@ -47,6 +47,9 @@ jobs:
       - name: Lint CSS (logical-properties guard)
         run: npm run lint:css
 
+      - name: Lint CSS (hardcoded-colour guard)
+        run: npm run lint:color
+
       - name: Type-check
         run: npm run typecheck
 

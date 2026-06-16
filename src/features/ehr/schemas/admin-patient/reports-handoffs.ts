@@ -1,15 +1,6 @@
 import { z } from 'zod';
 import { optionalTrimmedString, optionalNumber, requiredLatitude, requiredLongitude, optionalAccuracyMeters, optionalBoolean, requiredDate, requiredPatientId } from './primitives';
 
-export const createNursingReportSchema = z.object({
-  medplumPatientId: requiredPatientId,
-  encounterId: optionalTrimmedString,
-  noteBody: z.string().trim().min(1, 'Nursing note body is required'),
-  conditionSummary: optionalTrimmedString,
-  escalationNeeded: optionalBoolean,
-  followUpPlan: optionalTrimmedString,
-});
-
 export const createNursingShiftHandoffSchema = z
   .object({
     medplumPatientId: requiredPatientId,

@@ -26,7 +26,7 @@
   font-weight: $font-weight-semibold;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: $primary;
+  color: var(--color-primary);
   margin-bottom: 18px;
 
   &::before {
@@ -35,7 +35,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $primary;
+    background: var(--color-primary);
     margin-inline-end: 10px;
     vertical-align: middle;
     transform: translateY(-1px);
@@ -45,7 +45,7 @@
 .heading {
   font-size: 40px;
   font-weight: $font-weight-semibold;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   letter-spacing: -0.025em;
   line-height: 1.28;
   margin: 0 0 16px;
@@ -61,7 +61,7 @@
 
 .subtitle {
   font-size: 16px;
-  color: #6a7585;
+  color: var(--text-muted);
   line-height: 1.75;
   margin: 0;
 }
@@ -84,7 +84,7 @@
 
 .tile {
   background: $white;
-  border: 1px solid #ecebe6;
+  border: 1px solid var(--border-soft);
   border-radius: 14px;
   padding: 28px 24px;
   transition: border-color 0.25s ease, transform 0.25s ease;
@@ -101,7 +101,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  color: $primary;
+  color: var(--color-primary);
   font-size: 22px;
   margin-bottom: 18px;
 
@@ -113,7 +113,7 @@
 .tileTitle {
   font-size: 17px;
   font-weight: $font-weight-medium;
-  color: $brand-dark-blue;
+  color: var(--color-secondary);
   margin: 0 0 8px;
   line-height: 1.48;
   letter-spacing: -0.01em;
@@ -121,7 +121,7 @@
 
 .tileDesc {
   font-size: 14px;
-  color: #6a7585;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.78;
 }
