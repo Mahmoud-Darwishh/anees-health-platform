@@ -13,6 +13,8 @@ export type ActionDefinition = {
 export const ACTIONS = {
   // Workspace and read gates
   'workspace.physio.access': { module: 'physio_workspace', requires: 'read' },
+  'workspace.nursing.access': { module: 'nursing_workspace', requires: 'read' },
+  'workspace.doctor.access': { module: 'doctor_workspace', requires: 'read' },
   'patient.directory.read': { module: 'patient_demographics', requires: 'read' },
   'patient.read': { module: 'patient_demographics', requires: 'read', requiresCaseScope: true },
   'patient.banner.read': { module: 'patient_banner', requires: 'read', requiresCaseScope: true },
@@ -139,6 +141,15 @@ export const ACTIONS = {
   'consent.write': { module: 'consent_records', requires: 'write' },
   'nursing_shift.manage': { module: 'visits_schedule', requires: 'write' },
   'escalation.update': { module: 'escalations', requires: 'write', requiresCaseScope: true },
+
+  // Staff / user management (governance). `staff_user_mgmt` grants admin `sign`
+  // and compliance `read` in the matrix — so reads are visible to compliance
+  // for oversight, while every create/edit/credential change stays admin-only.
+  'staff.read': { module: 'staff_user_mgmt', requires: 'read' },
+  'staff.create': { module: 'staff_user_mgmt', requires: 'sign', sensitive: true },
+  'staff.update': { module: 'staff_user_mgmt', requires: 'sign', sensitive: true },
+  'staff.set_status': { module: 'staff_user_mgmt', requires: 'sign', sensitive: true },
+  'staff.issue_credential_link': { module: 'staff_user_mgmt', requires: 'sign', sensitive: true },
 } satisfies Record<string, ActionDefinition>;
 
 export type ActionName = keyof typeof ACTIONS;

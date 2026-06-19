@@ -13,6 +13,8 @@
  * with historical bookings; do not reintroduce them in the UI.
  */
 
+import { isWithinCoverage } from '@/lib/config/coverage-area';
+
 // ============================================================================
 // PRICING MAP — keys match booking_prices.key in DB.
 // ============================================================================
@@ -72,6 +74,10 @@ export interface BookingFormState {
   // Promo (preview only; revalidated on server)
   promocode?: string | null;
 
+  // Coverage gate (in-home/package only): 'cairo' | 'giza' | 'other'. Telemedicine
+  // is remote, so it is not coverage-gated and leaves this null.
+  governorate?: string | null;
+
   // ── Legacy retired fields (kept as null so existing helpers don't crash) ──
   serviceType: ServiceType | null;
   specialty: Specialty | null;
@@ -105,6 +111,7 @@ export interface CreateBookingIntentRequest {
   packageType?: PackageType;
   packageDuration?: PackageDuration;
   promocode?: string;
+  governorate?: string;
 }
 
 export interface BookingValidationError {
@@ -246,6 +253,14 @@ export function validateBookingForm(state: BookingFormState): BookingValidationE
       errors.push({ field: 'packageType', message: 'booking.validation.packageTypeRequired' });
     } else if (entry.durations.length > 1 && !state.packageDuration) {
       errors.push({ field: 'packageDuration', message: 'booking.validation.packageDurationRequired' });
+    }
+
+    // In-home care is coverage-gated to Greater Cairo. Telemedicine is remote
+    // and therefore exempt (no governorate required).
+    if (!state.governorate) {
+      errors.push({ field: 'governorate', message: 'booking.validation.governorateRequired' });
+    } else if (!isWithinCoverage(state.governorate)) {
+      errors.push({ field: 'governorate', message: 'booking.form.outOfCoverage' });
     }
   }
 

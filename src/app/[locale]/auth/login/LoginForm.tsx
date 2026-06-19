@@ -16,10 +16,6 @@ export default function LoginForm() {
   const rawCallbackUrl = searchParams.get('callbackUrl');
   const safeCallbackUrl = rawCallbackUrl?.startsWith('/') ? rawCallbackUrl : null;
   const patientDefaultUrl = `/${locale}/portal`;
-  // Staff land on the `/admin` dispatcher, which forwards each role to its own
-  // home section. Never hardcode a single workspace here — it caused redirect
-  // bounces (and wrong landings) for non-physio roles.
-  const staffDefaultUrl = '/admin';
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
@@ -33,11 +29,14 @@ export default function LoginForm() {
     setLoading(true);
 
     const trimmed = identifier.trim();
-    // An email identifier is a staff login; phone / case-id is a patient login.
+    // One login, whichever you are: an email identifier authenticates as staff
+    // (→ /admin dispatcher), a phone / case-ID authenticates as a patient
+    // (→ portal). No second sign-in. The dedicated /admin/login stays available
+    // as a direct staff entry, but signing in here never bounces to it.
     const isStaff = trimmed.includes('@');
 
     const result = isStaff
-      ? await signIn('staff-credentials', { email: trimmed, password, redirect: false })
+      ? await signIn('staff-credentials', { email: trimmed.toLowerCase(), password, redirect: false })
       : await signIn('patient-credentials', { identifier: trimmed, password, redirect: false });
 
     setLoading(false);
@@ -47,7 +46,7 @@ export default function LoginForm() {
       return;
     }
 
-    const destination = safeCallbackUrl ?? (isStaff ? staffDefaultUrl : patientDefaultUrl);
+    const destination = safeCallbackUrl ?? (isStaff ? '/admin' : patientDefaultUrl);
     router.push(destination);
     router.refresh();
   }

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { dayGreeting } from './helpers';
 import type { PortalContext } from './view-context';
 import type { PortalWorkspaceTab } from './types';
-import { ProfileSection, ClinicalDepthSection, EngagementSection } from './views/overview-sections';
+import { JourneyHeroSection, ProfileSection, ClinicalDepthSection, EngagementSection } from './views/overview-sections';
 import {
   ProblemsSection,
   AllergiesSection,
@@ -94,6 +94,7 @@ export function PortalPageView({ ctx }: { ctx: PortalContext }) {
         </div>
       </div>
 
+      {activeTab === 'overview' && <JourneyHeroSection ctx={ctx} />}
       {activeTab === 'overview' && <ProfileSection ctx={ctx} />}
       {activeTab === 'overview' && <ClinicalDepthSection ctx={ctx} />}
 

@@ -70,3 +70,45 @@ export function buildPaymentConfirmationMessage(
   );
   return lines.join('\n');
 }
+
+interface PortalClaimInviteInput {
+  fullName: string;
+  caseCode: string;
+  claimUrl: string;
+}
+
+/**
+ * Portal-claim invite — sent after payment is confirmed so the patient can
+ * create their account and access their care. They claim with their Case ID
+ * (shown here) + the same phone number on the booking.
+ *
+ * NEVER log the rendered text — it contains PHI (name) + the Case ID.
+ */
+export function buildPortalClaimInviteMessage(
+  input: PortalClaimInviteInput,
+  locale: 'en' | 'ar',
+): string {
+  if (locale === 'ar') {
+    return [
+      `مرحباً ${input.fullName} 👋`,
+      '',
+      'يمكنك الآن إنشاء حسابك في بوابة *أنيس هيلث* لمتابعة رعايتك ومواعيدك.',
+      '',
+      `🔑 رقم حالتك (Case ID): ${input.caseCode}`,
+      `🔗 أنشئ حسابك من هنا: ${input.claimUrl}`,
+      '',
+      'استخدم رقم هاتفك المسجل ورقم الحالة أعلاه لإكمال التسجيل.',
+    ].join('\n');
+  }
+
+  return [
+    `Hi ${input.fullName} 👋`,
+    '',
+    'You can now create your *Anees Health* portal account to follow your care and visits.',
+    '',
+    `🔑 Your Case ID: ${input.caseCode}`,
+    `🔗 Create your account: ${input.claimUrl}`,
+    '',
+    'Use your registered phone number and the Case ID above to finish signing up.',
+  ].join('\n');
+}

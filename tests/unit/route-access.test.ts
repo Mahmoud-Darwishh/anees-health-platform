@@ -15,11 +15,16 @@ describe('canAccessRoute (edge section gate)', () => {
     }
   });
 
-  it('restricts the clinician workspace to physio (+ admins)', () => {
+  it('opens the clinician workspace to physio + nurse + doctor (+ admins), not back-office roles', () => {
     expect(canAccessRoute('/clinician/today', 'physiotherapist')).toBe(true);
     expect(canAccessRoute('/clinician/today', 'admin')).toBe(true);
-    expect(canAccessRoute('/clinician/today', 'nurse')).toBe(false);
-    expect(canAccessRoute('/clinician/today', 'doctor')).toBe(false);
+    // Nurses + doctors each have a discipline workspace under /clinician/*.
+    expect(canAccessRoute('/clinician/nursing/today', 'nurse')).toBe(true);
+    expect(canAccessRoute('/clinician/doctor', 'doctor')).toBe(true);
+    expect(canAccessRoute('/clinician/today', 'nurse')).toBe(true);
+    expect(canAccessRoute('/clinician/today', 'doctor')).toBe(true);
+    // Back-office roles still have no clinician workspace.
+    expect(canAccessRoute('/clinician/today', 'insurance_coordinator')).toBe(false);
   });
 
   it('scopes the section dashboards to their owning roles', () => {
@@ -44,7 +49,7 @@ describe('canAccessRoute (edge section gate)', () => {
 
   it('routes each role to a reachable home', () => {
     expect(homeRouteForRole('physiotherapist')).toBe('/clinician/today');
-    expect(homeRouteForRole('nurse')).toBe('/admin/nursing/dashboard');
+    expect(homeRouteForRole('nurse')).toBe('/clinician/nursing/today');
     expect(homeRouteForRole('compliance_officer')).toBe('/admin/compliance');
     expect(homeRouteForRole('viewer')).toBe('/admin/no-workspace');
     expect(homeRouteForRole(null)).toBe('/en');

@@ -575,6 +575,22 @@ export const EHR_MATRIX = {
       admin: cell('read', 'global'),
     } satisfies ModuleAccess,
   },
+  nursing_workspace: {
+    title: 'Nurse workspace (/clinician/nursing/*)',
+    description: 'May open the nurse field-clinician app. Not a clinical record.',
+    access: {
+      nurse: cell('read', 'case'),
+      admin: cell('read', 'global'),
+    } satisfies ModuleAccess,
+  },
+  doctor_workspace: {
+    title: 'Doctor workspace (/clinician/doctor/*)',
+    description: 'May open the doctor review/sign workspace. Not a clinical record.',
+    access: {
+      doctor: cell('read', 'case'),
+      admin: cell('read', 'global'),
+    } satisfies ModuleAccess,
+  },
 };
 
 /** The set of valid module names. Using a wrong one is a compile error. */

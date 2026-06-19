@@ -50,6 +50,21 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     description: 'Insurers, coverage, prior-authorisation, and claims.',
   },
   {
+    href: '/admin/billing',
+    label: 'Billing',
+    description: 'Confirm InstaPay transfers and export delivered visits.',
+  },
+  {
+    href: '/admin/analytics',
+    label: 'Analytics',
+    description: 'Revenue, bookings funnel, visits, and clinician utilization.',
+  },
+  {
+    href: '/admin/staff',
+    label: 'Staff',
+    description: 'Onboard staff, assign roles + licences, and issue access links.',
+  },
+  {
     href: '/admin/compliance',
     label: 'Compliance',
     description: 'Audit log, break-glass overrides, and access events.',

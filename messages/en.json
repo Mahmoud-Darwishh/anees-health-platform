@@ -85,6 +85,14 @@
       "labReports": "Lab Reports",
       "latestBp": "Latest BP"
     },
+    "journey": {
+      "nextVisit": "Your next visit",
+      "noUpcoming": "No upcoming visit scheduled.",
+      "book": "Book a visit",
+      "viewAll": "View all visits",
+      "lastVisit": "Your last visit",
+      "noLastVisit": "No past visits yet."
+    },
     "clinicalDepthTitle": "Clinical Depth",
     "clinicalDepthSubtitle": "Problems, allergies, medications, documents, labs, and assessments.",
     "problemsTitle": "Problems",
@@ -1640,6 +1648,12 @@
     },
     "form": {
       "personalInfo": "Your Information",
+      "governorate": "Governorate",
+      "governoratePlaceholder": "Select your governorate",
+      "governorateCairo": "Cairo",
+      "governorateGiza": "Giza",
+      "governorateOther": "Other (outside Greater Cairo)",
+      "outOfCoverage": "We currently serve in-home visits in Greater Cairo (Cairo & Giza) only. Telemedicine is available nationwide.",
       "fullName": "Full Name",
       "fullNamePlaceholder": "Enter your full name",
       "countryCode": "Country Code",
@@ -1824,6 +1838,7 @@
       "visitTypeRequired": "Please select a visit type",
       "packageTypeRequired": "Please select a package",
       "packageDurationRequired": "Please choose a package duration",
+      "governorateRequired": "Please select your governorate",
       "serviceTypeRequired": "Please select a service type",
       "specialtyRequired": "Please select a specialty",
       "preferredDateRequired": "Please select a preferred date",
@@ -1932,6 +1947,29 @@
   },
   "payment": {
     "title": "Complete Payment",
+    "method": {
+      "title": "Choose how to pay",
+      "subtitle": "Pay securely to confirm your visit",
+      "card": "Credit / Debit Card",
+      "cardHint": "Visa, Mastercard, Meeza — instant",
+      "instapay": "InstaPay / Bank Transfer",
+      "instapayHint": "Transfer from your bank app, confirmed within hours"
+    },
+    "instapay": {
+      "sendTo": "Send the exact amount to",
+      "openApp": "Open InstaPay",
+      "step1": "Tap “Open InstaPay” and send the exact amount shown above.",
+      "step2": "Copy the transfer reference number from your app.",
+      "step3": "Enter the reference below and submit — we'll confirm and message you on WhatsApp.",
+      "referenceLabel": "Transfer reference (optional)",
+      "referencePlaceholder": "e.g. 1234567890",
+      "senderLabel": "Sender name (optional)",
+      "submit": "I've sent the payment",
+      "submitting": "Submitting...",
+      "successTitle": "Payment submitted",
+      "successBody": "We'll confirm your transfer and send your account details on WhatsApp shortly.",
+      "error": "Could not submit. Please try again."
+    },
     "subtitle": "Order: {orderId}",
     "orderTotal": "Order Total",
     "loading": "Preparing secure payment...",
@@ -2002,6 +2040,26 @@
         "sendFailed": "Failed to send OTP. Please try again.",
         "verifyFailed": "OTP verification failed. Please try again."
       }
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your phone number and we'll send a code on WhatsApp.",
+      "subtitleReset": "Enter the code we sent and choose a new password.",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "e.g. 01012345678",
+      "sendCode": "Send code",
+      "sending": "Sending…",
+      "codeLabel": "Verification code",
+      "codePlaceholder": "6-digit code",
+      "newPasswordLabel": "New password",
+      "newPasswordPlaceholder": "Choose a new password",
+      "resetButton": "Reset password",
+      "resetting": "Resetting…",
+      "otpSent": "We've sent a code to your WhatsApp.",
+      "passwordHint": "At least 12 characters, with an uppercase letter, a lowercase letter, and a number.",
+      "backToLogin": "Back to sign in",
+      "success": "Password reset. Redirecting to sign in…",
+      "genericError": "Something went wrong. Please try again."
     },
     "signup": {
       "title": "Create Account",

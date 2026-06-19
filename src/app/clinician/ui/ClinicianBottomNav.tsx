@@ -8,7 +8,7 @@ type NavItem = {
   label: string;
 };
 
-const NAV_ITEMS: NavItem[] = [
+const PHYSIO_NAV_ITEMS: NavItem[] = [
   { href: '/clinician/today', label: 'My Journey' },
   { href: '/clinician/patients', label: 'Patients' },
   { href: '/clinician/tasks', label: 'Tasks' },
@@ -16,17 +16,40 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/clinician/profile', label: 'Profile' },
 ];
 
-function isItemActive(pathname: string, href: string): boolean {
+const NURSING_NAV_ITEMS: NavItem[] = [
+  { href: '/clinician/nursing/today', label: 'My Journey' },
+  { href: '/clinician/nursing/profile', label: 'Profile' },
+];
+
+const DOCTOR_NAV_ITEMS: NavItem[] = [
+  { href: '/clinician/doctor', label: 'My Cases' },
+  { href: '/clinician/doctor/profile', label: 'Profile' },
+];
+
+function matchesItem(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function ClinicianBottomNav() {
+const NAV_BY_DISCIPLINE: Record<'physio' | 'nursing' | 'doctor', NavItem[]> = {
+  physio: PHYSIO_NAV_ITEMS,
+  nursing: NURSING_NAV_ITEMS,
+  doctor: DOCTOR_NAV_ITEMS,
+};
+
+export function ClinicianBottomNav({ discipline = 'physio' }: { discipline?: 'physio' | 'nursing' | 'doctor' }) {
   const pathname = usePathname();
+  const items = NAV_BY_DISCIPLINE[discipline] ?? PHYSIO_NAV_ITEMS;
+
+  // Pick the single most-specific match so a parent route (e.g. /clinician/doctor)
+  // does not also light up when a child (…/doctor/profile) is active.
+  const activeHref = items
+    .filter((item) => matchesItem(pathname, item.href))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
 
   return (
     <nav className="clinician-bottom-nav" aria-label="Clinician navigation">
-      {NAV_ITEMS.map((item) => {
-        const active = isItemActive(pathname, item.href);
+      {items.map((item) => {
+        const active = item.href === activeHref;
         return (
           <Link
             key={item.href}

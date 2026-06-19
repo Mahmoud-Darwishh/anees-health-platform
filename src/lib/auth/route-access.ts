@@ -46,8 +46,17 @@ const ROUTE_RULES: RouteRule[] = [
   { prefix: '/admin/access', roles: ALL_STAFF_ROLES },
 
   // ── Section families (prefix match) ──────────────────────────────────────
+  // Staff / user management — onboarding clinicians, assigning roles + licences.
+  // Admin + superadmin only (the `staff_user_mgmt` matrix module grants admin
+  // `sign`); compliance has matrix READ but no dedicated screen, by design.
+  { prefix: '/admin/staff', roles: ['superadmin', 'admin'] },
   { prefix: '/admin/compliance', roles: ['superadmin', 'admin', 'compliance_officer'] },
   { prefix: '/admin/insurance', roles: ['superadmin', 'admin', 'insurance_coordinator', 'finance'] },
+  // Payments + reconciliation (InstaPay confirm queue, delivered-visits export).
+  // Owner decision: operations OR finance may confirm transfers.
+  { prefix: '/admin/billing', roles: ['superadmin', 'admin', 'finance', 'medical_ops', 'operator'] },
+  // Business analytics / owner KPIs (aggregate, no PHI drill-down).
+  { prefix: '/admin/analytics', roles: ['superadmin', 'admin', 'finance', 'medical_ops', 'operator'] },
   { prefix: '/admin/ops', roles: ['superadmin', 'admin', 'medical_ops', 'operator'] },
   { prefix: '/admin/nursing', roles: ['superadmin', 'admin', 'nurse'] },
   // The clinician workspace gateway mirrors the `/clinician` app gate exactly —
@@ -59,7 +68,10 @@ const ROUTE_RULES: RouteRule[] = [
   // duties). They hold no write role, so every mutation stays gated downstream.
   { prefix: '/admin/escalations', roles: CLINICAL_READ_ROLES },
   { prefix: '/admin/patients', roles: CLINICAL_READ_ROLES },
-  { prefix: '/clinician', roles: ['superadmin', 'admin', 'physiotherapist'] },
+  // Field-clinician workspace. Physio, nurse, and doctor each have a discipline
+  // workspace here; the layout + each page self-guard on the discipline-specific
+  // matrix action (`workspace.physio.access` / `.nursing.access` / `.doctor.access`).
+  { prefix: '/clinician', roles: ['superadmin', 'admin', 'physiotherapist', 'nurse', 'doctor'] },
 ];
 
 /**
@@ -99,10 +111,14 @@ const ROLE_HOME: Record<StaffRole, string> = {
   superadmin: '/admin/patients',
   admin: '/admin/patients',
   finance: '/admin/insurance',
-  doctor: '/admin/patients',
+  // Doctors land in their review/sign workspace (case worklist + co-sign queue).
+  // The full chart at /admin/patients remains reachable for signing.
+  doctor: '/clinician/doctor',
   // Physiotherapists live in the field-clinician app, not the admin console.
   physiotherapist: '/clinician/today',
-  nurse: '/admin/nursing/dashboard',
+  // Nurses land in their field workspace (today's visits). The nurse-ops
+  // dashboard at /admin/nursing/dashboard remains reachable for oversight.
+  nurse: '/clinician/nursing/today',
   medical_ops: '/admin/ops',
   operator: '/admin/ops',
   insurance_coordinator: '/admin/insurance',

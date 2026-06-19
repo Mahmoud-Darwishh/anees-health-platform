@@ -9,6 +9,7 @@ import {
   getPackageEntry,
 } from '@/lib/models/booking.types';
 import { getBookingPrices } from '@/lib/api/pricing';
+import { isWithinCoverage, normalizeGovernorate } from '@/lib/config/coverage-area';
 import { validatePromocode, claimPromocodeWithinTx } from '@/lib/api/promocode';
 import { prisma } from '@/lib/db/prisma';
 import { upsertMedplumPatient } from '@/lib/medplum/patients';
@@ -74,6 +75,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Coverage gate — in-home (package) care is limited to Greater Cairo at
+    // launch. Block out-of-area BEFORE any payment. Telemedicine is remote, so
+    // it is exempt. Missing governorate on a package is a client/validation
+    // error; an explicit out-of-area answer gets a clear, actionable message.
+    const governorate = normalizeGovernorate(body.governorate);
+    if (body.visitType === 'package') {
+      if (!governorate) {
+        return NextResponse.json(
+          { success: false, message: 'Please select your governorate.' },
+          { status: 400, headers: cors },
+        );
+      }
+      if (!isWithinCoverage(governorate)) {
+        return NextResponse.json(
+          {
+            success: false,
+            outOfCoverage: true,
+            message: 'We currently serve in-home visits in Greater Cairo (Cairo & Giza) only.',
+          },
+          { status: 422, headers: cors },
+        );
+      }
+    }
+
     const packageType: PackageType | null =
       body.visitType === 'package' && body.packageType ? body.packageType : null;
 
@@ -97,6 +122,7 @@ export async function POST(request: NextRequest) {
       visitType: body.visitType,
       packageType,
       packageDuration,
+      governorate,
       // Legacy fields — always null in the new funnel.
       serviceType: null,
       specialty: null,
@@ -230,6 +256,7 @@ export async function POST(request: NextRequest) {
           amountEgp: amount,
           currency: 'EGP',
           status: 'pending',
+          governorate: governorate ?? undefined,
           promocodeId: promoId ?? undefined,
           promocodeCode: promoCode ?? undefined,
           ipAddress: ip,

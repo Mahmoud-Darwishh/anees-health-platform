@@ -15,7 +15,7 @@ export default async function AdminRootPage() {
   const user = await getSessionUser();
 
   if (!isStaff(user)) {
-    redirect('/en/auth/login?callbackUrl=/admin');
+    redirect('/admin/login?callbackUrl=/admin');
   }
 
   redirect(homeRouteForRole(user.staffRole ?? null));

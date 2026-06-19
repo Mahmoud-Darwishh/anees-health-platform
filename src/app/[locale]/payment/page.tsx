@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import PaymentGateway from '@/features/booking/components/payment-gateway';
+import PaymentMethodChooser from '@/features/booking/components/payment-method-chooser';
 
 interface PaymentPageProps {
   params: Promise<{ locale: string }>;
@@ -22,15 +22,21 @@ export default async function PaymentPage(props: PaymentPageProps) {
     redirect(`/${locale}/booking`);
   }
 
+  // Display label + the InstaPay deep link that opens the app to pay this payee.
+  const instapayHandle = process.env.INSTAPAY_HANDLE || 'Anees Health';
+  const instapayUrl = process.env.INSTAPAY_URL || 'https://ipn.eg/S/m_darwish/instapay/3FUhxJ';
+
   return (
     <main>
-      <PaymentGateway
+      <PaymentMethodChooser
         orderId={searchParams.orderId}
         amount={searchParams.amount}
         currency={searchParams.currency}
         customerName={searchParams.customerName}
         customerPhone={searchParams.customerPhone}
         locale={locale}
+        instapayHandle={instapayHandle}
+        instapayUrl={instapayUrl}
       />
     </main>
   );

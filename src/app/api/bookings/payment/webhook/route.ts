@@ -8,6 +8,8 @@ import {
   maskWhatsAppChatId,
 } from '@/lib/auth/wapilot';
 import { buildPaymentConfirmationMessage } from '@/lib/utils/booking-whatsapp';
+import { sendPortalClaimInviteForBooking } from '@/lib/billing/portal-invite';
+import { createVisitFromBooking } from '@/lib/billing/create-visit-from-booking';
 import { upsertMedplumPatient } from '@/lib/medplum/patients';
 import { createProgramCarePlan } from '@/lib/medplum/care-plans';
 import type { CareProgramCode } from '@/lib/medplum/fhir-extensions';
@@ -69,6 +71,7 @@ export async function POST(request: NextRequest) {
             currency: true,
             locale: true,
             confirmationSentAt: true,
+            inviteSentAt: true,
           },
         });
 
@@ -325,6 +328,16 @@ export async function POST(request: NextRequest) {
           } catch (err) {
             console.error('[Webhook] Medplum sync/CarePlan failed for', booking.bookingRef, err);
           }
+
+          // ── Non-blocking portal-claim invite ───────────────────────────────
+          // Now that payment is confirmed, invite the patient to claim their
+          // portal account (Case ID + signup link via WhatsApp). Shared with the
+          // InstaPay manual-confirm path; best-effort + idempotent; never throws.
+          await sendPortalClaimInviteForBooking(booking.bookingRef);
+
+          // Convert the paid booking into a draft, unassigned Visit for the
+          // dispatch board. Best-effort + idempotent; never blocks the webhook.
+          await createVisitFromBooking(booking.bookingRef);
         } else {
           await prisma.$transaction(async (tx) => {
             const failedBooking = await tx.onlineBooking.update({

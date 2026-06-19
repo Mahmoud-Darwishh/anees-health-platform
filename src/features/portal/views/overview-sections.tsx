@@ -1,6 +1,67 @@
+import Link from 'next/link';
 import { encounterTypeLabel } from '../helpers';
 import type { PortalContext } from '../view-context';
 import styles from '../portal.module.scss';
+
+type PortalEncounterLike = {
+  status?: string;
+  period?: { start?: string | null } | null;
+};
+
+/**
+ * Overview hero — the "your care, right now" journey view: the next visit (or a
+ * book CTA), the last visit, and the primary actions. Shown first on overview so
+ * the portal reads as a journey, not a data dump.
+ */
+export function JourneyHeroSection({ ctx }: { ctx: PortalContext }) {
+  const { t, locale, formatDateTime, nextAppointment, encounters } = ctx;
+
+  const lastVisit =
+    [...((encounters as PortalEncounterLike[]) ?? [])]
+      .filter((e) => (e.status === 'finished' || e.status === 'in-progress') && !!e.period?.start)
+      .sort((a, b) => new Date(b.period!.start!).getTime() - new Date(a.period!.start!).getTime())[0] ?? null;
+
+  return (
+    <div className={`card ${styles.sectionCard}`}>
+      <div className="card-body">
+        <div className="row g-3 align-items-stretch">
+          <div className="col-12 col-lg-7">
+            <div className="border rounded-3 p-3 h-100">
+              <div className="text-muted small">{t('journey.nextVisit')}</div>
+              {nextAppointment ? (
+                <>
+                  <div className={`${styles.metaValue} h5 mb-1`}>{formatDateTime(nextAppointment.period?.start ?? null)}</div>
+                  <div className="small text-muted">
+                    {encounterTypeLabel(nextAppointment)} · {nextAppointment.participant?.[0]?.individual?.display ?? t('none')}
+                  </div>
+                </>
+              ) : (
+                <div className="small text-muted">{t('journey.noUpcoming')}</div>
+              )}
+              <div className="mt-3 d-flex gap-2 flex-wrap">
+                <Link href={`/${locale}/booking`} className="btn btn-sm btn-primary">{t('journey.book')}</Link>
+                <Link href={`/${locale}/portal?tab=visits`} className="btn btn-sm btn-outline-secondary">{t('journey.viewAll')}</Link>
+              </div>
+            </div>
+          </div>
+          <div className="col-12 col-lg-5">
+            <div className="border rounded-3 p-3 h-100">
+              <div className="text-muted small">{t('journey.lastVisit')}</div>
+              {lastVisit ? (
+                <>
+                  <div className={styles.metaValue}>{formatDateTime(lastVisit.period?.start ?? null)}</div>
+                  <div className="small text-muted">{encounterTypeLabel(lastVisit as Parameters<typeof encounterTypeLabel>[0])}</div>
+                </>
+              ) : (
+                <div className="small text-muted">{t('journey.noLastVisit')}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** Overview tab — patient profile, address and caregiver contact. */
 export function ProfileSection({ ctx }: { ctx: PortalContext }) {

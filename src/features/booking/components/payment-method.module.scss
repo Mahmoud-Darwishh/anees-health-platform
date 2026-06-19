@@ -1,0 +1,129 @@
+@use '../../../assets/scss/utils/variables' as v;
+
+.wrap {
+  max-width: 540px;
+  margin-inline: auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 1.25rem;
+
+  h1 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    color: v.$brand-dark-blue;
+    opacity: 0.7;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+.choices {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.85rem;
+  background: var(--color-surface, #fff);
+  cursor: pointer;
+  text-align: start;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover { border-color: v.$primary; }
+
+  &.active {
+    border-color: v.$primary;
+    box-shadow: 0 0 0 3px rgba(170, 134, 66, 0.18);
+  }
+}
+
+.choiceIcon { font-size: 1.5rem; line-height: 1; }
+.choiceBody { display: flex; flex-direction: column; }
+.choiceTitle { font-weight: 600; }
+.choiceHint { font-size: 0.82rem; opacity: 0.65; }
+
+.panel {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  background: var(--color-surface, #fff);
+}
+
+.amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.handleBox {
+  border: 1px dashed v.$primary;
+  border-radius: 0.6rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  background: rgba(170, 134, 66, 0.06);
+
+  .handleLabel { font-size: 0.8rem; opacity: 0.7; display: block; }
+  .handleValue { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
+}
+
+.steps {
+  font-size: 0.88rem;
+  padding-inline-start: 1.1rem;
+  margin-bottom: 1.1rem;
+
+  li { margin-bottom: 0.4rem; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.85rem;
+
+  label { font-size: 0.85rem; font-weight: 600; }
+  input {
+    padding: 0.65rem 0.8rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 0.55rem;
+    font-size: 0.95rem;
+  }
+}
+
+.submit {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: v.$primary;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.6; cursor: default; }
+}
+
+.error { color: #b02a2a; font-size: 0.85rem; margin-top: 0.6rem; }
+
+.success {
+  text-align: center;
+  padding: 1rem;
+
+  .successIcon { font-size: 2.5rem; }
+  h2 { font-size: 1.15rem; margin: 0.5rem 0; }
+  p { font-size: 0.9rem; opacity: 0.8; }
+}

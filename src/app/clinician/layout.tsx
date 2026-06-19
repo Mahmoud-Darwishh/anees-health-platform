@@ -12,15 +12,20 @@ export default async function ClinicianLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Route gate: derives the allowed roles from the permission matrix, not a
-  // hard-coded list. A non-physio staff member is bounced to the `/admin`
-  // dispatcher, which sends them to their own home section.
+  // Route gate, discipline-aware: derived from the permission matrix, not a
+  // hard-coded list. Physio and nurse each have a workspace here; admins hold
+  // both. Anyone with neither is bounced to the `/admin` dispatcher.
   const user = await getSessionUser();
 
-  if (!(await staffCan('workspace.physio.access'))) {
+  const canPhysio = await staffCan('workspace.physio.access');
+  const canNursing = !canPhysio && (await staffCan('workspace.nursing.access'));
+  const canDoctor = !canPhysio && !canNursing && (await staffCan('workspace.doctor.access'));
+
+  if (!canPhysio && !canNursing && !canDoctor) {
     redirect('/admin');
   }
 
+  const discipline: 'physio' | 'nursing' | 'doctor' = canPhysio ? 'physio' : canNursing ? 'nursing' : 'doctor';
   const staffName = user?.name ?? user?.email ?? 'Clinician';
 
   return (
@@ -34,7 +39,7 @@ export default async function ClinicianLayout({
       </header>
 
       <main className="clinician-main">{children}</main>
-      <ClinicianBottomNav />
+      <ClinicianBottomNav discipline={discipline} />
     </div>
   );
 }

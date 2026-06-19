@@ -1,33 +1,34 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { getStaffUser } from '@/lib/auth/rbac';
 import { rolesForRoute } from '@/lib/auth/route-access';
-import Link from 'next/link';
+import { getDispatchBoardData } from '@/features/admin/ops/data';
+import { DispatchBoardView } from '@/features/admin/ops/DispatchBoardView';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOpsWorkspacePage() {
   const user = await getStaffUser(rolesForRoute('/admin/ops'));
-
   if (!user) {
     redirect('/admin/patients');
   }
 
+  const tenantId = user.tenantId ?? 'platform';
+  const board = await getDispatchBoardData(tenantId);
+
   return (
-    <div className="card bg-white">
-      <div className="card-header">
-        <h1 className="h5 mb-0">Medical Operations Workspace</h1>
+    <div className="d-flex flex-column gap-4">
+      <div className="anees-banner anees-banner-head">
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <p className="mb-1 small opacity-75">Anees · Medical Operations</p>
+            <h1 className="h5 mb-0">Dispatch &amp; scheduling</h1>
+          </div>
+          <Link href="/admin/ops/disputes" className="btn btn-sm btn-outline-light">Disputes &amp; disruptions</Link>
+        </div>
       </div>
-      <div className="card-body">
-        <p className="mb-2">
-          This route is reserved for live dispatch, shift oversight, and operations queues.
-        </p>
-        <p className="text-muted mb-3">
-          Next implementation slice: live map board with visit status lanes and reassignment actions.
-        </p>
-        <Link href="/admin/ops/disputes" className="btn btn-sm btn-outline-primary">
-          Open dispute and disruption queue
-        </Link>
-      </div>
+
+      <DispatchBoardView data={board} />
     </div>
   );
 }

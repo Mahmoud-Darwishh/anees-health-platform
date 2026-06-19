@@ -187,14 +187,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ account, user }) {
       if (account?.provider === 'google') {
-        // Default role is already 'patient' via the DB model default
-        if (user?.id) {
-          await writeLoginAudit({
-            actorId: user.id,
-            actorRole: (user.role as UserRole | undefined) ?? 'patient',
-            authProvider: 'google',
-          });
+        // Invite + claim posture: Google may only AUTHENTICATE an already
+        // provisioned patient (a case created by intake, linked to a Patient).
+        // It must never create a bare, unlinked account — those used to strand
+        // the user on a dead-end "not linked" portal screen. Reject otherwise.
+        const email = user?.email;
+        if (!email) {
+          return false;
         }
+        const existing = await prisma.user.findUnique({
+          where: { email },
+          select: { id: true, role: true, patientId: true },
+        });
+        if (!existing || existing.role !== 'patient' || !existing.patientId) {
+          // Denied → routed to the auth error page. No orphan account is created.
+          return false;
+        }
+        await writeLoginAudit({
+          actorId: existing.id,
+          actorRole: 'patient',
+          authProvider: 'google',
+        });
       }
       return true;
     },

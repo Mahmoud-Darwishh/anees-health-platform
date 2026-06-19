@@ -82,6 +82,7 @@ const INITIAL_FORM_STATE: BookingFormState = {
   packageType: null,
   packageDuration: null,
   promocode: null,
+  governorate: null,
   // Legacy fields — kept null for type compatibility.
   serviceType: null,
   specialty: null,
@@ -185,7 +186,7 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
     setErrors((prev) => ({ ...prev, packageDuration: '' }));
   };
 
-  const handleField = (field: 'fullName' | 'phoneNumber' | 'countryCode', value: string) => {
+  const handleField = (field: 'fullName' | 'phoneNumber' | 'countryCode' | 'governorate', value: string) => {
     setFormState((prev) => {
       let next = value;
       if (field === 'phoneNumber') next = cleanPhoneNumber(value, prev.countryCode);
@@ -193,6 +194,9 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
     });
     setErrors((prev) => ({ ...prev, [field]: '' }));
   };
+
+  // In-home (package) care is coverage-gated to Greater Cairo; telemedicine is remote.
+  const requiresGovernorate = selectedEntry?.visitType === 'package';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -394,6 +398,31 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
                     </div>
                     {errors.phoneNumber && <p className={styles.errorText}>{t(errors.phoneNumber)}</p>}
                   </div>
+
+                  {requiresGovernorate && (
+                    <div className={styles.formGroup}>
+                      <label htmlFor="governorate" className={styles.label}>
+                        {t('booking.form.governorate')} <span className={styles.required}>*</span>
+                      </label>
+                      <select
+                        id="governorate"
+                        className={styles.input}
+                        value={formState.governorate ?? ''}
+                        onChange={(e) => handleField('governorate', e.target.value)}
+                        aria-label={t('booking.form.governorate')}
+                      >
+                        <option value="">{t('booking.form.governoratePlaceholder')}</option>
+                        <option value="cairo">{t('booking.form.governorateCairo')}</option>
+                        <option value="giza">{t('booking.form.governorateGiza')}</option>
+                        <option value="other">{t('booking.form.governorateOther')}</option>
+                      </select>
+                      {errors.governorate ? (
+                        <p className={styles.errorText}>{t(errors.governorate)}</p>
+                      ) : formState.governorate === 'other' ? (
+                        <p className={styles.errorText}>{t('booking.form.outOfCoverage')}</p>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               </section>
             )}

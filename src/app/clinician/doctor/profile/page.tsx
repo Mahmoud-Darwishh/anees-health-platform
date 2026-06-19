@@ -1,0 +1,49 @@
+import { requireStaffCan } from '@/lib/auth/policy/enforce';
+import { prisma } from '@/lib/db/prisma';
+import { StaffProfileCard } from '@/features/ehr/clinician-shared/StaffProfileCard';
+import { PublicProfileEditor } from '@/features/admin/profile-requests/PublicProfileEditor';
+import { getMyLatestProfileRequest } from '@/features/admin/profile-requests/data';
+
+export const dynamic = 'force-dynamic';
+
+export default async function DoctorProfilePage() {
+  const { user } = await requireStaffCan('workspace.doctor.access');
+  const latestProfileRequest = await getMyLatestProfileRequest(user.staffId);
+  const staff = await prisma.staff.findUnique({
+    where: { id: user.staffId },
+    select: {
+      name: true,
+      email: true,
+      role: true,
+      clinicalLicenseType: true,
+      clinicalLicenseNumber: true,
+      clinicalLicenseExpiry: true,
+      licenseIssuingBody: true,
+      isOnCall: true,
+      isClinicalDirector: true,
+    },
+  });
+
+  return (
+    <section className="clinician-surface">
+      <header className="mb-3">
+        <h2 className="h5 mb-1">My profile</h2>
+        <p className="text-muted mb-0">Read-only. Ask an administrator to update your role or licence.</p>
+      </header>
+
+      <StaffProfileCard
+        name={staff?.name ?? user.name ?? null}
+        email={staff?.email ?? null}
+        role={staff?.role ?? user.staffRole ?? null}
+        licenseType={staff?.clinicalLicenseType ?? null}
+        licenseNumber={staff?.clinicalLicenseNumber ?? null}
+        licenseExpiry={staff?.clinicalLicenseExpiry ?? null}
+        issuingBody={staff?.licenseIssuingBody ?? null}
+        isOnCall={staff?.isOnCall ?? false}
+        isClinicalDirector={staff?.isClinicalDirector ?? false}
+      />
+
+      <PublicProfileEditor latest={latestProfileRequest} />
+    </section>
+  );
+}

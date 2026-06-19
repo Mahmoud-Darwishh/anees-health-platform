@@ -855,6 +855,17 @@ model OnlineBooking {
   ipAddress            String?
   userAgent            String?
   notes                String?
+
+  // ── Phase 3: prepayment rail + coverage gate + portal-claim invite ──
+  // All nullable / additive — existing bookings and the card flow are unaffected.
+  paymentMethod        String?   // 'card' | 'instapay'
+  instapayReference    String?   // patient-submitted transfer reference (optional proof)
+  instapaySenderName   String?   // optional sender name on the transfer
+  paymentConfirmedAt   DateTime? // when an InstaPay transfer was manually confirmed
+  paymentConfirmedBy   String?   // staff id who confirmed the InstaPay transfer
+  governorate          String?   // coverage gate: 'cairo' | 'giza' | other (free text)
+  inviteSentAt         DateTime? // portal-claim invite sent (WhatsApp)
+
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -908,6 +919,66 @@ model Promocode {
 }
 
 // ============================================================================
+// REFUNDS — prepayment refund ledger (Phase 3). Money movement is manual
+// (Kashier refund / InstaPay reverse transfer); this records the decision +
+// policy fee + amount and tracks completion. Loose refs (no FK) on purpose to
+// keep the migration additive.
+// ============================================================================
+
+model Refund {
+  id                 String    @id @default(cuid())
+  bookingRef         String
+  patientId          String?
+  amountPaidEgp      Decimal   @db.Decimal(10, 2)
+  feeEgp             Decimal   @db.Decimal(10, 2) @default(0)
+  refundEgp          Decimal   @db.Decimal(10, 2)
+  reasonCode         String
+  reasonNote         String?
+  method             String?
+  status             String    @default("pending")
+  requestedByStaffId String?
+  completedAt        DateTime?
+  tenantId           String    @default("platform")
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([bookingRef])
+  @@index([status])
+  @@index([tenantId])
+  @@map("refunds")
+}
+
+// ============================================================================
+// PROFILE CHANGE REQUESTS — clinician public-profile self-management with admin
+// approval. A clinician proposes public-facing content; an admin approves or
+// rejects. (Publishing approved content to the public Doctor profile is a
+// follow-up once clinician↔public-profile linking is decided.)
+// ============================================================================
+
+model ProfileChangeRequest {
+  id                String    @id @default(cuid())
+  staffId           String
+  headline          String?
+  bioEn             String?
+  bioAr             String?
+  specialties       String?
+  languages         String?
+  photoUrl          String?
+  status            String    @default("pending") // pending | approved | rejected
+  reviewedByStaffId String?
+  reviewNote        String?
+  reviewedAt        DateTime?
+  tenantId          String    @default("platform")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([staffId])
+  @@index([status])
+  @@index([tenantId])
+  @@map("profile_change_requests")
+}
+
+// ============================================================================
 // PWA PUSH SUBSCRIPTIONS
 // ============================================================================
 
@@ -944,6 +1015,10 @@ model Staff {
   isOnCall              Boolean     @default(false)
   isClinicalDirector    Boolean     @default(false)
   tenantId              String      @default("platform")
+  // Optional link to a public Doctor profile (marketing data, Int id). When set,
+  // an approved profile-change-request publishes to that public profile. Loose
+  // ref (no FK) — Doctor is denormalised marketing data, not staff-owned.
+  publicDoctorId        Int?
   lastLoginAt DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

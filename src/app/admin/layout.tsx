@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { getSessionUser, isStaff } from '@/lib/auth/rbac';
 import { getAdminNavItems } from '@/lib/auth/admin-nav-policy';
 import { AdminNav } from './AdminNav';
@@ -17,9 +16,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const visibleNavItems = getAdminNavItems(user?.staffRole);
   const renderedAt = Date.now();
 
-  // Defence in depth — proxy.ts already gates /admin, but never trust it alone.
+  // The only unauthenticated requests that reach this layout are the public
+  // staff-auth pages (/admin/login, /admin/set-password) — proxy.ts redirects
+  // every other /admin/* path to the staff login. Render those chrome-less, so
+  // the console nav/footer (and its redirect) never wrap a sign-in screen.
   if (!isStaff(user)) {
-    redirect('/en/auth/login?callbackUrl=/admin');
+    return <div className="anees-admin-shell anees-admin-auth-shell">{children}</div>;
   }
 
   return (

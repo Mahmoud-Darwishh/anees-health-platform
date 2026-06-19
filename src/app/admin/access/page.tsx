@@ -20,7 +20,7 @@ export default async function AdminAccessPage() {
   const user = await getSessionUser();
 
   if (!isStaff(user)) {
-    redirect('/en/auth/login?callbackUrl=/admin/access');
+    redirect('/admin/login?callbackUrl=/admin/access');
   }
 
   const role = user.staffRole;
