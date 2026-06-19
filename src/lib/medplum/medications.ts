@@ -34,6 +34,8 @@ export type MedicationStatementResource = {
 export type MedicationSummary = {
   id: string;
   medication: string;
+  /** RxNorm code when the medication was recorded from the coded formulary. */
+  rxnorm?: string | null;
   status: MedicationStatementResource['status'];
   dosage?: string;
   route?: string;
@@ -46,6 +48,8 @@ export type MedicationSummary = {
 export type CreateMedicationInput = {
   patientId: string;
   medication: string;
+  /** RxNorm / ATC codings from the formulary. Empty for free-text fallback meds. */
+  codings?: FhirCoding[] | null;
   dosage?: string | null;
   route?: string | null;
   frequency?: string | null;
@@ -60,9 +64,14 @@ export type CreateMedicationInput = {
 function normalizeMedication(resource: MedicationStatementResource): MedicationSummary | null {
   if (!resource.id) return null;
 
+  const rxnorm = resource.medicationCodeableConcept?.coding?.find((coding) =>
+    (coding.system ?? '').toLowerCase().includes('rxnorm'),
+  )?.code;
+
   return {
     id: resource.id,
     medication: resource.medicationCodeableConcept?.text ?? resource.medicationCodeableConcept?.coding?.[0]?.display ?? resource.medicationCodeableConcept?.coding?.[0]?.code ?? 'Medication',
+    rxnorm: rxnorm ?? null,
     status: resource.status,
     dosage: resource.dosage?.[0]?.text,
     route: resource.dosage?.[0]?.route?.text ?? resource.dosage?.[0]?.route?.coding?.[0]?.display,
@@ -95,6 +104,7 @@ export async function createPatientMedication(input: CreateMedicationInput): Pro
     resourceType: 'MedicationStatement',
     status: input.status ?? 'active',
     medicationCodeableConcept: {
+      coding: input.codings && input.codings.length > 0 ? input.codings : undefined,
       text: input.medication,
     },
     subject: { reference: `Patient/${input.patientId}` },

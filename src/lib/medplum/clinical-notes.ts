@@ -2,6 +2,7 @@ import 'server-only';
 
 import { EgyptianExtensions } from '@/lib/medplum/fhir-extensions';
 import { getMedplumClient } from '@/lib/medplum/client';
+import { recordProvenance } from '@/lib/medplum/provenance';
 import {
   MEDPLUM_CODE_SYSTEMS,
   isRestrictedTierClinicalCoding,
@@ -39,6 +40,8 @@ type MedplumClinicalNoteResource = {
   date: string;
   author: FhirReference[];
   title: string;
+  attester?: Array<{ mode: string; time?: string; party?: FhirReference }>;
+  relatesTo?: Array<{ code: string; targetReference?: FhirReference }>;
   section: Array<{
     title?: string;
     text?: {
@@ -162,6 +165,11 @@ export async function createClinicalNoteDraft(
       },
     ],
     title: input.title?.trim() || 'Clinical Note',
+    // An amendment supersedes its predecessor (immutable history — the prior note
+    // is never mutated; a new Composition `replaces` it).
+    relatesTo: input.amendedFromCompositionId
+      ? [{ code: 'replaces', targetReference: { reference: `Composition/${input.amendedFromCompositionId}` } }]
+      : undefined,
     section: [
       {
         title: 'Assessment',
@@ -213,16 +221,19 @@ export async function signClinicalNote(
 
   const signedAt = new Date().toISOString();
 
-  return (await medplum.updateResource({
+  const partyRef = signedBy?.authorReference ?? existing.author?.[0]?.reference;
+  const partyDisplay = signedBy?.authorDisplay ?? existing.author?.[0]?.display;
+  const party: FhirReference = partyRef
+    ? { reference: partyRef, display: partyDisplay ?? undefined }
+    : { display: partyDisplay ?? 'Clinician' };
+
+  const signed = (await medplum.updateResource({
     ...existing,
     status: 'final',
     date: signedAt,
-    author: [
-      {
-        reference: signedBy?.authorReference ?? existing.author?.[0]?.reference,
-        display: signedBy?.authorDisplay ?? existing.author?.[0]?.display,
-      },
-    ],
+    author: [party],
+    // Legal attestation: who signed, in what capacity (legal), and when.
+    attester: [{ mode: 'legal', time: signedAt, party }],
     extension: [
       ...(existing.extension ?? []),
       {
@@ -235,6 +246,19 @@ export async function signClinicalNote(
       ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
       : undefined,
   })) as MedplumClinicalNoteResource;
+
+  // Immutable signature provenance (best-effort — never undoes the sign).
+  await recordProvenance({
+    targetReference: `Composition/${signed.id ?? compositionId}`,
+    recordedAt: new Date(signedAt),
+    activity: 'UPDATE',
+    agents: [
+      { role: 'legal', who: party },
+      { role: 'author', who: party },
+    ],
+  });
+
+  return signed;
 }
 
 export async function listPatientClinicalNotes(

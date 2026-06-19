@@ -1,0 +1,109 @@
+{
+  "$schema": "../patient-record.schema.json",
+  "source": {
+    "driveFolderId": "197HdkTJ0Z1hKfdfP-D5-ALyb_Q-JpPwW",
+    "driveFolderName": "AN-3225-0626 (Hassebelrasoul Gamaleldein)",
+    "primaryDocId": "1uI7X1BZyRrmxVE9x5Qg_V5UjqxNEzjVkT-gjmVFJlkI",
+    "docLastUpdated": "2026-06-09",
+    "reviewStatus": "pending_human_review",
+    "notes": "Folder title says AN-3225-0626 but the report document and its header both state AN-3226-0626. Using AN-3226-0626 as the canonical code — CONFIRM."
+  },
+
+  "patient": {
+    "code": "AN-3226-0626",
+    "fullName": "Hassebelrasoul Gamaleldin Abdalla",
+    "arabicName": "حسب الرسول جمال الدين عبدالله",
+    "gender": "male",
+    "dateOfBirth": "1957-01-01",
+    "ageStatedInDoc": 70,
+    "nationality": "Sudanese",
+    "phone": "+201038964896",
+    "phoneSource": "caregiver_egyptian_number — patient's own phone not provided; CONFIRM",
+    "addressDetail": "كمباوند جنة زايد 2 عمارة 49 شقة 3 - الشيخ زايد - الجيزة",
+    "addressMapUrl": "https://maps.app.goo.gl/2snRWtoKVURLGZ8r6",
+    "primaryCaregiver": "Mohamed Hassebelrasoul",
+    "primaryCaregiverPhone": "+249912222301",
+    "primaryCaregiverWhatsapp": "+249912222301",
+    "caregiverRelation": "son",
+    "caregiverRelationSource": "inferred — doc says 'Mohamed Hassebelrasoul' (shares patient name); CONFIRM",
+    "chiefComplaint": "Progressive cognitive decline (provisional Alzheimer's), critically uncontrolled diabetes, severe malnutrition",
+    "status": "active"
+  },
+
+  "conditions": [
+    { "label": "Acute inflammatory condition with persistent cough", "clinicalStatus": "active", "category": "problem-list-item" },
+    { "label": "Critically uncontrolled diabetes mellitus (HbA1c 10.8%, glucose up to 500 mg/dL)", "clinicalStatus": "active", "category": "problem-list-item" },
+    { "label": "Progressive cognitive & neuropsychiatric decline — provisional Alzheimer's disease", "clinicalStatus": "active", "category": "problem-list-item" },
+    { "label": "Severe functional mobility deficit — non-ambulatory without full assistance", "clinicalStatus": "active", "category": "problem-list-item" },
+    { "label": "Severe weight loss, generalized weakness & malnutrition (cachexia)", "clinicalStatus": "active", "category": "problem-list-item" }
+  ],
+
+  "labs": [
+    { "label": "HbA1c", "value": 10.8, "unit": "%", "interpretation": "critically high" },
+    { "label": "Random blood glucose", "value": 202, "unit": "mg/dL", "context": "after >9h fasting" },
+    { "label": "Peak blood glucose (reported)", "value": 500, "unit": "mg/dL" },
+    { "label": "Vitamin D", "value": null, "interpretation": "deficiency" },
+    { "label": "Vitamin B12", "value": 2100, "unit": "pg/mL", "comparator": ">", "interpretation": "high" },
+    { "label": "Blood urea", "value": 51, "unit": "mg/dL", "interpretation": "elevated" }
+  ],
+
+  "vitalsOnExam": {
+    "consciousness": "somnolent / persistently sleepy (altered LOC)",
+    "respiratory": "right basal lung crepitations, low-grade fever, URTI",
+    "heartRate": "96-97 bpm",
+    "randomGlucose": "202 mg/dL fasting"
+  },
+
+  "medications": [
+    "Mixmazil", "Cerebrolysin", "Memocito", "Bravamax", "Topamac", "Neopression",
+    "Olapex", "Quintapex", "Cipra Pro 10mg", "Aspirin Protect 100mg", "Ator 20mg",
+    "Mercava sachets", "Immuphi", "Tricobavit", "Osteocare syrup", "Bonediviton syrup"
+  ],
+  "medicationsSource": "Prescribed by Dr. Osama Yacoub (Neurology) on 2026-06-08. Brand names — generic mapping TODO.",
+
+  "imaging": [
+    { "label": "Abdominal & Pelvic Ultrasonography", "date": "2024", "findings": "Fatty liver; gallbladder mud; left renal minute stone; chronic cystitis; prostatic enlargement" },
+    { "label": "MRI CSF Flowmetry Study of the Brain", "date": "2022", "findings": "Hypodynamic CSF flow through aqueduct of Sylvius; chronic ischemic changes Rt temporal/parietal; moderate communicating hydrocephalus" },
+    { "label": "Brain CT", "date": "2025", "findings": "see attached image" }
+  ],
+
+  "carePlan": {
+    "summary": "Recommend Intensive Care Management (hospital or ICU-at-Home) due to altered consciousness + acute respiratory distress. Strict vital-sign + glucose monitoring.",
+    "actions": [
+      "Antibiotic escalation to Moxifloxacin (Moxiflox) after Augmentin failure",
+      "Antipyretic switched from Panadol Cold & Flu to Paracetamol (Doliprane)"
+    ],
+    "requestedConsultations": ["Geriatrics", "Neurology", "Internal Medicine & Endocrine", "Clinical Nutrition", "Physical Therapy"],
+    "requestedInvestigations": ["CBC", "CRP", "Urinalysis + Urine Culture", "Blood Culture", "Strict Blood Glucose Mapping"]
+  },
+
+  "careTeam": [
+    { "name": "Dr. Mohamed Ashraf", "role": "Case Manager & Primary Physician", "specialty": "Internal Medicine" },
+    { "name": "Dr. Osama Yacoub", "role": "Consultant", "specialty": "Neurology" }
+  ],
+
+  "visits": [
+    {
+      "note": "No explicitly dated visit/session log in this patient's document (unlike physio patients). Proposing one initial assessment encounter dated to the report's last-updated date. CONFIRM.",
+      "proposedDate": "2026-06-09",
+      "type": "initial_assessment"
+    }
+  ],
+
+  "documents": [
+    { "category": "labs", "fileName": "2022 Creat.jpeg", "driveId": "1yRrP5G_qgGxQuNFhJ2S-Ioi3bu1P9gDj", "mime": "image/jpeg" },
+    { "category": "labs", "subFolder": "2026", "fileName": "CBC.jpeg", "driveId": "1GLv6suVHbA-eC76XKiM4ixCIMDVrTKO0", "mime": "image/jpeg" },
+    { "category": "labs", "subFolder": "2026", "fileName": "Lipid profile.jpeg", "driveId": "1hcJz-t_a4462iy0tNhvdYW4LZoxfc89A", "mime": "image/jpeg" },
+    { "category": "labs", "subFolder": "2026", "fileName": "Glucose, liver and kidney profiles.jpeg", "driveId": "1XFjlsjVaBoa5yTfkzfVe5tx4v2nJSua_", "mime": "image/jpeg" },
+    { "category": "labs", "subFolder": "2026", "fileName": "Hormone and Vitamins.jpeg", "driveId": "18pwbG_lGGbg4CJ7il7HrQG4iwrBx7qtq", "mime": "image/jpeg" },
+    { "category": "imaging", "subFolder": "Brain & CSF MRI", "fileName": "2022 1.jpeg", "driveId": "15wDVCsJ3Zrjb6M_Eln1g9D5bVZG5Z6Z3", "mime": "image/jpeg" },
+    { "category": "imaging", "subFolder": "Brain & CSF MRI", "fileName": "2022 2.jpeg", "driveId": "1ZXI0ECBoac8cf1rWIq2gCYo9LuSh_X3o", "mime": "image/jpeg" },
+    { "category": "imaging", "subFolder": "Abdominal & Pelvic Sonar", "fileName": "2024 Sonar.jpeg", "driveId": "1hOKQ-JJXvcPv8LhpCPbOVtDAqLuWSe56", "mime": "image/jpeg" },
+    { "category": "imaging", "subFolder": "Abdominal & Pelvic Sonar", "fileName": "2024 Report.jpeg", "driveId": "1YFlrvx_2NdGFC8dOa9zWGs676DfQsxLS", "mime": "image/jpeg" },
+    { "category": "imaging", "subFolder": "Brain CT", "fileName": "2025 (a).jpeg", "driveId": "1rus9wJ5c0X9dvGN-5WZaTktzPp61Xh_B", "mime": "image/jpeg" },
+    { "category": "imaging", "subFolder": "Brain CT", "fileName": "2025 (b).jpeg", "driveId": "1wCTCVJ221Ytt_nk3xAYEsuyTFLe-o48h", "mime": "image/jpeg" },
+    { "category": "report", "fileName": "Report.jpeg", "driveId": "1Yrcfdu7CiNg_L4e_a1q1sc9I12AInh-m", "mime": "image/jpeg" },
+    { "category": "prescription", "fileName": "WhatsApp Image 2026-06-09 (1).jpeg", "driveId": "1G7nEyN2APEHYxpFPT-hcB2o2RhEK0UZr", "mime": "image/jpeg" },
+    { "category": "prescription", "fileName": "WhatsApp Image 2026-06-09 (2).jpeg", "driveId": "1pbemE0eIY_9Fqkitn-yX04DEFZ2T6fB6", "mime": "image/jpeg" }
+  ]
+}

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
-import { CLINICAL_ROLES, getSessionUser, isCaseScopedClinicalRole, staffHasRole } from '@/lib/auth/rbac';
+import { CLINICAL_READ_ROLES, getSessionUser, isCaseScopedClinicalRole, staffHasRole } from '@/lib/auth/rbac';
 import { getPatientDocumentBinary } from '@/lib/medplum/documents';
 import { getPrivateMedicalObject } from '@/lib/storage/r2-medical';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
@@ -79,7 +79,7 @@ function resolveDispositionMode(requestUrl: string): 'inline' | 'attachment' {
 async function canReadDocumentForPatient(user: AuthenticatedUser, patientMedplumId: string): Promise<boolean> {
 
   if (user.role === 'staff' && user.staffId) {
-    if (!staffHasRole(user, CLINICAL_ROLES)) {
+    if (!staffHasRole(user, CLINICAL_READ_ROLES)) {
       return false;
     }
 

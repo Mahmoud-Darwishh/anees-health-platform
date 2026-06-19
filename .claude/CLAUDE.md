@@ -1,6 +1,6 @@
 # Anees Health Platform — Claude Code Context
 
-> **Last refresh:** 2026-06-05. This file is the canonical engineering reference. Companion docs sit in `docs/`.
+> **Last refresh:** 2026-06-18. This file is the canonical engineering reference. Companion docs sit in `docs/`.
 
 Production-grade bilingual (EN/AR) health-tech platform serving Egyptian elite home care today, with a signed hospital-partner MOU and a planned MENA expansion. **Next.js 16 App Router + React 19 + TypeScript strict**. Clinical data is **Medplum (FHIR)**. Operational data is **Postgres + Prisma**. Self-hosted Medplum on a VPS (Hostinger today, OVH Bahrain in flight). Security, audit, and accessibility are non-negotiable.
 
@@ -10,7 +10,8 @@ Production-grade bilingual (EN/AR) health-tech platform serving Egyptian elite h
 > - [EHR_NOW.md](../docs/EHR_NOW.md) — short-term sprint plan, kept ruthlessly current
 > - [EHR_ROLE_MATRIX.md](../docs/EHR_ROLE_MATRIX.md) — definitive RBAC + clinical workflows + regulatory overlay
 > - [EHR_PHYSIO_SPEC.md](../docs/EHR_PHYSIO_SPEC.md) — physiotherapist workspace, end-to-end spec
-> - [FHIR_CATALOG.md](../docs/FHIR_CATALOG.md) — Medplum resource catalog
+> - [FHIR_CATALOG.md](../docs/FHIR_CATALOG.md) — Medplum resource catalog (now carries per-resource Implemented/Partial/Roadmap status)
+> - [EHR_AUDIT.md](../docs/EHR_AUDIT.md) — clinical-core gap register + phased remediation plan (medical / tech / docs). **Read before trusting any "✅ done" status; several clinical modules are thinner than they look.**
 > - [SECURITY_ARCHITECTURE.md](../docs/SECURITY_ARCHITECTURE.md) — defense-in-depth layers
 > - [HIPAA_COMPLIANCE.md](../docs/HIPAA_COMPLIANCE.md) — HIPAA + Egypt DPL mapping
 > - [DEPLOYMENT_RUNBOOK.md](../docs/DEPLOYMENT_RUNBOOK.md) — infra + ops runbook
@@ -29,7 +30,7 @@ Production-grade bilingual (EN/AR) health-tech platform serving Egyptian elite h
 | Push | `web-push` (VAPID) — `PushSubscription` table | Live |
 | Maps | Leaflet (coverage page) | Live |
 | Operational DB | **Postgres + Prisma 5.22** — schema: `prisma/schema.prisma`, client: `src/lib/db/prisma.ts` | Live, 9 migrations applied |
-| Clinical DB | **Medplum (FHIR), self-hosted** — client: `src/lib/medplum/client.ts` | Live, 24 modules |
+| Clinical DB | **Medplum (FHIR), self-hosted** — client: `src/lib/medplum/client.ts` | Live, 29 files (~22 FHIR-resource modules). Several are thinner than the catalog implied — see [EHR_AUDIT.md](../docs/EHR_AUDIT.md) |
 | Auth | **NextAuth v5 (Auth.js, `5.0.0-beta.31`)** with Prisma adapter + JWT sessions. Providers: Google OAuth, patient credentials (phone or case-ID + password), staff credentials (email + password, bcrypt). Login + logout audit live. | Live |
 | OTP | **WhatsApp OTP via Wapilot** (`api.wapilot.net/api/v2`) for patient onboarding; OTP store in `src/lib/auth/whatsapp-otp-store.ts` | Live |
 | Caregiver portal access | FHIR `Consent` resources govern caregiver scopes (`profile / visits / vitals / notes / tasks`) — see `src/lib/medplum/consent-policy.ts` | Live |
@@ -38,8 +39,8 @@ Production-grade bilingual (EN/AR) health-tech platform serving Egyptian elite h
 | Validation | **Zod 4.4** — used heavily in `src/features/ehr/schemas/`; rolled into mutation routes incrementally | Partial |
 | Payments | Kashier (test + live) — booking funnel + webhook | Live (Egypt only) |
 | Multi-tenancy | `Tenant` model + `tenantId` columns on Patient/Provider/Visit/CarePlan/Invoice/OnlineBooking/Staff. Defaulted to `"platform"` tenant for backwards-compat. | Foundations only (Phase 1A) |
-| Tests | **None yet** under `src/`. Planned: Vitest + Playwright before hospital go-live. | Gap |
-| Observability | **No Sentry / log aggregator yet.** Targeted for the next two sprints (see EHR_NOW.md). | Gap |
+| Tests | **Vitest** wired (Phase 9) — 39 unit tests in `tests/` covering the RBAC matrix, route gate, clinical-safety engines, catalogs, production-readiness (`npm test`). Playwright E2E still planned. | Partial |
+| Observability | **Seam wired** (Phase 9): `reportError` + error boundaries + production-readiness fail-fast at boot; CSP already allows Sentry. The `@sentry/nextjs` SDK install (needs a DSN) is the remaining step. | Partial |
 | Hosting | **Self-hosted on Hostinger VPS** today (Next.js + Postgres + Medplum). Target = **OVH Bahrain**, see DEPLOYMENT_RUNBOOK.md. | Live but to be migrated |
 
 ---
@@ -126,7 +127,7 @@ src/
 │   ├── db/                      # Prisma singleton
 │   ├── ehr/                     # nursing-alerts, 🆕 clinician-physio-profile resolver
 │   ├── geo/                     # presence-policy (geofence rules)
-│   ├── medplum/                 # ⭐ 24 modules — FHIR clinical core. See "Medplum integration" below.
+│   ├── medplum/                 # ⭐ 29 files (~22 FHIR-resource modules) — clinical core. See "Medplum integration" below.
 │   ├── models/                  # Domain types (booking.types, doctor.types)
 │   ├── portal/                  # patient-record (server-only resolver — session-scoped)
 │   ├── pwa/                     # Subscription store + push helpers
@@ -168,14 +169,17 @@ Medplum is the **single source of truth for clinical data**. Postgres holds oper
 | `encounters.ts` | `Encounter` | Visits as FHIR encounters |
 | `appointments.ts` | `Appointment` | Scheduling |
 | `observations.ts` | `Observation` | **Vitals** (BP, HR, temp, SpO2, glucose, weight, pain) |
-| `care-reports.ts` | `Observation` | Long-form nursing/physio reports as structured Observations |
-| `conditions.ts` | `Condition` | Diagnoses (ICD/SNOMED) |
-| `allergies.ts` | `AllergyIntolerance` | Allergies + severities |
-| `medications.ts` | `MedicationRequest` | Active medication list |
+| `care-reports.ts` | `Observation` | Long-form nursing/physio reports (parent survey Observation). Phase 3: also emits discrete coded outcome Observations + `hasMember` linkage |
+| `outcome-measures.ts` | `Observation` (coded) | Discrete, LOINC/UCUM-coded outcome measures (Berg, TUG, pain, ROM…) + `listPatientOutcomeMeasures` trend reader (Phase 3) |
+| `conditions.ts` | `Condition` | Diagnoses (ICD-10) — verification (confirmed/provisional/differential), severity, body-site, auto restricted-tier tagging (Phase 6) |
+| `allergies.ts` | `AllergyIntolerance` | Allergies — coded (SNOMED/Anees) + category + reaction + NKA (Phase 2) |
+| `medications.ts` | `MedicationStatement` | Medication list — RxNorm/ATC coded, safety-screened, CS-ledger for scheduled drugs (Phase 2). Intended future split to `MedicationRequest` tracked in EHR_AUDIT |
 | `medication-administrations.ts` | `MedicationAdministration` | Doses given during visits |
-| `assessments.ts` | `Observation` (assessment-coded) | Falls risk, Braden, MMSE, etc. |
-| `clinical-notes.ts` | `Composition` | Draft + sign workflow; immutable after signing |
+| `assessments.ts` | `Observation` (coded) | Validated instruments (Braden, Morse, MMSE, Berg, TUG, NPRS) via `catalogs/assessment-instruments.ts` — range-validated score + `interpretation` risk band; reads legacy `QuestionnaireResponse` for history (Phase 4) |
+| `clinical-notes.ts` | `Composition` | Draft + sign; sign writes legal `attester` + `Provenance`; amendments `replaces` predecessor (Phase 6) |
+| `provenance.ts` | `Provenance` | Immutable "who signed/authored, when" attestation for notes + care reports (Phase 6) |
 | `care-plans.ts` | `CarePlan` | Per-patient clinical programs |
+| `episodes.ts` | `EpisodeOfCare` | Care episode + discharge/closure with outcome summary (Phase 8) |
 | `care-teams.ts` | `CareTeam` | Assigned clinicians; drives case-scoped reads |
 | `tasks.ts` | `Task` | Handoffs, follow-ups, clinician work queue |
 | `communications.ts` | `Communication` | Staff↔patient or staff↔staff messages |
@@ -183,8 +187,8 @@ Medplum is the **single source of truth for clinical data**. Postgres holds oper
 | `consent-policy.ts` | (logic) | Resolves portal scopes for caregivers from `Consent` resources |
 | `documents.ts` | `DocumentReference` + `Binary` | Lab PDFs, scans, medical attachments. Binary → R2-backed in production. |
 | `goals.ts` 🆕 | `Goal` | Patient rehabilitation goals; round-trip sync with Postgres `PatientGoal` (fhir_goal_id linkage) |
-| `labs.ts` | `ServiceRequest` + `DiagnosticReport` | Lab orders + results |
-| `audit.ts` | (mirror) | `writeMedplumAuditMirror` — writes Postgres `AuditLog` row alongside Medplum `AuditEvent` |
+| `labs.ts` | `ServiceRequest` + `DiagnosticReport` + `Observation` | Lab orders + results. Phase 7: discrete LOINC-coded result Observations (referenceRange + interpretation, via `catalogs/lab-analytes.ts`), `result[]`/`basedOn` linkage, order→result review Task |
+| `audit.ts` + `audit-event.ts` | `AuditEvent` (mirror) | `writeMedplumAuditMirror` → `recordAudit` (`@/lib/utils/audit`): durable Postgres `AuditLog` (retried, non-swallowing) **+ FHIR `AuditEvent`** mirror off the critical path (`after()`). Clinical writes + break-glass overrides covered; login/logout + `access_denied` still Postgres-only |
 
 See [docs/FHIR_CATALOG.md](../docs/FHIR_CATALOG.md) for resource-level field-by-field detail, sync direction, and example JSON.
 
@@ -223,7 +227,7 @@ See [docs/FHIR_CATALOG.md](../docs/FHIR_CATALOG.md) for resource-level field-by-
 
 | Path | Roles | Notes |
 |---|---|---|
-| `/admin/patients` | clinical roles + admin + medical_ops | Patient list (Medplum-sourced, case-scoped) |
+| `/admin/patients` | clinical roles + admin + medical_ops + **compliance_officer (read-only)** | Patient list (Medplum-sourced, case-scoped). Compliance has global read per the role matrix; no write role, so all mutations stay gated. Read gate = `CLINICAL_READ_ROLES` |
 | `/admin/patients/[id]` | clinical roles + admin + medical_ops | ⭐ Patient EHR detail — server actions for visits, vitals, notes, care team, tasks, conditions, allergies, meds, labs, docs, escalations, handoffs, consent, demographics |
 | `/admin/nursing/dashboard` | nurse + admin + superadmin | Nurse-ops dashboard |
 | `/admin/escalations` | clinical + medical_ops + admin | Escalations queue |
@@ -232,6 +236,7 @@ See [docs/FHIR_CATALOG.md](../docs/FHIR_CATALOG.md) for resource-level field-by-
 | `/admin/ops/disputes` 🆕 | medical_ops + operator | Disputed-visit queue |
 | `/admin/insurance` 🆕 | insurance_coordinator + admin | Insurer master + coverage + prior-auth + claims |
 | `/admin/compliance` 🆕 | compliance_officer + admin | Audit log dashboard — break-glass overrides, restricted-access events, login/logout |
+| `/admin/access` 🆕 | all staff | "My Access" — effective permissions rendered live from the role matrix (`permissionsForRole`) |
 
 Navigation visibility per role is computed by `src/lib/auth/admin-nav-policy.ts`.
 
@@ -374,7 +379,7 @@ All models live in `prisma/schema.prisma`. Reference the file before writing que
 - `PushSubscription` — VAPID subscriptions.
 - `RateLimit` — fixed-window counters for `@/lib/utils/rate-limit`.
 - `CoverageCheck` — coverage-map analytics. IP is SHA-256 hashed.
-- `AuditLog` — every clinical/operational change. `AuditAction` now spans: `create, update, delete, read, override, export, access_denied, login, logout`. Written today via `writeMedplumAuditMirror` (clinical writes) + `writeLoginAudit` (auth) + ad-hoc calls. Postgres-only mutations on operational tables are not yet fully covered (tracked in EHR_NOW.md).
+- `AuditLog` — every clinical/operational change. `AuditAction` now spans: `create, update, delete, read, override, export, access_denied, login, logout`. Written via `recordAudit` (`@/lib/utils/audit`) — durable Postgres row (retried, non-swallowing) + FHIR `AuditEvent` mirror — through `writeMedplumAuditMirror` (clinical writes) and the break-glass actions; `writeLoginAudit` (auth) covers login/logout. Operational Postgres-only mutations are not yet fully covered (tracked in EHR_AUDIT.md Phase 1).
 
 ### Removed (Jun 2026)
 - `Exercise`, `PatientHEP`, `PatientHEPItem`, `HEPAdherenceEntry`, `HEPReminderState`, `HEPStatus` — HEP feature parked behind a clinical-protocol gate.
@@ -416,7 +421,7 @@ All models live in `prisma/schema.prisma`. Reference the file before writing que
 
 | Pitfall | Where | Guidance |
 |---|---|---|
-| **Postgres-only audit gap** | auth callbacks + Postgres-only mutation paths | Login/logout now audited. Clinical writes mirror to `AuditLog` via `writeMedplumAuditMirror`. Operational Postgres-only mutations (Invoice, ProviderPayout, Promocode redemption, Patient demographics admin edits) still need explicit `prisma.auditLog.create()` calls. Leave `// TODO(audit)` markers where uncovered. |
+| **Postgres-only audit gap** | auth callbacks + Postgres-only mutation paths | Clinical writes + break-glass overrides now dual-store (Postgres `AuditLog` + FHIR `AuditEvent`) via `recordAudit`. Login/logout audited. Operational Postgres-only mutations (Invoice, ProviderPayout, Promocode redemption) still need `recordAudit(...)` (or `writeAuditLog` inside a txn) — Patient demographics edits are already covered. Leave `// TODO(audit)` markers where uncovered. |
 | **R2 signed URLs leak via logs** | `src/lib/storage/r2-medical.ts` | Never log signed URLs — they grant time-limited access to PHI bytes. Strip them from any debug output. Short TTL only (≤ 10 min). |
 | **Malware-scan backend is `mock_clean` in dev** | `src/lib/security/malware-scan.ts` | Dev returns `clean` unconditionally. Production **must** point at a real scanner via `EHR_MALWARE_SCAN_HTTP_URL` + token. Files that never pass `clean` must not be served. |
 | **Visit state-machine drift** | `Visit.state` enum + `VisitStateTransition` | The state machine has 22 states and explicit transitions. **Always go through a transition helper** that writes `VisitStateTransition`. Direct `Visit.update({ state })` is forbidden. |
@@ -527,15 +532,15 @@ To enable the admin / clinician dashboards locally, ensure you have a `User` + `
 | # | Concern | Status | Source of truth |
 |---|---|---|---|
 | 1 | Database + ORM | ✅ Postgres + Prisma 5.22 live; 9 migrations applied | `prisma/migrations/` |
-| 2 | Clinical EHR — Medplum FHIR | ✅ Deeply integrated. 24 modules. | [FHIR_CATALOG.md](../docs/FHIR_CATALOG.md) |
+| 2 | Clinical EHR — Medplum FHIR | 🟡 Broadly integrated (29 files), but several modules are free-text/uncoded and thinner than the catalog implied. | [FHIR_CATALOG.md](../docs/FHIR_CATALOG.md), [EHR_AUDIT.md](../docs/EHR_AUDIT.md) |
 | 3 | Patient portal | ✅ Live at `/[locale]/portal` with tabbed workspace + caregiver consent + document streaming | `src/app/[locale]/portal/` |
 | 4 | Auth | ✅ NextAuth v5 + Google + patient creds + staff creds + WhatsApp OTP + login/logout audit | `src/auth.ts` |
-| 5 | Audit logging | 🟡 Clinical mirror + login/logout live. Postgres-only operational writes still gap. | `src/lib/medplum/audit.ts` |
+| 5 | Audit logging | 🟡 Dual-store (Postgres `AuditLog`, retried/non-swallowing, + FHIR `AuditEvent` mirror) for clinical writes + overrides. Login/logout + `access_denied` + operational writes still Postgres-only. | `src/lib/utils/audit.ts`, `src/lib/medplum/audit-event.ts`, [EHR_AUDIT.md](../docs/EHR_AUDIT.md) Phase 1 |
 | 6 | Validation (Zod) | 🟡 In EHR schemas; not yet on every API route | `src/features/ehr/schemas/` |
 | 7 | Medical file storage | ✅ Cloudflare R2 + FHIR `DocumentReference`/`Binary` + malware scan job | `src/lib/storage/r2-medical.ts`, `src/lib/security/malware-scan.ts` |
 | 8 | Hosting | 🟡 Hostinger today → OVH Bahrain target | [DEPLOYMENT_RUNBOOK.md](../docs/DEPLOYMENT_RUNBOOK.md) |
-| 9 | Observability | ❌ Sentry + log aggregator not wired yet | EHR_NOW Sprint 5 |
-| 10 | Tests | ❌ None | EHR_NOW backlog |
+| 9 | Observability | 🟡 Seam + error boundaries + prod-readiness fail-fast wired (Phase 9); CSP Sentry-ready. SDK install (DSN) pending. | [EHR_AUDIT.md](../docs/EHR_AUDIT.md) Phase 9 |
+| 10 | Tests | 🟡 Vitest + 39 unit tests (RBAC/safety/catalogs/readiness). Playwright E2E pending. | `tests/`, [EHR_AUDIT.md](../docs/EHR_AUDIT.md) Phase 9 |
 | 11 | Multi-tenancy | 🟡 Foundations landed (Phase 1A): `Tenant` + `tenantId` columns. Query-level enforcement is still per-call. | `prisma/migrations/20260604130000_add_license_tenant_roles_phase1a/` |
 | 12 | Clinician workspace | ✅ Physio MVP live (`/clinician/*`). Doctor + nurse equivalents not built. | [EHR_PHYSIO_SPEC.md](../docs/EHR_PHYSIO_SPEC.md) |
 | 13 | Insurance | 🟡 Schema + admin dashboard skeleton (`/admin/insurance`). No live claim adjudication. | `prisma/migrations/20260604221500_matrix_foundations_tracking_insurance/` |

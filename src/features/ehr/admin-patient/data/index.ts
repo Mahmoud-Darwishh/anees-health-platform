@@ -11,7 +11,8 @@ import { listPatientAllergies } from '@/lib/medplum/allergies';
 import { listPatientMedications } from '@/lib/medplum/medications';
 import { listMedicationAdministrationRecords } from '@/lib/medplum/medication-administrations';
 import { listPatientDocuments } from '@/lib/medplum/documents';
-import { listPatientLabOrders, listPatientDiagnosticReports } from '@/lib/medplum/labs';
+import { listPatientLabOrders, listPatientDiagnosticReports, listPatientLabResultObservations } from '@/lib/medplum/labs';
+import { listPatientEpisodes } from '@/lib/medplum/episodes';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
 import { listGlucoseReadings } from '@/lib/medplum/glucose';
 import { listPatientCommunications } from '@/lib/medplum/communications';
@@ -19,7 +20,7 @@ import { listPatientAppointments } from '@/lib/medplum/appointments';
 import { listPatientCarePlans } from '@/lib/medplum/care-plans';
 import { listPatientGoalsFromMedplum } from '@/lib/medplum/goals';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
-import { CLINICAL_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
+import { CLINICAL_READ_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
 import { prisma } from '@/lib/db/prisma';
 import { sessionTenantId } from '@/lib/db/tenant-scope';
 import type { AdminPatientDetailData } from '../types';
@@ -42,7 +43,7 @@ export async function loadAdminPatientDetailData(
   id: string,
   activeTab?: string,
 ): Promise<AdminPatientDetailData> {
-  const user = await getStaffUser(CLINICAL_ROLES);
+  const user = await getStaffUser(CLINICAL_READ_ROLES);
 
   if (!user?.staffId || !user.staffRole) {
     return emptyAdminPatientDetailData({ staffRole: null, error: 'Unauthorized' });
@@ -222,6 +223,8 @@ export async function loadAdminPatientDetailData(
     consentsResult,
     localPatientResult,
     glucoseReadingsResult,
+    labResultObservationsResult,
+    episodesResult,
   ] =
     await Promise.allSettled([
       listPatientEncounters(patient.id, 30),
@@ -282,6 +285,8 @@ export async function loadAdminPatientDetailData(
       wants('care-team-consent') ? listPatientCaregiverPortalConsents(patient.id) : Promise.resolve([]),
       localPatientPromise,
       wants('measurements') ? listGlucoseReadings(patient.id, 200, { daysBack: 120 }) : Promise.resolve([]),
+      wants('labs') ? listPatientLabResultObservations(patient.id, 80) : Promise.resolve([]),
+      wants('care-plan-goals') ? listPatientEpisodes(patient.id, 10) : Promise.resolve([]),
     ]);
 
   // Restricted-tier gating: computed from the always-loaded CORE datasets so the
@@ -475,6 +480,10 @@ export async function loadAdminPatientDetailData(
     labOrdersError: settledError(labOrdersResult, 'Failed to load lab orders from Medplum'),
     labResults: visibleLabResults,
     labResultsError: settledError(labResultsResult, 'Failed to load diagnostic reports from Medplum'),
+    labResultObservations: settledValue(labResultObservationsResult, []),
+    labResultObservationsError: settledError(labResultObservationsResult, 'Failed to load discrete lab results from Medplum'),
+    episodes: settledValue(episodesResult, []),
+    episodesError: settledError(episodesResult, 'Failed to load care episodes from Medplum'),
     assessments: settledValue(assessmentsResult, []),
     assessmentsError: settledError(assessmentsResult, 'Failed to load patient assessments from Medplum'),
     glucoseReadings: settledValue(glucoseReadingsResult, []),

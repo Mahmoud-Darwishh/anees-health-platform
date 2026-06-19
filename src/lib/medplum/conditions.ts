@@ -30,6 +30,8 @@ export type ConditionResource = {
   verificationStatus?: { coding?: FhirCoding[] };
   category?: Array<{ coding?: FhirCoding[] }>;
   code?: { coding?: FhirCoding[]; text?: string };
+  severity?: { coding?: FhirCoding[]; text?: string };
+  bodySite?: Array<{ coding?: FhirCoding[]; text?: string }>;
   subject?: FhirReference;
   onsetDateTime?: string;
   recordedDate?: string;
@@ -45,11 +47,15 @@ export type ConditionSummary = {
   statusCode: string;
   category: 'medical' | 'physical_therapy';
   verification?: string;
+  severity?: string;
+  bodySite?: string;
   onset?: string;
   recordedDate?: string;
   note?: string;
   restrictedTier: boolean;
 };
+
+export type ConditionVerification = 'confirmed' | 'provisional' | 'differential' | 'unconfirmed';
 
 export type CreateConditionInput = {
   patientId: string;
@@ -57,11 +63,49 @@ export type CreateConditionInput = {
   label: string;
   code?: string | null;
   codings?: FhirCoding[] | null;
+  verificationStatus?: ConditionVerification | null;
+  severity?: 'mild' | 'moderate' | 'severe' | null;
+  bodySite?: string | null;
   onsetDate?: Date | null;
   note?: string | null;
   recordedByReference?: string | null;
   recordedByDisplay?: string | null;
 };
+
+const CONDITION_VER_STATUS_SYSTEM = 'http://terminology.hl7.org/CodeSystem/condition-ver-status';
+const RESTRICTED_TIER_SYSTEM = 'https://anees.health/fhir/CodeSystem/restricted-tier';
+
+const VERIFICATION_DISPLAY: Record<ConditionVerification, string> = {
+  confirmed: 'Confirmed',
+  provisional: 'Provisional',
+  differential: 'Differential',
+  unconfirmed: 'Unconfirmed',
+};
+
+const SEVERITY_SNOMED: Record<'mild' | 'moderate' | 'severe', { code: string; display: string }> = {
+  mild: { code: '255604002', display: 'Mild' },
+  moderate: { code: '6736007', display: 'Moderate' },
+  severe: { code: '24484000', display: 'Severe' },
+};
+
+/**
+ * Auto-classify a sensitive diagnosis into a restricted security tier (so the
+ * existing restricted-tier masking in the chart applies automatically). Driven by
+ * ICD-10 ranges + label hints: mental/behavioural (F-codes) → `psy`; HIV
+ * (B20–B24, Z21) and STIs (A50–A64) → `r`.
+ */
+function restrictedTierForCondition(code: string | null | undefined, label: string | null | undefined): FhirCoding | null {
+  const c = (code ?? '').toUpperCase();
+  if (/^F\d/.test(c)) return { system: RESTRICTED_TIER_SYSTEM, code: 'psy', display: 'Behavioral health' };
+  if (/^B2[0-4]/.test(c) || /^Z21/.test(c)) return { system: RESTRICTED_TIER_SYSTEM, code: 'r', display: 'Restricted (HIV)' };
+  if (/^A5\d/.test(c) || /^A6[0-4]/.test(c)) return { system: RESTRICTED_TIER_SYSTEM, code: 'r', display: 'Restricted (STI)' };
+  const l = (label ?? '').toLowerCase();
+  if (/(hiv|aids)/.test(l)) return { system: RESTRICTED_TIER_SYSTEM, code: 'r', display: 'Restricted (HIV)' };
+  if (/(depress|anxiety|psychiat|schizo|bipolar|mental health|substance use|addiction|suicid)/.test(l)) {
+    return { system: RESTRICTED_TIER_SYSTEM, code: 'psy', display: 'Behavioral health' };
+  }
+  return null;
+}
 
 function normalizeCondition(resource: ConditionResource): ConditionSummary | null {
   if (!resource.id) return null;
@@ -86,6 +130,8 @@ function normalizeCondition(resource: ConditionResource): ConditionSummary | nul
     statusCode,
     category: isPhysioTherapy ? 'physical_therapy' : 'medical',
     verification: resource.verificationStatus?.coding?.[0]?.display ?? resource.verificationStatus?.coding?.[0]?.code,
+    severity: resource.severity?.text ?? resource.severity?.coding?.[0]?.display,
+    bodySite: resource.bodySite?.[0]?.text ?? resource.bodySite?.[0]?.coding?.[0]?.display,
     onset: resource.onsetDateTime,
     recordedDate: resource.recordedDate,
     note: resource.note?.[0]?.text,
@@ -138,19 +184,33 @@ export async function createPatientCondition(input: CreateConditionInput): Promi
     : [];
   const resolvedCodeCodings = normalizedCodings.length > 0 ? normalizedCodings : fallbackIcdCoding;
 
+  const verification = input.verificationStatus ?? 'confirmed';
+  const severity = input.severity ?? null;
+  const primaryCode =
+    input.code ??
+    resolvedCodeCodings.find((coding) => (coding.system ?? '').toLowerCase().includes('icd-10'))?.code ??
+    resolvedCodeCodings[0]?.code ??
+    null;
+  const security = restrictedTierForCondition(primaryCode, input.label);
+
   return (await medplum.createResource({
     resourceType: 'Condition',
+    meta: security ? { security: [security] } : undefined,
     clinicalStatus: {
       coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-clinical', code: 'active', display: 'Active' }],
     },
     verificationStatus: {
-      coding: [{ system: 'http://terminology.hl7.org/CodeSystem/condition-ver-status', code: 'confirmed', display: 'Confirmed' }],
+      coding: [{ system: CONDITION_VER_STATUS_SYSTEM, code: verification, display: VERIFICATION_DISPLAY[verification] }],
     },
     category: [{ coding: categoryCodings }],
     code: {
       coding: resolvedCodeCodings.length > 0 ? resolvedCodeCodings : undefined,
       text: input.label,
     },
+    severity: severity
+      ? { coding: [{ system: 'http://snomed.info/sct', ...SEVERITY_SNOMED[severity] }], text: SEVERITY_SNOMED[severity].display }
+      : undefined,
+    bodySite: input.bodySite ? [{ text: input.bodySite }] : undefined,
     subject: { reference: `Patient/${input.patientId}` },
     onsetDateTime: input.onsetDate?.toISOString(),
     recordedDate: new Date().toISOString(),

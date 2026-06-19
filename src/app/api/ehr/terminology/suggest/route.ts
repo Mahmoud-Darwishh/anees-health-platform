@@ -4,11 +4,16 @@ import { getSessionUser, isStaff } from '@/lib/auth/rbac';
 import { resolveCorsHeaders } from '@/lib/utils/cors';
 import { suggestMedplumTerminology, type MedplumTerminologyDomain } from '@/lib/medplum/terminology';
 import { searchIcd10Problems } from '@/features/ehr/catalogs/icd10-problems';
+import { searchDrugFormulary } from '@/features/ehr/catalogs/drug-formulary';
+import { searchAllergens } from '@/features/ehr/catalogs/allergen-catalog';
+import { searchLabAnalytes } from '@/features/ehr/catalogs/lab-analytes';
 
 const querySchema = z.object({
   domain: z.enum([
     'problem',
+    'drug',
     'allergen',
+    'lab-analyte',
     'allergy-reaction',
     'allergy-note',
     'medication',
@@ -41,10 +46,20 @@ export async function GET(request: Request) {
 
     const limit = parsed.data.limit ?? 10;
 
-    // Problems are served from the app-owned ICD-10 catalog, not Medplum's
-    // terminology server (its ICD-10 CodeSystem is empty and write-protected).
+    // App-owned catalogs (Medplum's terminology server has neither RxNorm nor a
+    // usable allergen value set loaded for our client). These also carry the
+    // class/cross-reactivity data the safety engine needs.
     if (parsed.data.domain === 'problem') {
       return NextResponse.json({ terms: await searchIcd10Problems(parsed.data.q, limit) }, { headers: cors });
+    }
+    if (parsed.data.domain === 'drug') {
+      return NextResponse.json({ terms: await searchDrugFormulary(parsed.data.q, limit) }, { headers: cors });
+    }
+    if (parsed.data.domain === 'allergen') {
+      return NextResponse.json({ terms: await searchAllergens(parsed.data.q, limit) }, { headers: cors });
+    }
+    if (parsed.data.domain === 'lab-analyte') {
+      return NextResponse.json({ terms: searchLabAnalytes(parsed.data.q, limit) }, { headers: cors });
     }
 
     const terms = await suggestMedplumTerminology(

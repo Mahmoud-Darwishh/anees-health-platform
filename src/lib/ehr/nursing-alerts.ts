@@ -8,7 +8,7 @@ import {
 } from '@/lib/config/nursing-ops-policy';
 
 export type VitalsThresholdBreach = {
-  key: 'systolicBp' | 'diastolicBp' | 'heartRate' | 'temperatureC' | 'glucoseMgDl' | 'spo2Pct' | 'painScore';
+  key: 'systolicBp' | 'diastolicBp' | 'heartRate' | 'respiratoryRate' | 'temperatureC' | 'glucoseMgDl' | 'spo2Pct' | 'painScore';
   label: string;
   value: number;
   min: number | null;
@@ -17,7 +17,7 @@ export type VitalsThresholdBreach = {
 
 type EvaluatedVitalsInput = Pick<
   CreateVitalObservationsInput,
-  'systolicBp' | 'diastolicBp' | 'heartRate' | 'temperatureC' | 'glucoseMgDl' | 'spo2Pct' | 'painScore'
+  'systolicBp' | 'diastolicBp' | 'heartRate' | 'respiratoryRate' | 'temperatureC' | 'glucoseMgDl' | 'spo2Pct' | 'painScore'
 >;
 
 function checkRange(
@@ -61,6 +61,7 @@ export function evaluateVitalsThresholdBreaches(
     checkRange('systolicBp', 'Systolic BP', input.systolicBp, config.systolicBp),
     checkRange('diastolicBp', 'Diastolic BP', input.diastolicBp, config.diastolicBp),
     checkRange('heartRate', 'Heart Rate', input.heartRate, config.heartRate),
+    checkRange('respiratoryRate', 'Respiratory Rate', input.respiratoryRate, config.respiratoryRate),
     checkRange('temperatureC', 'Temperature (C)', input.temperatureC, config.temperatureC),
     checkRange('glucoseMgDl', 'Glucose (mg/dL)', input.glucoseMgDl, config.glucoseMgDl),
     checkRange('spo2Pct', 'SpO2 (%)', input.spo2Pct, config.spo2Pct),

@@ -1,7 +1,7 @@
 # Docs — Anees Health Platform
 
 > **Audience:** anyone landing in this folder for the first time — owner, engineer, hospital partner, auditor.
-> **Last refresh:** 2026-06-05.
+> **Last refresh:** 2026-06-18.
 
 This folder holds every long-form document for the platform. Read this README first; it tells you which doc to open for which question.
 
@@ -34,7 +34,8 @@ Anees is a production-grade bilingual (EN/AR) home-care platform serving Egypt t
 | Doc | What it answers |
 |---|---|
 | [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) | "What is the stack, what's where in the repo, what conventions must I follow, what pitfalls must I know?" The canonical engineering reference. Lives at `.claude/CLAUDE.md` (outside this folder) because Claude Code reads it automatically. |
-| [FHIR_CATALOG.md](FHIR_CATALOG.md) | "Which FHIR resources do we use? Which module owns each one? What does the JSON look like? What are the Egyptian extensions?" |
+| [FHIR_CATALOG.md](FHIR_CATALOG.md) | "Which FHIR resources do we use? Which module owns each one? What does the JSON look like? What are the Egyptian extensions?" Each resource now carries an Implemented / Partial / Roadmap status. |
+| [EHR_AUDIT.md](EHR_AUDIT.md) | "Where is the clinical core medically/technically immature or not matching the docs, and in what order do we fix it?" The gap register + phased remediation plan. |
 | [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) | "Who can read / write / sign what? How does case scope work? What's a break-glass override? How do field-ops state transitions behave?" |
 | [EHR_PHYSIO_SPEC.md](EHR_PHYSIO_SPEC.md) | "What is the physiotherapist workspace, end-to-end?" The deepest product spec we have. 80 KB; read the reading guide first. |
 
@@ -97,4 +98,4 @@ Anees is a production-grade bilingual (EN/AR) home-care platform serving Egypt t
 - [Root `README.md`](../README.md) — the GitHub front door. Read this if you landed at the repo root.
 - [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) — the engineering reference.
 - [`prisma/schema.prisma`](../prisma/schema.prisma) — the authoritative DB schema.
-- [`src/lib/medplum/`](../src/lib/medplum/) — the 24 FHIR modules.
+- [`src/lib/medplum/`](../src/lib/medplum/) — the FHIR clinical modules (29 files; ~22 own a resource).

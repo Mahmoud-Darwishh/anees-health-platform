@@ -1,6 +1,7 @@
-import { createAllergyAction, createConditionAction, retireConditionAction, updateConditionStatusAction, retireAllergyAction, updateAllergyStatusAction } from '../actions';
+import { createAllergyAction, recordNoKnownAllergiesAction, createConditionAction, retireConditionAction, updateConditionStatusAction, retireAllergyAction, updateAllergyStatusAction } from '../actions';
 import { ProblemCodeFields } from '@/features/ehr/components/ProblemCodeFields';
-import { CONDITION_CONTEXT_OPTIONS, CONDITION_STATUS_OPTIONS, ALLERGY_STATUS_OPTIONS, COMMON_ALLERGENS } from '../view-helpers';
+import { CodedTermPicker } from '@/features/ehr/components/CodedTermPicker';
+import { CONDITION_CONTEXT_OPTIONS, CONDITION_STATUS_OPTIONS, ALLERGY_STATUS_OPTIONS } from '../view-helpers';
 import type { AdminPatientViewContext } from '../view-context';
 
 export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext }) {
@@ -49,6 +50,28 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                     ))}
                   </select>
                 </div>
+                <div className="col-md-3">
+                  <label htmlFor="conditionVerification" className="form-label">Verification</label>
+                  <select id="conditionVerification" name="conditionVerification" className="form-select" defaultValue="confirmed">
+                    <option value="confirmed">Confirmed</option>
+                    <option value="provisional">Provisional</option>
+                    <option value="differential">Differential</option>
+                    <option value="unconfirmed">Unconfirmed</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label htmlFor="conditionSeverity" className="form-label">Severity</label>
+                  <select id="conditionSeverity" name="conditionSeverity" className="form-select" defaultValue="">
+                    <option value="">Not specified</option>
+                    <option value="mild">Mild</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="severe">Severe</option>
+                  </select>
+                </div>
+                <div className="col-md-6">
+                  <label htmlFor="conditionBodySite" className="form-label">Body site (optional)</label>
+                  <input id="conditionBodySite" name="conditionBodySite" type="text" className="form-control" placeholder="e.g. left knee, sacrum" autoComplete="off" dir="auto" />
+                </div>
                 <div className="col-12">
                   <button type="submit" className="btn btn-primary">Add problem</button>
                 </div>
@@ -67,14 +90,23 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                         <tr key={condition.id}>
                           <td>
                             <div className="fw-semibold">{condition.label}</div>
-                            <div className="text-muted small">{condition.code ?? '—'}</div>
+                            <div className="text-muted small">
+                              {condition.code ?? '—'}
+                              {condition.severity ? ` · ${condition.severity}` : ''}
+                              {condition.bodySite ? ` · ${condition.bodySite}` : ''}
+                            </div>
                           </td>
                           <td>
                             <span className={`badge ${condition.category === 'physical_therapy' ? 'bg-info-subtle text-info-emphasis' : 'bg-secondary-subtle text-secondary-emphasis'}`}>
                               {condition.category === 'physical_therapy' ? 'PT' : 'Medical'}
                             </span>
                           </td>
-                          <td className="text-capitalize">{condition.status}</td>
+                          <td className="text-capitalize">
+                            {condition.status}
+                            {condition.verification && condition.verification.toLowerCase() !== 'confirmed' ? (
+                              <div className="text-warning small">{condition.verification}</div>
+                            ) : null}
+                          </td>
                           <td>{condition.onset ? new Date(condition.onset).toLocaleDateString('en-GB') : '—'}</td>
                           <td className="text-muted small">{condition.note ?? '—'}</td>
                           <td className="text-end">
@@ -125,25 +157,27 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
             <div className="card-body">
               <form action={createAllergyAction} className="row g-3 mb-3">
                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
-                <div className="col-md-6">
-                  <label htmlFor="allergen" className="form-label">Allergen</label>
-                  <input
-                    id="allergen"
-                    name="allergen"
-                    type="text"
-                    className="form-control"
-                    placeholder="Type allergen (free text)"
-                    list="common-allergens"
-                    autoComplete="off"
-                    required
-                  />
-                  <datalist id="common-allergens">
-                    {COMMON_ALLERGENS.map((allergen) => (
-                      <option key={allergen} value={allergen} />
-                    ))}
-                  </datalist>
+                <CodedTermPicker
+                  domain="allergen"
+                  labelInputName="allergen"
+                  codeInputName="allergenCode"
+                  title="Allergen"
+                  placeholder="Type an allergen, then pick a match"
+                  className="col-md-6"
+                  helpCoded="Coded allergen — drug cross-reactivity screening enabled."
+                  helpFree="Free text — set the category below; no cross-reactivity screening."
+                  required
+                />
+                <div className="col-md-3">
+                  <label htmlFor="allergyCategory" className="form-label">Category</label>
+                  <select id="allergyCategory" name="allergyCategory" className="form-select" defaultValue="medication">
+                    <option value="medication">Medication</option>
+                    <option value="food">Food</option>
+                    <option value="environment">Environment</option>
+                    <option value="biologic">Biologic</option>
+                  </select>
                 </div>
-                <div className="col-md-6">
+                <div className="col-md-3">
                   <label htmlFor="allergySeverity" className="form-label">Severity</label>
                   <select id="allergySeverity" name="allergySeverity" className="form-select" defaultValue="">
                     <option value="">Unknown</option>
@@ -152,21 +186,42 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                     <option value="severe">Severe</option>
                   </select>
                 </div>
-                <div className="col-12">
+                <div className="col-md-6">
+                  <label htmlFor="allergyReaction" className="form-label">Reaction</label>
+                  <input
+                    id="allergyReaction"
+                    name="allergyReaction"
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. rash, anaphylaxis, angioedema"
+                    autoComplete="off"
+                    dir="auto"
+                  />
+                </div>
+                <div className="col-md-6">
                   <label htmlFor="allergyNote" className="form-label">Notes</label>
                   <input
                     id="allergyNote"
                     name="allergyNote"
                     type="text"
                     className="form-control"
-                    placeholder="Type allergy note (free text)"
+                    placeholder="Optional context"
                     autoComplete="off"
+                    dir="auto"
                   />
                 </div>
                 <div className="col-12">
                   <button type="submit" className="btn btn-primary">Add allergy</button>
                 </div>
               </form>
+
+              {allergies.length === 0 && (
+                <form action={recordNoKnownAllergiesAction} className="d-flex align-items-center gap-2 mb-3">
+                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                  <button type="submit" className="btn btn-outline-secondary btn-sm">Record: No Known Allergies</button>
+                  <span className="text-muted small">Confirms allergies were asked — distinct from an empty (unasked) list.</span>
+                </form>
+              )}
               {allergiesError && <div className="alert alert-warning" role="alert">Could not load allergies: {allergiesError}</div>}
               {!allergiesError && allergies.length === 0 && <div className="alert alert-info mb-0" role="alert">No allergies recorded yet.</div>}
               {!allergiesError && allergies.length > 0 && (

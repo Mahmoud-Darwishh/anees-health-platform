@@ -1,4 +1,4 @@
-import { createStandingOrderAction, executeStandingOrderAction } from '../actions';
+import { createStandingOrderAction, executeStandingOrderAction, closeCareEpisodeAction } from '../actions';
 import { workflowStateLabel, formatClinicalDate, carePlanStatusBadgeClass, goalStatusBadgeClass, goalStatusLabel } from '../view-helpers';
 import type { AdminPatientViewContext } from '../view-context';
 
@@ -12,6 +12,9 @@ export function CarePlanGoalsSections({ ctx }: { ctx: AdminPatientViewContext })
     localVisits,
     standingOrders,
     standingOrdersError,
+    episodes,
+    episodesError,
+    episodeCloseWrite,
     isTab,
   } = ctx;
 
@@ -19,6 +22,45 @@ export function CarePlanGoalsSections({ ctx }: { ctx: AdminPatientViewContext })
     <>
           {isTab('care-plan-goals') && (
           <>
+          <div className="card bg-white mb-3">
+            <div className="card-header d-flex justify-content-between align-items-center">
+              <h2 className="h6 mb-0">Care episode &amp; discharge</h2>
+              <span className="text-muted small">{episodes.length} episode{episodes.length === 1 ? '' : 's'}</span>
+            </div>
+            <div className="card-body">
+              {episodesError && <div className="alert alert-warning" role="alert">Could not load care episodes: {episodesError}</div>}
+              {!episodesError && episodes.length === 0 && <div className="alert alert-info" role="alert">No care episode recorded yet.</div>}
+              {!episodesError && episodes.length > 0 && (
+                <div className="table-responsive mb-3">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead><tr><th>Status</th><th>Start</th><th>End</th><th>Outcome</th></tr></thead>
+                    <tbody>
+                      {episodes.map((episode) => (
+                        <tr key={episode.id}>
+                          <td><span className={`badge ${episode.status === 'finished' ? 'bg-secondary' : 'bg-success'}`}>{episode.status}</span></td>
+                          <td>{episode.start ? new Date(episode.start).toLocaleDateString('en-GB') : '—'}</td>
+                          <td>{episode.end ? new Date(episode.end).toLocaleDateString('en-GB') : '—'}</td>
+                          <td className="text-muted small">{episode.outcomeSummary ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {episodeCloseWrite ? (
+                <form action={closeCareEpisodeAction} className="row g-2">
+                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                  <div className="col-12">
+                    <label htmlFor="episodeOutcomeSummary" className="form-label">Discharge outcome summary</label>
+                    <textarea id="episodeOutcomeSummary" name="episodeOutcomeSummary" className="form-control" rows={2} placeholder="Goals achieved, condition at discharge, follow-up plan…" required dir="auto" />
+                  </div>
+                  <div className="col-12"><button type="submit" className="btn btn-outline-danger">Discharge / close care episode</button></div>
+                </form>
+              ) : (
+                <p className="small text-muted mb-0">Discharge (closing the care episode) is a licensed-physician sign-off, per the role matrix.</p>
+              )}
+            </div>
+          </div>
           <div id="patient-care-plan-goals" className="row g-3">
             <div className="col-lg-6">
               <div className="card bg-white h-100">

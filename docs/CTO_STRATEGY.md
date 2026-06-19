@@ -301,7 +301,7 @@ Detailed §164.308/310/312 mapping is in [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.
 | Is the data encrypted? | TLS in transit always. R2 server-side encrypted at rest. Postgres at-rest will be native once on OVH managed Postgres. |
 | Who can see a patient's data? | Only roles in our RBAC matrix ([EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md)) with case scope, plus consented caregivers. Every read is logged. |
 | What happens on a breach? | Documented procedure in [SECURITY_ARCHITECTURE.md §10](SECURITY_ARCHITECTURE.md). 72-hour notification under Egypt DPL Art. 20. |
-| Can we audit access? | Yes. Dual audit (FHIR `AuditEvent` + Postgres `AuditLog`). Compliance officer reviews via `/admin/compliance`. |
+| Can we audit access? | Partially. Postgres `AuditLog` captures clinical writes + login/logout (compliance officer reviews via `/admin/compliance`). The FHIR `AuditEvent` half is **not built yet**, and the write is best-effort — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1. |
 | Can we use our own auth? | Planned (Phase 1) — hospital partner SSO via OIDC, scoped to the hospital tenant. |
 | What's your incident response time? | RPO 24h (target 1h), RTO 4h (target 1h). See DEPLOYMENT_RUNBOOK.md. |
 

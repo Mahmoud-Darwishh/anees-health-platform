@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { reportError } from '@/lib/utils/observability';
 
 /**
  * Last-resort boundary: catches errors thrown in the ROOT layout (and any
@@ -18,9 +19,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('[GlobalErrorBoundary]', error);
-    }
+    reportError(error, { boundary: 'app/global-error', digest: error.digest });
   }, [error]);
 
   return (

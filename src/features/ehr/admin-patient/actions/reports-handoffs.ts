@@ -13,7 +13,11 @@ import { NURSING_HANDOFF_DEFAULT_RADIUS_METERS, NURSING_HANDOFF_MAX_ACCURACY_MET
 export async function createNursingShiftHandoffAction(formData: FormData): Promise<void> {
   try {
     const input = createNursingShiftHandoffSchema.parse(formDataToInput(formData));
-    await requireAdminPatientAction('nursing_shift.manage', input.medplumPatientId, 'nursing_handoff');
+    // A shift handoff is a nursing report → gate it as one (nurse / licensed
+    // med-ops sign), matching the role matrix + the UI flag. (Previously gated as
+    // `nursing_shift.manage` = visits_schedule:write, which wrongly blocked the
+    // nurses who actually submit handoffs.)
+    await requireAdminPatientAction('nursing_report.create', input.medplumPatientId, 'nursing_handoff');
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
 
     await assertRosteredNurseForPatientIfNurse(staff, input.medplumPatientId, input.shiftEndAt);

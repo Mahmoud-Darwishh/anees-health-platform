@@ -1,6 +1,7 @@
-import { createDiagnosticReportAction, createLabOrderAction, createNursingShiftHandoffAction } from '../actions';
+import { createDiagnosticReportAction, createLabOrderAction, addLabResultAction, createNursingShiftHandoffAction } from '../actions';
 import { NursingHandoffLocationCapture } from '../NursingHandoffLocationCapture';
 import { TerminologyTextField } from '@/features/ehr/components/TerminologyTextField';
+import { CodedTermPicker } from '@/features/ehr/components/CodedTermPicker';
 import { NURSING_STATUS_OPTIONS, PENDING_TASK_OPTIONS, MEDICATION_SAFETY_OPTIONS, NEXT_SHIFT_FOCUS_OPTIONS } from '../view-helpers';
 import type { AdminPatientViewContext } from '../view-context';
 
@@ -12,6 +13,8 @@ export function LabsSections({ ctx }: { ctx: AdminPatientViewContext }) {
     labOrdersError,
     labResults,
     labResultsError,
+    labResultObservations,
+    labResultObservationsError,
     nursingShiftHandoffWrite,
     isTab,
   } = ctx;
@@ -78,6 +81,65 @@ export function LabsSections({ ctx }: { ctx: AdminPatientViewContext }) {
                     <div className="col-12"><button type="submit" className="btn btn-primary">Save result</button></div>
                   </form>
                 </div>
+              </div>
+
+              <div className="mb-3">
+                <h3 className="h6">Add result value (coded)</h3>
+                <p className="small text-muted mb-2">Records a discrete LOINC-coded value with a reference range + automatic abnormal flag.</p>
+                <form action={addLabResultAction} className="row g-3">
+                  <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
+                  <CodedTermPicker
+                    domain="lab-analyte"
+                    labelInputName="analyteLabel"
+                    codeInputName="analyteKey"
+                    title="Analyte"
+                    placeholder="Type an analyte (e.g. hemoglobin, potassium, ALT)"
+                    className="col-md-4"
+                    helpCoded="Coded — LOINC + reference range + abnormal flag applied."
+                    helpFree="Pick a listed analyte to store a discrete coded result."
+                    required
+                  />
+                  <div className="col-md-2"><label htmlFor="labResultValue" className="form-label">Value</label><input id="labResultValue" name="labResultValue" type="number" step="any" className="form-control" required /></div>
+                  <div className="col-md-3">
+                    <label htmlFor="addResultReport" className="form-label">Link to report</label>
+                    <select id="addResultReport" name="diagnosticReportId" className="form-select" defaultValue="">
+                      <option value="">None</option>
+                      {labResults.map((report) => (<option key={report.id} value={report.id}>{report.title}</option>))}
+                    </select>
+                  </div>
+                  <div className="col-md-3">
+                    <label htmlFor="addResultOrder" className="form-label">Based on order</label>
+                    <select id="addResultOrder" name="basedOnOrderId" className="form-select" defaultValue="">
+                      <option value="">None</option>
+                      {labOrders.map((order) => (<option key={order.id} value={order.id}>{order.title}</option>))}
+                    </select>
+                  </div>
+                  <div className="col-12"><button type="submit" className="btn btn-outline-primary">Add result value</button></div>
+                </form>
+
+                {labResultObservationsError && <div className="alert alert-warning mt-2" role="alert">Could not load result values: {labResultObservationsError}</div>}
+                {!labResultObservationsError && labResultObservations.length > 0 && (
+                  <div className="table-responsive mt-3">
+                    <table className="table table-sm align-middle mb-0">
+                      <thead><tr><th>Analyte</th><th>Value</th><th>Reference</th><th>Flag</th><th>Date</th></tr></thead>
+                      <tbody>
+                        {labResultObservations.map((result) => (
+                          <tr key={result.id}>
+                            <td><div className="fw-semibold">{result.analyte}</div><div className="text-muted small">{result.loinc ?? '—'}</div></td>
+                            <td className={result.flag && result.flag !== 'N' ? 'text-danger fw-semibold' : ''}>{result.value ?? '—'} {result.unit ?? ''}</td>
+                            <td className="text-muted small">{result.referenceRange ?? '—'}</td>
+                            <td>
+                              {result.flag === 'H' ? <span className="badge bg-danger">High</span>
+                                : result.flag === 'L' ? <span className="badge bg-primary">Low</span>
+                                : result.flag === 'N' ? <span className="badge bg-success">Normal</span> : '—'}
+                            </td>
+                            <td className="text-muted small">{result.effective ? new Date(result.effective).toLocaleDateString('en-GB') : '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
               <div className="row g-4">

@@ -10,6 +10,16 @@ export const createLabOrderSchema = z.object({
   labOrderNote: optionalTrimmedString,
 });
 
+export const addLabResultSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  diagnosticReportId: optionalTrimmedString,
+  basedOnOrderId: optionalTrimmedString,
+  analyteLabel: z.string().trim().min(1, 'Analyte is required'),
+  analyteKey: optionalTrimmedString,
+  labResultValue: z.coerce.number(),
+  labResultEffectiveOn: optionalDate,
+});
+
 export const createDiagnosticReportSchema = z.object({
   medplumPatientId: requiredPatientId,
   diagnosticTitle: z.string().trim().min(1, 'Report title is required'),

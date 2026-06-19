@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { listMedplumPatients } from '@/lib/medplum/patients';
-import { getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
+import { CLINICAL_READ_ROLES, getStaffUser, isCaseScopedClinicalRole } from '@/lib/auth/rbac';
 import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
@@ -65,7 +65,7 @@ function staffRoleLabel(staffRole?: string | null): string {
 }
 
 export default async function AdminPatientsPage() {
-  const user = await getStaffUser();
+  const user = await getStaffUser(CLINICAL_READ_ROLES);
   await requireStaffCan('patient.directory.read', {
     audit: {
       tableName: 'patients',

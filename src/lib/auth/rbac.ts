@@ -4,12 +4,13 @@ import type { LicenseType, StaffRole } from '@prisma/client';
 import {
   CLINICAL_ROLES,
   CLINICAL_WRITE_ROLES,
+  CLINICAL_READ_ROLES,
   CASE_SCOPED_CLINICAL_READ_ROLES,
 } from './role-constants';
 
 // Re-exported so existing `import { CLINICAL_ROLES } from '@/lib/auth/rbac'`
 // keeps working. The lists themselves live in the Edge-safe role-constants.ts.
-export { CLINICAL_ROLES, CLINICAL_WRITE_ROLES, CASE_SCOPED_CLINICAL_READ_ROLES };
+export { CLINICAL_ROLES, CLINICAL_WRITE_ROLES, CLINICAL_READ_ROLES, CASE_SCOPED_CLINICAL_READ_ROLES };
 
 export type SessionUser = {
   id: string;

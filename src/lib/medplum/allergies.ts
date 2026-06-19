@@ -34,20 +34,32 @@ export type AllergyIntoleranceResource = {
   note?: Array<{ text?: string }>;
 };
 
+export type AllergyCategory = 'food' | 'medication' | 'environment' | 'biologic';
+
+/** SNOMED "No known allergy" — the affirmative NKA record. */
+const NO_KNOWN_ALLERGY_CODE = '716186003';
+
 export type AllergySummary = {
   id: string;
   allergen: string;
+  category?: AllergyCategory;
   severity?: string;
   reaction?: string;
   onset?: string;
   status: string;
   statusCode: string;
   note?: string;
+  /** True for the affirmative "No Known Allergies" record. */
+  isNoKnownAllergy?: boolean;
 };
 
 export type CreateAllergyInput = {
   patientId: string;
   allergen: string;
+  category?: AllergyCategory | null;
+  /** SNOMED / Anees codings from the allergen catalog. Empty for free-text. */
+  codings?: FhirCoding[] | null;
+  reactionManifestation?: string | null;
   severity?: 'mild' | 'moderate' | 'severe' | null;
   note?: string | null;
   recordedByReference?: string | null;
@@ -57,9 +69,12 @@ export type CreateAllergyInput = {
 function normalizeAllergy(resource: AllergyIntoleranceResource): AllergySummary | null {
   if (!resource.id) return null;
 
+  const isNoKnownAllergy = (resource.code?.coding ?? []).some((coding) => coding.code === NO_KNOWN_ALLERGY_CODE);
+
   return {
     id: resource.id,
     allergen: resource.code?.text ?? resource.code?.coding?.[0]?.display ?? resource.code?.coding?.[0]?.code ?? 'Allergy',
+    category: resource.category?.[0],
     severity: resource.reaction?.[0]?.severity,
     reaction:
       resource.reaction?.[0]?.manifestation?.[0]?.text ??
@@ -68,6 +83,7 @@ function normalizeAllergy(resource: AllergyIntoleranceResource): AllergySummary 
     status: resource.clinicalStatus?.coding?.[0]?.display ?? resource.clinicalStatus?.coding?.[0]?.code ?? 'unknown',
     statusCode: resource.clinicalStatus?.coding?.[0]?.code ?? 'active',
     note: resource.note?.[0]?.text,
+    isNoKnownAllergy,
   };
 }
 
@@ -95,18 +111,20 @@ export async function createPatientAllergy(input: CreateAllergyInput): Promise<A
 
   const noteText = input.note?.trim() || null;
   const severity = input.severity ?? null;
+  const manifestationText = input.reactionManifestation?.trim() || null;
 
-  // FHIR ait constraint: a `reaction` entry MUST carry a `manifestation`. We only
-  // capture severity now (no reaction text), so build a reaction with a neutral
-  // manifestation when a severity is given, and omit `reaction` entirely otherwise.
-  const reaction = severity
-    ? [
-        {
-          manifestation: [{ text: 'Unspecified reaction' }],
-          severity,
-        },
-      ]
-    : undefined;
+  // FHIR ait constraint: a `reaction` entry MUST carry a `manifestation`. Build a
+  // reaction when we have either a severity or a recorded manifestation; otherwise
+  // omit `reaction` entirely.
+  const reaction =
+    severity || manifestationText
+      ? [
+          {
+            manifestation: [{ text: manifestationText ?? 'Unspecified reaction' }],
+            ...(severity ? { severity } : {}),
+          },
+        ]
+      : undefined;
 
   return (await medplum.createResource({
     resourceType: 'AllergyIntolerance',
@@ -116,8 +134,10 @@ export async function createPatientAllergy(input: CreateAllergyInput): Promise<A
     verificationStatus: {
       coding: [{ system: 'http://terminology.hl7.org/CodeSystem/allergyintolerance-verification', code: 'unconfirmed', display: 'Unconfirmed' }],
     },
+    category: input.category ? [input.category] : undefined,
     criticality: severity === 'severe' ? 'high' : severity ? 'low' : 'unable-to-assess',
     code: {
+      coding: input.codings && input.codings.length > 0 ? input.codings : undefined,
       text: input.allergen,
     },
     patient: { reference: `Patient/${input.patientId}` },
@@ -126,6 +146,37 @@ export async function createPatientAllergy(input: CreateAllergyInput): Promise<A
       : undefined,
     reaction,
     note: noteText ? [{ text: noteText }] : undefined,
+  } as never)) as AllergyIntoleranceResource;
+}
+
+/**
+ * Records the affirmative "No Known Allergies" status as a SNOMED-coded
+ * AllergyIntolerance (716186003) with `verificationStatus = confirmed`. This is
+ * clinically distinct from an empty allergy list (which means "not asked").
+ */
+export async function createNoKnownAllergyRecord(input: {
+  patientId: string;
+  recordedByReference?: string | null;
+  recordedByDisplay?: string | null;
+}): Promise<AllergyIntoleranceResource> {
+  const medplum = await getMedplumClient();
+
+  return (await medplum.createResource({
+    resourceType: 'AllergyIntolerance',
+    clinicalStatus: {
+      coding: [{ system: 'http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical', code: 'active', display: 'Active' }],
+    },
+    verificationStatus: {
+      coding: [{ system: 'http://terminology.hl7.org/CodeSystem/allergyintolerance-verification', code: 'confirmed', display: 'Confirmed' }],
+    },
+    code: {
+      coding: [{ system: 'http://snomed.info/sct', code: NO_KNOWN_ALLERGY_CODE, display: 'No known allergy' }],
+      text: 'No known allergies',
+    },
+    patient: { reference: `Patient/${input.patientId}` },
+    recorder: input.recordedByReference
+      ? { reference: input.recordedByReference, display: input.recordedByDisplay ?? undefined }
+      : undefined,
   } as never)) as AllergyIntoleranceResource;
 }
 

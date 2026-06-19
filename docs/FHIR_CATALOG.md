@@ -1,8 +1,12 @@
 # FHIR Resource Catalog — Anees Health Platform (Medplum)
 
 > **Audience:** engineers, hospital-integration partners, security auditors.
-> **Last refresh:** 2026-06-05.
-> **Source of truth:** `src/lib/medplum/*.ts` (24 modules). This doc summarises what each module does in FHIR terms; the code is authoritative.
+> **Last refresh:** 2026-06-18.
+> **Source of truth:** `src/lib/medplum/*.ts` (29 files; ~22 own a FHIR resource, the rest are client/config/constants/extensions/terminology helpers). This doc summarises what each module does in FHIR terms; **the code is authoritative — where this doc and the code disagree, the code wins and this doc is the bug.**
+>
+> **⚠️ Accuracy pass (2026-06-18):** an internal audit found several sections below described an *intended* design rather than the *shipped* code. Those sections now carry a **Status** line using the legend here. The full gap register and the plan to close each gap live in **[EHR_AUDIT.md](EHR_AUDIT.md)**.
+>
+> **Status legend:** ✅ Implemented as described · 🟡 Partial — implemented but thinner than the prose implies · 🗺️ Roadmap — described here but **not in the code yet**.
 
 Medplum is our **single source of truth for clinical data**. We store every FHIR resource on a self-hosted Medplum instance and mirror identifiers / status into Postgres only where operational queries need them (visits, payouts, finance). This document walks the resources we use, one by one.
 
@@ -26,7 +30,7 @@ For each resource you'll see:
 - **Custom code systems** (programs, encounter types, document categories) start with `https://anees.health/fhir/CodeSystem/` or `https://anees.health/fhir/`.
 - **StructureDefinition extensions** live in `src/lib/medplum/fhir-extensions.ts` under `EgyptianExtensions`. Base URL: `https://anees.health/fhir/StructureDefinition/`.
 - **Restricted tiers** (mental health, HIV, reproductive health, domestic violence) are flagged by `meta.security` codings (`r`, `v`, `psy`, `eth`) or clinical-code hints. See `isRestrictedTierSecurityCoding` / `isRestrictedTierClinicalCoding` in `constants.ts`. Restricted resources require explicit consent or a `DestructiveApprovalToken` to view.
-- **Audit** — every clinical write goes through `writeMedplumAuditMirror` (in `src/lib/medplum/audit.ts`) which creates both a FHIR `AuditEvent` and a Postgres `AuditLog` row.
+- **Audit** ✅ — clinical writes and break-glass overrides go through `recordAudit` (`@/lib/utils/audit`), which writes a durable Postgres `AuditLog` row (retried, non-swallowing) **and** mirrors a FHIR `AuditEvent` to Medplum off the critical path (`after()`). See resource #21 and [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1. (Login/logout + `access_denied` remain Postgres-only for now.)
 
 ---
 
@@ -132,18 +136,18 @@ Lightweight wrapper used for scheduling proposals before a `Visit` is confirmed.
 
 **Module:** `src/lib/medplum/observations.ts` · **Sync:** write-through to Medplum, query Medplum on read
 
-**Required fields**
+**Status:** ✅ Complete (Phase 5, 2026-06-18).
 
 - `status` — `final` (or `amended` after edit).
-- `category[]` — `vital-signs` (`http://terminology.hl7.org/CodeSystem/observation-category`).
-- `code` — LOINC (e.g. `85354-9` for BP panel, `8867-4` heart rate, `8310-5` body temp, `59408-5` SpO2, `2339-0` glucose).
-- `subject` → Patient.
-- `encounter` → Encounter when measured during a visit.
-- `effectiveDateTime`.
-- `valueQuantity { value, unit, system: "http://unitsofmeasure.org", code }`. BP uses `component[]` (systolic + diastolic).
-- `performer[]` → Practitioner.
+- `category[]` — `vital-signs`.
+- `code` — LOINC: BP panel `85354-9` (systolic `8480-6` / diastolic `8462-4`), HR `8867-4`, **respiratory rate `9279-1`**, body temp `8310-5`, glucose `2339-0`, body weight `29463-7`, **body height `8302-2`**, **BMI `39156-5` (auto-computed from weight + height)**, SpO2 `59408-5`, pain `72514-3`.
+- `valueQuantity { value, unit, system: UCUM, code }`. BP uses `component[]` (systolic + diastolic).
+- **`interpretation[]`** is now written on every threshold-bearing vital (and the BP components) — `L` / `N` / `H` (v3 ObservationInterpretation) from the nursing-ops thresholds; BMI uses WHO cut-offs. The abnormal flag lives on the Observation itself, not only in the side escalation.
+- `subject`, `encounter`, `effectiveDateTime`, `performer[]` → Practitioner.
 
-**Thresholds** are evaluated server-side in `src/lib/ehr/nursing-alerts.ts` against `src/lib/config/nursing-ops-policy.ts`. Out-of-range vitals raise a `Task` for the on-call doctor (see resource #18).
+**Live + server alerting:** the charting form shows an **at-entry** Low/High warning as the clinician types (thresholds passed from `nursing-ops-policy`), and `recordVitalsAction` still raises a debounced escalation `Communication` on a breach (now incl. respiratory rate) — see resources #18/#19.
+
+**Glucose — two purposes by design:** the vitals glucose (LOINC `2339-0`) is a point-of-care reading; the dedicated **Blood Glucose Profile** (LOINC `41653-7`, with timing/meal context) is the structured monitoring feature. The vitals form links to it.
 
 **Example (heart rate)**
 ```json
@@ -162,19 +166,39 @@ Lightweight wrapper used for scheduling proposals before a `Visit` is confirmed.
 
 ---
 
-## 6. Observation (Assessments)
+## 6. Observation (Assessments) — validated, scored, risk-banded
 
-**Module:** `src/lib/medplum/assessments.ts` · **Sync:** write-through
+**Module:** `src/lib/medplum/assessments.ts` + `src/features/ehr/catalogs/assessment-instruments.ts` · **Sync:** write-through
 
-Same `Observation` shape, but `category = survey` and `code` is an assessment scale (Braden, MMSE, Falls Risk, Numeric Pain Scale). `valueInteger` or `valueQuantity` for the score; `interpretation[]` for the bucketed label. Used by physio + nurse during sessions.
+**Status:** ✅ Validated instruments (Phase 4, 2026-06-18). The phantom `Questionnaire/anees-assessment` is gone.
+
+Assessments are now stored as **coded `Observation`s** (category `survey` + an Anees `assessment` category for precise search), driven by an app-owned instrument catalog (Braden, Morse Fall Scale, MMSE, Berg, TUG, NPRS):
+
+- `code` — Anees instrument code **+ LOINC** where one exists (Braden 38228-2, MMSE 72106-8, NPRS 72514-3).
+- `valueQuantity` — the raw score with a UCUM unit; **range-validated** server-side against the instrument (e.g. Berg 0–56) — an out-of-range score is rejected.
+- `interpretation[]` — the computed **risk band** (e.g. "High fall risk") as a FHIR v3 ObservationInterpretation code (`N / A / AA`) + an Anees risk coding.
+- A free-text fallback remains for non-instrument notes (no band).
+
+`listPatientAssessments` reads the new coded Observations **and** legacy `QuestionnaireResponse`s (so history still surfaces), merged newest-first. The risk band shows in the admin Measurements table and the physio session workspace.
 
 ---
 
-## 7. Observation / Composition (Care reports)
+## 7. Observation (Care reports) + discrete outcome-measure Observations
 
-**Module:** `src/lib/medplum/care-reports.ts` · **Sync:** write-through
+**Module:** `src/lib/medplum/care-reports.ts` + `src/lib/medplum/outcome-measures.ts` · **Sync:** write-through
 
-Long-form nursing / physio session reports written as structured `Observation` components (or as `Composition` when full-document signing is required). Always tied to an `Encounter`. The narrative portion is escaped HTML; the structured components carry coded findings.
+**Status:** ✅ Outcome measures promoted to discrete coded Observations (Phase 3, 2026-06-18). 🟡 Report signing + notes-unification folded into Phase 6.
+
+The physio/nursing session report is still written as a parent `Observation` (`category = survey`) carrying the narrative + components (so the existing physio analytics keep working). **In addition**, each structured measure (pain before/after, Berg, Tinetti, Ashworth, TUG, knee ROM, SLR, Schober, functional reach) is now promoted to its **own discrete `Observation`** via `outcome-measures.ts`:
+
+- `code` — an Anees outcome code **+ a LOINC** secondary coding where one exists (e.g. pain → `72514-3`).
+- `valueQuantity` with a **UCUM** unit (`deg`, `s`, `cm`, `{score}`).
+- dual `category` (`survey | activity | exam` + an Anees `outcome-measure` category for precise search).
+- `derivedFrom` → the parent report; the parent gains a `hasMember` reference to the children (the wrapper *references* the measures).
+
+A standards-based consumer — or our `listPatientOutcomeMeasures` trend reader, surfaced in the physio session workspace — can now pull "every Berg score over time" with one search. Emission is best-effort: a failure never loses the (already-saved) report.
+
+**Phase 6 update:** each report now writes an immutable **`Provenance`** authorship attestation on create. A full draft→sign lifecycle and narrative unification into a `Composition` remain deferred (need a notes-management UI) — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 6.
 
 ---
 
@@ -182,13 +206,16 @@ Long-form nursing / physio session reports written as structured `Observation` c
 
 **Module:** `src/lib/medplum/conditions.ts` · **Sync:** write-through
 
-- `code` — ICD-10 or SNOMED CT (systems in `MEDPLUM_CODE_SYSTEMS.icd10 / snomed`).
-- `clinicalStatus` — `active | resolved | inactive`.
-- `verificationStatus` — `confirmed | provisional`.
-- `subject`, `recordedDate`, `recorder` (Practitioner).
-- `category[]` — `problem-list-item` or `encounter-diagnosis`.
+**Status:** ✅ Matured (Phase 6, 2026-06-18).
 
-Mental-health / behavioural conditions automatically attract `meta.security = psy` and the restricted-tier gate.
+- `code` — ICD-10 (from the Postgres `icd10_codes` table).
+- `clinicalStatus` — `active | resolved | inactive | remission` (lifecycle edit supported).
+- `verificationStatus` — **`confirmed | provisional | differential | unconfirmed`** (clinician-selectable; defaults to confirmed).
+- `severity` — SNOMED-coded `mild | moderate | severe` (optional).
+- `bodySite` — free-text site (optional).
+- `subject`, `recordedDate`, `recorder` (Practitioner), `category[]` (`problem-list-item` + a `physical-therapy` tag for PT diagnoses).
+
+**Restricted tier (auto):** sensitive diagnoses are **auto-tagged** into a restricted security tier on create — ICD-10 F-codes → `psy` (behavioural health); HIV (B20–B24, Z21) and STIs (A50–A64) → `r`; plus a label-keyword fallback. The existing restricted-tier masking then applies automatically.
 
 ---
 
@@ -196,28 +223,38 @@ Mental-health / behavioural conditions automatically attract `meta.security = ps
 
 **Module:** `src/lib/medplum/allergies.ts` · **Sync:** write-through
 
-- `clinicalStatus` — `active | resolved`.
-- `type` — `allergy | intolerance`.
-- `category[]` — `food | medication | environment | biologic`.
-- `criticality` — `low | high | unable-to-assess`.
-- `code` — RxNorm for meds, SNOMED for everything else.
+**Status:** ✅ Coded + categorised (Phase 2, 2026-06-18).
+
+- `clinicalStatus` — `active | inactive | resolved`; `verificationStatus` defaults to `unconfirmed` (`confirmed` for the NKA record).
+- `category` — **`food | medication | environment | biologic`** (from the allergen catalog `@/features/ehr/catalogs/allergen-catalog`, or clinician-selected for free text).
+- `code` — **SNOMED** (where known) + an **Anees allergen code** that links back to the catalog; `text` fallback for free-text allergens.
+- `criticality` — derived from severity (`severe → high`, any other severity → `low`, none → `unable-to-assess`).
+- `reaction[]` — captures the **manifestation** (e.g. *rash*, *anaphylaxis*, *angioedema*) + severity.
+- **"No Known Allergies"** is recordable as an affirmative SNOMED-coded (716186003) record — clinically distinct from an empty (unasked) list.
 - `patient`, `recorder`.
-- `reaction[].manifestation[]` + `severity`.
+
+Coded allergens carry cross-reactivity classes (e.g. penicillin → beta-lactam) that drive **drug–allergy screening** at medication entry (see #10). Free-text allergens carry a category but no cross-reactivity data.
 
 **Why allergies live in the patient banner, not a tab:** see [EHR_ROLE_MATRIX.md §12](EHR_ROLE_MATRIX.md). They are safety-critical and rendered everywhere a clinician sees the patient.
 
 ---
 
-## 10. MedicationRequest
+## 10. MedicationStatement (coded + safety-screened)
 
 **Module:** `src/lib/medplum/medications.ts` · **Sync:** write-through
 
-- `status` — `active | on-hold | cancelled | completed | stopped`.
-- `intent` — `order` (default) or `plan` for proposals.
-- `medicationCodeableConcept` — RxNorm.
-- `subject`, `authoredOn`, `requester` (Practitioner).
-- `dosageInstruction[]` — text + timing + dose.
-- For controlled substances (EDA schedule), the platform also writes a `ControlledSubstanceLedger` row in Postgres at the same time. Both must succeed or neither does.
+**Status:** ✅ Coded + safety-screened (Phase 2, 2026-06-18). 🟡 Resource type unchanged by design (see note).
+
+What is written today:
+- `status` — `active | on-hold | completed | stopped | entered-in-error | …`.
+- `medicationCodeableConcept` — **RxNorm + ATC coding** from the app-owned formulary (`@/features/ehr/catalogs/drug-formulary`), with a `text` fallback. Free-text drugs not in the formulary are still allowed but save uncoded and are not screened.
+- `subject`, `dateAsserted`, `informationSource` (Practitioner); `effectivePeriod`; `dosage[0]` text + route + timing.
+
+**Safety screening:** on create, coded drugs are screened by `@/lib/ehr/medication-safety` against the patient's active medications + allergies — **drug–allergy cross-reactivity, drug–drug interactions, and duplicate therapy**. Warnings/contraindications **block the save** until the clinician ticks an acknowledgement.
+
+**Controlled substances:** a scheduled drug (CII–CV, flagged in the formulary) also writes a Postgres `ControlledSubstanceLedger` row (`actionType = prescribed`) — the EDA audit trail — audited via `recordAudit`.
+
+**Resource-type note (deliberate):** chart entries remain `MedicationStatement`, not `MedicationRequest`. This preserves existing data + `MedicationAdministration` linkage. Splitting prescriptions (`MedicationRequest`) from reconciliation (`MedicationStatement`) needs dual-read + MAR re-linking and is tracked as its own follow-on in [EHR_AUDIT.md](EHR_AUDIT.md) Phase 2 — not bundled with the safety work.
 
 ---
 
@@ -241,6 +278,8 @@ Records doses actually given (vs. ordered). Required: `status`, `medicationCodea
 - `goal[]` — references to `Goal` resources (#17).
 
 Note: the Postgres `CarePlan` table is for operational/finance tracking (cost, visit count). The Medplum `CarePlan` is the clinical record. Both exist; both link to the same patient.
+
+**EpisodeOfCare (Phase 8):** `src/lib/medplum/episodes.ts` adds the care-episode bookend — **discharge / closure**. Closing an episode (`closeCareEpisode`, gated by `episode.close` = care-plan **sign** → licensed physician) sets `status = finished`, stamps `period.end`, and records a clinician **outcome summary** (an Anees extension). Surfaced as the "Care episode & discharge" panel in the Care-Plan tab.
 
 ---
 
@@ -294,7 +333,14 @@ This is the hybrid storage path:
 
 **Module:** `src/lib/medplum/labs.ts` · **Sync:** write-through
 
-Lab orders are `ServiceRequest` (status = `active | completed`, code = LOINC). Lab results are `DiagnosticReport` (status, code, subject, effectiveDateTime, conclusion, `result[]` → `Observation` refs). The PDF lives in R2 + `Binary`, referenced from `DiagnosticReport.presentedForm`.
+**Status:** ✅ Discrete coded results + order→result loop (Phase 7, 2026-06-18). 🟡 `presentedForm` PDF deferred (use the Documents feature).
+
+- Lab orders are `ServiceRequest` (`status = active`, `intent = order`); the title is validated against the terminology service.
+- **Discrete results** are now `Observation`s (category `laboratory`) via `createLabResultObservation`: **LOINC-coded** from the app-owned analyte catalog (`catalogs/lab-analytes.ts`), `valueQuantity` + UCUM unit, a **`referenceRange`**, and a computed **`interpretation`** (L/N/H abnormal flag). They link to the `DiagnosticReport` via `result[]` and to the order via `basedOn`.
+- **Order→result loop:** creating a lab order also spawns a `lab-result-review` `Task` owned by the ordering clinician, so an unresulted order can't silently fall through.
+- The `DiagnosticReport` still carries the narrative title + conclusion; the discrete values surface (with flags) alongside it in the Labs tab.
+
+**Deferred:** `presentedForm` (the result PDF) — already coverable via the Documents feature (#15); native `presentedForm` wiring is a small follow-up.
 
 ---
 
@@ -302,12 +348,13 @@ Lab orders are `ServiceRequest` (status = `active | completed`, code = LOINC). L
 
 **Module:** `src/lib/medplum/goals.ts` 🆕 · **Sync:** Postgres ↔ Medplum (bidirectional, identifier-keyed)
 
-The latest addition. Round-trips between Postgres `PatientGoal` (operational view used by the physio workspace) and FHIR `Goal` (the clinical record).
+**Status:** 🟡 Partial. Round-trips between Postgres `PatientGoal` (operational view used by the physio workspace) and FHIR `Goal` (the clinical record).
 
-- `lifecycleStatus` — `proposed | active | completed | cancelled` (mapped from `PatientGoal.status`: `in_progress → active`, `met → completed`, `discontinued → cancelled`).
+- `lifecycleStatus` — `active | completed | cancelled` (mapped from `PatientGoal.status`: `in_progress → active`, `met → completed`, `discontinued → cancelled`).
+- `achievementStatus` — `in-progress | achieved | not-achieved`.
 - `description.text` — the SMART goal narrative.
 - `subject`, `expressedBy` (Practitioner), `startDate`.
-- `target[]` — `measure` (LOINC code for the metric), `detailQuantity`, `dueDate`.
+- `target[]` — `measure` is **free text** (`measurementUnit`), `detailString` (not a coded `detailQuantity`), `dueDate`. **Baseline / current values are serialized into a free-text `note` string and parsed back out with a regex** — brittle, not structured. Coded target quantities are a roadmap item.
 - `identifier[]` with `system = https://anees.health/fhir/identifier/patient-goal-id` → `PatientGoal.id`. Postgres `PatientGoal.fhirGoalId` holds the Medplum resource ID.
 
 **Why bidirectional:** the physio workspace edits goals heavily during sessions (mobile-first UX). Postgres is faster for those edits; Medplum is the regulatory record. Sync runs on every commit.
@@ -344,33 +391,50 @@ Used for staff↔staff handoffs and staff↔patient secure messages. Patient-fac
 
 ---
 
-## 20. Composition (Clinical notes)
+## 20. Composition (Clinical notes) + Provenance
 
-**Module:** `src/lib/medplum/clinical-notes.ts` · **Sync:** write-through
+**Module:** `src/lib/medplum/clinical-notes.ts` + `src/lib/medplum/provenance.ts` · **Sync:** write-through
 
-The signed clinical note. **Immutable after `status = final`.** Amendments create a new `Composition` linked via the `clinical-note-amends` extension.
+The clinical note. Draft → sign workflow with optimistic concurrency (`If-Match` on the version id).
+
+**Status:** ✅ Legally attested signing (Phase 6, 2026-06-18). 🟡 Structured SOAP sections + trainee co-sign deferred (no notes-management UI yet).
+
+On **sign**, the note gets:
+- `status = final`, `date`, the `clinical-note-signed-at` extension;
+- a FHIR **`Composition.attester`** (`mode = legal`, `party`, `time`) — a standards-grade attestation of who signed and when;
+- an immutable **`Provenance`** record (target = the Composition; agents = legal + author) via `provenance.ts`.
+
+**Amendments** create a **new** Composition that `relatesTo` (`replaces`) its predecessor — the prior note is never mutated (immutable history); re-signing a `final` note is a no-op.
 
 - `status` — `preliminary` (draft) → `final` (signed) → `amended`.
-- `type` — Anees `clinical-note-type` code.
-- `subject`, `date`, `author[]`, `encounter`.
-- `section[]` — structured sections; each holds narrative + entry refs (e.g. → Observations, Conditions).
+- `type`, `subject`, `date`, `author[]`, **`attester[]`**, **`relatesTo[]`**, `encounter`.
+- `section[]` — currently one narrative section (structured SOAP deferred).
 - Anees extensions: `clinical-note-text`, `clinical-note-discipline`, `clinical-note-signed-at`, `clinical-note-amends`.
 
-License gating: only a clinician with a valid syndicate license can move a note from `preliminary` to `final` (`canSignClinical` check before the write).
+License gating: the calling action checks `canSignClinical` before moving a note to `final`.
+
+**Deferred (tracked, [EHR_AUDIT.md](EHR_AUDIT.md) Phase 6):** structured SOAP sections, trainee **co-sign/countersign**, and full narrative unification — all need a notes-management UI that doesn't exist yet.
 
 ---
 
-## 21. AuditEvent (via `audit.ts`)
+## 21. AuditEvent (FHIR) + AuditLog (Postgres) — dual-store
 
-**Module:** `src/lib/medplum/audit.ts` · **Sync:** write-only
+**Module:** `src/lib/medplum/audit-event.ts` (FHIR) + `src/lib/utils/audit.ts` (Postgres + orchestration) · **Sync:** write-only
 
-Every clinical write writes both: (1) a FHIR `AuditEvent` on Medplum, and (2) a Postgres `AuditLog` row. The Postgres mirror exists because it is faster to query for compliance dashboards and survives Medplum downtime.
+**Status:** ✅ Implemented (Phase 1, 2026-06-18) for clinical writes + break-glass overrides; 🟡 not yet extended to login/logout and `access_denied`.
 
-- `type` — `rest` for API ops, `application activity` for server-side mutations.
-- `action` — `C | R | U | D | E` mapped from our `AuditAction` enum (`create / read / update / delete / export / override / access_denied / login / logout`).
-- `recorded`, `outcome` (`0 = success`, `4 = minor fail`, `8 = serious fail`).
-- `agent[]` — actor info (Practitioner, role, IP).
-- `entity[]` — what was acted on (`Patient/...`, `Encounter/...`, etc.).
+`recordAudit` (in `@/lib/utils/audit`) is the canonical entry point. It:
+
+1. Writes the durable Postgres `AuditLog` row, **retried up to 3× and never silently swallowed** (a persistent failure logs at ERROR with the marker `AUDIT_WRITE_FAILED`; for `critical` actions — access grants, break-glass — it **throws** so the action is denied rather than left un-audited).
+2. Mirrors a spec-compliant FHIR **`AuditEvent`** (R4) to Medplum **off the request's critical path** via `after()`, so a Medplum outage never blocks care nor loses the already-persisted Postgres record. FHIR-mirror failures log with the marker `AUDIT_FHIR_MIRROR_FAILED`.
+
+`writeMedplumAuditMirror` (clinical writes) and the restricted-access / break-glass actions both route through `recordAudit`, so both halves are written for those paths.
+
+**FHIR `AuditEvent` shape (no PHI):** `type` (`rest`, or DICOM `110114` for auth), `subtype` (Anees `audit-action` code), `action` (C/R/U/D/E), `recorded`, `outcome` (`0` success / `4` minor failure), `agent[]` (`who` = Practitioner ref or staff identifier, `requestor: true`, role), `source.observer` = "Anees Health EHR", `entity[]` (the touched resource + an optional `Patient` entity).
+
+**Postgres `AuditLog` row carries:** `tableName`, `recordId`, `action` (`create / read / update / delete / export / override / access_denied / login / logout`), `changedBy`, `changedFields`, optional `newData` / `previousData`.
+
+**Residual (tracked in [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1):** login/logout (`writeLoginAudit` in `src/auth.ts`) and `access_denied` (`enforce.ts`, best-effort) are still Postgres-only; the operational-mutation coverage sweep (promocode redemption, invoice, payout) is ongoing — patient demographics edits are already covered.
 
 ---
 
@@ -385,7 +449,7 @@ The following base FHIR resources are **not** in active use and should not be ad
 | `Immunization` | Out of scope for home care. | When we add primary-care pediatrics. |
 | `Procedure` | We embed procedure info in `Encounter` + `Composition` today. | When we need detailed surgical reporting. |
 | `RelatedPerson` | Caregivers are modelled as `Practitioner` + `Consent` for simplicity. | When caregivers need their own scoped portal accounts. |
-| `Questionnaire` / `QuestionnaireResponse` | Assessments use `Observation` (assessment-coded). | When we ship patient-reported outcome surveys at scale. |
+| `Questionnaire` / item-level `QuestionnaireResponse` | Assessments now store **coded `Observation`s** with validated total scores + risk bands (see #6), not item-level questionnaires. Legacy `QuestionnaireResponse`s are still read for history. | When item-level capture is needed (e.g. patient-reported outcome surveys at scale). |
 
 ---
 
@@ -425,6 +489,7 @@ Caregiver scope flags (consent extension): `portal-scope` system maps to `profil
 
 ## See also
 
+- [EHR_AUDIT.md](EHR_AUDIT.md) — the gap register + phased remediation plan behind every 🟡 / 🗺️ Status line above.
 - [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) — engineering overview, route map, conventions.
 - [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) — how PHI moves at the wire, RBAC implementation, signed URLs.
 - [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) — how this catalog maps to HIPAA §164.312 technical safeguards.

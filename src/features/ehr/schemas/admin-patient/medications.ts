@@ -4,6 +4,8 @@ import { optionalTrimmedString, optionalNumber, optionalDate, requiredPatientId 
 export const createMedicationSchema = z.object({
   medplumPatientId: requiredPatientId,
   medicationName: z.string().trim().min(1, 'Medication name is required'),
+  /** RxNorm code from the formulary picker; empty for a free-text fallback med. */
+  medicationRxnorm: optionalTrimmedString,
   dosageText: optionalTrimmedString,
   routeText: optionalTrimmedString,
   frequencyText: optionalTrimmedString,

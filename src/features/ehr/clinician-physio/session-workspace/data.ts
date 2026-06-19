@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db/prisma';
 import { sessionTenantId } from '@/lib/db/tenant-scope';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
 import { careReportCode, careReportComponentText, listPatientCareReports } from '@/lib/medplum/care-reports';
+import { listPatientOutcomeMeasures, type OutcomeMeasureTrend } from '@/lib/medplum/outcome-measures';
 
 export type SessionTemplate = 'custom' | 'post_op_knee' | 'stroke_rehab' | 'low_back_pain' | 'geriatric_mobility';
 export type RankingWindow = '7d' | '30d' | 'all';
@@ -34,8 +35,11 @@ export type PhysioSessionWorkspaceData = {
     title: string;
     type: string;
     score: number | null;
+    band: string | null;
     authored: string | null;
   }>;
+  /** Discrete, coded outcome measures (last 90d) — the interoperable trend read. */
+  codedOutcomeMeasures: OutcomeMeasureTrend[];
   sessionDashboard: {
     totalSessions: number;
     avgPainDrop: number | null;
@@ -195,10 +199,18 @@ export async function getPhysioSessionWorkspaceData(
       title: assessment.title,
       type: assessment.type,
       score: typeof assessment.score === 'number' ? assessment.score : null,
+      band: assessment.band ?? null,
       authored: assessment.authored ?? null,
     }));
   } catch {
     recentAssessments = [];
+  }
+
+  let codedOutcomeMeasures: PhysioSessionWorkspaceData['codedOutcomeMeasures'] = [];
+  try {
+    codedOutcomeMeasures = await listPatientOutcomeMeasures(visit.patient.medplumPatientId, { daysBack: 90 });
+  } catch {
+    codedOutcomeMeasures = [];
   }
 
   let sessionDashboard: PhysioSessionWorkspaceData['sessionDashboard'] = {
@@ -456,6 +468,7 @@ export async function getPhysioSessionWorkspaceData(
     },
     canDocumentSession: state === 'checked_in',
     recentAssessments,
+    codedOutcomeMeasures,
     sessionDashboard,
   };
 }

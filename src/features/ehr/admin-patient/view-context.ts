@@ -1,5 +1,5 @@
 import { ANEES_PATIENT_CODE_SYSTEM } from './constants';
-import { canCreateNursingShiftHandoff, canEditDemographics, canWriteClinicalCondition, canWriteMedication, getWorkspaceTabsForRole } from './role-scope';
+import { canCloseCareEpisode, canCreateNursingShiftHandoff, canEditDemographics, canWriteClinicalCondition, canWriteMeasurements, canWriteMedication, getWorkspaceTabsForRole } from './role-scope';
 import { ADMIN_WORKSPACE_TAB_LIST, resolveAllowedWorkspaceTab } from './workspace-tabs';
 import type { AdminWorkspaceTab } from './workspace-tabs';
 import { getPatientHomeAddress, getAddressMapUrl } from './view-helpers';
@@ -37,6 +37,10 @@ export function buildAdminPatientViewContext(data: AdminPatientDetailData, activ
     labOrdersError,
     labResults,
     labResultsError,
+    labResultObservations,
+    labResultObservationsError,
+    episodes,
+    episodesError,
     assessments,
     assessmentsError,
     glucoseReadings,
@@ -88,6 +92,8 @@ export function buildAdminPatientViewContext(data: AdminPatientDetailData, activ
   const canWritePhysioCondition = canWriteClinicalCondition(staffRole, 'physical_therapy');
   const clinicalConditionWrite = canWriteMedicalCondition || canWritePhysioCondition;
   const medicationWrite = canWriteMedication(staffRole);
+  const measurementsWrite = canWriteMeasurements(staffRole);
+  const episodeCloseWrite = canCloseCareEpisode(staffRole);
   const nursingShiftHandoffWrite = canCreateNursingShiftHandoff(staffRole);
   const isTab = (...tabs: AdminWorkspaceTab[]): boolean => tabs.includes(currentTab);
   const escalationTasks = tasks.filter((task) => task.code?.coding?.[0]?.code === 'escalation');
@@ -161,6 +167,10 @@ export function buildAdminPatientViewContext(data: AdminPatientDetailData, activ
     labOrdersError,
     labResults,
     labResultsError,
+    labResultObservations,
+    labResultObservationsError,
+    episodes,
+    episodesError,
     assessments,
     assessmentsError,
     glucoseReadings,
@@ -203,6 +213,8 @@ export function buildAdminPatientViewContext(data: AdminPatientDetailData, activ
     canWritePhysioCondition,
     clinicalConditionWrite,
     medicationWrite,
+    measurementsWrite,
+    episodeCloseWrite,
     nursingShiftHandoffWrite,
     isTab,
     escalationTasks,

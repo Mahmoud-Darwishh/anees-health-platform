@@ -9,6 +9,7 @@ import {
   disputeVisitAction,
 } from '../actions';
 import { VisitTransitionForm } from '../VisitTransitionForm';
+import { listInstruments } from '@/features/ehr/catalogs/assessment-instruments';
 import type { PhysioSessionWorkspaceData } from './data';
 import { TemplateObjectiveFields } from './TemplateObjectiveFields';
 
@@ -394,30 +395,19 @@ export function SessionWorkspacePageView({ data }: { data: PhysioSessionWorkspac
                 <input type="hidden" name="physioVisitId" value={visit.id} />
 
                 <div className="mb-2">
-                  <label className="form-label small mb-1">Assessment Tool</label>
-                  <select name="assessmentTitle" className="form-select form-select-sm" defaultValue="Timed Up and Go" required>
-                    <option value="Timed Up and Go">Timed Up and Go (TUG)</option>
-                    <option value="Berg Balance Scale">Berg Balance Scale</option>
-                    <option value="Numeric Pain Rating Scale">Numeric Pain Rating Scale</option>
-                    <option value="Six Minute Walk Test">6 Minute Walk Test</option>
-                    <option value="Range of Motion">Range of Motion</option>
-                    <option value="Manual Muscle Testing">Manual Muscle Testing</option>
+                  <label className="form-label small mb-1">Validated instrument</label>
+                  <select name="assessmentInstrument" className="form-select form-select-sm" defaultValue="berg" required>
+                    {listInstruments().map((instrument) => (
+                      <option key={instrument.key} value={instrument.key}>
+                        {instrument.shortName} — {instrument.reference}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="mb-2">
-                  <label className="form-label small mb-1">Type</label>
-                  <select name="assessmentType" className="form-select form-select-sm" defaultValue="mobility">
-                    <option value="mobility">Mobility</option>
-                    <option value="functional">Functional</option>
-                    <option value="pain">Pain</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div className="mb-2">
-                  <label className="form-label small mb-1">Score (optional)</label>
-                  <input name="assessmentScore" type="number" className="form-control form-control-sm" />
+                  <label className="form-label small mb-1">Score</label>
+                  <input name="assessmentScore" type="number" step="any" className="form-control form-control-sm" required />
                 </div>
 
                 <div className="mb-2">
@@ -443,7 +433,10 @@ export function SessionWorkspacePageView({ data }: { data: PhysioSessionWorkspac
                   <div className="small">
                     {data.recentAssessments.slice(0, 6).map((assessment) => (
                       <div key={assessment.id} className="mb-2 pb-2 border-bottom">
-                        <div className="fw-semibold">{assessment.title}</div>
+                        <div className="d-flex justify-content-between align-items-center gap-2">
+                          <span className="fw-semibold">{assessment.title}</span>
+                          {assessment.band ? <span className="badge bg-secondary-subtle text-secondary-emphasis">{assessment.band}</span> : null}
+                        </div>
                         <div className="text-muted">
                           {assessment.type}
                           {assessment.score !== null ? ` · score ${assessment.score}` : ''}
@@ -454,6 +447,39 @@ export function SessionWorkspacePageView({ data }: { data: PhysioSessionWorkspac
                   </div>
                 )}
               </div>
+            </div>
+          </article>
+
+          <article className="card border-0 shadow-sm mt-3">
+            <div className="card-body">
+              <h3 className="h6 mb-2">Coded Outcome Measures</h3>
+              <p className="small text-muted mb-3">Discrete FHIR-coded scores (last 90 days) — trendable and interoperable.</p>
+              {data.codedOutcomeMeasures.length === 0 ? (
+                <p className="small text-muted mb-0">No coded outcome measures yet.</p>
+              ) : (
+                <div className="small">
+                  {data.codedOutcomeMeasures.map((measure) => (
+                    <div key={measure.code} className="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                      <div>
+                        <div className="fw-semibold">{measure.display}</div>
+                        <div className="text-muted">
+                          {measure.points.length} reading{measure.points.length === 1 ? '' : 's'}
+                        </div>
+                      </div>
+                      <div className="text-end">
+                        <div className="fw-semibold">
+                          {measure.latest
+                            ? `${measure.latest.value}${measure.unit && measure.unit !== '{score}' ? ` ${measure.unit}` : ''}`
+                            : '—'}
+                        </div>
+                        <div className="text-muted">
+                          {measure.latest ? new Date(measure.latest.date).toLocaleDateString('en-GB') : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </article>
 

@@ -7,7 +7,16 @@
 
 > **Landed since last review (2026-06-04 → 2026-06-05):** New StaffRole values `medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin` are now in the schema. License gating via `Staff.licenseType/Number/Expiry` + `PhysioProfile`. Visit state machine (22 states + 16 disruption codes + `VisitStateTransition`). Break-glass governance via `DestructiveApprovalToken`. Cloudflare R2 + malware scanning for medical files. Login + logout audit live. Multi-tenancy `tenantId` columns on core tables. Clinician workspace at `/clinician/*`.
 
+> **Landed 2026-06-18 (code now matches §3):** the coarse route gates were aligned to the fine matrix in `policy/ehr-matrix.ts`, and the **UI permission flags now derive from the matrix** (`role-scope.ts` → `roleAllowsAction`, the same lookup the server gate uses) — so the form a user sees and the action they can submit can never drift. Every staff role is live with matrix-accurate access — **Compliance Officer** now has global read of the patient chart + documents (`CLINICAL_READ_ROLES`; no write role, so all mutations stay gated); **Viewer** (no PHI) and **Hospital Partner Admin** (multi-tenant, schema-only) get a clear role-aware landing. A **"My Access"** page (`/admin/access`) renders any role's effective permissions live from this matrix. See [EHR_AUDIT.md](EHR_AUDIT.md) Phase 7–8.
+
 > This document is the **single source of truth** for the EHR's business logic. When code conflicts with this doc, fix the code. When reality conflicts with this doc, update the doc.
+
+> **Launch-scope alignment (owner decision, 2026-06-19 — see [`PRODUCT_LAUNCH_AUDIT.md`](./PRODUCT_LAUNCH_AUDIT.md)):** This matrix stays the canonical permission grid and **no cell value below is edited by this note** — it only records which roles are *turned on* for the first direct-care launch (Greater Cairo, prepaid, no cash):
+> - **ON at launch:** Portal User (patient/caregiver) · Nurse · Physio · **Doctor (review + sign only — no doctor field/home-visit app yet)** · Medical-Ops / Case-Manager · Admin · Superadmin.
+> - **Light at launch:** Compliance Officer (audit oversight only).
+> - **Finance functions ON, insurance *claims* OFF:** prepayment needs refunds + InstaPay reconciliation + clinician-payout *visibility*, but **not** insurer claims/pre-auth — so the **Insurance Coordinator role and the claims modules are deferred**, while finance-ops (`billing_invoices`, `provider_payouts`) stay live for Admin.
+> - **OFF / deferred:** Hospital Partner Admin (B2) · Viewer · the white-label / multi-tenant surface (B3).
+> The deferred roles keep their cells (deny-by-default protects them); they are simply not staffed or surfaced until their phase.
 
 ---
 
@@ -715,7 +724,7 @@ Don't build the partner UI yet. Just make sure we can backfill `tenantId='platfo
 | NurseShiftAssignment | Primary + incoming nurse, acknowledgement, escalation task linkage |
 | Staff model | `medplumPractitionerId`, `providerId`, `lastLoginAt`, password hash |
 | Audit log | Generic `AuditLog` table with prev/new JSON; `writeMedplumAuditMirror` for clinical writes |
-| Medplum integration | 24 modules in `src/lib/medplum/` covering Patient, Practitioner, Encounter, Observation, Condition, AllergyIntolerance, MedicationRequest, MedicationAdministration, Assessment, ClinicalNote (Composition), CarePlan, CareTeam, Task, Communication, Consent, DocumentReference+Binary, ServiceRequest+DiagnosticReport |
+| Medplum integration | 29 files (~22 FHIR-resource modules) in `src/lib/medplum/` covering Patient, Practitioner, Encounter, Observation, Condition, AllergyIntolerance, MedicationStatement (intended: MedicationRequest), MedicationAdministration, Assessment (QuestionnaireResponse), ClinicalNote (Composition), CarePlan, CareTeam, Task, Communication, Consent, DocumentReference+Binary, ServiceRequest+DiagnosticReport, Goal. Several are free-text/uncoded — see [EHR_AUDIT.md](EHR_AUDIT.md) |
 | 30 admin server actions | Visits, vitals, notes (draft + sign), care team, tasks, nursing reports, physio reports, conditions, allergies, meds, med administration, incidents, documents, labs, assessments, communications, escalations, appointments, shift handoffs, geo policy, caregiver consent, demographics |
 | Patient portal | 8-tab workspace with consent-scoped rendering (`src/app/[locale]/portal/page.tsx`) |
 | Admin patient detail | 14-tab workspace (`src/features/ehr/admin-patient/page-view.tsx`) |

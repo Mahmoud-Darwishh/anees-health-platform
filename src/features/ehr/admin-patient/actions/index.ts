@@ -32,6 +32,7 @@ export {
   executeStandingOrderAction,
 } from './standing-orders';
 export {
+  closeCareEpisodeAction,
   assignCareTeamMemberAction,
   unassignCareTeamMemberAction,
   createCareTaskAction,
@@ -46,6 +47,7 @@ export {
 export {
   createConditionAction,
   createAllergyAction,
+  recordNoKnownAllergiesAction,
   retireConditionAction,
   retireAllergyAction,
   updateConditionStatusAction,
@@ -71,6 +73,7 @@ export {
 export {
   createLabOrderAction,
   createDiagnosticReportAction,
+  addLabResultAction,
 } from './labs';
 export {
   createNurseShiftAssignmentAction,

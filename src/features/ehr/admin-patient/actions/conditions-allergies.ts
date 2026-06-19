@@ -2,10 +2,11 @@
 
 import { AuditAction } from '@prisma/client';
 import { createPatientCondition, markConditionEnteredInError, setConditionClinicalStatus } from '@/lib/medplum/conditions';
-import { createPatientAllergy, markAllergyEnteredInError, setAllergyClinicalStatus } from '@/lib/medplum/allergies';
+import { createPatientAllergy, createNoKnownAllergyRecord, markAllergyEnteredInError, setAllergyClinicalStatus } from '@/lib/medplum/allergies';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import { resolveProblemTerminology } from '@/features/ehr/catalogs/icd10-problems';
-import { createConditionSchema, createAllergySchema, retireConditionSchema, retireAllergySchema, updateConditionStatusSchema, updateAllergyStatusSchema, formDataToInput } from '@/features/ehr/schemas/admin-patient-actions';
+import { resolveAllergenTerminology } from '@/features/ehr/catalogs/allergen-catalog';
+import { createConditionSchema, createAllergySchema, recordNoKnownAllergiesSchema, retireConditionSchema, retireAllergySchema, updateConditionStatusSchema, updateAllergyStatusSchema, formDataToInput } from '@/features/ehr/schemas/admin-patient-actions';
 import { canWriteClinicalCondition } from '../role-scope';
 import { setAdminPatientFlash } from '../flash';
 import { refreshClinicalPaths, failAction, requireAdminPatientAction, getClinicalWriterWithPractitioner } from './shared';
@@ -51,6 +52,9 @@ export async function createConditionAction(formData: FormData): Promise<void> {
       label: canonicalLabel,
       code: resolvedIcd10,
       codings: resolvedCodings,
+      verificationStatus: input.conditionVerification ?? null,
+      severity: input.conditionSeverity ?? null,
+      bodySite: input.conditionBodySite ?? null,
       onsetDate: input.conditionOnsetDate ?? null,
       note: input.conditionNote ?? null,
       recordedByReference: practitioner.reference,
@@ -61,8 +65,10 @@ export async function createConditionAction(formData: FormData): Promise<void> {
       tableName: 'MedplumCondition',
       recordId: condition.id ?? `${input.medplumPatientId}:${Date.now()}`,
       action: AuditAction.create,
-      changedFields: ['clinicalStatus', 'verificationStatus', 'code', 'subject', 'onsetDateTime', 'note'],
+      changedFields: ['clinicalStatus', 'verificationStatus', 'severity', 'bodySite', 'code', 'meta.security', 'subject', 'onsetDateTime', 'note'],
       changedBy,
+      patientId: input.medplumPatientId,
+      actorRole: staff.staffRole,
     });
 
     await setAdminPatientFlash({
@@ -77,15 +83,25 @@ export async function createConditionAction(formData: FormData): Promise<void> {
 
 export async function createAllergyAction(formData: FormData): Promise<void> {
   try {
-    const { practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createAllergySchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('allergy.create', input.medplumPatientId, 'allergies');
 
-    // Allergies are free text by design — a short typed allergen is enough
-    // for point-of-care safety; no coded terminology lookup is required here.
+    // Resolve against the app-owned allergen catalog for a FHIR category + coding
+    // + cross-reactivity data (drives drug–allergy screening). Free-text allergens
+    // are still allowed; they carry the clinician-chosen category but no coding.
+    const resolved = await resolveAllergenTerminology({
+      label: input.allergen,
+      explicitCode: input.allergenCode ?? null,
+    });
+    const category = resolved?.category ?? input.allergyCategory ?? 'medication';
+
     const allergy = await createPatientAllergy({
       patientId: input.medplumPatientId,
-      allergen: input.allergen,
+      allergen: resolved?.canonicalLabel ?? input.allergen,
+      category,
+      codings: resolved?.codings ?? null,
+      reactionManifestation: input.allergyReaction ?? null,
       severity: input.allergySeverity ?? null,
       note: input.allergyNote ?? null,
       recordedByReference: practitioner.reference,
@@ -96,11 +112,45 @@ export async function createAllergyAction(formData: FormData): Promise<void> {
       tableName: 'MedplumAllergyIntolerance',
       recordId: allergy.id ?? `${input.medplumPatientId}:${Date.now()}`,
       action: AuditAction.create,
-      changedFields: ['clinicalStatus', 'verificationStatus', 'code', 'note'],
+      changedFields: ['clinicalStatus', 'verificationStatus', 'category', 'code', 'reaction', 'note'],
       changedBy,
+      patientId: input.medplumPatientId,
+      actorRole: staff.staffRole,
     });
 
-    await setAdminPatientFlash({ type: 'success', message: 'Allergy added successfully.' });
+    await setAdminPatientFlash({
+      type: 'success',
+      message: resolved ? `Allergy added (${category}, coded).` : `Allergy added (${category}, free text).`,
+    });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
+
+export async function recordNoKnownAllergiesAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = recordNoKnownAllergiesSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('allergy.create', input.medplumPatientId, 'allergies');
+
+    const record = await createNoKnownAllergyRecord({
+      patientId: input.medplumPatientId,
+      recordedByReference: practitioner.reference,
+      recordedByDisplay: practitioner.display,
+    });
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumAllergyIntolerance',
+      recordId: record.id ?? `${input.medplumPatientId}:${Date.now()}`,
+      action: AuditAction.create,
+      changedFields: ['clinicalStatus', 'verificationStatus', 'code'],
+      changedBy,
+      patientId: input.medplumPatientId,
+      actorRole: staff.staffRole,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Recorded: No Known Allergies (confirmed).' });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
     await failAction(formData, error);

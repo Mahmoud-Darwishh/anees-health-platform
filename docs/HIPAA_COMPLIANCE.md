@@ -1,7 +1,7 @@
 # HIPAA & Egypt DPL Compliance Map — Anees Health Platform
 
 > **Audience:** the owner, the compliance officer, hospital procurement, future auditors.
-> **Last refresh:** 2026-06-05.
+> **Last refresh:** 2026-06-18.
 > **Plain-English summary:** we are *not yet* HIPAA-certified (no formal audit, no signed BAAs across every vendor) — and we don't have to be today because we operate in Egypt under DPL 151/2020. But every architectural decision is made *as if* HIPAA applies, because the hospital MOU and the planned MENA expansion will force the question soon. This document tells you exactly where we stand against the HIPAA Security Rule (§164.308 administrative, §164.310 physical, §164.312 technical safeguards), plus Egypt's DPL, and what's left to close.
 
 ---
@@ -123,7 +123,7 @@ This is where our architecture maps tightest. Most controls are implemented in c
 | | Emergency Access — Required | `DestructiveApprovalToken` (break-glass) flow. | `prisma/schema.prisma`, `/admin/compliance` | UI flow partial. |
 | | Automatic Logoff — Addressable | JWT expiry (24h). Idle-timeout-in-UI not enforced. | `src/auth.ts` | Add 30-min idle logout in admin/clinician shells. |
 | | Encryption and Decryption — Addressable | TLS in transit; R2 server-side at rest; Postgres at-rest depends on host. | TLS + R2 + Postgres | Move to OVH managed Postgres for native at-rest encryption. |
-| **Audit Controls** §164.312(b) | Hardware/software mechanisms to record activity. | Dual audit: FHIR `AuditEvent` + Postgres `AuditLog`. Login + logout + override + clinical writes covered. | `src/lib/medplum/audit.ts`, `src/auth.ts` | Postgres-only operational writes incomplete; `access_denied` not always emitted. |
+| **Audit Controls** §164.312(b) | Hardware/software mechanisms to record activity. | **Dual-store** for clinical writes + break-glass overrides: durable Postgres `AuditLog` (retried, non-swallowing; `critical` actions throw if un-auditable) **+ FHIR `AuditEvent`** mirror to Medplum off the critical path. Login/logout/override also in Postgres. | `src/lib/utils/audit.ts`, `src/lib/medplum/audit-event.ts`, `src/auth.ts` | 🟡 Extend the FHIR mirror to login/logout + `access_denied`; finish operational-write coverage (promocode/invoice/payout). ([EHR_AUDIT.md](EHR_AUDIT.md) Phase 1) |
 | **Integrity** §164.312(c)(1) | Mechanism to authenticate ePHI. — Addressable | Soft delete only on clinical. `Composition` becomes immutable on sign. FHIR resource versioning is built-in. | Medplum versioning, `Patient.deletedAt` | Periodic integrity check (planned, low priority). |
 | **Person or Entity Authentication** §164.312(d) | Verify identity. — Required | bcrypt passwords + WhatsApp OTP for patients. Google OAuth for self-signup. | `src/auth.ts`, OTP routes | 2FA for staff accounts (planned, Sprint 6). |
 | **Transmission Security** §164.312(e)(1) | Integrity Controls — Addressable | TLS everywhere; HMAC on Kashier webhook. | `next.config.ts`, webhook route | None. |
@@ -230,7 +230,7 @@ Every vendor that touches PHI needs either a BAA (HIPAA) or a DPA (DPL/GDPR), de
 ## 12. Audit log retention
 
 - Postgres `AuditLog`: **indefinite**. Archival to cold storage after 2 years (planned, Phase 2).
-- Medplum `AuditEvent`: indefinite (Medplum default).
+- Medplum `AuditEvent`: indefinite (Medplum default). Written for clinical writes + break-glass overrides as of Phase 1 (2026-06-18); login/logout + `access_denied` mirror still pending — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1.
 - File access logs on the streaming endpoint: 90 days minimum (HIPAA), structured by `AuditLog`.
 - R2 server-side access logs: 30 days (R2 default).
 

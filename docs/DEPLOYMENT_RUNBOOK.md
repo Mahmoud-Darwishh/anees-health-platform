@@ -169,7 +169,7 @@ Every rotation event must produce an `AuditLog` row with `action = update` and a
 | Postgres (operational) | Managed PITR (target) + nightly `pg_dump` (today) | 30 days PITR + 90 days dumps | Monthly restore drill |
 | Medplum (FHIR resources) | Bulk export via `$export` job + Postgres backing-store backup | 30 days + 90 days | Monthly restore drill |
 | R2 medical files | R2 bucket versioning + monthly snapshot to OVH cold storage | Versioning indefinite + 7 years cold | Quarterly restore spot-check |
-| Audit log | Postgres + Medplum AuditEvent | Same as above + planned archive | Annual review |
+| Audit log | Postgres `AuditLog` (FHIR `AuditEvent` not built yet — EHR_AUDIT Phase 1) | Same as above + planned archive | Annual review |
 | Application code | GitHub | Forever | n/a |
 | `.env.local` (and equivalents) | Out-of-band — printed, sealed, locked. **Never** in cloud storage outside a secret manager. | Forever | Owner |
 

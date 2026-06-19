@@ -31,6 +31,11 @@ export const updateCareTaskStatusSchema = z.object({
   taskVersionId: optionalTrimmedString,
 });
 
+export const closeCareEpisodeSchema = z.object({
+  medplumPatientId: requiredPatientId,
+  episodeOutcomeSummary: z.string().trim().min(1, 'A discharge outcome summary is required'),
+});
+
 export const createCommunicationSchema = z.object({
   medplumPatientId: requiredPatientId,
   communicationCategory: z.enum(['clinical-update', 'handoff', 'escalation', 'incident']).default('clinical-update'),

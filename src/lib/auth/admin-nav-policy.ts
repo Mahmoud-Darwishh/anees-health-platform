@@ -59,6 +59,11 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: 'Nurse Dashboard',
     description: 'Nursing-operations dashboard and shift metrics.',
   },
+  {
+    href: '/admin/access',
+    label: 'My Access',
+    description: 'Your effective permissions, derived live from the role matrix.',
+  },
 ];
 
 export function getAdminNavItems(staffRole: StaffRole | null | undefined): AdminNavItem[] {

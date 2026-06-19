@@ -14,32 +14,6 @@ export const CONDITION_STATUS_OPTIONS = ['active', 'resolved', 'inactive', 'remi
 
 export const ALLERGY_STATUS_OPTIONS = ['active', 'inactive', 'resolved'] as const;
 
-// Free-text allergens with a small convenience list of common ones (datalist).
-export const COMMON_ALLERGENS = [
-  'Penicillin',
-  'Amoxicillin',
-  'Cephalosporins',
-  'Sulfa drugs',
-  'Aspirin',
-  'NSAIDs',
-  'Ibuprofen',
-  'Codeine',
-  'Morphine',
-  'Contrast dye',
-  'Latex',
-  'Peanuts',
-  'Tree nuts',
-  'Shellfish',
-  'Eggs',
-  'Milk',
-  'Soy',
-  'Wheat',
-  'Bee stings',
-  'Pollen',
-  'Dust mites',
-] as const;
-
-
 export const MEDICATION_ROUTE_OPTIONS = ['Oral', 'Sublingual', 'Subcutaneous', 'Intramuscular', 'Intravenous', 'Topical', 'Inhaled', 'Rectal', 'Ophthalmic', 'Otic'] as const;
 
 export const MEDICATION_MANAGE_STATUS_OPTIONS = ['active', 'on-hold', 'completed', 'stopped'] as const;
@@ -55,44 +29,6 @@ export const MEDICATION_DURATION_OPTIONS = [
   { value: '21', label: '21 days' },
   { value: '30', label: '30 days' },
   { value: '90', label: '90 days' },
-] as const;
-
-// Free-text medication names with a convenience list of common ones (datalist).
-export const COMMON_MEDICATIONS = [
-  'Paracetamol (Acetaminophen)',
-  'Ibuprofen',
-  'Aspirin',
-  'Amoxicillin',
-  'Amoxicillin/Clavulanate',
-  'Azithromycin',
-  'Ceftriaxone',
-  'Ciprofloxacin',
-  'Metronidazole',
-  'Omeprazole',
-  'Pantoprazole',
-  'Metformin',
-  'Insulin glargine',
-  'Insulin regular',
-  'Amlodipine',
-  'Lisinopril',
-  'Losartan',
-  'Bisoprolol',
-  'Atorvastatin',
-  'Furosemide',
-  'Spironolactone',
-  'Warfarin',
-  'Enoxaparin',
-  'Clopidogrel',
-  'Levothyroxine',
-  'Prednisolone',
-  'Salbutamol (Albuterol)',
-  'Ondansetron',
-  'Morphine',
-  'Tramadol',
-  'Diazepam',
-  'Ceftazidime',
-  'Vancomycin',
-  'Heparin',
 ] as const;
 
 export const MEDICATION_FREQUENCY_OPTIONS = [
@@ -122,16 +58,6 @@ export const MAR_REASON_OPTIONS = [
   'Other clinical reason',
 ] as const;
 
-
-export const ASSESSMENT_OPTIONS = [
-  { title: 'Falls risk screen', type: 'mobility', summary: 'Falls risk reviewed; prevention plan updated.' },
-  { title: 'Braden pressure injury risk', type: 'functional', summary: 'Skin risk reviewed; repositioning and skin-care plan updated.' },
-  { title: 'Pain reassessment', type: 'pain', summary: 'Pain score reviewed with response to current plan.' },
-  { title: 'Mobility and gait review', type: 'mobility', summary: 'Mobility reviewed with transfer and gait safety recommendations.' },
-  { title: 'ADL functional review', type: 'functional', summary: 'ADL support level reviewed and care plan updated.' },
-  { title: 'Cognitive status screen', type: 'functional', summary: 'Cognitive status reviewed; safety supervision needs updated.' },
-  { title: 'Wound risk review', type: 'other', summary: 'Wound status/risk reviewed and follow-up plan updated.' },
-] as const;
 
 export const NURSING_STATUS_OPTIONS = [
   'Stable; no acute change this shift',

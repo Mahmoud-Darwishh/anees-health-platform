@@ -35,7 +35,7 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 │  Soft delete only on clinical                                                 │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │  AUDIT & MONITORING                                                          │
-│  AuditEvent (Medplum) + AuditLog (Postgres)                                  │
+│  AuditLog (Postgres, durable) + FHIR AuditEvent (Medplum mirror)             │
 │  Login + logout audit  →  /admin/compliance dashboard                         │
 │  (Sentry + log aggregator: planned)                                          │
 ├──────────────────────────────────────────────────────────────────────────────┤
@@ -98,7 +98,7 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 ### 4.4 License gating
 - `Staff` carries `licenseType`, `licenseNumber`, `licenseExpiry`, `licenseIssuingBody`.
 - `canSignClinical(staff, discipline)` in `rbac.ts` blocks any clinical write if the license has expired.
-- **Authors of clinical notes, signers of compositions, and creators of MedicationRequests must all pass this gate.**
+- **Authors of clinical notes, signers of compositions, and creators of medication records must all pass this gate.**
 - Expired-license users can still read their own queue and do non-clinical admin work.
 
 ### 4.5 Case scoping
@@ -158,7 +158,7 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 ### 6.2 Medplum (clinical / FHIR)
 - Self-hosted on the same VPS today (target: dedicated host on OVH).
 - Uses HTTPS + client-credentials OAuth (`MEDPLUM_CLIENT_ID` + `MEDPLUM_CLIENT_SECRET`). The shared client (`src/lib/medplum/client.ts`) caches the access token and auto-retries on 401.
-- Audit trail is dual: a FHIR `AuditEvent` resource for every write, mirrored to Postgres `AuditLog` via `writeMedplumAuditMirror`.
+- Audit trail: `recordAudit` (`@/lib/utils/audit`) writes a durable Postgres `AuditLog` row (retried, non-swallowing) **and** mirrors a FHIR `AuditEvent` to Medplum off the critical path (`after()`), for clinical writes + break-glass overrides. Login/logout + `access_denied` remain Postgres-only — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1.
 
 ### 6.3 Cloudflare R2 (medical files)
 - Bucket holds **all** medical document bytes (lab PDFs, scans, photos).
@@ -202,8 +202,8 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 | Export / report download | export routes | ❌ — to be added when export functionality lands |
 
 ### 7.2 Where audit lives
-- Primary: FHIR `AuditEvent` in Medplum.
-- Mirror: Postgres `AuditLog` table.
+- **Durable primary:** Postgres `AuditLog` — written by `recordAudit` / `writeAuditLog` (retried, non-swallowing; `critical` actions throw if un-auditable); login/logout by `writeLoginAudit`.
+- **Interoperable mirror:** FHIR `AuditEvent` in Medplum, written off the critical path via `after()` for clinical writes + break-glass overrides (Phase 1, 2026-06-18). Login/logout + `access_denied` mirror is pending — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1.
 - Retention: indefinite (regulatory). Archival to cold storage is a Phase 2 task.
 
 ### 7.3 What the compliance dashboard shows

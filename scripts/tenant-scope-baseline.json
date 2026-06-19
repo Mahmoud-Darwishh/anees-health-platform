@@ -1,0 +1,13 @@
+[
+  "src/app/[locale]/payment/redirect/page.tsx:onlineBooking.updateMany",
+  "src/app/admin/compliance/page.tsx:staff.findMany",
+  "src/app/api/bookings/payment/webhook/route.ts:onlineBooking.update",
+  "src/auth.ts:staff.update",
+  "src/features/ehr/admin-patient/actions/shared/financials.ts:visit.update",
+  "src/features/ehr/admin-patient/actions/shared/owner-references.ts:staff.findFirst",
+  "src/features/ehr/admin-patient/actions/shared/owner-references.ts:staff.findMany",
+  "src/features/ehr/admin-patient/actions/shared/workflow-state.ts:visit.update",
+  "src/features/ehr/admin-patient/actions/visit-workflow.ts:visit.update",
+  "src/features/ehr/clinician-physio/earnings/data.ts:visit.aggregate",
+  "src/lib/medplum/practitioners.ts:staff.update"
+]

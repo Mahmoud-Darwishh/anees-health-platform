@@ -52,6 +52,16 @@ export const CLINICAL_WRITE_ROLES: StaffRole[] = [
 ];
 
 /**
+ * Roles allowed to READ the clinical chart. Adds `compliance_officer` to the
+ * clinical roles: the role matrix (`policy/ehr-matrix.ts`) grants Compliance
+ * `read / global` on every clinical module (audit + oversight, separation of
+ * duties), but they hold NO write role, so every mutation stays gated. Use this
+ * for read entry points (patient list/detail loaders, document streaming);
+ * keep writes on `CLINICAL_WRITE_ROLES`.
+ */
+export const CLINICAL_READ_ROLES: StaffRole[] = [...CLINICAL_ROLES, 'compliance_officer'];
+
+/**
  * Roles that must be scoped to assigned care-team patients for clinical reads.
  * Admin and superadmin are intentionally excluded.
  */

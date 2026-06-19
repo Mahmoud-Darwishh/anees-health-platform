@@ -3,7 +3,7 @@
 import { createPatientCommunication } from '@/lib/medplum/communications';
 import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { prisma } from '@/lib/db/prisma';
-import { writeAuditLog } from '@/lib/utils/audit';
+import { recordAudit } from '@/lib/utils/audit';
 import { requestRestrictedAccessSchema, requestBreakGlassAccessSchema, approveDestructiveTokenSchema, formDataToInput } from '@/features/ehr/schemas/admin-patient-actions';
 import { ADMIN_PATIENT_RESTRICTED_ACCESS_TTL_MINUTES } from '../constants';
 import { setAdminPatientFlash } from '../flash';
@@ -37,19 +37,24 @@ export async function requestRestrictedAccessAction(formData: FormData): Promise
       },
     });
 
-    await writeAuditLog({
-      tableName: 'restricted_clinical_access',
-      recordId: input.medplumPatientId,
-      action: 'override',
-      changedFields: {
-        reason: input.restrictedAccessReason,
-        role: staff.staffRole,
-        tokenId: token.id,
-        accessType: 'reasoned_restricted_read',
-        expiresAt: expiresAt.toISOString(),
+    await recordAudit(
+      {
+        tableName: 'restricted_clinical_access',
+        recordId: input.medplumPatientId,
+        action: 'override',
+        changedFields: {
+          reason: input.restrictedAccessReason,
+          role: staff.staffRole,
+          tokenId: token.id,
+          accessType: 'reasoned_restricted_read',
+          expiresAt: expiresAt.toISOString(),
+        },
+        changedBy,
+        patientId: input.medplumPatientId,
+        actorRole: staff.staffRole,
       },
-      changedBy,
-    });
+      { critical: true },
+    );
 
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const weeklyOverrides = await prisma.auditLog.count({
@@ -107,20 +112,25 @@ export async function requestBreakGlassAccessAction(formData: FormData): Promise
       },
     });
 
-    await writeAuditLog({
-      tableName: 'restricted_clinical_access',
-      recordId: input.medplumPatientId,
-      action: 'override',
-      changedFields: {
-        reason: input.breakGlassReason,
-        role: staff.staffRole,
-        mode: 'break-glass',
-        tokenId: token.id,
-        status: 'pending_approval',
-        expiresAt: expiresAt.toISOString(),
+    await recordAudit(
+      {
+        tableName: 'restricted_clinical_access',
+        recordId: input.medplumPatientId,
+        action: 'override',
+        changedFields: {
+          reason: input.breakGlassReason,
+          role: staff.staffRole,
+          mode: 'break-glass',
+          tokenId: token.id,
+          status: 'pending_approval',
+          expiresAt: expiresAt.toISOString(),
+        },
+        changedBy,
+        patientId: input.medplumPatientId,
+        actorRole: staff.staffRole,
       },
-      changedBy,
-    });
+      { critical: true },
+    );
 
     const complianceOwner = await resolveComplianceOwnerReference();
     const adminOwners = await resolveAdminOwnerReferences();
@@ -208,18 +218,23 @@ export async function approveDestructiveTokenAction(formData: FormData): Promise
       },
     });
 
-    await writeAuditLog({
-      tableName: 'destructive_approval_tokens',
-      recordId: token.id,
-      action: 'override',
-      changedBy: approver.staffId,
-      changedFields: {
-        actionType: token.actionType,
-        approvedBy: approver.staffId,
-        consumedBy,
-        status: 'consumed',
+    await recordAudit(
+      {
+        tableName: 'destructive_approval_tokens',
+        recordId: token.id,
+        action: 'override',
+        changedBy: approver.staffId,
+        changedFields: {
+          actionType: token.actionType,
+          approvedBy: approver.staffId,
+          consumedBy,
+          status: 'consumed',
+        },
+        patientId: input.medplumPatientId,
+        actorRole: approver.staffRole,
       },
-    });
+      { critical: true },
+    );
 
     await setAdminPatientFlash({ type: 'success', message: 'Approval token approved and consumed.' });
     refreshClinicalPaths(input.medplumPatientId);

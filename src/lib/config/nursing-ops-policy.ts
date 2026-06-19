@@ -7,6 +7,7 @@ export type NursingVitalThresholdConfig = {
   systolicBp: NumericRange;
   diastolicBp: NumericRange;
   heartRate: NumericRange;
+  respiratoryRate: NumericRange;
   temperatureC: NumericRange;
   glucoseMgDl: NumericRange;
   spo2Pct: NumericRange;
@@ -33,6 +34,10 @@ export const NURSING_VITAL_THRESHOLDS: NursingVitalThresholdConfig = {
   heartRate: {
     min: parseNumber(process.env.NURSING_ALERT_HR_MIN, 50),
     max: parseNumber(process.env.NURSING_ALERT_HR_MAX, 120),
+  },
+  respiratoryRate: {
+    min: parseNumber(process.env.NURSING_ALERT_RR_MIN, 8),
+    max: parseNumber(process.env.NURSING_ALERT_RR_MAX, 24),
   },
   temperatureC: {
     min: parseNumber(process.env.NURSING_ALERT_TEMP_MIN_C, 35.0),

@@ -117,6 +117,10 @@ export const ACTIONS = {
     module: 'physio_notes', requires: 'sign',
     discipline: 'physiotherapy', requiresLicense: true, requiresCaseScope: true, sensitive: true,
   },
+  'episode.close': {
+    module: 'care_plan', requires: 'sign',
+    discipline: 'medical', requiresLicense: true, requiresCaseScope: true, sensitive: true,
+  },
   'task.start': { module: 'tasks', requires: 'write', discipline: 'physiotherapy' },
   'task.complete': { module: 'tasks', requires: 'write', discipline: 'physiotherapy' },
   'task.create': { module: 'tasks', requires: 'write', requiresCaseScope: true },

@@ -15,7 +15,7 @@
  */
 
 import type { StaffRole } from '@prisma/client';
-import { ALL_STAFF_ROLES, CLINICAL_ROLES } from './role-constants';
+import { ALL_STAFF_ROLES, CLINICAL_READ_ROLES } from './role-constants';
 
 type RouteRule = {
   prefix: string;
@@ -42,6 +42,8 @@ const ROUTE_RULES: RouteRule[] = [
   // authenticated staff member, but ONLY at their exact path.
   { prefix: '/admin', roles: ALL_STAFF_ROLES, exact: true },
   { prefix: '/admin/no-workspace', roles: ALL_STAFF_ROLES, exact: true },
+  // Every authenticated staff member may view their own effective permissions.
+  { prefix: '/admin/access', roles: ALL_STAFF_ROLES },
 
   // ── Section families (prefix match) ──────────────────────────────────────
   { prefix: '/admin/compliance', roles: ['superadmin', 'admin', 'compliance_officer'] },
@@ -53,8 +55,10 @@ const ROUTE_RULES: RouteRule[] = [
   // two lists identical prevents the post-login "allowed here, blocked there"
   // redirect bounce that other clinical roles used to hit.
   { prefix: '/admin/clinician', roles: ['superadmin', 'admin', 'physiotherapist'] },
-  { prefix: '/admin/escalations', roles: CLINICAL_ROLES },
-  { prefix: '/admin/patients', roles: CLINICAL_ROLES },
+  // Compliance-officer is included for READ (oversight + audit, separation of
+  // duties). They hold no write role, so every mutation stays gated downstream.
+  { prefix: '/admin/escalations', roles: CLINICAL_READ_ROLES },
+  { prefix: '/admin/patients', roles: CLINICAL_READ_ROLES },
   { prefix: '/clinician', roles: ['superadmin', 'admin', 'physiotherapist'] },
 ];
 

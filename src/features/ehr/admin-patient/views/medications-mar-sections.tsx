@@ -1,6 +1,7 @@
 import { createMedicationAction, createMedicationAdministrationAction, updateMedicationStatusAction, retireMedicationAction, retireMedicationAdministrationAction } from '../actions';
 import { NowDateTimeInput } from '@/features/ehr/components/NowDateTimeInput';
-import { MEDICATION_ROUTE_OPTIONS, MEDICATION_MANAGE_STATUS_OPTIONS, MEDICATION_DURATION_OPTIONS, COMMON_MEDICATIONS, MEDICATION_FREQUENCY_OPTIONS, MAR_REASON_OPTIONS } from '../view-helpers';
+import { CodedTermPicker } from '@/features/ehr/components/CodedTermPicker';
+import { MEDICATION_ROUTE_OPTIONS, MEDICATION_MANAGE_STATUS_OPTIONS, MEDICATION_DURATION_OPTIONS, MEDICATION_FREQUENCY_OPTIONS, MAR_REASON_OPTIONS } from '../view-helpers';
 import type { AdminPatientViewContext } from '../view-context';
 
 export function MedicationsMarSections({ ctx }: { ctx: AdminPatientViewContext }) {
@@ -29,24 +30,17 @@ export function MedicationsMarSections({ ctx }: { ctx: AdminPatientViewContext }
                   <summary className="fw-semibold">Add medication order</summary>
                   <form action={createMedicationAction} className="row g-3 mt-3">
                     <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
-                    <div className="col-md-6">
-                      <label htmlFor="medicationName" className="form-label">Medication name</label>
-                      <input
-                        id="medicationName"
-                        name="medicationName"
-                        type="text"
-                        className="form-control"
-                        placeholder="Type medication (free text)"
-                        list="common-medications"
-                        autoComplete="off"
-                        required
-                      />
-                      <datalist id="common-medications">
-                        {COMMON_MEDICATIONS.map((medication) => (
-                          <option key={medication} value={medication} />
-                        ))}
-                      </datalist>
-                    </div>
+                    <CodedTermPicker
+                      domain="drug"
+                      labelInputName="medicationName"
+                      codeInputName="medicationRxnorm"
+                      title="Medication (RxNorm)"
+                      placeholder="Type a drug name or brand, then pick a match"
+                      className="col-md-6"
+                      helpCoded="Coded drug — interaction + allergy screening enabled."
+                      helpFree="Not in formulary — saves as free text, without safety screening."
+                      required
+                    />
                     <div className="col-md-3">
                       <label htmlFor="startDate" className="form-label">Start date</label>
                       <input id="startDate" name="startDate" type="date" className="form-control" />
@@ -81,6 +75,14 @@ export function MedicationsMarSections({ ctx }: { ctx: AdminPatientViewContext }
                     <div className="col-12">
                       <label htmlFor="medicationNote" className="form-label">Notes</label>
                       <textarea id="medicationNote" name="medicationNote" className="form-control" rows={2} placeholder="Medication context or monitoring notes" dir="auto" />
+                    </div>
+                    <div className="col-12">
+                      <div className="form-check">
+                        <input className="form-check-input" type="checkbox" id="acknowledgeInteractions" name="acknowledgeInteractions" value="on" />
+                        <label className="form-check-label" htmlFor="acknowledgeInteractions">
+                          I reviewed the interaction / allergy warnings (only required when the safety check flags an issue).
+                        </label>
+                      </div>
                     </div>
                     <div className="col-12">
                       <button type="submit" className="btn btn-primary">Add medication</button>

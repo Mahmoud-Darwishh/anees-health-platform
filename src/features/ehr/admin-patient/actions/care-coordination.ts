@@ -6,12 +6,43 @@ import { assignStaffToPatientCareTeam, unassignStaffFromPatientCareTeam } from '
 import { createPatientTask, updatePatientTaskStatus } from '@/lib/medplum/tasks';
 import { createPatientCommunication } from '@/lib/medplum/communications';
 import { createPatientAppointment } from '@/lib/medplum/appointments';
+import { closeCareEpisode } from '@/lib/medplum/episodes';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import { prisma } from '@/lib/db/prisma';
-import { assignCareTeamSchema, createCareTaskSchema, createCommunicationSchema, createAppointmentSchema, formDataToInput, unassignCareTeamSchema, updateCareTaskStatusSchema } from '@/features/ehr/schemas/admin-patient-actions';
+import { assignCareTeamSchema, closeCareEpisodeSchema, createCareTaskSchema, createCommunicationSchema, createAppointmentSchema, formDataToInput, unassignCareTeamSchema, updateCareTaskStatusSchema } from '@/features/ehr/schemas/admin-patient-actions';
 import { toCareTeamRole } from '../helpers';
 import { setAdminPatientFlash } from '../flash';
 import { refreshClinicalPaths, failAction, requireAdminPatientAction, getClinicalWriterWithPractitioner, getCoordinationWriterWithPractitioner, resolvePractitionerFromStaffId } from './shared';
+
+export async function closeCareEpisodeAction(formData: FormData): Promise<void> {
+  try {
+    const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
+    const input = closeCareEpisodeSchema.parse(formDataToInput(formData));
+    await requireAdminPatientAction('episode.close', input.medplumPatientId, 'episodes');
+
+    const episode = await closeCareEpisode({
+      patientId: input.medplumPatientId,
+      outcomeSummary: input.episodeOutcomeSummary,
+      performerReference: practitioner.reference,
+      performerDisplay: practitioner.display,
+    });
+
+    await writeMedplumAuditMirror({
+      tableName: 'MedplumEpisodeOfCare',
+      recordId: episode.id ?? `${input.medplumPatientId}:${Date.now()}`,
+      action: AuditAction.update,
+      changedFields: ['status', 'period.end', 'careManager', 'extension'],
+      changedBy,
+      patientId: input.medplumPatientId,
+      actorRole: staff.staffRole,
+    });
+
+    await setAdminPatientFlash({ type: 'success', message: 'Care episode closed — patient discharged.' });
+    refreshClinicalPaths(input.medplumPatientId);
+  } catch (error) {
+    await failAction(formData, error);
+  }
+}
 
 export async function assignCareTeamMemberAction(formData: FormData): Promise<void> {
   try {

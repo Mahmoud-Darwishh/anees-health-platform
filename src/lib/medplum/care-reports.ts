@@ -2,6 +2,9 @@ import 'server-only';
 
 import { getMedplumClient } from '@/lib/medplum/client';
 import { MEDPLUM_CODE_SYSTEMS } from '@/lib/medplum/constants';
+import { logger } from '@/lib/utils/app-logger';
+import { recordProvenance } from '@/lib/medplum/provenance';
+import { createOutcomeObservations, type OutcomeMeasureInput, type OutcomeMeasureKey } from '@/lib/medplum/outcome-measures';
 import {
   booleanComponent,
   compactComponents,
@@ -28,6 +31,8 @@ export type CareReportResource = {
   encounter?: FhirReference;
   performer?: FhirReference[];
   effectiveDateTime?: string;
+  /** Phase 3: references to the discrete coded outcome Observations derived from this report. */
+  hasMember?: FhirReference[];
   note?: Array<{ text?: string }>;
   component?: Array<{
     code?: { coding?: Array<{ system?: string; code?: string; display?: string }> };
@@ -127,10 +132,17 @@ function baseReport(input: CreateBaseReportInput): Omit<CareReportResource, 'res
   };
 }
 
+/** The authoring clinician as a FHIR reference (display-only when no Practitioner ref). */
+function reportAuthorWho(input: CreateBaseReportInput): FhirReference {
+  return input.performerReference
+    ? { reference: input.performerReference, display: input.performerDisplay ?? undefined }
+    : { display: input.performerDisplay ?? 'Clinician' };
+}
+
 export async function createNursingReport(input: CreateNursingReportInput): Promise<CareReportResource> {
   const medplum = await getMedplumClient();
 
-  return (await medplum.createResource({
+  const report = (await medplum.createResource({
     resourceType: 'Observation',
     ...baseReport(input),
     code: {
@@ -149,12 +161,47 @@ export async function createNursingReport(input: CreateNursingReportInput): Prom
       stringComponent('follow-up-plan', 'Follow-up Plan', input.followUpPlan),
     ]),
   } as never)) as CareReportResource;
+
+  if (report.id) {
+    await recordProvenance({
+      targetReference: `Observation/${report.id}`,
+      activity: 'CREATE',
+      agents: [{ role: 'author', who: reportAuthorWho(input) }],
+    });
+  }
+
+  return report;
+}
+
+/**
+ * The structured-measure fields on a physio report, mapped to their discrete
+ * outcome-measure keys. Drives the Phase 3 promotion to coded Observations.
+ */
+function extractOutcomeMeasures(input: CreatePhysioReportInput): OutcomeMeasureInput[] {
+  const candidates: Array<[OutcomeMeasureKey, number | null | undefined]> = [
+    ['pain_before', input.painBefore],
+    ['pain_after', input.painAfter],
+    ['tug_seconds', input.geriatricTugSeconds],
+    ['berg', input.strokeBergScore],
+    ['tinetti', input.geriatricTinettiScore],
+    ['ashworth', input.strokeAshworthScore],
+    ['functional_reach_cm', input.strokeFunctionalReachCm],
+    ['slr_left_deg', input.lowBackSlrLeftDeg],
+    ['slr_right_deg', input.lowBackSlrRightDeg],
+    ['schober_cm', input.lowBackSchoberCm],
+    ['knee_flexion_deg', input.postOpKneeFlexionDeg],
+    ['knee_extension_deg', input.postOpKneeExtensionDeg],
+  ];
+
+  return candidates
+    .filter((entry): entry is [OutcomeMeasureKey, number] => typeof entry[1] === 'number')
+    .map(([key, value]) => ({ key, value }));
 }
 
 export async function createPhysioSessionReport(input: CreatePhysioReportInput): Promise<CareReportResource> {
   const medplum = await getMedplumClient();
 
-  return (await medplum.createResource({
+  const report = (await medplum.createResource({
     resourceType: 'Observation',
     ...baseReport(input),
     code: {
@@ -195,6 +242,43 @@ export async function createPhysioSessionReport(input: CreatePhysioReportInput):
       stringComponent('discharge-readiness', 'Discharge Readiness', input.dischargeReadiness),
     ]),
   } as never)) as CareReportResource;
+
+  // Phase 6: immutable authorship attestation for the session report (best-effort).
+  if (report.id) {
+    await recordProvenance({
+      targetReference: `Observation/${report.id}`,
+      activity: 'CREATE',
+      agents: [{ role: 'author', who: reportAuthorWho(input) }],
+    });
+  }
+
+  // Phase 3: promote the structured measures to discrete coded Observations and
+  // link them back from the parent report (`hasMember`). Best-effort — a failure
+  // here must never lose the (already-saved) session report.
+  try {
+    const measures = extractOutcomeMeasures(input);
+    if (report.id && measures.length > 0) {
+      const members = await createOutcomeObservations({
+        patientId: input.patientId,
+        encounterId: input.encounterId ?? null,
+        performerReference: input.performerReference ?? null,
+        performerDisplay: input.performerDisplay ?? null,
+        recordedAt: input.recordedAt ?? new Date(),
+        parentReportId: report.id,
+        measures,
+      });
+      if (members.length > 0) {
+        return (await medplum.updateResource({ ...report, hasMember: members } as never)) as CareReportResource;
+      }
+    }
+  } catch (error) {
+    logger.error('Failed to emit discrete outcome observations for physio report', {
+      reportId: report.id,
+      error: error instanceof Error ? error.message : 'unknown',
+    });
+  }
+
+  return report;
 }
 
 export async function createNursingShiftHandoffReport(input: CreateNursingShiftHandoffInput): Promise<CareReportResource> {
