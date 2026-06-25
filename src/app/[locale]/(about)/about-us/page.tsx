@@ -454,7 +454,10 @@ export default function AboutUsPage() {
             name: t('title'),
             mainEntity: {
               '@type': 'MedicalOrganization',
-              '@id': `${baseUrl}#organization`,
+              // Must match orgId() in jsonld.ts exactly (note the slash before
+              // the hash) so this resolves to the SAME entity node emitted
+              // site-wide, instead of forking a second Organization in the graph.
+              '@id': `${baseUrl}/#organization`,
               name: 'Anees Health',
               description: t('founders_search_statement'),
               url: `${baseUrl}/${locale}`,
@@ -480,7 +483,9 @@ export default function AboutUsPage() {
                   jobTitle: isArabic ? 'مؤسس مشارك' : 'Co-Founder',
                 },
               ],
-              sameAs: [founder1Url, founder2Url],
+              // sameAs is for the ORG's own canonical profiles (social), not the
+              // founders — the founders are already linked via `founder[]` above.
+              sameAs: [...site.socialProfiles],
             },
           }),
         }}

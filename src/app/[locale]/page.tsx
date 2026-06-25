@@ -8,7 +8,7 @@ import {
   webPageSchema,
   renderJsonLd,
 } from '@/lib/seo/jsonld';
-import { homeFaqs } from '@/lib/seo/faqs';
+import { getTranslations } from 'next-intl/server';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 import { getDoctors } from '@/lib/api/doctors';
 
@@ -38,7 +38,15 @@ export default async function HomePage({
   ];
 
   const homeBreadcrumb = breadcrumbSchema(breadcrumbs);
-  const homeFaq = faqPageSchema(homeFaqs[locale]);
+  // Single-source the FAQ: build the schema from the SAME i18n messages the
+  // visible <SectionFaq /> renders (home.faqs.q1..q5 / a1..a5), so the
+  // structured data and the on-page copy can never drift apart.
+  const tFaq = await getTranslations({ locale, namespace: 'home.faqs' });
+  const homeFaqItems = [1, 2, 3, 4, 5].map((n) => ({
+    question: tFaq(`q${n}`),
+    answer: tFaq(`a${n}`),
+  }));
+  const homeFaq = faqPageSchema(homeFaqItems);
   const homeWebPage = webPageSchema({
     locale,
     path: `/${locale}`,

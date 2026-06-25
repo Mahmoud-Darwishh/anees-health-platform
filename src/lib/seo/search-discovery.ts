@@ -52,6 +52,42 @@ const SERVICE_COPY: Record<SupportedLocale, Record<string, ServiceLandingContent
       keywords:
         'Anees elderly care at home, geriatric doctor home visit, senior home care Egypt, elderly doctor at home Cairo, geriatrics Anees',
     },
+    'home-nursing': {
+      slug: 'home-nursing',
+      title: 'Home Nursing in Egypt | Anees Skilled Nurses',
+      headline: 'Skilled home nursing in Egypt',
+      description:
+        'Book licensed home nurses on Anees for wound care, injections, IV therapy, catheter and tube care, vitals monitoring, and post-operative and chronic-care support across Greater Cairo.',
+      keywords:
+        'Anees home nursing, home nursing Cairo, home nurse Egypt, skilled nursing at home, wound care at home',
+    },
+    'lab-tests-at-home': {
+      slug: 'lab-tests-at-home',
+      title: 'Lab Tests at Home in Egypt | Anees Home Sample Collection',
+      headline: 'Lab tests at home in Egypt',
+      description:
+        'Arrange home blood tests and sample collection with Anees across Greater Cairo. A phlebotomist visits the patient at home, samples are processed by accredited laboratories, and results are returned digitally.',
+      keywords:
+        'Anees lab tests at home, blood test at home Egypt, home sample collection Cairo, home phlebotomy, lab at home',
+    },
+    'post-operative-care': {
+      slug: 'post-operative-care',
+      title: 'Post-Operative Care at Home in Egypt | Anees',
+      headline: 'Post-operative care at home in Egypt',
+      description:
+        'Recover at home after surgery with Anees: wound and drain care, pain and medication management, nursing visits, and physiotherapy, coordinated by one care coordinator across Greater Cairo.',
+      keywords:
+        'Anees post operative care, post-surgery home care Egypt, wound care at home, recovery at home after surgery, home nursing post-op',
+    },
+    'palliative-chronic-care': {
+      slug: 'palliative-chronic-care',
+      title: 'Palliative & Chronic-Disease Care at Home in Egypt | Anees',
+      headline: 'Palliative and chronic-disease care at home',
+      description:
+        'Ongoing home care for chronic and palliative patients with Anees — diabetes, hypertension, cardiac and respiratory management, symptom control, nursing, and doctor follow-up across Greater Cairo.',
+      keywords:
+        'Anees palliative care, chronic disease home care Egypt, home care diabetes, symptom management at home, chronic care Cairo',
+    },
   },
   ar: {
     'doctor-at-home': {
@@ -81,6 +117,42 @@ const SERVICE_COPY: Record<SupportedLocale, Record<string, ServiceLandingContent
       keywords:
         'أنيس رعاية مسنين منزلية، طبيب شيخوخة منزلي، رعاية كبار السن مصر، دكتور مسنين في البيت، طب الشيخوخة أنيس',
     },
+    'home-nursing': {
+      slug: 'home-nursing',
+      title: 'تمريض منزلي في مصر | ممرضون متخصصون من أنيس',
+      headline: 'تمريض منزلي متخصص في مصر',
+      description:
+        'احجز ممرضين منزليين مرخصين عبر أنيس للعناية بالجروح والحقن والمحاليل الوريدية والقساطر وأنابيب التغذية ومتابعة العلامات الحيوية ورعاية ما بعد العمليات والأمراض المزمنة في القاهرة الكبرى.',
+      keywords:
+        'أنيس تمريض منزلي، تمريض منزلي القاهرة، ممرضة منزلية مصر، عناية بالجروح في المنزل، تركيب محاليل منزلي',
+    },
+    'lab-tests-at-home': {
+      slug: 'lab-tests-at-home',
+      title: 'تحاليل في المنزل بمصر | سحب عينات منزلي من أنيس',
+      headline: 'تحاليل وسحب عينات في المنزل بمصر',
+      description:
+        'رتّب تحاليل الدم وسحب العينات في المنزل مع أنيس في القاهرة الكبرى. يزور فني سحب العينات المريض في منزله، وتُحلَّل العينات في معامل معتمدة وتُرسل النتائج رقمياً.',
+      keywords:
+        'أنيس تحاليل منزلية، تحاليل دم في المنزل، سحب عينات منزلي القاهرة، تحاليل في البيت، فحوصات منزلية',
+    },
+    'post-operative-care': {
+      slug: 'post-operative-care',
+      title: 'الرعاية بعد العمليات في المنزل بمصر | أنيس',
+      headline: 'الرعاية بعد العمليات في المنزل بمصر',
+      description:
+        'تعافَ في المنزل بعد العملية مع أنيس: العناية بالجروح والأنابيب، وإدارة الألم والأدوية، وزيارات التمريض، والعلاج الطبيعي، بتنسيق منسق واحد في القاهرة الكبرى.',
+      keywords:
+        'أنيس رعاية ما بعد العمليات، رعاية بعد الجراحة في المنزل، العناية بالجروح، تعافي منزلي بعد العملية، تمريض ما بعد الجراحة',
+    },
+    'palliative-chronic-care': {
+      slug: 'palliative-chronic-care',
+      title: 'الرعاية التلطيفية ورعاية الأمراض المزمنة في المنزل | أنيس',
+      headline: 'الرعاية التلطيفية ورعاية الأمراض المزمنة في المنزل',
+      description:
+        'رعاية منزلية مستمرة للحالات المزمنة والتلطيفية مع أنيس — متابعة السكري والضغط والقلب والجهاز التنفسي، والتحكم في الأعراض، والتمريض، ومتابعة الطبيب في القاهرة الكبرى.',
+      keywords:
+        'أنيس رعاية تلطيفية، رعاية الأمراض المزمنة في المنزل، رعاية السكري منزلية، تحكم في الأعراض، رعاية مزمنة القاهرة',
+    },
   },
 };
 
@@ -103,6 +175,14 @@ function matchServiceDoctors(serviceSlug: string, doctor: Doctor, englishDoctor:
       return hasHomeChannel && /(physio|physical therapy|rehabilitation)/i.test(haystack);
     case 'elderly-care-at-home':
       return hasHomeChannel && /(geriatric|elderly|aging|senior)/i.test(haystack);
+    case 'home-nursing':
+      return hasHomeChannel && /(nurs|geriatric|internal|general|family)/i.test(haystack);
+    case 'lab-tests-at-home':
+      return hasHomeChannel && /(internal|general|family|patholog|lab)/i.test(haystack);
+    case 'post-operative-care':
+      return hasHomeChannel && /(surg|orthop|general|internal)/i.test(haystack);
+    case 'palliative-chronic-care':
+      return hasHomeChannel && /(geriatric|internal|oncolog|palliat|chronic|cardio|pulmon|respir)/i.test(haystack);
     default:
       return false;
   }

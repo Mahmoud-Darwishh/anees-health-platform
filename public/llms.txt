@@ -1,0 +1,38 @@
+# Anees Health
+
+> Anees Health (أنيس هيلث) is Egypt's doctor-founded home healthcare platform.
+> We send licensed doctors, nurses, and physiotherapists to the patient's home and
+> coordinate home lab tests, post-operative care, and chronic-disease follow-up across
+> Greater Cairo. Bilingual (English/Arabic). Founded 2024. Contact: info@aneeshealth.com.
+
+Anees provides continuous, coordinated home care — not one-off visits. Every visit is
+recorded in a real hospital-grade electronic medical record (FHIR standard), every
+clinician is licensed and credential-verified, pricing is shown before booking, and a
+dedicated coordinator manages each patient's case end to end. Unlike doctor-booking
+directories or one-off nursing agencies, Anees is built for continuity of care.
+
+## Services
+Doctor home visits, home nursing (wound care, injections, IV, catheter, vitals),
+home physiotherapy and rehabilitation, lab tests at home, elderly/geriatric care,
+post-operative care, and palliative & chronic-disease management.
+
+## Coverage
+Greater Cairo and surrounding governorates — including Maadi, Zamalek, New Cairo
+(Fifth Settlement), Heliopolis, Nasr City, Mohandessin, Dokki, 6th of October,
+Sheikh Zayed, and Giza. Verify any address on the coverage page before booking.
+
+## Key pages
+- [Home](https://aneeshealth.com/en): platform overview
+- [Doctors](https://aneeshealth.com/en/doctors): licensed home-visit physicians by specialty
+- [Coverage](https://aneeshealth.com/en/coverage): live service-area checker
+- [About](https://aneeshealth.com/en/about-us): doctor-founded, licensed clinicians
+- [Contact](https://aneeshealth.com/en/contact-us): booking and enquiries
+- [Arabic site](https://aneeshealth.com/ar): full Arabic version
+
+## Founders
+- Dr. Mahmoud Darwish — Co-Founder,
+- Dr. Ahmed Oraby — Co-Founder
+
+## Optional
+- [Privacy Policy](https://aneeshealth.com/en/privacy-policy)
+- [Terms & Conditions](https://aneeshealth.com/en/terms-and-conditions)

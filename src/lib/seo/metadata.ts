@@ -313,6 +313,24 @@ export function buildBookingMetadata(locale: SupportedLocale): Metadata {
   });
 }
 
+/* ───────────────────────────────── FAQ ──────────────────────────── */
+
+export function buildFaqMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/faq`,
+    title: locale === 'ar'
+      ? 'الأسئلة الشائعة — الرعاية الصحية المنزلية في مصر | أنيس هيلث'
+      : 'Frequently Asked Questions — Home Healthcare in Egypt | Anees Health',
+    description: locale === 'ar'
+      ? 'إجابات عن الأسئلة الشائعة حول الرعاية الصحية المنزلية في مصر مع أنيس هيلث: الخدمات، الأسعار، التغطية، التراخيص، الحجز والدفع، والخصوصية.'
+      : 'Answers to common questions about home healthcare in Egypt with Anees Health: services, pricing, coverage, clinician licensing, booking, payment, and privacy.',
+    keywords: locale === 'ar'
+      ? ['أسئلة شائعة', 'رعاية صحية منزلية', 'أنيس هيلث', 'أسعار الرعاية المنزلية', 'مناطق التغطية']
+      : ['home healthcare FAQ Egypt', 'Anees Health questions', 'home visit FAQ', 'home nursing FAQ', 'home care pricing Egypt'],
+  });
+}
+
 /* ───────────────────────────── Coverage ─────────────────────────── */
 
 export function buildCoverageMetadata(locale: SupportedLocale): Metadata {
@@ -326,6 +344,96 @@ export function buildCoverageMetadata(locale: SupportedLocale): Metadata {
     keywords: locale === 'ar'
       ? ['مناطق التغطية', 'القاهرة الكبرى', 'الجيزة', 'زيارات منزلية في مصر']
       : ['coverage areas Egypt', 'Greater Cairo home visits', 'Giza home visits', 'Anees coverage'],
+  });
+}
+
+/* ───────────────────────────── Guides ───────────────────────────── */
+
+export function buildGuidesMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/guides`,
+    title: locale === 'ar'
+      ? 'أدلة الرعاية الصحية المنزلية في مصر | أنيس هيلث'
+      : 'Home Healthcare Guides in Egypt | Anees Health',
+    description: locale === 'ar'
+      ? 'أدلة عملية حول الرعاية الصحية المنزلية في مصر — كيف تختار مزوّداً، الرعاية المنزلية أم دار المسنين، التكلفة، ورعاية كبار السن وما بعد العمليات.'
+      : 'Practical guides to home healthcare in Egypt — how to choose a provider, home care vs. nursing home, costs, and caring for elderly and post-operative patients.',
+    keywords: locale === 'ar'
+      ? ['أدلة الرعاية المنزلية', 'كيف تختار تمريض منزلي', 'رعاية منزلية أم دار مسنين']
+      : ['home healthcare guides Egypt', 'how to choose home nursing', 'home care vs nursing home'],
+  });
+}
+
+export function buildGuideMetadata(args: {
+  locale: SupportedLocale;
+  slug: string;
+  title: string;
+  description: string;
+}): Metadata {
+  return buildBaseMetadata({
+    locale: args.locale,
+    path: `/${args.locale}/guides/${args.slug}`,
+    title: `${args.title} | Anees Health`,
+    description: args.description,
+  });
+}
+
+/* ───────────────────────────── Pricing ──────────────────────────── */
+
+export function buildPricingMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/pricing`,
+    title: locale === 'ar'
+      ? 'أسعار الرعاية الصحية المنزلية في مصر (2026) — أسعار شفافة | أنيس هيلث'
+      : 'Home Healthcare Prices in Egypt (2026) — Transparent Pricing | Anees Health',
+    description: locale === 'ar'
+      ? 'كيف تعمل أسعار أنيس هيلث: السعر يظهر بوضوح قبل تأكيد الحجز، بلا رسوم مفاجئة. تعرّف على نطاقات أسعار زيارات الأطباء والتمريض والعلاج الطبيعي والتحاليل في المنزل.'
+      : 'How Anees Health pricing works: the price is shown before you confirm — no surprise fees. See indicative price ranges for doctor home visits, nursing, physiotherapy, and lab tests at home.',
+    keywords: locale === 'ar'
+      ? ['أسعار الرعاية المنزلية مصر', 'سعر زيارة طبيب منزلية', 'أسعار التمريض المنزلي', 'تكلفة علاج طبيعي منزلي']
+      : ['home healthcare cost Egypt', 'doctor home visit price Egypt', 'home nursing cost Cairo', 'physiotherapy at home price'],
+  });
+}
+
+/* ───────────────────────────── Areas (local) ────────────────────── */
+
+export function buildAreasMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/areas`,
+    title: locale === 'ar'
+      ? 'مناطق الرعاية الصحية المنزلية في القاهرة الكبرى | أنيس هيلث'
+      : 'Home Healthcare Areas in Greater Cairo | Anees Health',
+    description: locale === 'ar'
+      ? 'تصفّح المناطق التي تخدمها أنيس هيلث للزيارات المنزلية في القاهرة الكبرى — المعادي، التجمع الخامس، الزمالك، مصر الجديدة، المهندسين والمزيد.'
+      : 'Browse the Greater Cairo areas Anees Health serves for home visits — Maadi, New Cairo, Zamalek, Heliopolis, Mohandessin and more.',
+    keywords: locale === 'ar'
+      ? ['مناطق الرعاية المنزلية', 'القاهرة الكبرى', 'تمريض منزلي القاهرة', 'زيارة طبيب منزلية']
+      : ['home healthcare areas Cairo', 'home visit areas Greater Cairo', 'home nursing by area Egypt'],
+  });
+}
+
+export function buildAreaMetadata(args: {
+  locale: SupportedLocale;
+  slug: string;
+  name: string;
+  governorate: string;
+}): Metadata {
+  const { locale, slug, name } = args;
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/areas/${slug}`,
+    title: locale === 'ar'
+      ? `رعاية صحية منزلية في ${name} — طبيب وتمريض وعلاج طبيعي | أنيس هيلث`
+      : `Home Healthcare in ${name}, Cairo — Doctor, Nursing & Physio Home Visits | Anees Health`,
+    description: locale === 'ar'
+      ? `احجز زيارات أطباء وتمريضاً وعلاجاً طبيعياً وتحاليل في المنزل في ${name} مع أنيس هيلث — كادر مرخّص وأسعار واضحة قبل الزيارة.`
+      : `Book doctor home visits, home nursing, physiotherapy, and lab tests at home in ${name} with Anees Health — licensed clinicians and prices shown before the visit.`,
+    keywords: locale === 'ar'
+      ? [`رعاية منزلية ${name}`, `طبيب منزلي ${name}`, `تمريض منزلي ${name}`, 'أنيس هيلث']
+      : [`home healthcare ${name}`, `doctor home visit ${name}`, `home nursing ${name}`, 'Anees Health'],
   });
 }
 

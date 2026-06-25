@@ -83,6 +83,16 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link href={href('/areas')} className={styles.link}>
+                    {t('footer.areas')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/pricing')} className={styles.link}>
+                    {t('footer.pricing')}
+                  </Link>
+                </li>
+                <li>
                   <Link href={href('/specialties')} className={styles.link}>
                     {t('footer.specialities')}
                   </Link>
@@ -107,6 +117,16 @@ const Footer = () => {
                 <li>
                   <Link href={href('/doctors')} className={styles.link}>
                     {t('nav.doctors')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/guides')} className={styles.link}>
+                    {t('footer.guides')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/faq')} className={styles.link}>
+                    {t('footer.faq')}
                   </Link>
                 </li>
                 <li>

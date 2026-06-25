@@ -188,11 +188,15 @@ const Header = () => {
 
                 <li
                   className={`nav-item has-submenu ${
-                    isActiveLink(`/${locale}/coverage`) ? 'active' : ''
+                    isActiveLink(`/${locale}/services`) ||
+                    isActiveLink(`/${locale}/specialties`) ||
+                    isActiveLink(`/${locale}/coverage`)
+                      ? 'active'
+                      : ''
                   }`}
                 >
                   <Link
-                    href={`/${locale}#services`}
+                    href={`/${locale}/services`}
                     className="nav-link"
                     role="button"
                     aria-haspopup="true"
@@ -200,6 +204,16 @@ const Header = () => {
                     {t('nav.services')} <LucideIcon iconClass="fas fa-chevron-down" />
                   </Link>
                   <ul className="submenu">
+                    <li>
+                      <Link href={`/${locale}/services`} onClick={onHandleLinkClick}>
+                        {t('footer.our_services')}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/specialties`} onClick={onHandleLinkClick}>
+                        {t('footer.specialities')}
+                      </Link>
+                    </li>
                     <li>
                       <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
                         {t('nav.coverage')}
@@ -415,7 +429,11 @@ const Header = () => {
             {/* Services group with collapsible submenu */}
             <li
               className={`has-submenu ${openSubmenus.services ? 'submenu-open' : ''} ${
-                isActiveLink(`/${locale}/coverage`) ? 'active' : ''
+                isActiveLink(`/${locale}/services`) ||
+                isActiveLink(`/${locale}/specialties`) ||
+                isActiveLink(`/${locale}/coverage`)
+                  ? 'active'
+                  : ''
               }`}
             >
               <button
@@ -429,6 +447,18 @@ const Header = () => {
                 <LucideIcon iconClass="fas fa-chevron-down mobile-drawer__chevron" aria-hidden="true" />
               </button>
               <ul className="mobile-drawer__submenu">
+                <li>
+                  <Link href={`/${locale}/services`} onClick={onHandleLinkClick}>
+                    <LucideIcon iconClass="fa-solid fa-heart-pulse" />
+                    <span>{t('footer.our_services')}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link href={`/${locale}/specialties`} onClick={onHandleLinkClick}>
+                    <LucideIcon iconClass="fa-solid fa-layer-group" />
+                    <span>{t('footer.specialities')}</span>
+                  </Link>
+                </li>
                 <li>
                   <Link href={`/${locale}/coverage`} onClick={onHandleLinkClick}>
                     <LucideIcon iconClass="fa-solid fa-location-dot" />

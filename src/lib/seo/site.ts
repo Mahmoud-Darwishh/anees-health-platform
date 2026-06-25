@@ -23,8 +23,9 @@ export const site = {
   /** Founding */
   foundedYear: 2024,
 
-  /** OG / share image (1200x630) */
-  defaultOgImage: `${baseUrl}/assets/img/about-img1.png`,
+  /** OG / share image (1200x630) — purpose-built branded card.
+   *  Regenerate with `node scripts/generate-og-image.cjs`. */
+  defaultOgImage: `${baseUrl}/assets/img/og-default.png`,
   /** Logo image — used by Organization.logo (must be reachable, square-ish) */
   logoImage: `${baseUrl}/assets/img/footer-logo.png`,
 

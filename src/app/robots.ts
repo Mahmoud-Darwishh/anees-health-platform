@@ -1,137 +1,81 @@
 /**
  * Robots.txt configuration
  * Route: /robots.txt
- * 
- * Configures search engine and AI crawler access
+ *
+ * Configures search engine and AI crawler access.
  * - Allows all legitimate bots (Google, Bing, AI crawlers)
- * - Sitemap references for discovery
+ * - Locale-aware disallow rules (public routes are prefixed /en, /ar)
+ * - Sitemap reference for discovery
+ *
+ * NOTE: robots.txt is advisory only. PHI/private surfaces (admin, clinician,
+ * portal, api) are auth-gated in code — never rely on robots.txt for security.
  */
 
 import { MetadataRoute } from 'next';
 import { config } from '@/lib/config';
+
+// Shared disallow list. Public routes are locale-prefixed (/en/..., /ar/...), so
+// funnel/private paths use a wildcard prefix ("/" + "*" + "/booking/") to match
+// both locales as well as the bare path. (A bare "/booking/" would NOT match
+// "/en/booking".)
+const DISALLOW = [
+  '/api/',
+  '/_next/',
+  '/admin/',
+  '/dashboard/',
+  '/*/booking/',
+  '/*/payment/',
+  '/*/portal/',
+  '/booking/confirmation',
+];
+
+/**
+ * AI / answer-engine crawlers we explicitly welcome for AEO/GEO. Tokens kept
+ * current as of 2026 (search-index + live-fetch + training crawlers). All
+ * honor robots.txt per their operator docs.
+ */
+const AI_CRAWLERS = [
+  'GPTBot', // OpenAI training
+  'ChatGPT-User', // OpenAI live user fetch
+  'OAI-SearchBot', // OpenAI SearchGPT index
+  'CCBot', // Common Crawl (feeds many LLMs)
+  'anthropic-ai', // Anthropic (legacy)
+  'ClaudeBot', // Anthropic training crawler
+  'Claude-User', // Anthropic live user fetch
+  'Claude-SearchBot', // Anthropic search index
+  'Claude-Web', // Anthropic on-demand fetcher
+  'PerplexityBot', // Perplexity index
+  'Perplexity-User', // Perplexity live user fetch
+  'Google-Extended', // Google AI (Gemini/Vertex) training opt-in token
+  'Google-CloudVertexBot', // Vertex AI Agent Builder fetch
+  'cohere-ai', // Cohere
+  'Bytespider', // ByteDance / TikTok
+  'Diffbot', // Diffbot
+  'Applebot-Extended', // Apple Intelligence
+  'Meta-ExternalAgent', // Meta AI training
+  'Meta-ExternalFetcher', // Meta AI on-demand fetch
+  'MistralAI-User', // Mistral Le Chat
+  'DuckAssistBot', // DuckDuckGo AI assist
+  'Amazonbot', // Amazon (Alexa / Rufus)
+  'YouBot', // You.com AI search
+];
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = config.api.baseUrl;
 
   return {
     rules: [
-      {
-        userAgent: '*',
+      { userAgent: '*', allow: '/', disallow: DISALLOW },
+      ...AI_CRAWLERS.map((userAgent) => ({
+        userAgent,
         allow: '/',
-        disallow: [
-          '/api/',
-          '/booking/confirmation',
-          '/_next/',
-          '/admin/',
-          '/dashboard/',
-        ],
-      },
-      // Explicitly allow AI crawlers for GEO (Generative Engine Optimization)
-      {
-        userAgent: 'GPTBot', // OpenAI
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'ChatGPT-User', // OpenAI ChatGPT
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'CCBot', // Common Crawl (used by many AI models)
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'anthropic-ai', // Claude
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'PerplexityBot', // Perplexity AI
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Google-Extended', // Google AI (Bard/Gemini)
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'cohere-ai', // Cohere AI
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Bytespider', // ByteDance (TikTok)
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Diffbot', // Diffbot AI
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'ClaudeBot', // Anthropic web crawler (distinct from anthropic-ai)
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Claude-Web', // Anthropic on-demand fetcher
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'OAI-SearchBot', // OpenAI SearchGPT indexer
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Applebot-Extended', // Apple Intelligence
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Meta-ExternalAgent', // Meta AI training crawler
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Meta-ExternalFetcher', // Meta AI on-demand fetcher
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'MistralAI-User', // Mistral Le Chat
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'DuckAssistBot', // DuckDuckGo AI assist
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'Amazonbot', // Amazon (Alexa / Rufus)
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'YouBot', // You.com AI search
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
-      {
-        userAgent: 'PerplexityBot-User', // Perplexity on-demand fetcher
-        allow: '/',
-        disallow: ['/api/', '/booking/', '/admin/', '/dashboard/'],
-      },
+        disallow: DISALLOW,
+      })),
     ],
-    sitemap: [
-      `${baseUrl}/sitemap.xml`,
-      `${baseUrl}/sitemap-doctors.xml`,
-    ],
+    // Single canonical sitemap. The previous sitemap-doctors.xml entry returned
+    // 404 (a standalone sitemap-doctors route file is not recognized by Next),
+    // and sitemap.ts already lists every doctor URL, so it was removed.
+    sitemap: baseUrl + '/sitemap.xml',
     host: baseUrl,
   };
 }
