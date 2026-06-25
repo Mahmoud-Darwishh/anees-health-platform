@@ -14,6 +14,7 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
+import ContentHero from '@/components/common/content/ContentHero';
 import { buildPricingMetadata } from '@/lib/seo/metadata';
 import { faqPageSchema, webPageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { bookingFaqs } from '@/lib/seo/faqs';
@@ -109,20 +110,16 @@ export default async function PricingPage({
           { label: site.labels.home[locale], href: `/${locale}` },
           { label: isAr ? 'الأسعار' : 'Pricing', active: true },
         ]}
-        title={isAr ? 'الأسعار' : 'Pricing'}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">
-              {isAr ? 'أسعار الرعاية الصحية المنزلية في مصر' : 'Home Healthcare Prices in Egypt'}
-            </h1>
-            <p className="lead mb-0">{heroLead}</p>
-          </div>
-        </section>
+        <ContentHero
+          eyebrow={isAr ? 'أسعار شفافة' : 'Transparent pricing'}
+          title={isAr ? 'أسعار الرعاية الصحية المنزلية في مصر' : 'Home Healthcare Prices in Egypt'}
+          lead={heroLead}
+        />
 
-        <section className="pb-4">
+        <section className="pt-5 pb-4">
           <div className="container">
             <h2 className="h4 mb-3">{isAr ? 'الباقات والخدمات' : 'Packages & services'}</h2>
             <div className="row g-4">

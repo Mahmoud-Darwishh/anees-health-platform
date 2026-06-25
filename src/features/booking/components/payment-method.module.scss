@@ -35,9 +35,9 @@
   gap: 0.75rem;
   width: 100%;
   padding: 1rem 1.1rem;
-  border: 2px solid rgba(0, 0, 0, 0.12);
+  border: 2px solid var(--border-soft);
   border-radius: 0.85rem;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   cursor: pointer;
   text-align: start;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -46,7 +46,7 @@
 
   &.active {
     border-color: v.$primary;
-    box-shadow: 0 0 0 3px rgba(170, 134, 66, 0.18);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-gold) 18%, transparent);
   }
 }
 
@@ -56,10 +56,10 @@
 .choiceHint { font-size: 0.82rem; opacity: 0.65; }
 
 .panel {
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-soft);
   border-radius: 0.85rem;
   padding: 1.25rem;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
 }
 
 .amount {
@@ -75,7 +75,7 @@
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
   text-align: center;
-  background: rgba(170, 134, 66, 0.06);
+  background: color-mix(in srgb, var(--color-brand-gold) 6%, transparent);
 
   .handleLabel { font-size: 0.8rem; opacity: 0.7; display: block; }
   .handleValue { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
@@ -98,7 +98,7 @@
   label { font-size: 0.85rem; font-weight: 600; }
   input {
     padding: 0.65rem 0.8rem;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-strong);
     border-radius: 0.55rem;
     font-size: 0.95rem;
   }
@@ -110,14 +110,14 @@
   border: none;
   border-radius: 0.6rem;
   background: v.$primary;
-  color: #fff;
+  color: var(--text-on-dark);
   font-weight: 600;
   cursor: pointer;
 
   &:disabled { opacity: 0.6; cursor: default; }
 }
 
-.error { color: #b02a2a; font-size: 0.85rem; margin-top: 0.6rem; }
+.error { color: var(--status-danger-fg); font-size: 0.85rem; margin-top: 0.6rem; }
 
 .success {
   text-align: center;

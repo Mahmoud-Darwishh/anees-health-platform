@@ -1,8 +1,8 @@
 /**
- * Guides hub — /[locale]/guides
+ * Conditions hub — /[locale]/conditions
  *
- * Lists the editorial guides (comparison / how-to / pillar) that build topical
- * authority and feed AI answer engines.
+ * Indexes the condition/use-case pages (stroke rehab, wound care, diabetic foot,
+ * fall prevention) — the GEO-authority content AI engines cite.
  */
 import Script from 'next/script';
 import type { Metadata } from 'next';
@@ -13,9 +13,10 @@ import RelatedLinks from '@/components/common/RelatedLinks';
 import ContentHero from '@/components/common/content/ContentHero';
 import ContentCard from '@/components/common/content/ContentCard';
 import { Container, Section, Grid } from '@/components/common/layout';
-import { buildGuidesMetadata } from '@/lib/seo/metadata';
+import { conditionIcon } from '@/lib/seo/icons';
+import { buildConditionsMetadata } from '@/lib/seo/metadata';
 import { webPageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
-import { getAllGuides } from '@/lib/seo/guides';
+import { getAllConditions } from '@/lib/seo/conditions';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 
 export const revalidate = 3600;
@@ -26,10 +27,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  return buildGuidesMetadata(locale === 'ar' ? 'ar' : 'en');
+  return buildConditionsMetadata(locale === 'ar' ? 'ar' : 'en');
 }
 
-export default async function GuidesPage({
+export default async function ConditionsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -38,20 +39,20 @@ export default async function GuidesPage({
   const locale: SupportedLocale = raw === 'ar' ? 'ar' : 'en';
   const isAr = locale === 'ar';
 
-  const guides = getAllGuides(locale);
-  const guidesLabel = isAr ? 'الأدلة' : 'Guides';
+  const conditions = getAllConditions(locale);
+  const label = isAr ? 'الرعاية حسب الحالة' : 'Care by condition';
   const heroLead = isAr
-    ? 'أدلة عملية تساعد الأسر المصرية على اتخاذ قرارات الرعاية المنزلية بثقة — كيف تختار مزوّداً، والمقارنة بين الخيارات، وما تتوقعه.'
-    : 'Practical guides to help Egyptian families make home-care decisions with confidence — how to choose a provider, how the options compare, and what to expect.';
+    ? 'كيف تُدار حالات شائعة بأمان في المنزل في مصر — من تأهيل الجلطة والعناية بالجروح إلى القدم السكري والوقاية من السقوط — ودور الرعاية المنزلية في كل منها.'
+    : 'How common conditions are managed safely at home in Egypt — from stroke rehabilitation and wound care to diabetic foot care and fall prevention — and the role home care plays in each.';
 
   const breadcrumbItems = [
     { name: site.labels.home[locale], url: `${site.baseUrl}/${locale}` },
-    { name: guidesLabel, url: `${site.baseUrl}/${locale}/guides` },
+    { name: label, url: `${site.baseUrl}/${locale}/conditions` },
   ];
   const webpage = webPageSchema({
     locale,
-    path: `/${locale}/guides`,
-    name: guidesLabel,
+    path: `/${locale}/conditions`,
+    name: label,
     description: heroLead,
     breadcrumbs: breadcrumbItems,
   });
@@ -59,35 +60,35 @@ export default async function GuidesPage({
 
   return (
     <>
-      <Script id="guides-webpage-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(webpage) }} />
-      <Script id="guides-breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbs) }} />
+      <Script id="conditions-webpage-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(webpage) }} />
+      <Script id="conditions-breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbs) }} />
 
       <Header />
       <Breadcrumb
         items={[
           { label: site.labels.home[locale], href: `/${locale}` },
-          { label: guidesLabel, active: true },
+          { label, active: true },
         ]}
       />
 
       <main id="main-content">
         <ContentHero
-          eyebrow={guidesLabel}
-          title={isAr ? 'أدلة الرعاية الصحية المنزلية' : 'Home Healthcare Guides'}
+          eyebrow={label}
+          title={isAr ? 'الرعاية المنزلية حسب الحالة' : 'Home Care by Condition'}
           lead={heroLead}
         />
 
         <Section>
           <Container>
             <Grid min="380px">
-              {guides.map((g) => (
+              {conditions.map((c) => (
                 <ContentCard
-                  key={g.slug}
-                  href={`/${locale}/guides/${g.slug}`}
-                  icon="fa-file-lines"
-                  title={g.title}
-                  description={g.description}
-                  cta={isAr ? 'اقرأ الدليل' : 'Read guide'}
+                  key={c.slug}
+                  href={`/${locale}/conditions/${c.slug}`}
+                  icon={conditionIcon(c.slug)}
+                  title={c.name}
+                  description={c.description}
+                  cta={isAr ? 'اقرأ المزيد' : 'Read more'}
                 />
               ))}
             </Grid>
@@ -99,8 +100,8 @@ export default async function GuidesPage({
         locale={locale}
         links={[
           { href: `/${locale}/services`, label: isAr ? 'الخدمات المنزلية' : 'Home services' },
+          { href: `/${locale}/guides`, label: isAr ? 'الأدلة' : 'Guides' },
           { href: `/${locale}/faq`, label: isAr ? 'الأسئلة الشائعة' : 'FAQ' },
-          { href: `/${locale}/areas`, label: isAr ? 'مناطق التغطية' : 'Coverage areas' },
           { href: `/${locale}/booking`, label: isAr ? 'احجز زيارة منزلية' : 'Book a home visit' },
         ]}
       />

@@ -1,0 +1,45 @@
+.hero {
+  position: relative;
+  padding-block: clamp(2.75rem, 6vw, 4.75rem);
+  text-align: center;
+  background:
+    radial-gradient(120% 130% at 100% 0%, color-mix(in srgb, var(--color-brand-gold) 13%, transparent), transparent 54%),
+    var(--surface-soft);
+  border-block-end: 1px solid var(--border-soft);
+  overflow: hidden;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-brand-gold);
+  background: color-mix(in srgb, var(--color-brand-gold) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-brand-gold) 24%, transparent);
+  border-radius: var(--radius-pill);
+  padding-block: 0.32rem;
+  padding-inline: 0.85rem;
+  margin-block-end: 1.15rem;
+}
+
+.title {
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 600;
+  color: var(--text-strong);
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin-block: 0 0.9rem;
+  margin-inline: auto;
+  max-width: 22ch;
+}
+
+.lead {
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
+  color: var(--text-soft);
+  line-height: 1.7;
+  margin-block: 0;
+  margin-inline: auto;
+  max-width: 62ch;
+}

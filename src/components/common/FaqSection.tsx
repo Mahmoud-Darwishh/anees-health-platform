@@ -1,4 +1,6 @@
 import type { FaqItem } from '@/lib/seo/faqs';
+import { Container } from '@/components/common/layout';
+import styles from './FaqSection.module.scss';
 
 interface FaqSectionProps {
   heading: string;
@@ -19,20 +21,20 @@ export default function FaqSection({ heading, faqs, id = 'faq-section' }: FaqSec
   if (!faqs?.length) return null;
 
   return (
-    <section className="py-5" aria-labelledby={`${id}-heading`}>
-      <div className="container">
-        <h2 id={`${id}-heading`} className="h3 mb-4">
+    <section className={styles.section} aria-labelledby={`${id}-heading`}>
+      <Container>
+        <h2 id={`${id}-heading`} className={styles.heading}>
           {heading}
         </h2>
-        <div className="row">
+        <div className={styles.list}>
           {faqs.map((faq, index) => (
-            <div key={`${index}-${faq.question}`} className="col-12 col-lg-10 mb-4">
-              <h3 className="h6 mb-2">{faq.question}</h3>
-              <p className="text-muted mb-0">{faq.answer}</p>
+            <div key={`${index}-${faq.question}`} className={styles.item}>
+              <h3 className={styles.question}>{faq.question}</h3>
+              <p className={styles.answer}>{faq.answer}</p>
             </div>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

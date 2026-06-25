@@ -14,6 +14,7 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
+import ContentHero from '@/components/common/content/ContentHero';
 import DoctorMiniGrid from '@/features/doctors/components/DoctorMiniGrid';
 import { buildServiceLandingMetadata } from '@/lib/seo/metadata';
 import {
@@ -135,18 +136,12 @@ export default async function ServiceLandingPage({
           { label: site.labels.services[locale], href: `/${locale}/services` },
           { label: landing.headline, active: true },
         ]}
-        title={landing.headline}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">{landing.headline}</h1>
-            <p className="lead mb-0">{landing.description}</p>
-          </div>
-        </section>
+        <ContentHero title={landing.headline} lead={landing.description} />
 
-        <section className="pb-2">
+        <section className="pt-5 pb-2">
           <div className="container">
             <h2 className="h4 mb-3">{isAr ? 'كيف تحجز هذه الخدمة' : 'How to book this service'}</h2>
             <ol className="ps-3 mb-0">

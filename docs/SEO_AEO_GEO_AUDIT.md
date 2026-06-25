@@ -554,11 +554,11 @@ The `Doctor` type (`src/lib/models/doctor.types.ts`) currently has **no `sameAs`
 - [~] **MKT/CMO** Editorial content — **3 flagship bilingual guides shipped** (how-to: choosing home nursing; comparison: home care vs nursing home; pillar: complete 2026 guide), GEO-optimized (clear definitions, a cited market statistic, chunked sections, FAQ). *Remaining: the rest of the comparison/how-to/listicle calendar + condition pages.*
 - [x] **ENG** Location pages — all 10 areas (incl. Sheikh Zayed, 6th October, Giza) shipped in Sprint 1 ✅; per-type sitemaps + index still optional (single sitemap is fine at current scale)
 - [ ] **OWNER/MKT** Directory citations (Vezeeta, Dalili Medical, Tebcan, Yellow Pages) with the canonical NAP; Crunchbase + Wikidata entities
-- [ ] **ENG** CWV pass (self-host Bootstrap CSS, defer Clarity/Pixel past LCP) *(M3)*
+- [x] **ENG** CWV pass *(M3)* ✅ 2026-06-25 — self-hosted Bootstrap CSS + JS (pinned v5.3.0, same-origin, dead jsdelivr preconnect removed, `/assets/js` cache header added). *Found the rest was already optimal:* Clarity + Meta Pixel already `lazyOnload`, Bootstrap JS `afterInteractive`, Chatling lazy, fonts self-hosted with `display: swap`, preconnects present. (Optional follow-up: drop the now-unused `cdn.jsdelivr.net` from the CSP allow-list.)
 - **Acceptance:** content engine live with `articleSchema`; flagship comparison + how-to + pillar guides indexed; ≥4 directory citations live; CWV green on home + a service page.
 
 ### Sprint 3 — "Long-tail & moat" (Wave 3–4)
-- [ ] **ENG/MKT** Condition/use-case pages (`MedicalCondition` helper) + glossary (`DefinedTerm` helper)
+- [x] **ENG/MKT** Condition/use-case pages ✅ 2026-06-25 (4 shipped: stroke rehab, post-surgery wound care, diabetic foot care, fall prevention — bilingual, `MedicalWebPage` + `Article` + FAQ schema, linked to services) **+ Glossary** ✅ 2026-06-25 (10 bilingual `DefinedTerm` pages + `DefinedTermSet` hub)
 - [ ] **MKT** Seasonal pages (winter night-visit, summer IV-drip, Ramadan diabetic support)
 - [ ] **MKT** Off-domain brand seeding (Reddit r/Egypt, expat forums) with consistent claims
 - [ ] **MKT** Ongoing review program + social-proof build (benchmark vs Care Hub's ~82k FB)
@@ -664,7 +664,43 @@ The `Doctor` type (`src/lib/models/doctor.types.ts`) currently has **no `sameAs`
 - *Quality gates:* typecheck clean · ESLint 0 · 59/59 tests pass.
 - **⚠️ Needs owner confirmation:** the Sanad Annual (EGP 60,000) reads lower than 12× the monthly (EGP 19,500) — confirm it's a distinct/lighter annual plan, not a typo. And send the remaining package prices.
 
-**Now open:** confirm + complete `pricing.ts` packages (then per-service cost pages can follow), more editorial content (condition/use-case + remaining guides), CWV pass *(M3)*. **Owner tasks:** Google Business Profile + reviews, canonical NAP, the `aneesclinic.com` 301, directory citations, redeploy.
+### 2026-06-25 — Sprint 3 kickoff: condition/use-case pages (Cluster 7) — ✅ typecheck + lint + tests + browser-verified
+- **New `medicalWebPageSchema` helper** in `jsonld.ts` (schema.org `MedicalWebPage` with medical `aspect` + patient `audience` — the standards-correct type for health-content pages) + a shared `ArticleSections` render component.
+- **4 bilingual condition pages** (`src/lib/seo/conditions.ts` + `/[locale]/conditions` hub + `/[locale]/conditions/[slug]`), written as content lead, GEO-optimized, each linking to the relevant home services:
+  1. *Stroke Rehabilitation at Home* → physiotherapy + nursing
+  2. *Post-Surgery Wound Care at Home* → nursing + post-op
+  3. *Diabetic Foot Care at Home* → nursing + doctor visit
+  4. *Elderly Fall Prevention at Home* → physiotherapy + elderly care
+  Each emits `MedicalWebPage` + `Article` + `FAQPage` + `Breadcrumb`. Added `buildConditionsMetadata`/`buildConditionMetadata`, sitemap (8 condition URLs), and a footer "Care by Condition" link (EN+AR). *Verified: hub 200 (4 cards); `/en/conditions/stroke-rehab-at-home` 200 (MedicalWebPage schema, 4 sections, FAQ, 2 service links); `/ar/conditions/diabetic-foot-care` 200.*
+- *Quality gates:* typecheck clean · ESLint 0 · 59/59 tests pass.
+
+### 2026-06-25 — Design pass: brand polish across all new pages — ✅ typecheck + lint:css + lint:color + ESLint + tests + verified
+- **New shared UI components** (brand-tokenized, CSS-var only, logical properties): `ContentHero` (cream hero band with a soft gold radial glow + a gold pill eyebrow + H1 + lead), `ContentCard` (rounded `--radius-lg` cards with a gold-tinted icon, optional meta pill, hover lift + soft→elevated shadow + gold arrow), restyled `FaqSection` (cards with a gold inline-start accent), and a `.prose` style for `ArticleSections` (gold list markers, readable rhythm). Icon map (`src/lib/seo/icons.ts`) uses only fa-classes `LucideIcon` actually maps.
+- **Applied across all 12 new routes** — services (hub + slug), specialties (hub + slug), areas (hub + slug), conditions (hub + slug), guides (hub + slug), faq, pricing. Replaced the plain Bootstrap heroes/cards; dropped the duplicate breadcrumb title so each page has one clean hero.
+- *Verified:* all 12 pages HTTP 200 (EN + AR) with `ContentHero`/`ContentCard` present; computed styles confirm the tokens apply (navy/gold/cream, 999px pill eyebrow `rgb(166,131,65)`, 20px card radius, navy soft-shadow, gold-tinted icon via `color-mix`). `tsc` clean · logical-CSS guard **passed** · color guard clean **for all new files** · ESLint 0 · 59/59 tests.
+- **⚠️ Pre-existing issue flagged (NOT mine):** `npm run lint:color` fails on `src/features/booking/components/payment-method.module.scss` (4 raw hex colours, last changed in commit `c3bc5e2` before this session). Out of scope here — flagging per the "surface, don't silently fix" rule; worth a small follow-up to token-ize or `// hex-ok` those.
+
+### 2026-06-25 — Sprint 3 cont.: Glossary cluster (Cluster 9) — ✅ typecheck + lint:css + lint:color + ESLint + tests + browser-verified
+- **New `DefinedTermSet` + `DefinedTerm` schema helpers** in `jsonld.ts` (the standards-correct types for glossary/definition content).
+- **10 bilingual glossary terms** (`src/lib/seo/glossary.ts` + `/[locale]/glossary` hub + `/[locale]/glossary/[slug]`): home healthcare, home nursing, home physiotherapy, geriatric care, palliative care, post-operative care, wound care, IV therapy, chronic disease management, vital signs. Each page = a crisp "What is X?" definition (GEO clean-definition pattern) + "when you'd need it" + the related Anees service + cross-links to sibling terms. Uses the new `ContentHero`/`ContentCard` design. Added `buildGlossaryMetadata`/`buildGlossaryTermMetadata`, sitemap (20 term URLs + 2 hubs), and a footer "Glossary" link (EN+AR).
+- *Verified:* hub 200 (10 cards, `DefinedTermSet` schema); `/en/glossary/home-nursing` 200 (`DefinedTerm` schema, "What is Home nursing", related-service + 6 sibling links); `/ar/glossary/palliative-care` 200.
+- *Quality gates:* typecheck clean · logical-CSS guard passed · color guard clean · ESLint 0 · 59/59 tests.
+
+### 2026-06-25 — Performance / CWV pass (M3) — ✅ typecheck + ESLint + tests + verified
+- **Self-hosted Bootstrap** — downloaded the pinned **v5.3.0** CSS (`public/assets/css/bootstrap.min.css`, 232,914 B) and JS bundle (`public/assets/js/bootstrap.bundle.min.js`, 80,421 B), and repointed `src/app/layout.tsx` (CSS `<link>`) + `src/app/[locale]/layout.tsx` (JS `<Script>`) to the local copies. Render-critical CSS is now **same-origin** (faster first paint, resilient if the CDN is blocked/down, and no third-party request per visit — a privacy win for a medical platform). Removed the now-dead `cdn.jsdelivr.net` preconnect/dns-prefetch and added an `/assets/js` 1-week cache header in `next.config.ts`. Documented the deliberate `<link>` (vs CSS import) to keep it out of the app's CSS-order graph.
+- **The rest was already optimal** (good news — the M3 audit assumed otherwise): Microsoft Clarity + Meta Pixel are already `strategy="lazyOnload"`, Bootstrap JS is `afterInteractive`, Chatling is lazy, Google fonts are self-hosted by Next with `display: swap`, and the cdnjs preconnect remains for the font origin.
+- *Verified:* `/assets/css/bootstrap.min.css` + `/assets/js/bootstrap.bundle.min.js` serve 200 with correct content-types and exact byte sizes; `/en/services` references the local paths with **0 jsdelivr requests**; CSS is byte-identical v5.3.0 so styling/JS behavior is unchanged. typecheck clean · ESLint 0 · 59/59 tests.
+- **Optional follow-up:** the `cdn.jsdelivr.net` entry can now be removed from `next.config.ts` CSP `script-src`/`style-src` (left in place to avoid an untested CSP change here).
+
+### 2026-06-25 — Bootstrap → design-system migration, Phase 1 (foundation + public hubs)
+- **Why:** move the public site to the intended stack — SCSS Modules + design tokens + native CSS Grid/Flex layout primitives + (later) Radix UI for interactive widgets — and retire Bootstrap. This is a **staged migration**, not a delete: Bootstrap is load-bearing in **76 files** (44 public, 21 admin, 8 portal, 3 clinician — admin/portal/clinician use it by design), so it can only be *removed* once every file is converted **and visually verified**.
+- **Built the foundation:** token-based layout primitives `src/components/common/layout/` (`Container`, `Section`, `Grid`, `Stack`, `Cluster`, `Measure`) — native CSS Grid/Flexbox, logical properties, container widths mirroring Bootstrap's steps exactly so converted pages stay edge-aligned with not-yet-migrated chrome.
+- **Converted (Bootstrap-grid-free):** shared `ContentHero` + `FaqSection`, and the **6 public hub pages** (services, specialties, conditions, guides, glossary, faq) — `section/container/row/col` → `Section`/`Container`/`Grid`. *Verified: all 200 EN+AR, primitives present, card grids no longer Bootstrap.*
+- ⚠️ **Verification limit (important):** this headless preview renders at a **1px viewport**, so I can confirm structure/CSS correctness but **cannot see responsive rendering**. The remaining surfaces — esp. the auth-gated **admin/portal/clinician (EHR)** I can't reach — must be visually QA'd in a real browser before they're trusted.
+- *Quality gates:* typecheck clean · logical-CSS guard passed · color guard clean · ESLint 0 · 59/59 tests.
+- **Remaining migration (staged):** article/[slug] pages + pricing table + areas hub (typography/utility classes), the shared chrome (`Header`/`Footer`/`Breadcrumb`/`RelatedLinks` — affects every public page), the doctors grid (Bootstrap-JS offcanvas/dropdown → Radix), home sections, then admin (21) / portal (8) / clinician (3). **Only after all 76 are converted + verified can Bootstrap (CSS + JS + CSP entries) be removed.**
+
+**Now open:** continue the Bootstrap migration (with real-browser verification), complete `pricing.ts` packages (owner numbers), seasonal editorial content. **Owner tasks:** Google Business Profile + reviews, canonical NAP, the `aneesclinic.com` 301, directory citations, redeploy.
 
 ---
 

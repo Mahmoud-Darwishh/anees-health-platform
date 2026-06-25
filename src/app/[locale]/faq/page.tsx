@@ -12,6 +12,7 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
+import ContentHero from '@/components/common/content/ContentHero';
 import { buildFaqMetadata } from '@/lib/seo/metadata';
 import { faqPageSchema, webPageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { homeFaqs, servicesFaqs, bookingFaqs, coverageFaqs } from '@/lib/seo/faqs';
@@ -77,16 +78,10 @@ export default async function FaqPage({
           { label: site.labels.home[locale], href: `/${locale}` },
           { label: faqLabel, active: true },
         ]}
-        title={faqLabel}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">{faqLabel}</h1>
-            <p className="lead mb-0">{heroLead}</p>
-          </div>
-        </section>
+        <ContentHero eyebrow={isAr ? 'مساعدة' : 'Help'} title={faqLabel} lead={heroLead} />
 
         {groups.map((g) => (
           <FaqSection key={g.id} id={`faq-${g.id}`} heading={g.heading} faqs={g.faqs} />

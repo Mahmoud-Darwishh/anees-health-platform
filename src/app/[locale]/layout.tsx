@@ -103,9 +103,9 @@ export default async function LocaleLayout({
           })();
         `}
       </Script>
-      {/* Bootstrap JS */}
+      {/* Bootstrap JS — self-hosted (pinned v5.3.0). */}
       <Script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        src="/assets/js/bootstrap.bundle.min.js"
         strategy="afterInteractive"
       />
       </SessionProvider>

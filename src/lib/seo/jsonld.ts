@@ -610,3 +610,88 @@ export function webPageSchema(args: {
     breadcrumb: args.breadcrumbs ? breadcrumbSchema(args.breadcrumbs) : undefined,
   };
 }
+
+/* ──────────────────────── DefinedTerm (glossary) ────────────────── */
+
+export function definedTermSetSchema(args: {
+  locale: SupportedLocale;
+  path: string;
+  name: string;
+  description: string;
+  terms: { slug: string; term: string; definition: string }[];
+}): JsonValue {
+  const url = `${site.baseUrl}${args.path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTermSet',
+    '@id': url,
+    url,
+    name: args.name,
+    description: args.description,
+    inLanguage: bcp47(args.locale),
+    hasDefinedTerm: args.terms.map((t) => ({
+      '@type': 'DefinedTerm',
+      name: t.term,
+      description: t.definition,
+      url: `${url}/${t.slug}`,
+    })),
+  };
+}
+
+export function definedTermSchema(args: {
+  locale: SupportedLocale;
+  setPath: string;
+  setName: string;
+  slug: string;
+  term: string;
+  definition: string;
+}): JsonValue {
+  const setUrl = `${site.baseUrl}${args.setPath}`;
+  const url = `${setUrl}/${args.slug}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'DefinedTerm',
+    '@id': url,
+    url,
+    name: args.term,
+    description: args.definition,
+    inLanguage: bcp47(args.locale),
+    inDefinedTermSet: {
+      '@type': 'DefinedTermSet',
+      '@id': setUrl,
+      name: args.setName,
+    },
+  };
+}
+
+/* ──────────────────────── MedicalWebPage (health content) ───────── */
+
+/**
+ * Health-content page schema (condition / treatment / prevention pages).
+ * Per schema.org medical-types best practice: tag the medical `aspect`
+ * (e.g. 'Treatment', 'Prevention') and a patient `audience`.
+ */
+export function medicalWebPageSchema(args: {
+  locale: SupportedLocale;
+  path: string;
+  name: string;
+  description: string;
+  aspect?: string;
+  breadcrumbs?: BreadcrumbItem[];
+}): JsonValue {
+  const url = `${site.baseUrl}${args.path}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    '@id': url,
+    url,
+    name: args.name,
+    description: args.description,
+    inLanguage: bcp47(args.locale),
+    aspect: args.aspect,
+    audience: { '@type': 'MedicalAudience', audienceType: 'Patient' },
+    isPartOf: { '@id': websiteId() },
+    about: { '@id': orgId() },
+    breadcrumb: args.breadcrumbs ? breadcrumbSchema(args.breadcrumbs) : undefined,
+  };
+}

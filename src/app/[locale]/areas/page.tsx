@@ -4,13 +4,14 @@
  * Indexes the Greater-Cairo neighbourhoods Anees serves and links down to each
  * local landing page, capturing high-intent "near me" / neighbourhood queries.
  */
-import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
+import ContentHero from '@/components/common/content/ContentHero';
+import ContentCard from '@/components/common/content/ContentCard';
 import { buildAreasMetadata } from '@/lib/seo/metadata';
 import { webPageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { getAllAreas } from '@/lib/seo/areas';
@@ -71,36 +72,29 @@ export default async function AreasPage({
           { label: site.labels.home[locale], href: `/${locale}` },
           { label: areasLabel, active: true },
         ]}
-        title={areasLabel}
       />
 
       <main id="main-content">
+        <ContentHero
+          eyebrow={areasLabel}
+          title={isAr ? 'مناطق الرعاية الصحية المنزلية في القاهرة الكبرى' : 'Home Healthcare Areas in Greater Cairo'}
+          lead={heroLead}
+        />
+
         <section className="py-5">
           <div className="container">
-            <h1 className="h2 mb-3">
-              {isAr ? 'مناطق الرعاية الصحية المنزلية في القاهرة الكبرى' : 'Home Healthcare Areas in Greater Cairo'}
-            </h1>
-            <p className="lead mb-0">{heroLead}</p>
-          </div>
-        </section>
-
-        <section className="pb-5">
-          <div className="container">
             {Object.entries(byGovernorate).map(([gov, list]) => (
-              <div key={gov} className="mb-4">
+              <div key={gov} className="mb-5">
                 <h2 className="h5 mb-3">{gov}</h2>
                 <div className="row g-3">
                   {list.map((a) => (
                     <div key={a.slug} className="col-12 col-sm-6 col-lg-4">
-                      <Link
+                      <ContentCard
                         href={`/${locale}/areas/${a.slug}`}
-                        className="card h-100 border-0 shadow-sm text-decoration-none"
-                      >
-                        <div className="card-body d-flex align-items-center justify-content-between gap-2">
-                          <span className="fw-semibold text-body">{a.name}</span>
-                          <span className="text-muted small">{isAr ? 'الخدمات المنزلية' : 'Home services'}</span>
-                        </div>
-                      </Link>
+                        icon="fa-location-dot"
+                        title={a.name}
+                        cta={isAr ? 'الخدمات المنزلية' : 'Home services'}
+                      />
                     </div>
                   ))}
                 </div>

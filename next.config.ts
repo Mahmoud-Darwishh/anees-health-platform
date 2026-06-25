@@ -72,6 +72,16 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Cache vendor JS with medium TTL (1 week) — Bootstrap is self-hosted here
+      {
+        source: '/assets/js/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800',
+          },
+        ],
+      },
       // Cache fonts with long TTL (1 year)
       {
         source: '/assets/fonts/:path*',
@@ -90,8 +100,8 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel-scripts.com https://chatling.ai https://*.chatling.ai https://cdn.jsdelivr.net https://www.clarity.ms https://scripts.clarity.ms https://connect.facebook.net https://payments.kashier.io https://*.kashier.io https://*.posthog.com https://browser.sentry-cdn.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://chatling.ai https://*.chatling.ai https://payments.kashier.io",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel-scripts.com https://chatling.ai https://*.chatling.ai https://www.clarity.ms https://scripts.clarity.ms https://connect.facebook.net https://payments.kashier.io https://*.kashier.io https://*.posthog.com https://browser.sentry-cdn.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://chatling.ai https://*.chatling.ai https://payments.kashier.io",
               "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
               "img-src 'self' data: blob: https:",
               "connect-src 'self' https://*.vercel-scripts.com https://vercel.live https://chatling.ai https://*.chatling.ai https://*.clarity.ms https://connect.facebook.net https://api.ipify.org https://www.cloudflare.com https://api.kashier.io https://test-api.kashier.io https://payments.kashier.io https://*.sentry.io https://*.ingest.sentry.io https://*.daily.co wss://*.daily.co wss://*.wss.daily.co https://*.r2.cloudflarestorage.com https://*.posthog.com wss://*.posthog.com",

@@ -15,6 +15,9 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
+import ContentHero from '@/components/common/content/ContentHero';
+import ContentCard from '@/components/common/content/ContentCard';
+import { serviceIcon } from '@/lib/seo/icons';
 import { buildAreaMetadata } from '@/lib/seo/metadata';
 import { webPageSchema, breadcrumbSchema, faqPageSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { coverageFaqs } from '@/lib/seo/faqs';
@@ -110,20 +113,16 @@ export default async function AreaLandingPage({
           { label: isAr ? 'مناطق التغطية' : 'Coverage areas', href: `/${locale}/areas` },
           { label: area.name, active: true },
         ]}
-        title={isAr ? `رعاية منزلية في ${area.name}` : `Home Healthcare in ${area.name}`}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">
-              {isAr ? `رعاية صحية منزلية في ${area.name}` : `Home Healthcare in ${area.name}, ${area.governorate}`}
-            </h1>
-            <p className="lead mb-0">{heroLead}</p>
-          </div>
-        </section>
+        <ContentHero
+          eyebrow={isAr ? area.name : `${area.name}, ${area.governorate}`}
+          title={isAr ? `رعاية صحية منزلية في ${area.name}` : `Home Healthcare in ${area.name}, ${area.governorate}`}
+          lead={heroLead}
+        />
 
-        <section className="pb-2">
+        <section className="pt-5 pb-2">
           <div className="container">
             <h2 className="h4 mb-3">
               {isAr ? `الخدمات المنزلية المتاحة في ${area.name}` : `Home services available in ${area.name}`}
@@ -131,15 +130,13 @@ export default async function AreaLandingPage({
             <div className="row g-4">
               {services.map((s) => (
                 <div key={s.slug} className="col-12 col-md-6 col-lg-4">
-                  <Link
+                  <ContentCard
                     href={`/${locale}/services/${s.slug}`}
-                    className="card h-100 border-0 shadow-sm text-decoration-none"
-                  >
-                    <div className="card-body">
-                      <h3 className="h6 mb-2 text-body">{s.headline}</h3>
-                      <p className="text-muted mb-0 small">{s.description}</p>
-                    </div>
-                  </Link>
+                    icon={serviceIcon(s.slug)}
+                    title={s.headline}
+                    description={s.description}
+                    cta={isAr ? 'تفاصيل' : 'Details'}
+                  />
                 </div>
               ))}
             </div>

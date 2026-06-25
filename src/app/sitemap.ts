@@ -11,6 +11,8 @@ import { getAllDoctorSlugs } from '@/lib/api/doctors';
 import { getAllServiceLandingSlugs, getAllSpecialtyLandings } from '@/lib/seo/search-discovery';
 import { getAllAreaSlugs } from '@/lib/seo/areas';
 import { getAllGuideSlugs } from '@/lib/seo/guides';
+import { getAllConditionSlugs } from '@/lib/seo/conditions';
+import { getAllGlossarySlugs } from '@/lib/seo/glossary';
 import { config } from '@/lib/config';
 
 // List of featured/prominent doctors for higher SEO priority
@@ -32,6 +34,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const specialtySlugs = (await getAllSpecialtyLandings('en')).map((s) => s.slug);
   const areaSlugs = getAllAreaSlugs();
   const guideSlugs = getAllGuideSlugs();
+  const conditionSlugs = getAllConditionSlugs();
+  const glossarySlugs = getAllGlossarySlugs();
 
   const entries: MetadataRoute.Sitemap = [];
 
@@ -92,6 +96,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: LAST_MODIFIED,
         changeFrequency: 'weekly',
         priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/${locale}/conditions`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/${locale}/glossary`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'monthly',
+        priority: 0.55,
       },
       // About pages
       {
@@ -170,6 +186,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: LAST_MODIFIED,
         changeFrequency: 'monthly',
         priority: 0.65,
+      });
+    }
+
+    // Condition / use-case pages
+    for (const slug of conditionSlugs) {
+      entries.push({
+        url: `${baseUrl}/${locale}/conditions/${slug}`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'monthly',
+        priority: 0.65,
+      });
+    }
+
+    // Glossary terms
+    for (const slug of glossarySlugs) {
+      entries.push({
+        url: `${baseUrl}/${locale}/glossary/${slug}`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'yearly',
+        priority: 0.45,
       });
     }
   }

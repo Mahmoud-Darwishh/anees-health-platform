@@ -75,17 +75,19 @@ export default function RootLayout({
         <meta name="geo.position" content={`${site.geo.latitude};${site.geo.longitude}`} />
         <meta name="ICBM" content={`${site.geo.latitude}, ${site.geo.longitude}`} />
 
-        {/* Connection warm-up for render-critical and third-party origins */}
-        <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+        {/* Connection warm-up for the third-party font origin (cdnjs). Bootstrap
+            is now self-hosted, so the jsdelivr warm-up was removed. */}
         <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
 
-        {/* Bootstrap (render-critical for shared grid/utilities) */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-        />
+        {/* Bootstrap (render-critical for shared grid/utilities) — self-hosted,
+            pinned v5.3.0: render-critical CSS is same-origin (faster first paint,
+            resilient if a CDN is blocked, and no third-party request per visit).
+            Deliberate <link> rather than a CSS import: it stays render-critical in
+            <head> without entering the app's CSS-order graph (avoids FOUC /
+            specificity shifts across the public, admin, and portal shells). */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
 
         {/* Meta Pixel NoScript */}
         <noscript>

@@ -125,6 +125,16 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link href={href('/conditions')} className={styles.link}>
+                    {t('footer.conditions')}
+                  </Link>
+                </li>
+                <li>
+                  <Link href={href('/glossary')} className={styles.link}>
+                    {t('footer.glossary')}
+                  </Link>
+                </li>
+                <li>
                   <Link href={href('/faq')} className={styles.link}>
                     {t('footer.faq')}
                   </Link>

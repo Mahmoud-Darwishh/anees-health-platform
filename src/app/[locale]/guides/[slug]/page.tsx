@@ -12,6 +12,8 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
+import ContentHero from '@/components/common/content/ContentHero';
+import ArticleSections from '@/components/common/ArticleSections';
 import { buildGuideMetadata } from '@/lib/seo/metadata';
 import {
   articleSchema,
@@ -103,32 +105,16 @@ export default async function GuideArticlePage({
           { label: isAr ? 'الأدلة' : 'Guides', href: `/${locale}/guides` },
           { label: guide.title, active: true },
         ]}
-        title={guide.title}
       />
 
       <main id="main-content">
+        <ContentHero title={guide.title} lead={guide.intro} />
+
         <article className="py-5">
           <div className="container">
             <div className="row">
               <div className="col-12 col-lg-9">
-                <h1 className="h2 mb-3">{guide.title}</h1>
-                <p className="lead">{guide.intro}</p>
-
-                {guide.sections.map((section, i) => (
-                  <section key={i} className="mt-4">
-                    <h2 className="h4 mb-3">{section.heading}</h2>
-                    {section.body.map((p, j) => (
-                      <p key={j}>{p}</p>
-                    ))}
-                    {section.bullets && section.bullets.length > 0 ? (
-                      <ul>
-                        {section.bullets.map((b, k) => (
-                          <li key={k} className="mb-1">{b}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </section>
-                ))}
+                <ArticleSections sections={guide.sections} />
               </div>
             </div>
           </div>

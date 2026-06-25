@@ -6,7 +6,6 @@
  * existed; this route surfaces them) and emits ItemList + FAQ + WebPage +
  * Breadcrumb JSON-LD via the existing builders.
  */
-import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
@@ -14,6 +13,10 @@ import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
+import ContentHero from '@/components/common/content/ContentHero';
+import ContentCard from '@/components/common/content/ContentCard';
+import { Container, Section, Grid } from '@/components/common/layout';
+import { serviceIcon } from '@/lib/seo/icons';
 import { buildServicesMetadata } from '@/lib/seo/metadata';
 import {
   servicesItemListSchema,
@@ -90,38 +93,31 @@ export default async function ServicesPage({
           { label: site.labels.home[locale], href: `/${locale}` },
           { label: site.labels.services[locale], active: true },
         ]}
-        title={site.labels.services[locale]}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">
-              {isAr ? 'خدمات الرعاية الصحية المنزلية في مصر' : 'Home Healthcare Services in Egypt'}
-            </h1>
-            <p className="lead mb-0">{heroLead}</p>
-          </div>
-        </section>
+        <ContentHero
+          eyebrow={isAr ? 'الخدمات المنزلية' : 'Home services'}
+          title={isAr ? 'خدمات الرعاية الصحية المنزلية في مصر' : 'Home Healthcare Services in Egypt'}
+          lead={heroLead}
+        />
 
-        <section className="pb-2">
-          <div className="container">
-            <div className="row g-4">
+        <Section>
+          <Container>
+            <Grid min="300px">
               {landings.map((s) => (
-                <div key={s.slug} className="col-12 col-md-6 col-lg-4">
-                  <Link
-                    href={`/${locale}/services/${s.slug}`}
-                    className="card h-100 border-0 shadow-sm text-decoration-none"
-                  >
-                    <div className="card-body">
-                      <h2 className="h5 mb-2 text-body">{s.headline}</h2>
-                      <p className="text-muted mb-0">{s.description}</p>
-                    </div>
-                  </Link>
-                </div>
+                <ContentCard
+                  key={s.slug}
+                  href={`/${locale}/services/${s.slug}`}
+                  icon={serviceIcon(s.slug)}
+                  title={s.headline}
+                  description={s.description}
+                  cta={isAr ? 'تفاصيل الخدمة' : 'View service'}
+                />
               ))}
-            </div>
-          </div>
-        </section>
+            </Grid>
+          </Container>
+        </Section>
 
         <FaqSection
           heading={isAr ? 'الأسئلة الشائعة عن الخدمات المنزلية' : 'Home healthcare services FAQ'}

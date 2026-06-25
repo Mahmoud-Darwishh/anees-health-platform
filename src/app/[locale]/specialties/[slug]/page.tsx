@@ -11,6 +11,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
+import ContentHero from '@/components/common/content/ContentHero';
 import DoctorMiniGrid from '@/features/doctors/components/DoctorMiniGrid';
 import { buildSpecialtyMetadata } from '@/lib/seo/metadata';
 import {
@@ -111,18 +112,13 @@ export default async function SpecialtyLandingPage({
           { label: site.labels.specialties[locale], href: `/${locale}/specialties` },
           { label: specialtyName, active: true },
         ]}
-        title={specialtyName}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">
-              {isAr ? `${specialtyName} — زيارات منزلية` : `${specialtyName} — Home Visits`}
-            </h1>
-            <p className="lead mb-0">{description}</p>
-          </div>
-        </section>
+        <ContentHero
+          title={isAr ? `${specialtyName} — زيارات منزلية` : `${specialtyName} — Home Visits`}
+          lead={description}
+        />
 
         <DoctorMiniGrid
           doctors={doctors}

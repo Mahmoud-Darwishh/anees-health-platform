@@ -1,0 +1,93 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  padding: 1.5rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  color: var(--text-strong);
+  transition:
+    transform 0.22s var(--reveal-ease),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-elevated);
+  border-color: color-mix(in srgb, var(--color-brand-gold) 50%, var(--border-soft));
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-block-end: 1.1rem;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 46px;
+  block-size: 46px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-brand-gold) 14%, transparent);
+  color: var(--color-brand-gold);
+  font-size: 1.2rem;
+}
+
+.meta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-brand-gold);
+  background: color-mix(in srgb, var(--color-brand-gold) 11%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-brand-gold) 26%, transparent);
+  border-radius: var(--radius-pill);
+  padding-block: 0.28rem;
+  padding-inline: 0.7rem;
+}
+
+.title {
+  font-size: 1.12rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  line-height: 1.32;
+  margin-block-end: 0.45rem;
+}
+
+.desc {
+  font-size: 0.93rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-block-start: auto;
+  padding-block-start: 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-brand-gold);
+
+  i {
+    display: inline-flex;
+    transition: transform 0.22s var(--reveal-ease);
+  }
+}
+
+.card:hover .cta i,
+.card:focus-visible .cta i {
+  transform: translateX(3px);
+}

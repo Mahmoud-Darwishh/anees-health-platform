@@ -5,13 +5,15 @@
  * doctor roster via `getAllSpecialtyLandings`) and links down to per-specialty
  * pages, spreading internal-link equity to doctor profiles.
  */
-import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 import RelatedLinks from '@/components/common/RelatedLinks';
+import ContentHero from '@/components/common/content/ContentHero';
+import ContentCard from '@/components/common/content/ContentCard';
+import { Container, Section, Grid } from '@/components/common/layout';
 import { buildSpecialtiesMetadata } from '@/lib/seo/metadata';
 import { webPageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { getAllSpecialtyLandings } from '@/lib/seo/search-discovery';
@@ -68,41 +70,31 @@ export default async function SpecialtiesPage({
           { label: site.labels.home[locale], href: `/${locale}` },
           { label: site.labels.specialties[locale], active: true },
         ]}
-        title={site.labels.specialties[locale]}
       />
 
       <main id="main-content">
-        <section className="py-5">
-          <div className="container">
-            <h1 className="h2 mb-3">
-              {isAr ? 'التخصصات الطبية للزيارات المنزلية' : 'Medical Specialties for Home Visits'}
-            </h1>
-            <p className="lead mb-0">{heroLead}</p>
-          </div>
-        </section>
+        <ContentHero
+          eyebrow={isAr ? 'التخصصات' : 'Specialties'}
+          title={isAr ? 'التخصصات الطبية للزيارات المنزلية' : 'Medical Specialties for Home Visits'}
+          lead={heroLead}
+        />
 
-        <section className="pb-5">
-          <div className="container">
-            <div className="row g-4">
+        <Section>
+          <Container>
+            <Grid min="300px">
               {specialties.map((s) => (
-                <div key={s.slug} className="col-12 col-md-6 col-lg-4">
-                  <Link
-                    href={`/${locale}/specialties/${s.slug}`}
-                    className="card h-100 border-0 shadow-sm text-decoration-none"
-                  >
-                    <div className="card-body d-flex justify-content-between align-items-center gap-2">
-                      <h2 className="h6 mb-0 text-body">{s.name}</h2>
-                      <span className="badge bg-light text-muted">
-                        {s.doctorCount}{' '}
-                        {isAr ? 'طبيب' : s.doctorCount === 1 ? 'doctor' : 'doctors'}
-                      </span>
-                    </div>
-                  </Link>
-                </div>
+                <ContentCard
+                  key={s.slug}
+                  href={`/${locale}/specialties/${s.slug}`}
+                  icon="fa-user-doctor"
+                  title={s.name}
+                  meta={`${s.doctorCount} ${isAr ? 'طبيب' : s.doctorCount === 1 ? 'doctor' : 'doctors'}`}
+                  cta={isAr ? 'عرض الأطباء' : 'View doctors'}
+                />
               ))}
-            </div>
-          </div>
-        </section>
+            </Grid>
+          </Container>
+        </Section>
       </main>
 
       <RelatedLinks

@@ -347,6 +347,72 @@ export function buildCoverageMetadata(locale: SupportedLocale): Metadata {
   });
 }
 
+/* ──────────────────────────── Glossary ──────────────────────────── */
+
+export function buildGlossaryMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/glossary`,
+    title: locale === 'ar'
+      ? 'قاموس مصطلحات الرعاية الصحية المنزلية | أنيس هيلث'
+      : 'Home Healthcare Glossary | Anees Health',
+    description: locale === 'ar'
+      ? 'تعريفات واضحة لمصطلحات الرعاية الصحية المنزلية في مصر — التمريض المنزلي، الرعاية التلطيفية، العلاج الطبيعي، العناية بالجروح والمزيد.'
+      : 'Clear definitions of home-healthcare terms in Egypt — home nursing, palliative care, physiotherapy, wound care, IV therapy and more.',
+    keywords: locale === 'ar'
+      ? ['مصطلحات الرعاية المنزلية', 'ما معنى التمريض المنزلي', 'تعريف الرعاية التلطيفية']
+      : ['home healthcare glossary', 'what is home nursing', 'home care terms Egypt'],
+  });
+}
+
+export function buildGlossaryTermMetadata(args: {
+  locale: SupportedLocale;
+  slug: string;
+  term: string;
+  definition: string;
+}): Metadata {
+  return buildBaseMetadata({
+    locale: args.locale,
+    path: `/${args.locale}/glossary/${args.slug}`,
+    title: args.locale === 'ar'
+      ? `ما هو ${args.term}؟ | أنيس هيلث`
+      : `What is ${args.term}? | Anees Health`,
+    description: args.definition.slice(0, 300),
+  });
+}
+
+/* ─────────────────────────── Conditions ─────────────────────────── */
+
+export function buildConditionsMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/conditions`,
+    title: locale === 'ar'
+      ? 'الرعاية المنزلية حسب الحالة في مصر | أنيس هيلث'
+      : 'Home Care by Condition in Egypt | Anees Health',
+    description: locale === 'ar'
+      ? 'كيف تُدار حالات شائعة في المنزل في مصر — تأهيل الجلطة، العناية بالجروح بعد الجراحة، القدم السكري، والوقاية من سقوط المسنين.'
+      : 'How common conditions are managed at home in Egypt — stroke rehabilitation, post-surgery wound care, diabetic foot care, and elderly fall prevention.',
+    keywords: locale === 'ar'
+      ? ['رعاية منزلية حسب الحالة', 'تأهيل جلطة منزلي', 'عناية بالجروح في المنزل', 'القدم السكري']
+      : ['home care by condition Egypt', 'stroke rehab at home', 'wound care at home', 'diabetic foot care'],
+  });
+}
+
+export function buildConditionMetadata(args: {
+  locale: SupportedLocale;
+  slug: string;
+  title: string;
+  description: string;
+}): Metadata {
+  return buildBaseMetadata({
+    locale: args.locale,
+    path: `/${args.locale}/conditions/${args.slug}`,
+    title: `${args.title} | Anees Health`,
+    description: args.description,
+  });
+}
+
 /* ───────────────────────────── Guides ───────────────────────────── */
 
 export function buildGuidesMetadata(locale: SupportedLocale): Metadata {
