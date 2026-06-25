@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { getMedplumClient } from './client';
+import { getMedplumClient, searchAllResources } from './client';
 
 type FhirReference = {
   reference?: string;
@@ -83,13 +83,15 @@ function normalizeMedication(resource: MedicationStatementResource): MedicationS
 }
 
 export async function listPatientMedications(patientId: string, count = 50): Promise<MedicationSummary[]> {
-  const medplum = await getMedplumClient();
-
-  const resources = (await medplum.searchResources('MedicationStatement', {
-    subject: `Patient/${patientId}`,
-    _count: String(count),
-    _sort: '-_lastUpdated',
-  })) as MedicationStatementResource[];
+  // Paginate to completeness — the medication-safety screen relies on the full
+  // active list to catch drug-drug / duplicate-therapy interactions, and
+  // entered-in-error records are filtered below, so a single fixed page could
+  // hide live medications. `count` is the page size.
+  const resources = await searchAllResources<MedicationStatementResource>(
+    'MedicationStatement',
+    { subject: `Patient/${patientId}`, _sort: '-_lastUpdated' },
+    { pageSize: count, maxResources: 1000 },
+  );
 
   return resources
     .filter((resource) => resource.status !== 'entered-in-error')

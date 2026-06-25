@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   const cors = resolveCorsHeaders(request.headers.get('origin'));
 
   const ip = getClientIp(request);
-  const ipAllowed = await checkRateLimit(`wa-otp-verify:ip:${ip}`, VERIFY_LIMIT_PER_IP, VERIFY_WINDOW_MS);
+  const ipAllowed = await checkRateLimit(`wa-otp-verify:ip:${ip}`, VERIFY_LIMIT_PER_IP, VERIFY_WINDOW_MS, true);
   if (!ipAllowed) return tooManyRequests(cors);
 
   let body: unknown;

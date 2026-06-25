@@ -262,7 +262,7 @@ export async function retireMedicationAction(formData: FormData): Promise<void> 
   }
 }
 
-export async function createMedicationAdministrationAction(formData: FormData): Promise<void> {
+export async function createMedicationAdministrationAction(formData: FormData, opts?: { rethrow?: boolean }): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createMedicationAdministrationSchema.parse(formDataToInput(formData));
@@ -298,7 +298,7 @@ export async function createMedicationAdministrationAction(formData: FormData): 
     await setAdminPatientFlash({ type: 'success', message: 'Medication administration saved.' });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
-    await failAction(formData, error);
+    await failAction(formData, error, opts);
   }
 }
 

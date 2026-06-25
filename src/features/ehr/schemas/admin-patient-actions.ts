@@ -3,6 +3,7 @@ export * from './admin-patient/vitals-assessments';
 export * from './admin-patient/glucose';
 export * from './admin-patient/care-coordination';
 export * from './admin-patient/reports-handoffs';
+export * from './admin-patient/clinical-notes';
 export * from './admin-patient/conditions-allergies';
 export * from './admin-patient/medications';
 export * from './admin-patient/documents';

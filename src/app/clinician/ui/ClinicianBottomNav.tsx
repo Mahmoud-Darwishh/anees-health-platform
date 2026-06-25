@@ -18,11 +18,15 @@ const PHYSIO_NAV_ITEMS: NavItem[] = [
 
 const NURSING_NAV_ITEMS: NavItem[] = [
   { href: '/clinician/nursing/today', label: 'My Journey' },
+  { href: '/clinician/nursing/patients', label: 'Patients' },
+  { href: '/clinician/nursing/tasks', label: 'Tasks' },
   { href: '/clinician/nursing/profile', label: 'Profile' },
 ];
 
 const DOCTOR_NAV_ITEMS: NavItem[] = [
+  { href: '/clinician/doctor/today', label: 'My Journey' },
   { href: '/clinician/doctor', label: 'My Cases' },
+  { href: '/clinician/doctor/patients', label: 'Patients' },
   { href: '/clinician/doctor/profile', label: 'Profile' },
 ];
 

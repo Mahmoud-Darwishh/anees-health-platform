@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { reportError } from '@/lib/utils/observability';
 
 /**
  * Error boundary for the `/clinician/*` workspace. English-only and mobile-first
@@ -16,9 +17,9 @@ export default function ClinicianError({
   reset: () => void;
 }) {
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('[ClinicianErrorBoundary]', error);
-    }
+    // Forward to the observability seam (structured-logs always; Sentry once a
+    // DSN is set). The seam scrubs to message-level only — never PHI.
+    reportError(error, { boundary: 'clinician/error', digest: error.digest });
   }, [error]);
 
   return (

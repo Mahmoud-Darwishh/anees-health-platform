@@ -21,10 +21,21 @@ export function parseActionError(error: unknown): string {
   return error instanceof Error ? error.message : 'Unexpected error. Please try again.';
 }
 
-export async function failAction(formData: FormData, error: unknown): Promise<void> {
+export async function failAction(
+  formData: FormData,
+  error: unknown,
+  opts?: { rethrow?: boolean },
+): Promise<void> {
   const medplumPatientId = getPatientIdFromFormData(formData);
   await setAdminPatientFlash({ type: 'error', message: parseActionError(error) });
   if (medplumPatientId) {
     refreshClinicalPaths(medplumPatientId);
+  }
+  // Clinician field wrappers pass { rethrow: true } so a real write failure
+  // propagates to their useActionState form (which renders the error) instead of
+  // only landing in the /admin flash cookie the field clinician never sees. The
+  // admin chart pages call failAction without opts → behaviour unchanged.
+  if (opts?.rethrow) {
+    throw error;
   }
 }

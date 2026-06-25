@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   const cors = resolveCorsHeaders(request.headers.get('origin'));
   const ip = getClientIp(request);
 
-  const limited = await checkRateLimit(`patient-register:${ip}`, 5, 15 * 60 * 1000);
+  const limited = await checkRateLimit(`patient-register:${ip}`, 5, 15 * 60 * 1000, true);
   if (!limited) {
     return NextResponse.json(
       { error: 'Too many registration attempts. Please wait 15 minutes.' },

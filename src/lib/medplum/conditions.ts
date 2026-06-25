@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { getMedplumClient } from './client';
+import { getMedplumClient, searchAllResources } from './client';
 import {
   MEDPLUM_CODE_SYSTEMS,
   isRestrictedTierClinicalCoding,
@@ -144,13 +144,14 @@ function isEnteredInError(resource: ConditionResource): boolean {
 }
 
 export async function listPatientConditions(patientId: string, count = 50): Promise<ConditionSummary[]> {
-  const medplum = await getMedplumClient();
-
-  const resources = (await medplum.searchResources('Condition', {
-    patient: `Patient/${patientId}`,
-    _count: String(count),
-    _sort: '-_lastUpdated',
-  })) as ConditionResource[];
+  // Paginate to completeness — the problem list feeds the safety header, and
+  // entered-in-error records are filtered below, so a single fixed page could
+  // hide active problems. `count` is the page size.
+  const resources = await searchAllResources<ConditionResource>(
+    'Condition',
+    { patient: `Patient/${patientId}`, _sort: '-_lastUpdated' },
+    { pageSize: count, maxResources: 1000 },
+  );
 
   return resources
     .filter((resource) => !isEnteredInError(resource))

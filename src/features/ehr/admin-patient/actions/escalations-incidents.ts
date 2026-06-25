@@ -8,7 +8,7 @@ import { createIncidentReportSchema, createEscalationSchema, formDataToInput } f
 import { setAdminPatientFlash } from '../flash';
 import { refreshClinicalPaths, getPatientIdFromFormData, failAction, requireAdminPatientAction, getCoordinationWriterWithPractitioner, resolvePractitionerFromStaffId, createEscalationAndCommunication, runEscalationSlaSweepForPatient, runCoSignSlaSweepForPatient } from './shared';
 
-export async function createIncidentReportAction(formData: FormData): Promise<void> {
+export async function createIncidentReportAction(formData: FormData, opts?: { rethrow?: boolean }): Promise<void> {
   try {
     const { practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = createIncidentReportSchema.parse(formDataToInput(formData));
@@ -65,7 +65,7 @@ export async function createIncidentReportAction(formData: FormData): Promise<vo
     await setAdminPatientFlash({ type: 'success', message: 'Incident report logged successfully.' });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
-    await failAction(formData, error);
+    await failAction(formData, error, opts);
   }
 }
 

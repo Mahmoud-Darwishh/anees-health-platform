@@ -51,7 +51,8 @@ export default async function ReceiptPage({ params }: Props) {
   }
 
   const patient = await prisma.patient.findFirst({
-    where: { phone: `${booking.countryCode}${booking.phoneNumber}` },
+    // Tenant-scoped: resolve the patient within the (already tenant-verified) booking's tenant.
+    where: { phone: `${booking.countryCode}${booking.phoneNumber}`, tenantId: booking.tenantId },
     orderBy: { createdAt: 'desc' },
     select: { code: true },
   });

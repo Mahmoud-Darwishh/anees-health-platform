@@ -156,6 +156,16 @@ export async function listPatientTasks(patientId: string, count = 50): Promise<M
   })) as MedplumTaskResource[];
 }
 
+/** Read a single Task by id. Returns null if it does not exist (never throws). */
+export async function getPatientTaskById(taskId: string): Promise<MedplumTaskResource | null> {
+  const medplum = await getMedplumClient();
+  try {
+    return (await medplum.readResource('Task', taskId)) as MedplumTaskResource;
+  } catch {
+    return null;
+  }
+}
+
 export async function listTasksByOwner(ownerReference: string, count = 100): Promise<MedplumTaskResource[]> {
   const medplum = await getMedplumClient();
 

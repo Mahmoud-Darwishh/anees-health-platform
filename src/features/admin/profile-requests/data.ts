@@ -50,7 +50,9 @@ export async function getPendingProfileRequests(tenantId: string): Promise<Pendi
   if (rows.length === 0) return [];
 
   const staff = await prisma.staff.findMany({
-    where: { id: { in: rows.map((r) => r.staffId) } },
+    // Tenant-scoped: belt-and-suspenders — staffIds already come from this
+    // tenant's requests, but pin the tenant so a cross-tenant id can't resolve.
+    where: { id: { in: rows.map((r) => r.staffId) }, tenantId },
     select: { id: true, name: true, role: true },
   });
   const staffById = new Map(staff.map((s) => [s.id, s]));

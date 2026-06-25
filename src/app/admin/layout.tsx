@@ -14,6 +14,11 @@ const appVersion = packageJson.version;
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getSessionUser();
   const visibleNavItems = getAdminNavItems(user?.staffRole);
+  // Server render timestamp for the "last refreshed" chip. Date.now() is correct
+  // and intentional in this `force-dynamic` Server Component (it runs once per
+  // request, on the server); react-hooks/purity can't tell an RSC from a client
+  // render, so it is disabled for this single line.
+  // eslint-disable-next-line react-hooks/purity
   const renderedAt = Date.now();
 
   // The only unauthenticated requests that reach this layout are the public

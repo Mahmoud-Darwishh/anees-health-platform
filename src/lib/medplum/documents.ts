@@ -10,6 +10,7 @@ import {
 	deletePrivateMedicalObject,
 	putPrivateMedicalObject,
 } from '@/lib/storage/r2-medical';
+import { scanMedicalDocument } from '@/lib/security/malware-scan';
 
 type FhirReference = {
 	reference?: string;
@@ -373,6 +374,19 @@ export async function createPatientDocument(input: CreatePatientDocumentInput): 
 		data: input.data,
 	});
 
+	// Scan at upload time so a document is never recorded as servable without a
+	// verdict. A real scanner returns clean/infected; if it is unreachable the
+	// verdict is scan_failed and the serving route blocks the file (fail closed).
+	// The background scan job still re-checks documents on its own cadence.
+	const scan = await scanMedicalDocument({
+		data: input.data,
+		fileName: input.originalFilename,
+		contentType: input.contentType,
+		checksumSha256: uploaded.checksumSha256,
+	});
+	const malwareStatus: MalwareStatus = scan.verdict;
+	const scannedAtIso = new Date().toISOString();
+
 	try {
 		const document = (await medplum.createResource({
 			resourceType: 'DocumentReference',
@@ -388,8 +402,19 @@ export async function createPatientDocument(input: CreatePatientDocumentInput): 
 				},
 				{
 					system: IDENTIFIER_SYSTEM_MALWARE_STATUS,
-					value: 'clean',
+					value: malwareStatus,
 				},
+				{
+					system: IDENTIFIER_SYSTEM_MALWARE_SCANNED_AT,
+					value: scannedAtIso,
+				},
+				{
+					system: IDENTIFIER_SYSTEM_MALWARE_ENGINE,
+					value: scan.engine,
+				},
+				...(scan.signature
+					? [{ system: IDENTIFIER_SYSTEM_MALWARE_SIGNATURE, value: scan.signature }]
+					: []),
 			],
 			subject: { reference: `Patient/${input.patientId}` },
 			type: {
@@ -418,7 +443,13 @@ export async function createPatientDocument(input: CreatePatientDocumentInput): 
 				? [{ reference: input.authorReference, display: input.authorDisplay ?? undefined }]
 				: undefined,
 			meta: {
-				security: [{ system: MALWARE_SECURITY_SYSTEM, code: 'clean', display: 'clean' }],
+				security: [
+					{
+						system: MALWARE_SECURITY_SYSTEM,
+						code: malwareStatus,
+						display: malwareStatus.replace('_', ' '),
+					},
+				],
 			},
 			content: [
 				{

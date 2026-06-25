@@ -40,7 +40,7 @@ Production-grade bilingual (EN/AR) health-tech platform serving Egyptian elite h
 | Payments | Kashier (test + live) — booking funnel + webhook | Live (Egypt only) |
 | Multi-tenancy | `Tenant` model + `tenantId` columns on Patient/Provider/Visit/CarePlan/Invoice/OnlineBooking/Staff. Defaulted to `"platform"` tenant for backwards-compat. | Foundations only (Phase 1A) |
 | Tests | **Vitest** wired (Phase 9) — 39 unit tests in `tests/` covering the RBAC matrix, route gate, clinical-safety engines, catalogs, production-readiness (`npm test`). Playwright E2E still planned. | Partial |
-| Observability | **Seam wired** (Phase 9): `reportError` + error boundaries + production-readiness fail-fast at boot; CSP already allows Sentry. The `@sentry/nextjs` SDK install (needs a DSN) is the remaining step. | Partial |
+| Observability | **Wired** (Phase 9): `@sentry/nextjs` **installed** (v10.59.0) + DSN-gated init (`instrumentation.ts` / `instrumentation-client.ts`) + `reportError` seam; **all five error boundaries forward to the seam** (root, global, `[locale]`, admin, clinician); production-readiness fail-fast at boot; CSP allows Sentry. Activate by setting `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN`. `withSentryConfig` (source-map upload) not yet added. | Partial |
 | Hosting | **Self-hosted on Hostinger VPS** today (Next.js + Postgres + Medplum). Target = **OVH Bahrain**, see DEPLOYMENT_RUNBOOK.md. | Live but to be migrated |
 
 ---
@@ -488,7 +488,7 @@ EHR_MALWARE_SCAN_HTTP_TOKEN=...           # bearer token for the scanner
 
 # Internal cron / scheduled jobs
 CRON_SECRET=...             # bearer for /api/internal/* routes
-EHR_SCAN_KEY=...            # alternate header for the document scan job (x-ehr-scan-key)
+EHR_DOCUMENT_SCAN_KEY=...   # alternate header for the document scan job (x-ehr-scan-key)
 
 # Misc
 HASH_SALT=...
@@ -539,7 +539,7 @@ To enable the admin / clinician dashboards locally, ensure you have a `User` + `
 | 6 | Validation (Zod) | 🟡 In EHR schemas; not yet on every API route | `src/features/ehr/schemas/` |
 | 7 | Medical file storage | ✅ Cloudflare R2 + FHIR `DocumentReference`/`Binary` + malware scan job | `src/lib/storage/r2-medical.ts`, `src/lib/security/malware-scan.ts` |
 | 8 | Hosting | 🟡 Hostinger today → OVH Bahrain target | [DEPLOYMENT_RUNBOOK.md](../docs/DEPLOYMENT_RUNBOOK.md) |
-| 9 | Observability | 🟡 Seam + error boundaries + prod-readiness fail-fast wired (Phase 9); CSP Sentry-ready. SDK install (DSN) pending. | [EHR_AUDIT.md](../docs/EHR_AUDIT.md) Phase 9 |
+| 9 | Observability | 🟡 `@sentry/nextjs` installed (v10.59.0) + DSN-gated init + `reportError` seam + all 5 error boundaries forward + prod-readiness fail-fast (Phase 9); CSP Sentry-ready. Activate by setting the DSN envs; `withSentryConfig` source-maps still optional. | [EHR_AUDIT.md](../docs/EHR_AUDIT.md) Phase 9 |
 | 10 | Tests | 🟡 Vitest + 39 unit tests (RBAC/safety/catalogs/readiness). Playwright E2E pending. | `tests/`, [EHR_AUDIT.md](../docs/EHR_AUDIT.md) Phase 9 |
 | 11 | Multi-tenancy | 🟡 Foundations landed (Phase 1A): `Tenant` + `tenantId` columns. Query-level enforcement is still per-call. | `prisma/migrations/20260604130000_add_license_tenant_roles_phase1a/` |
 | 12 | Clinician workspace | ✅ Physio MVP live (`/clinician/*`). Doctor + nurse equivalents not built. | [EHR_PHYSIO_SPEC.md](../docs/EHR_PHYSIO_SPEC.md) |

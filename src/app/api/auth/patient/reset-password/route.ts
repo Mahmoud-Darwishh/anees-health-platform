@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   const cors = resolveCorsHeaders(request.headers.get('origin'));
   const ip = getClientIp(request);
 
-  const allowed = await checkRateLimit(`patient-reset:${ip}`, 10, 15 * 60 * 1000);
+  const allowed = await checkRateLimit(`patient-reset:${ip}`, 10, 15 * 60 * 1000, true);
   if (!allowed) return tooManyRequests(cors);
 
   let body: unknown;

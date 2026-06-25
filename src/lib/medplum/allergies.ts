@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { getMedplumClient } from './client';
+import { getMedplumClient, searchAllResources } from './client';
 
 type FhirReference = {
   reference?: string;
@@ -92,13 +92,15 @@ function isEnteredInError(resource: AllergyIntoleranceResource): boolean {
 }
 
 export async function listPatientAllergies(patientId: string, count = 50): Promise<AllergySummary[]> {
-  const medplum = await getMedplumClient();
-
-  const resources = (await medplum.searchResources('AllergyIntolerance', {
-    patient: `Patient/${patientId}`,
-    _count: String(count),
-    _sort: '-_lastUpdated',
-  })) as AllergyIntoleranceResource[];
+  // Paginate to completeness — a truncated allergy list is a safety hazard, and
+  // entered-in-error records are filtered below (after the fetch), so a fixed
+  // single page could hide active allergies behind corrected ones. `count` is the
+  // page size; the full list is returned up to a generous safety cap.
+  const resources = await searchAllResources<AllergyIntoleranceResource>(
+    'AllergyIntolerance',
+    { patient: `Patient/${patientId}`, _sort: '-_lastUpdated' },
+    { pageSize: count, maxResources: 1000 },
+  );
 
   return resources
     .filter((resource) => !isEnteredInError(resource))

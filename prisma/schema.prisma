@@ -1144,6 +1144,11 @@ model AuditLog {
   newData       Json?
   changedBy     String?
   changedAt     DateTime    @default(now())
+  // Tamper-evidence (best-effort, back-fillable): `hash` is a SHA-256 of this
+  // row's immutable content + `prevHash`; `prevHash` links to the previous row's
+  // hash. A broken/recomputed mismatch reveals in-place edits or deletions.
+  hash          String?
+  prevHash      String?
 
   @@index([tableName, recordId])
   @@index([tableName, recordId, changedAt])

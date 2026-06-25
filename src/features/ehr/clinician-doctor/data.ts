@@ -11,6 +11,7 @@ export type DoctorTaskItem = {
   id: string;
   title: string;
   description: string | null;
+  code: string | null;
   priority: MedplumTaskResource['priority'] | null;
   status: MedplumTaskResource['status'];
   patientMedplumId: string | null;
@@ -136,6 +137,7 @@ export async function getDoctorWorklistData(): Promise<DoctorWorklistData> {
         id: task.id as string,
         title: task.code?.text ?? task.code?.coding?.[0]?.display ?? 'Task',
         description: task.description ?? null,
+        code: task.code?.coding?.[0]?.code ?? null,
         priority: task.priority ?? null,
         status: task.status,
         patientMedplumId: extractMedplumPatientId(task.for?.reference),

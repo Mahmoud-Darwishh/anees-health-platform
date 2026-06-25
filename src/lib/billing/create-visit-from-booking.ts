@@ -37,7 +37,9 @@ export async function createVisitFromBooking(bookingRef: string): Promise<void> 
     }
 
     const patient = await prisma.patient.findFirst({
-      where: { phone: `${booking.countryCode}${booking.phoneNumber}` },
+      // Tenant-scoped: resolve the patient within the booking's tenant so a
+      // shared phone number can never match a patient in another tenant.
+      where: { phone: `${booking.countryCode}${booking.phoneNumber}`, tenantId: booking.tenantId },
       orderBy: { createdAt: 'desc' },
       select: { id: true },
     });

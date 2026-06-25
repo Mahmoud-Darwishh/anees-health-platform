@@ -25,9 +25,12 @@ function AssignControl({ visit, clinicians }: { visit: DispatchVisit; clinicians
       <input type="hidden" name="visitId" value={visit.id} />
       <select name="staffId" className="form-select form-select-sm" style={{ maxWidth: '12rem' }} required defaultValue="">
         <option value="" disabled>{visit.clinicianName ? 'Reassign to…' : 'Assign clinician…'}</option>
-        {clinicians.map((c) => (
-          <option key={c.staffId} value={c.staffId}>{c.name} ({c.role}) · {c.todayCount} today</option>
-        ))}
+        {clinicians.map((c) => {
+          const avail = !c.availabilitySet ? '' : c.availableToday ? ' · ✓ available' : ' · off today';
+          return (
+            <option key={c.staffId} value={c.staffId}>{c.name} ({c.role}) · {c.todayCount} today{avail}</option>
+          );
+        })}
       </select>
       <button type="submit" className="btn btn-sm btn-primary" disabled={pending}>
         {pending ? '…' : visit.clinicianName ? 'Reassign' : 'Assign'}
@@ -120,17 +123,34 @@ export function DispatchBoardView({ data }: { data: DispatchBoardData }) {
       <div className="card bg-white">
         <div className="card-body">
           <h2 className="h6">Clinician capacity — today</h2>
+          <p className="text-muted small">Who&apos;s available, where, and their load. Availability is declared by each clinician in their profile.</p>
           {data.clinicians.length === 0 ? (
             <div className="alert alert-light border mb-0">
               No assignable clinicians. Add staff with a linked provider profile in <Link href="/admin/staff">Staff</Link>.
             </div>
           ) : (
-            <div className="d-flex flex-wrap gap-2">
-              {data.clinicians.map((c) => (
-                <span key={c.staffId} className="badge text-bg-light border p-2">
-                  {c.name} <span className="text-muted">({c.role})</span> · <strong>{c.todayCount}</strong> today
-                </span>
-              ))}
+            <div className="table-responsive">
+              <table className="table table-sm align-middle mb-0">
+                <thead>
+                  <tr><th>Clinician</th><th>Today</th><th>Areas</th><th>Load</th></tr>
+                </thead>
+                <tbody>
+                  {data.clinicians.map((c) => {
+                    let avail: { label: string; cls: string };
+                    if (!c.availabilitySet) avail = { label: 'Not set', cls: 'text-bg-light border' };
+                    else if (c.availableToday) avail = { label: `Available ${c.todayWindowLabel}`, cls: 'text-bg-success' };
+                    else avail = { label: 'Off today', cls: 'text-bg-secondary' };
+                    return (
+                      <tr key={c.staffId}>
+                        <td className="small">{c.name} <span className="text-muted">({c.role})</span></td>
+                        <td><span className={`badge ${avail.cls}`}>{avail.label}</span></td>
+                        <td className="small text-muted">{c.areas.length ? c.areas.join(', ') : '—'}</td>
+                        <td className="small"><strong>{c.todayCount}</strong> today</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

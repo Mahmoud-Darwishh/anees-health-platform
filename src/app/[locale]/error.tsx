@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import ErrorState from '@/components/common/ErrorState';
+import { reportError } from '@/lib/utils/observability';
 
 /**
  * Error boundary for every page under `[locale]/*` (home, doctors, booking,
@@ -20,6 +22,13 @@ export default function LocaleError({
 }) {
   const params = useParams();
   const locale = params?.locale === 'ar' ? 'ar' : 'en';
+
+  useEffect(() => {
+    // Forward public-site + patient-portal errors to the observability seam
+    // (structured-logs always; Sentry once a DSN is set). Never PHI — the seam
+    // keeps message-level detail only.
+    reportError(error, { boundary: 'app/[locale]/error', digest: error.digest });
+  }, [error]);
 
   return <ErrorState error={error} reset={reset} locale={locale} />;
 }

@@ -45,6 +45,10 @@ export {
   createPhysioReportAction,
 } from './reports-handoffs';
 export {
+  createNursingNoteAction,
+  createDoctorNoteAction,
+} from './clinical-notes';
+export {
   createConditionAction,
   createAllergyAction,
   recordNoKnownAllergiesAction,

@@ -10,7 +10,7 @@ import { createAssessmentSchema, formDataToInput, recordVitalsSchema } from '@/f
 import { setAdminPatientFlash } from '../flash';
 import { refreshClinicalPaths, failAction, requireAdminPatientAction, getClinicalWriterWithPractitioner, createEscalationAndCommunication, hasRecentOpenVitalsAutoEscalation, assertRosteredNurseForPatientIfNurse } from './shared';
 
-export async function recordVitalsAction(formData: FormData): Promise<void> {
+export async function recordVitalsAction(formData: FormData, opts?: { rethrow?: boolean }): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = recordVitalsSchema.parse(formDataToInput(formData));
@@ -104,11 +104,11 @@ export async function recordVitalsAction(formData: FormData): Promise<void> {
     });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
-    await failAction(formData, error);
+    await failAction(formData, error, opts);
   }
 }
 
-export async function createAssessmentAction(formData: FormData): Promise<void> {
+export async function createAssessmentAction(formData: FormData, opts?: { rethrow?: boolean }): Promise<void> {
   try {
     const { staff, practitioner, changedBy } = await getClinicalWriterWithPractitioner();
     const input = createAssessmentSchema.parse(formDataToInput(formData));
@@ -168,7 +168,7 @@ export async function createAssessmentAction(formData: FormData): Promise<void> 
     });
     refreshClinicalPaths(input.medplumPatientId);
   } catch (error) {
-    await failAction(formData, error);
+    await failAction(formData, error, opts);
   }
 }
 

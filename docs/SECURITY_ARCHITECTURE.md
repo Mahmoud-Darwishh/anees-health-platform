@@ -233,7 +233,7 @@ See `.env.local` template in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) and [DE
 | `R2_SECRET_ACCESS_KEY` | 180 days |
 | `KASHIER_SECRET_KEY` / `KASHIER_API_KEY` | per Kashier contract |
 | `WAPILOT_API_TOKEN` | 365 days |
-| `CRON_SECRET` / `EHR_SCAN_KEY` | 90 days |
+| `CRON_SECRET` / `EHR_DOCUMENT_SCAN_KEY` | 90 days |
 | `EHR_MALWARE_SCAN_HTTP_TOKEN` | 180 days |
 | `HASH_SALT` | **never rotate without a planned migration** (would invalidate IP hashes in `CoverageCheck`) |
 

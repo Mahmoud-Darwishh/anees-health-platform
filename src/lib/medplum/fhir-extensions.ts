@@ -11,6 +11,8 @@ export const EgyptianExtensions = {
   clinicalNoteDiscipline: `${ANEES_FHIR_EXTENSION_BASE}/clinical-note-discipline`,
   clinicalNoteSignedAt: `${ANEES_FHIR_EXTENSION_BASE}/clinical-note-signed-at`,
   clinicalNoteAmends: `${ANEES_FHIR_EXTENSION_BASE}/clinical-note-amends`,
+  clinicianServiceAreas: `${ANEES_FHIR_EXTENSION_BASE}/clinician-service-areas`,
+  clinicianAvailabilityNote: `${ANEES_FHIR_EXTENSION_BASE}/clinician-availability-note`,
 } as const;
 
 export type CareProgramCode = 'sanad' | 'haraka' | 'wai' | 'amal';

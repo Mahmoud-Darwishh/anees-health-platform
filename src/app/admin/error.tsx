@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { reportError } from '@/lib/utils/observability';
 
 /**
  * Error boundary for the whole `/admin/*` console. English-only, Bootstrap-
@@ -17,9 +18,9 @@ export default function AdminError({
   reset: () => void;
 }) {
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('[AdminErrorBoundary]', error);
-    }
+    // Forward to the observability seam (structured-logs always; Sentry once a
+    // DSN is set). The seam scrubs to message-level only — never PHI.
+    reportError(error, { boundary: 'admin/error', digest: error.digest });
   }, [error]);
 
   return (

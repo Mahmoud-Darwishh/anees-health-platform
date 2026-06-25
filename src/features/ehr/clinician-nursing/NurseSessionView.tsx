@@ -11,6 +11,9 @@ import {
 } from './actions';
 import { NurseVitalsForm } from './NurseVitalsForm';
 import { NurseAssessmentForm } from './NurseAssessmentForm';
+import { NurseNoteForm } from './NurseNoteForm';
+import { NurseMedicationForm } from './NurseMedicationForm';
+import { NurseEscalationForm } from './NurseEscalationForm';
 
 type TransitionConfig = {
   label: string;
@@ -79,6 +82,15 @@ export function NurseSessionView({ data }: { data: NurseSessionData }) {
         </div>
       ) : null}
 
+      {/* Escalation — always available on-site; a red flag can occur on arrival,
+          before formal documentation opens. */}
+      <details className="clinician-visit-card mb-3">
+        <summary className="h6 mb-0">⚠️ Raise an incident / escalation</summary>
+        <div className="mt-2">
+          <NurseEscalationForm visitId={data.visitId} />
+        </div>
+      </details>
+
       {/* Documentation (on-site) */}
       {data.canDocument ? (
         <>
@@ -90,6 +102,16 @@ export function NurseSessionView({ data }: { data: NurseSessionData }) {
           <div className="clinician-visit-card mb-3">
             <h3 className="h6">Assessment</h3>
             <NurseAssessmentForm visitId={data.visitId} />
+          </div>
+
+          <div className="clinician-visit-card mb-3">
+            <h3 className="h6">Medication administration (MAR)</h3>
+            <NurseMedicationForm visitId={data.visitId} />
+          </div>
+
+          <div className="clinician-visit-card mb-3">
+            <h3 className="h6">Nursing note</h3>
+            <NurseNoteForm visitId={data.visitId} />
           </div>
 
           {data.flowState === 'checked_in' ? (

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = getClientIp(request);
-  const ipAllowed = await checkRateLimit(`wa-otp-send:ip:${ip}`, SEND_LIMIT_PER_IP, SEND_WINDOW_MS);
+  const ipAllowed = await checkRateLimit(`wa-otp-send:ip:${ip}`, SEND_LIMIT_PER_IP, SEND_WINDOW_MS, true);
   if (!ipAllowed) return tooManyRequests(cors);
 
   let body: unknown;
@@ -96,6 +96,7 @@ export async function POST(request: NextRequest) {
     `wa-otp-send:to:${chatId}`,
     SEND_LIMIT_PER_RECIPIENT,
     SEND_WINDOW_MS,
+    true,
   );
   if (!recipientAllowed) {
     return NextResponse.json(

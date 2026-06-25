@@ -152,7 +152,7 @@ Three environments. Local dev runs on a developer machine; staging mirrors prod 
 | `KASHIER_SECRET_KEY` + `KASHIER_API_KEY` | Payments | Per Kashier policy | Coordinate with Kashier support. |
 | `WAPILOT_API_TOKEN` | OTP | 365 days | Generate new in Wapilot dashboard; update env; restart. |
 | `CRON_SECRET` | Internal API routes | 90 days | Generate UUIDv4; update scheduler env; update app env; restart. |
-| `EHR_SCAN_KEY` | Document scan job | 90 days | Same pattern. |
+| `EHR_DOCUMENT_SCAN_KEY` | Document scan job (header `x-ehr-scan-key`) | 90 days | Same pattern. |
 | `EHR_MALWARE_SCAN_HTTP_TOKEN` | Malware scanner client | 180 days | Coordinate with scanner vendor. |
 | `HASH_SALT` | IP hashing in `CoverageCheck` | **Do not rotate** without a plan | Rotation invalidates existing IP hashes. Plan separately. |
 
@@ -216,7 +216,7 @@ Every rotation event must produce an `AuditLog` row with `action = update` and a
 | Patch OS / kernel updates | Monthly | Engineer |
 | Apply security updates to deps (`npm audit`) | Weekly review, monthly bump | Engineer |
 | Review `/admin/compliance` audit log | Weekly | Compliance Officer |
-| Rotate `CRON_SECRET` + `EHR_SCAN_KEY` | Quarterly | Engineer |
+| Rotate `CRON_SECRET` + `EHR_DOCUMENT_SCAN_KEY` | Quarterly | Engineer |
 | Rotate `AUTH_SECRET` | Quarterly | Engineer |
 | Restore drill | Quarterly | Engineer + Owner |
 | Pen test | Annual | External + Owner |

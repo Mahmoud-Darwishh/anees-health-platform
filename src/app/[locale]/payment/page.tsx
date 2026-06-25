@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import PaymentMethodChooser from '@/features/booking/components/payment-method-chooser';
+import { logger } from '@/lib/utils/app-logger';
 
 interface PaymentPageProps {
   params: Promise<{ locale: string }>;
@@ -23,8 +24,19 @@ export default async function PaymentPage(props: PaymentPageProps) {
   }
 
   // Display label + the InstaPay deep link that opens the app to pay this payee.
+  // These MUST be set in production. We deliberately do NOT ship a hard-coded
+  // payee deep link as a fallback: a missing env var must never silently route a
+  // patient's money to a personal account. When unset, the panel shows the brand
+  // label and simply omits the "open app" deep link.
   const instapayHandle = process.env.INSTAPAY_HANDLE || 'Anees Health';
-  const instapayUrl = process.env.INSTAPAY_URL || 'https://ipn.eg/S/m_darwish/instapay/3FUhxJ';
+  const instapayUrl = process.env.INSTAPAY_URL || '';
+
+  if (process.env.NODE_ENV === 'production' && (!process.env.INSTAPAY_HANDLE || !process.env.INSTAPAY_URL)) {
+    logger.warn('INSTAPAY_NOT_CONFIGURED: set INSTAPAY_HANDLE and INSTAPAY_URL — showing placeholder payee, deep link omitted', {
+      hasHandle: Boolean(process.env.INSTAPAY_HANDLE),
+      hasUrl: Boolean(process.env.INSTAPAY_URL),
+    });
+  }
 
   return (
     <main>

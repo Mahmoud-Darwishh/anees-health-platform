@@ -2,9 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 import { ZodError } from 'zod';
-import type { StaffRole } from '@prisma/client';
+import { AuditAction, type StaffRole } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { requireStaffCan } from '@/lib/auth/policy/enforce';
+import { getPatientTaskById, updatePatientTaskStatus } from '@/lib/medplum/tasks';
+import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
+import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import {
   acknowledgeVisitAction as acknowledgeVisitAdminAction,
   startTravelAction as startTravelAdminAction,
@@ -13,11 +16,17 @@ import {
   checkOutVisitAction as checkOutVisitAdminAction,
   recordVitalsAction as recordVitalsAdminAction,
   createAssessmentAction as createAssessmentAdminAction,
+  createNursingNoteAction as createNursingNoteAdminAction,
+  createMedicationAdministrationAction as createMedicationAdministrationAdminAction,
+  createIncidentReportAction as createIncidentReportAdminAction,
 } from '@/features/ehr/admin-patient/actions';
 import {
   formDataToInput,
   recordVitalsSchema,
   createAssessmentSchema,
+  createNursingNoteSchema,
+  createMedicationAdministrationSchema,
+  createIncidentReportSchema,
 } from '@/features/ehr/schemas/admin-patient-actions';
 import type { NurseFormState } from './types';
 
@@ -142,7 +151,7 @@ export async function recordNurseVitalsAction(_prev: NurseFormState, formData: F
     recordVitalsSchema.parse(formDataToInput(trusted));
     await requireStaffCan('vitals.record', { targetPatientMedplumId: medplumPatientId });
 
-    await recordVitalsAdminAction(trusted);
+    await recordVitalsAdminAction(trusted, { rethrow: true });
     revalidateNurseSession(formData);
     return { status: 'success', message: 'Vitals recorded and signed.' };
   } catch (error) {
@@ -159,10 +168,139 @@ export async function recordNurseAssessmentAction(_prev: NurseFormState, formDat
     createAssessmentSchema.parse(formDataToInput(trusted));
     await requireStaffCan('assessment.create', { targetPatientMedplumId: medplumPatientId });
 
-    await createAssessmentAdminAction(trusted);
+    await createAssessmentAdminAction(trusted, { rethrow: true });
     revalidateNurseSession(formData);
     return { status: 'success', message: 'Assessment recorded and signed.' };
   } catch (error) {
     return toErrorState(error);
   }
+}
+
+export async function recordNurseNoteAction(_prev: NurseFormState, formData: FormData): Promise<NurseFormState> {
+  try {
+    const context = await assertNurseWorkspaceAccess();
+    const medplumPatientId = await resolveNurseVisitMedplumId(formData, context);
+    const trusted = withTrustedPatientId(formData, medplumPatientId);
+
+    createNursingNoteSchema.parse(formDataToInput(trusted));
+    await requireStaffCan('note.nursing.sign', { targetPatientMedplumId: medplumPatientId });
+
+    await createNursingNoteAdminAction(trusted, { rethrow: true });
+    revalidateNurseSession(formData);
+    return { status: 'success', message: 'Nursing note signed.' };
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
+
+export async function recordNurseMedicationAction(_prev: NurseFormState, formData: FormData): Promise<NurseFormState> {
+  try {
+    const context = await assertNurseWorkspaceAccess();
+    const medplumPatientId = await resolveNurseVisitMedplumId(formData, context);
+    const trusted = withTrustedPatientId(formData, medplumPatientId);
+
+    createMedicationAdministrationSchema.parse(formDataToInput(trusted));
+    await requireStaffCan('medication.administer', { targetPatientMedplumId: medplumPatientId });
+
+    await createMedicationAdministrationAdminAction(trusted, { rethrow: true });
+    revalidateNurseSession(formData);
+    return { status: 'success', message: 'Medication administration recorded.' };
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
+
+export async function raiseNurseIncidentAction(_prev: NurseFormState, formData: FormData): Promise<NurseFormState> {
+  try {
+    const context = await assertNurseWorkspaceAccess();
+    const medplumPatientId = await resolveNurseVisitMedplumId(formData, context);
+    const trusted = withTrustedPatientId(formData, medplumPatientId);
+
+    createIncidentReportSchema.parse(formDataToInput(trusted));
+    await requireStaffCan('incident_report.create', { targetPatientMedplumId: medplumPatientId });
+
+    await createIncidentReportAdminAction(trusted, { rethrow: true });
+    revalidateNurseSession(formData);
+    return { status: 'success', message: 'Incident logged and routed to the care team.' };
+  } catch (error) {
+    return toErrorState(error);
+  }
+}
+
+// ── Task queue (start / complete) ────────────────────────────────────────────
+// A task mutation is bound on BOTH axes the matrix intends for a nurse's queue
+// (tasks = write, case, "own queue"): the task's patient must be in this nurse's
+// case-scope (task.update carries requiresCaseScope) AND the task must be owned
+// by their own Practitioner. Without this, a client-supplied task id would let a
+// nurse complete any task in the system, including another clinician's.
+
+function extractMedplumPatientId(reference: string | null | undefined): string | null {
+  if (!reference) return null;
+  const match = reference.match(/^Patient\/(.+)$/);
+  return match ? match[1] : null;
+}
+
+async function authorizeOwnNurseTask(
+  taskId: string,
+): Promise<{ staffId: string; staffRole: StaffRole; patientMedplumId: string; versionId: string | null }> {
+  const { user } = await requireStaffCan('workspace.nursing.access');
+  const task = await getPatientTaskById(taskId);
+  if (!task) {
+    throw new Error('Task not found.');
+  }
+  const patientMedplumId = extractMedplumPatientId(task.for?.reference);
+  if (!patientMedplumId) {
+    throw new Error('This task is not linked to a patient.');
+  }
+  // Case-scope: the task's patient must be on this nurse's care team.
+  await requireStaffCan('task.update', { targetPatientMedplumId: patientMedplumId });
+  // Own-queue: a nurse may only act on tasks owned by their own Practitioner.
+  // (Admins/superadmins/med-ops act on behalf, gated by case-scope above.)
+  if (user.staffRole === 'nurse') {
+    const staffRecord = await prisma.staff.findUnique({
+      where: { id: user.staffId },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    if (!staffRecord) {
+      throw new Error('Could not resolve your staff profile.');
+    }
+    const practitioner = await ensureCachedMedplumPractitionerForStaff({
+      staffId: staffRecord.id,
+      name: staffRecord.name ?? staffRecord.email ?? `Staff ${staffRecord.id}`,
+      email: staffRecord.email,
+      role: staffRecord.role,
+    });
+    if (!task.owner?.reference || task.owner.reference !== practitioner.reference) {
+      throw new Error('This task is not in your queue.');
+    }
+  }
+  return { staffId: user.staffId, staffRole: user.staffRole, patientMedplumId, versionId: task.meta?.versionId ?? null };
+}
+
+async function setNurseTaskStatus(formData: FormData, status: 'in-progress' | 'completed'): Promise<void> {
+  const taskId = String(formData.get('taskId') ?? '').trim();
+  const expectedVersionId = String(formData.get('expectedVersionId') ?? '').trim() || null;
+  if (!taskId) {
+    throw new Error('Task id is required.');
+  }
+  const { staffId, staffRole, patientMedplumId, versionId } = await authorizeOwnNurseTask(taskId);
+  await updatePatientTaskStatus(taskId, status, { expectedVersionId: expectedVersionId ?? versionId });
+  await writeMedplumAuditMirror({
+    tableName: 'MedplumTask',
+    recordId: taskId,
+    action: AuditAction.update,
+    changedFields: ['status'],
+    changedBy: staffId,
+    actorRole: staffRole,
+    patientId: patientMedplumId,
+  });
+  revalidatePath('/clinician/nursing/tasks');
+}
+
+export async function startNurseTaskAction(formData: FormData): Promise<void> {
+  await setNurseTaskStatus(formData, 'in-progress');
+}
+
+export async function completeNurseTaskAction(formData: FormData): Promise<void> {
+  await setNurseTaskStatus(formData, 'completed');
 }

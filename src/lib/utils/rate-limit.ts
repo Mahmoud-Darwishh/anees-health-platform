@@ -27,15 +27,22 @@ export function getClientIp(request: NextRequest): string {
 }
 
 /**
- * @param key       Unique bucket id (e.g. `"booking-create:1.2.3.4"`)
- * @param max       Max requests allowed in the window
- * @param windowMs  Window length in milliseconds
- * @returns         true if request is allowed, false if rate-limited
+ * @param key         Unique bucket id (e.g. `"booking-create:1.2.3.4"`)
+ * @param max         Max requests allowed in the window
+ * @param windowMs    Window length in milliseconds
+ * @param failClosed  When the backend is unreachable: `false` (default) allows
+ *                    the request through (fail open — right for non-security
+ *                    funnels); `true` blocks it (fail closed). Pass `true` for
+ *                    security-critical buckets (login, OTP, password reset,
+ *                    registration) so a DB hiccup can't silently disable
+ *                    brute-force/credential-stuffing protection.
+ * @returns           true if request is allowed, false if rate-limited
  */
 export async function checkRateLimit(
   key: string,
   max: number,
   windowMs: number,
+  failClosed = false,
 ): Promise<boolean> {
   const now = new Date();
   const newExpiresAt = new Date(now.getTime() + windowMs);
@@ -61,10 +68,15 @@ export async function checkRateLimit(
     });
     return true;
   } catch (err) {
-    // Fail open — never block a legitimate request because the limiter table
-    // is unreachable. Log so we notice.
-    console.error('[rate-limit] backend error — failing open:', err);
-    return true;
+    // Backend unreachable. Security-critical callers (failClosed=true) block the
+    // request so a DB hiccup can't disable brute-force protection; everyone else
+    // fails open so a limiter outage never blocks a legitimate request. Always
+    // log so we notice.
+    console.error(
+      `[rate-limit] backend error — failing ${failClosed ? 'closed' : 'open'} (key=${key}):`,
+      err,
+    );
+    return !failClosed;
   }
 }
 

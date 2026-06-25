@@ -271,7 +271,8 @@ export async function recordRefundAction(
     const refundEgp = Math.max(Math.round((amountPaid - feeEgp) * 100) / 100, 0);
 
     const patient = await prisma.patient.findFirst({
-      where: { phone: `${booking.countryCode}${booking.phoneNumber}` },
+      // Tenant-scoped: resolve the patient within the (already tenant-verified) booking's tenant.
+      where: { phone: `${booking.countryCode}${booking.phoneNumber}`, tenantId: booking.tenantId },
       orderBy: { createdAt: 'desc' },
       select: { id: true },
     });

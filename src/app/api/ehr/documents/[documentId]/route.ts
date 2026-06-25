@@ -150,7 +150,11 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  if (payload.malwareStatus === 'infected' || payload.malwareStatus === 'scan_failed') {
+  // Fail closed: serve ONLY documents that have passed a clean malware scan.
+  // A 'pending' (never-scanned) document is blocked just like an infected one —
+  // unscanned PHI must never be served. Documents are scanned at upload time and
+  // by the background scan job; until a clean verdict is recorded they stay blocked.
+  if (payload.malwareStatus !== 'clean') {
     await writeDocumentAudit({
       action: 'access_denied',
       documentId: documentId.trim(),
@@ -159,9 +163,14 @@ export async function GET(request: Request, context: RouteContext) {
       reason: `malware_status_${payload.malwareStatus}`,
     });
 
+    const isPending = payload.malwareStatus === 'pending';
     return NextResponse.json(
-      { error: `Document is blocked by security policy (status: ${payload.malwareStatus}).` },
-      { status: 423 },
+      {
+        error: isPending
+          ? 'Document is awaiting a security scan and cannot be served yet. Please try again shortly.'
+          : `Document is blocked by security policy (status: ${payload.malwareStatus}).`,
+      },
+      { status: isPending ? 409 : 423 },
     );
   }
 

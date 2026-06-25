@@ -3,6 +3,7 @@ import 'server-only';
 import type { StaffRole, VisitStatus, VisitType } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { startOfDay, endOfDay } from '@/features/ehr/clinician-shared/visit-flow';
+import { listPractitionerAvailability, dayCodeForDate, slotForDay, type PractitionerAvailability } from '@/lib/medplum/availability';
 
 export type DispatchVisit = {
   id: string;
@@ -22,6 +23,13 @@ export type ClinicianOption = {
   name: string;
   role: StaffRole;
   todayCount: number;
+  /** Has the clinician declared any availability (days or areas)? */
+  availabilitySet: boolean;
+  /** Is today within a declared working window? */
+  availableToday: boolean;
+  /** e.g. "09:00–17:00" when available today, else null. */
+  todayWindowLabel: string | null;
+  areas: string[];
 };
 
 export type DispatchBoardData = {
@@ -93,7 +101,7 @@ export async function getDispatchBoardData(tenantId: string): Promise<DispatchBo
 
   const clinicianStaff = await prisma.staff.findMany({
     where: { tenantId, status: 'active', role: { in: CLINICAL_DISCIPLINES }, providerId: { not: null } },
-    select: { id: true, name: true, role: true, providerId: true },
+    select: { id: true, name: true, role: true, providerId: true, medplumPractitionerId: true },
     orderBy: [{ role: 'asc' }, { name: 'asc' }],
   });
 
@@ -143,15 +151,37 @@ export async function getDispatchBoardData(tenantId: string): Promise<DispatchBo
     }
   }
 
+  // Declared availability (Medplum PractitionerRole) — best-effort: a Medplum
+  // hiccup must not break the board, so an empty map degrades to "Not set".
+  let availabilityByRef = new Map<string, PractitionerAvailability>();
+  try {
+    availabilityByRef = await listPractitionerAvailability();
+  } catch {
+    availabilityByRef = new Map();
+  }
+  const todayCode = dayCodeForDate(now);
+
   return {
     todays: todaysRows.map((v) => mapVisit(v, providerNameById)),
     unassigned: unassignedRows.map((v) => mapVisit(v, providerNameById)),
     upcoming: upcomingRows.map((v) => mapVisit(v, providerNameById)),
-    clinicians: clinicianStaff.map((staff) => ({
-      staffId: staff.id,
-      name: staff.name,
-      role: staff.role,
-      todayCount: staff.providerId ? todayCountByProvider.get(staff.providerId) ?? 0 : 0,
-    })),
+    clinicians: clinicianStaff.map((staff) => {
+      const availability = staff.medplumPractitionerId
+        ? availabilityByRef.get(`Practitioner/${staff.medplumPractitionerId}`)
+        : undefined;
+      const todaySlot = availability ? slotForDay(availability, todayCode) : null;
+      const availabilitySet = !!availability && (availability.slots.length > 0 || availability.areas.length > 0);
+
+      return {
+        staffId: staff.id,
+        name: staff.name,
+        role: staff.role,
+        todayCount: staff.providerId ? todayCountByProvider.get(staff.providerId) ?? 0 : 0,
+        availabilitySet,
+        availableToday: !!todaySlot,
+        todayWindowLabel: todaySlot ? `${todaySlot.startTime}–${todaySlot.endTime}` : null,
+        areas: availability?.areas ?? [],
+      };
+    }),
   };
 }

@@ -2,6 +2,7 @@ name: CI
 
 # Quality gate for every push and pull request.
 # - quality:    lint + type-check (fast, no database, no secrets)
+# - test:       vitest unit suite + tenant-scope / RBAC / security-policy guards
 # - migrations: guard against schema/migration drift (throwaway Postgres)
 # - build:      production `next build` against a throwaway Postgres
 #
@@ -52,6 +53,34 @@ jobs:
 
       - name: Type-check
         run: npm run typecheck
+
+  test:
+    name: Unit tests & policy guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci # postinstall runs `prisma generate`
+
+      - name: Unit tests (vitest)
+        run: npm run test
+
+      - name: RBAC matrix guard
+        run: npm run lint:rbac
+
+      - name: Security-policy self-test
+        run: npm run test:security-policy
+
+      - name: Tenant-scope guard
+        run: npm run lint:tenant
 
   migrations:
     name: Migration drift guard

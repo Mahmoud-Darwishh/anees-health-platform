@@ -24,6 +24,7 @@
     "lint:tenant": "node scripts/guard-tenant-scope.cjs",
     "ci:migration-guard": "node scripts/prisma-migration-guard.cjs",
     "test:security-policy": "ts-node --transpile-only --project scripts/tsconfig.json scripts/security-policy-selftest.cjs",
+    "audit:verify-chain": "ts-node --transpile-only --project scripts/tsconfig.json scripts/verify-audit-chain.ts",
     "test:glucose-profile": "ts-node --transpile-only --project scripts/tsconfig.json scripts/glucose-profile-selftest.cjs",
     "lint:rbac": "ts-node --transpile-only --project scripts/tsconfig.json scripts/lint-rbac.ts",
     "lint:rbac:fix": "ts-node --transpile-only --project scripts/tsconfig.json scripts/lint-rbac.ts --fix",

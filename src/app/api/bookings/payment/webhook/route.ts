@@ -10,6 +10,7 @@ import {
 import { buildPaymentConfirmationMessage } from '@/lib/utils/booking-whatsapp';
 import { sendPortalClaimInviteForBooking } from '@/lib/billing/portal-invite';
 import { createVisitFromBooking } from '@/lib/billing/create-visit-from-booking';
+import { reconcilePaymentAmount } from '@/lib/billing/payment-reconciliation';
 import { upsertMedplumPatient } from '@/lib/medplum/patients';
 import { createProgramCarePlan } from '@/lib/medplum/care-plans';
 import type { CareProgramCode } from '@/lib/medplum/fhir-extensions';
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
             locale: true,
             confirmationSentAt: true,
             inviteSentAt: true,
+            tenantId: true,
           },
         });
 
@@ -84,9 +86,34 @@ export async function POST(request: NextRequest) {
           const invoiceCode = `INV_${booking.bookingRef}`;
           const paymentCode = `PAY_${booking.bookingRef}`;
 
+          // Reconcile the gateway-reported charge against the booked price BEFORE
+          // writing the ledger. We never reject (money was received) but flag +
+          // audit any discrepancy so finance can review, instead of silently
+          // booking the expected figure.
+          const reconciliation = reconcilePaymentAmount({
+            expectedAmountEgp: Number(booking.amountEgp),
+            expectedCurrency: booking.currency,
+            gatewayAmount: Number(data.amount),
+            gatewayCurrency: data.currency,
+          });
+          if (!reconciliation.matched) {
+            console.error(
+              '[Webhook] Payment reconciliation flag (%s) for %s: gateway %s %s vs booked EGP %s',
+              reconciliation.reason,
+              booking.bookingRef,
+              reconciliation.gatewayCurrency ?? '?',
+              reconciliation.gatewayAmount ?? '?',
+              reconciliation.expectedAmountEgp,
+            );
+          }
+          const reviewNote = reconciliation.matched
+            ? ''
+            : ` [REVIEW: payment ${reconciliation.reason} — gateway ${reconciliation.gatewayCurrency ?? '?'} ${reconciliation.gatewayAmount ?? '?'} vs booked EGP ${reconciliation.expectedAmountEgp}]`;
+
           await prisma.$transaction(async (tx) => {
             const patient = await tx.patient.findFirst({
-              where: { phone: normalizedPhone },
+              // Tenant-scoped: never match a patient outside the booking's tenant.
+              where: { phone: normalizedPhone, tenantId: booking.tenantId },
               orderBy: { createdAt: 'desc' },
             });
 
@@ -119,14 +146,14 @@ export async function POST(request: NextRequest) {
                 grossAmountEgp: booking.amountEgp,
                 netAmountEgp: booking.amountEgp,
                 status: 'paid',
-                notes: `Paid via Kashier for booking ${booking.bookingRef}`,
+                notes: `Paid via Kashier for booking ${booking.bookingRef}${reviewNote}`,
               },
               update: {
                 patientId: patient.id,
                 grossAmountEgp: booking.amountEgp,
                 netAmountEgp: booking.amountEgp,
                 status: 'paid',
-                notes: `Paid via Kashier for booking ${booking.bookingRef}`,
+                notes: `Paid via Kashier for booking ${booking.bookingRef}${reviewNote}`,
               },
             });
 
@@ -153,7 +180,7 @@ export async function POST(request: NextRequest) {
                 amountEgp: booking.amountEgp,
                 paymentMethodId,
                 referenceNumber: data.transactionId || data.kashierOrderId || booking.bookingRef,
-                notes: `Kashier order ${data.kashierOrderId}; transaction ${data.transactionId}`,
+                notes: `Kashier order ${data.kashierOrderId}; transaction ${data.transactionId}${reviewNote}`,
               },
               update: {
                 invoiceId: invoice.id,
@@ -161,9 +188,29 @@ export async function POST(request: NextRequest) {
                 amountEgp: booking.amountEgp,
                 paymentMethodId,
                 referenceNumber: data.transactionId || data.kashierOrderId || booking.bookingRef,
-                notes: `Kashier order ${data.kashierOrderId}; transaction ${data.transactionId}`,
+                notes: `Kashier order ${data.kashierOrderId}; transaction ${data.transactionId}${reviewNote}`,
               },
             });
+
+            if (!reconciliation.matched) {
+              await tx.auditLog.create({
+                data: {
+                  tableName: 'payments',
+                  recordId: paymentCode,
+                  action: 'update',
+                  changedFields: {
+                    source: 'api.booking.payment.webhook.reconciliation',
+                    issue: reconciliation.reason,
+                    expectedAmountEgp: reconciliation.expectedAmountEgp,
+                    gatewayAmount: reconciliation.gatewayAmount,
+                    expectedCurrency: reconciliation.expectedCurrency,
+                    gatewayCurrency: reconciliation.gatewayCurrency,
+                    bookingRef: booking.bookingRef,
+                  },
+                  changedBy: 'system:kashier_webhook',
+                },
+              });
+            }
 
             await tx.onlineBooking.update({
               where: { bookingRef: booking.bookingRef },
@@ -259,7 +306,8 @@ export async function POST(request: NextRequest) {
           // Medplum — Kashier retries would duplicate Invoices/Payments.
           try {
             const medplumPatient = await prisma.patient.findFirst({
-              where: { phone: normalizedPhone },
+              // Tenant-scoped: never match a patient outside the booking's tenant.
+              where: { phone: normalizedPhone, tenantId: booking.tenantId },
               orderBy: { createdAt: 'desc' },
               select: {
                 id: true,

@@ -4,8 +4,43 @@ import { after } from 'next/server';
 import type { AuditAction, Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/utils/app-logger';
+import { computeAuditHash } from '@/lib/utils/audit-hash';
 
 type AuditClient = Pick<Prisma.TransactionClient, 'auditLog'> | typeof prisma;
+
+/**
+ * Best-effort tamper-evidence: chain this row's content to the previous row's
+ * hash. NEVER throws — integrity metadata is additive, and a hashing/read failure
+ * must never block the audit write itself. On any error both columns stay null
+ * and the row is written exactly as before.
+ */
+async function resolveAuditIntegrity(
+  input: WriteAuditLogInput,
+  client: AuditClient,
+): Promise<{ hash: string | null; prevHash: string | null }> {
+  try {
+    const latest = await client.auditLog.findFirst({
+      orderBy: [{ changedAt: 'desc' }, { id: 'desc' }],
+      select: { hash: true },
+    });
+    const prevHash = latest?.hash ?? null;
+    const hash = computeAuditHash(
+      {
+        tableName: input.tableName,
+        recordId: input.recordId,
+        action: input.action,
+        changedBy: input.changedBy ?? null,
+        changedFields: input.changedFields ?? null,
+        previousData: input.previousData ?? null,
+        newData: input.newData ?? null,
+      },
+      prevHash,
+    );
+    return { hash, prevHash };
+  } catch {
+    return { hash: null, prevHash: null };
+  }
+}
 
 export type WriteAuditLogInput = {
   tableName: string;
@@ -24,6 +59,7 @@ export type WriteAuditLogInput = {
  * in a transaction, prefer `recordAudit`, which adds retry + a FHIR mirror.
  */
 export async function writeAuditLog(input: WriteAuditLogInput, client: AuditClient = prisma): Promise<void> {
+  const integrity = await resolveAuditIntegrity(input, client);
   await client.auditLog.create({
     data: {
       tableName: input.tableName,
@@ -33,6 +69,13 @@ export async function writeAuditLog(input: WriteAuditLogInput, client: AuditClie
       changedFields: input.changedFields ?? undefined,
       previousData: input.previousData ?? undefined,
       newData: input.newData ?? undefined,
+      // `?? undefined` (not null) so Prisma OMITS these columns from the INSERT
+      // when there's no hash. Combined with the missing-column SELECT in
+      // resolveAuditIntegrity being caught, this makes the code safe to run
+      // against a DB where the migration has not been applied yet — the audit
+      // row still writes; it just carries no integrity metadata.
+      hash: integrity.hash ?? undefined,
+      prevHash: integrity.prevHash ?? undefined,
     },
   });
 }

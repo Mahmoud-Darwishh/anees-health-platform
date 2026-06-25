@@ -31,6 +31,7 @@ export async function sendPortalClaimInviteForBooking(bookingRef: string): Promi
         phoneNumber: true,
         locale: true,
         inviteSentAt: true,
+        tenantId: true,
       },
     });
 
@@ -40,7 +41,8 @@ export async function sendPortalClaimInviteForBooking(bookingRef: string): Promi
 
     const normalizedPhone = `${booking.countryCode}${booking.phoneNumber}`;
     const claimPatient = await prisma.patient.findFirst({
-      where: { phone: normalizedPhone },
+      // Tenant-scoped: resolve the patient within the booking's tenant.
+      where: { phone: normalizedPhone, tenantId: booking.tenantId },
       orderBy: { createdAt: 'desc' },
       select: { code: true },
     });

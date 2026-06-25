@@ -64,9 +64,11 @@ export default function InstaPayPanel({ orderId, amount, currency, instapayHandl
         <span className={styles.handleValue} dir="ltr">{instapayHandle}</span>
       </div>
 
-      <a href={instapayUrl} target="_blank" rel="noopener noreferrer" className={styles.submit} style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: '1rem' }}>
-        {t('instapay.openApp')}
-      </a>
+      {instapayUrl ? (
+        <a href={instapayUrl} target="_blank" rel="noopener noreferrer" className={styles.submit} style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: '1rem' }}>
+          {t('instapay.openApp')}
+        </a>
+      ) : null}
 
       <ol className={styles.steps}>
         <li>{t('instapay.step1')}</li>

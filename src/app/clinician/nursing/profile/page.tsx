@@ -3,12 +3,15 @@ import { prisma } from '@/lib/db/prisma';
 import { StaffProfileCard } from '@/features/ehr/clinician-shared/StaffProfileCard';
 import { PublicProfileEditor } from '@/features/admin/profile-requests/PublicProfileEditor';
 import { getMyLatestProfileRequest } from '@/features/admin/profile-requests/data';
+import { AvailabilityManager } from '@/features/ehr/clinician-shared/availability/AvailabilityManager';
+import { canManageAvailability, getMyAvailability } from '@/features/ehr/clinician-shared/availability/data';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NurseProfilePage() {
   const { user } = await requireStaffCan('workspace.nursing.access');
   const latestProfileRequest = await getMyLatestProfileRequest(user.staffId);
+  const availability = canManageAvailability(user.staffRole) ? await getMyAvailability() : null;
   const staff = await prisma.staff.findUnique({
     where: { id: user.staffId },
     select: {
@@ -44,6 +47,8 @@ export default async function NurseProfilePage() {
       />
 
       <PublicProfileEditor latest={latestProfileRequest} />
+
+      {availability ? <AvailabilityManager availability={availability} /> : null}
     </section>
   );
 }

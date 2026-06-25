@@ -127,3 +127,53 @@ export async function getMedplumClient(): Promise<MedplumClient> {
   await ensureMedplumLogin(medplumClientState);
   return medplumClientState.proxiedClient;
 }
+
+/**
+ * Paginate a Medplum search to completeness (offset-based), accumulating every
+ * page up to a safety cap.
+ *
+ * Fixes silent truncation on clinical lists: a single fixed `_count` page could
+ * drop active records once a patient accumulates history — especially where
+ * entered-in-error rows are filtered client-side *after* the fetch, so corrected
+ * records can push live ones past the cap. For safety-critical lists (allergies,
+ * medications, problems) a missing row is a patient-safety hazard, not just a UX
+ * one. Reads should be sorted so the newest records survive if the cap is hit.
+ *
+ * Offset paging (vs. cursor/`Bundle.link`) is used deliberately: it composes with
+ * the resilient client proxy (which wraps every method and would break a
+ * `for await` over an async generator) and is more than adequate for the bounded
+ * per-patient lists this is applied to.
+ */
+export async function searchAllResources<T>(
+  resourceType: string,
+  query: Record<string, string | undefined>,
+  options: { pageSize?: number; maxResources?: number } = {},
+): Promise<T[]> {
+  const medplum = await getMedplumClient();
+  const pageSize = Math.max(1, Math.min(options.pageSize ?? 100, 200));
+  const maxResources = Math.max(1, options.maxResources ?? 2000);
+
+  const baseQuery: Record<string, string> = {};
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && key !== '_count' && key !== '_offset') {
+      baseQuery[key] = value;
+    }
+  }
+
+  const all: T[] = [];
+  let offset = 0;
+  while (all.length < maxResources) {
+    const page = (await medplum.searchResources(
+      resourceType as Parameters<typeof medplum.searchResources>[0],
+      { ...baseQuery, _count: String(pageSize), _offset: String(offset) },
+    )) as unknown as T[];
+
+    all.push(...page);
+    if (page.length < pageSize) {
+      break;
+    }
+    offset += pageSize;
+  }
+
+  return all.length > maxResources ? all.slice(0, maxResources) : all;
+}
