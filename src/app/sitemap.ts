@@ -13,6 +13,8 @@ import { getAllAreaSlugs } from '@/lib/seo/areas';
 import { getAllGuideSlugs } from '@/lib/seo/guides';
 import { getAllConditionSlugs } from '@/lib/seo/conditions';
 import { getAllGlossarySlugs } from '@/lib/seo/glossary';
+import { getAllBlogSlugs } from '@/lib/seo/blog';
+import { getAllCostExplainerSlugs } from '@/lib/seo/pricing-explainers';
 import { config } from '@/lib/config';
 
 // List of featured/prominent doctors for higher SEO priority
@@ -36,6 +38,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const guideSlugs = getAllGuideSlugs();
   const conditionSlugs = getAllConditionSlugs();
   const glossarySlugs = getAllGlossarySlugs();
+  const blogSlugs = getAllBlogSlugs();
+  const costSlugs = getAllCostExplainerSlugs();
 
   const entries: MetadataRoute.Sitemap = [];
 
@@ -96,6 +100,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: LAST_MODIFIED,
         changeFrequency: 'weekly',
         priority: 0.7,
+      },
+      {
+        url: `${baseUrl}/${locale}/blog`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'weekly',
+        priority: 0.65,
       },
       {
         url: `${baseUrl}/${locale}/conditions`,
@@ -186,6 +196,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: LAST_MODIFIED,
         changeFrequency: 'monthly',
         priority: 0.65,
+      });
+    }
+
+    // Per-service cost explainers (high-intent "how much does X cost")
+    for (const slug of costSlugs) {
+      entries.push({
+        url: `${baseUrl}/${locale}/pricing/${slug}`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      });
+    }
+
+    // Blog posts (dated awareness/education)
+    for (const slug of blogSlugs) {
+      entries.push({
+        url: `${baseUrl}/${locale}/blog/${slug}`,
+        lastModified: LAST_MODIFIED,
+        changeFrequency: 'monthly',
+        priority: 0.6,
       });
     }
 

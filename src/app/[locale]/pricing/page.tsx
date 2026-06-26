@@ -19,6 +19,7 @@ import { buildPricingMetadata } from '@/lib/seo/metadata';
 import { faqPageSchema, webPageSchema, breadcrumbSchema, aggregateOfferSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { bookingFaqs } from '@/lib/seo/faqs';
 import { getAllPackages, allTierPricesEgp, type PriceTier } from '@/lib/seo/pricing';
+import { getAllCostExplainers } from '@/lib/seo/pricing-explainers';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 
 export const revalidate = 3600;
@@ -42,6 +43,7 @@ export default async function PricingPage({
   const isAr = locale === 'ar';
 
   const packages = getAllPackages(locale);
+  const costGuides = getAllCostExplainers(locale);
 
   const num = (n: number) => n.toLocaleString('en-US');
   const tierPrice = (t: PriceTier) =>
@@ -153,6 +155,24 @@ export default async function PricingPage({
                 ? 'الأسعار إرشادية وتبدأ من القيم الموضّحة؛ يظهر السعر النهائي دائماً قبل تأكيد الحجز.'
                 : 'Prices are indicative and start from the values shown; the final price is always confirmed before you book.'}
             </p>
+          </div>
+        </section>
+
+        <section className="pb-2">
+          <div className="container">
+            <h2 className="h4 mb-3">{isAr ? 'أدلة التكلفة حسب الخدمة' : 'Cost guides by service'}</h2>
+            <p className="text-muted mb-3">
+              {isAr
+                ? 'كم تكلّف كل خدمة وما الذي يؤثّر في سعرها؟ اطّلع على دليل التكلفة المفصّل لكل خدمة:'
+                : 'How much does each service cost and what affects its price? See the detailed cost guide for each:'}
+            </p>
+            <ul className="row g-2 list-unstyled mb-0">
+              {costGuides.map((c) => (
+                <li key={c.slug} className="col-12 col-md-6">
+                  <Link href={`/${locale}/pricing/${c.slug}`}>{c.title}</Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 

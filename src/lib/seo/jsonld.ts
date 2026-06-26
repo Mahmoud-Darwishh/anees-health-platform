@@ -539,6 +539,36 @@ export function articleSchema(
   };
 }
 
+/**
+ * BlogPosting — the dated awareness/education stream (`/blog`). Distinct from
+ * `articleSchema` (`Article`) so the blog reads as a timely post type, not an
+ * evergreen guide.
+ */
+export function blogPostingSchema(
+  data: {
+    title: string;
+    description: string;
+    datePublished: string;
+    dateModified: string;
+    author: string;
+  },
+  locale: SupportedLocale,
+  url: string
+): JsonValue {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: data.title,
+    description: data.description,
+    datePublished: data.datePublished,
+    dateModified: data.dateModified,
+    inLanguage: bcp47(locale),
+    author: { '@type': 'Organization', name: data.author },
+    publisher: { '@id': orgId() },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+  };
+}
+
 /* ────────────────────────── ContactPage ─────────────────────────── */
 
 export function contactPageSchema(locale: SupportedLocale): JsonValue {

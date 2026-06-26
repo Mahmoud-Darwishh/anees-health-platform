@@ -33,6 +33,8 @@ import {
   getAllServiceLandingSlugs,
   getServiceLandingDoctors,
 } from '@/lib/seo/search-discovery';
+import { getCostExplainerSlugForService } from '@/lib/seo/pricing-explainers';
+import Link from 'next/link';
 import { config } from '@/lib/config';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 
@@ -96,6 +98,7 @@ export default async function ServiceLandingPage({
   if (!landing) notFound();
 
   const answer = getServiceAnswer(locale, slug);
+  const costSlug = getCostExplainerSlugForService(slug);
   const doctors = await getServiceLandingDoctors(locale, slug);
 
   const breadcrumbItems = [
@@ -147,6 +150,13 @@ export default async function ServiceLandingPage({
           <section className="pt-5 pb-0">
             <div className="container">
               <p className="lead mb-0">{answer}</p>
+              {costSlug ? (
+                <p className="mt-3 mb-0">
+                  <Link href={`/${locale}/pricing/${costSlug}`}>
+                    {isAr ? 'كم تكلفة هذه الخدمة؟ اطّلع على دليل التكلفة' : 'How much does this cost? See the cost guide'}
+                  </Link>
+                </p>
+              ) : null}
             </div>
           </section>
         ) : null}

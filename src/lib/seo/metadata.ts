@@ -37,8 +37,18 @@ function buildBaseMetadata(input: CommonInput): Metadata {
   const altPath = input.path.replace(/^\/(en|ar)/, `/${altLocale}`);
   const ogImage = input.ogImage || site.defaultOgImage;
 
+  // Title hygiene: strip any brand suffix a caller appended, then add the
+  // locale-correct brand back exactly once — skipping it entirely when the
+  // title already references the brand (home, doctors hub, service taglines).
+  // `{ absolute }` bypasses the root layout's `%s | Anees Health` template,
+  // which would otherwise DOUBLE the brand on every page (and force the English
+  // brand onto Arabic titles).
+  const brand = input.locale === 'ar' ? 'أنيس هيلث' : 'Anees Health';
+  const baseTitle = input.title.replace(/\s*\|\s*(?:Anees Health|أنيس هيلث)\s*$/u, '').trim();
+  const fullTitle = /(?:Anees|أنيس)/u.test(baseTitle) ? baseTitle : `${baseTitle} | ${brand}`;
+
   return {
-    title: input.title,
+    title: { absolute: fullTitle },
     description: input.description,
     keywords: input.keywords,
     alternates: {
@@ -49,15 +59,15 @@ function buildBaseMetadata(input: CommonInput): Metadata {
       type: 'website',
       url: canonical,
       siteName: brandLabel(input.locale),
-      title: input.title,
+      title: fullTitle,
       description: input.description,
       locale: bcp47(input.locale),
       alternateLocale: [bcp47(altLocale)],
-      images: [{ url: ogImage, width: 1200, height: 630, alt: input.title }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: fullTitle }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: input.title,
+      title: fullTitle,
       description: input.description,
       images: [ogImage],
     },
@@ -184,11 +194,11 @@ export function buildHomeMetadata(locale: SupportedLocale): Metadata {
 export function buildDoctorsMetadata(locale: SupportedLocale): Metadata {
   const copy = locale === 'ar'
     ? {
-        title: 'أطباء أنيس هيلث للزيارات المنزلية',
+        title: 'أطباء الزيارات المنزلية في مصر حسب التخصص',
         description: 'تصفح أطباء أنيس هيلث المرخصين للزيارات المنزلية والاستشارات في القاهرة الكبرى. تخصصات متعددة، رعاية في المنزل، حجز فوري.',
       }
     : {
-        title: 'Anees Health Doctors for Home Visits | Licensed Egyptian Physicians',
+        title: 'Home-Visit Doctors in Egypt by Specialty',
         description: 'Browse licensed Anees Health doctors offering home visits and consultations across Greater Cairo. Multiple specialties, at-home care, instant booking.',
       };
   return buildBaseMetadata({
@@ -320,8 +330,8 @@ export function buildFaqMetadata(locale: SupportedLocale): Metadata {
     locale,
     path: `/${locale}/faq`,
     title: locale === 'ar'
-      ? 'الأسئلة الشائعة — الرعاية الصحية المنزلية في مصر | أنيس هيلث'
-      : 'Frequently Asked Questions — Home Healthcare in Egypt | Anees Health',
+      ? 'أسئلة شائعة عن الرعاية الصحية المنزلية في مصر'
+      : 'Home Healthcare FAQs in Egypt',
     description: locale === 'ar'
       ? 'إجابات عن الأسئلة الشائعة حول الرعاية الصحية المنزلية في مصر مع أنيس هيلث: الخدمات، الأسعار، التغطية، التراخيص، الحجز والدفع، والخصوصية.'
       : 'Answers to common questions about home healthcare in Egypt with Anees Health: services, pricing, coverage, clinician licensing, booking, payment, and privacy.',
@@ -445,6 +455,38 @@ export function buildGuideMetadata(args: {
   });
 }
 
+/* ───────────────────────────── Blog ─────────────────────────────── */
+
+export function buildBlogMetadata(locale: SupportedLocale): Metadata {
+  return buildBaseMetadata({
+    locale,
+    path: `/${locale}/blog`,
+    title: locale === 'ar'
+      ? 'مدونة الرعاية الصحية المنزلية | أنيس هيلث'
+      : 'Home Healthcare Blog | Anees Health',
+    description: locale === 'ar'
+      ? 'مقالات توعوية وموسمية عن الرعاية الصحية المنزلية في مصر — علامات حاجة كبار السن للرعاية، ماذا تتوقع في الزيارة المنزلية، والحفاظ على المسنين في حرّ الصيف.'
+      : 'Awareness and seasonal articles on home healthcare in Egypt — signs an elderly parent needs care, what to expect from a home visit, and keeping seniors safe in the summer heat.',
+    keywords: locale === 'ar'
+      ? ['مدونة الرعاية المنزلية', 'علامات حاجة كبار السن للرعاية', 'رعاية المسنين في الصيف']
+      : ['home healthcare blog Egypt', 'signs elderly parent needs care', 'elderly summer heat care'],
+  });
+}
+
+export function buildBlogPostMetadata(args: {
+  locale: SupportedLocale;
+  slug: string;
+  title: string;
+  description: string;
+}): Metadata {
+  return buildBaseMetadata({
+    locale: args.locale,
+    path: `/${args.locale}/blog/${args.slug}`,
+    title: `${args.title} | Anees Health`,
+    description: args.description,
+  });
+}
+
 /* ───────────────────────────── Pricing ──────────────────────────── */
 
 export function buildPricingMetadata(locale: SupportedLocale): Metadata {
@@ -452,14 +494,28 @@ export function buildPricingMetadata(locale: SupportedLocale): Metadata {
     locale,
     path: `/${locale}/pricing`,
     title: locale === 'ar'
-      ? 'أسعار الرعاية الصحية المنزلية في مصر (2026) — أسعار شفافة | أنيس هيلث'
-      : 'Home Healthcare Prices in Egypt (2026) — Transparent Pricing | Anees Health',
+      ? 'أسعار الرعاية الصحية المنزلية في مصر (2026)'
+      : 'Home Healthcare Prices in Egypt (2026)',
     description: locale === 'ar'
       ? 'كيف تعمل أسعار أنيس هيلث: السعر يظهر بوضوح قبل تأكيد الحجز، بلا رسوم مفاجئة. تعرّف على نطاقات أسعار زيارات الأطباء والتمريض والعلاج الطبيعي والتحاليل في المنزل.'
       : 'How Anees Health pricing works: the price is shown before you confirm — no surprise fees. See indicative price ranges for doctor home visits, nursing, physiotherapy, and lab tests at home.',
     keywords: locale === 'ar'
       ? ['أسعار الرعاية المنزلية مصر', 'سعر زيارة طبيب منزلية', 'أسعار التمريض المنزلي', 'تكلفة علاج طبيعي منزلي']
       : ['home healthcare cost Egypt', 'doctor home visit price Egypt', 'home nursing cost Cairo', 'physiotherapy at home price'],
+  });
+}
+
+export function buildCostPageMetadata(args: {
+  locale: SupportedLocale;
+  slug: string;
+  title: string;
+  description: string;
+}): Metadata {
+  return buildBaseMetadata({
+    locale: args.locale,
+    path: `/${args.locale}/pricing/${args.slug}`,
+    title: `${args.title} | Anees Health`,
+    description: args.description,
   });
 }
 
@@ -492,8 +548,8 @@ export function buildAreaMetadata(args: {
     locale,
     path: `/${locale}/areas/${slug}`,
     title: locale === 'ar'
-      ? `رعاية صحية منزلية في ${name} — طبيب وتمريض وعلاج طبيعي | أنيس هيلث`
-      : `Home Healthcare in ${name}, Cairo — Doctor, Nursing & Physio Home Visits | Anees Health`,
+      ? `رعاية صحية منزلية في ${name} — طبيب وتمريض`
+      : `Home Healthcare in ${name} — Doctor & Nursing`,
     description: locale === 'ar'
       ? `احجز زيارات أطباء وتمريضاً وعلاجاً طبيعياً وتحاليل في المنزل في ${name} مع أنيس هيلث — كادر مرخّص وأسعار واضحة قبل الزيارة.`
       : `Book doctor home visits, home nursing, physiotherapy, and lab tests at home in ${name} with Anees Health — licensed clinicians and prices shown before the visit.`,
