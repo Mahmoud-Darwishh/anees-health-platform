@@ -29,6 +29,7 @@ import {
 import { servicesFaqs } from '@/lib/seo/faqs';
 import {
   getServiceLanding,
+  getServiceAnswer,
   getAllServiceLandingSlugs,
   getServiceLandingDoctors,
 } from '@/lib/seo/search-discovery';
@@ -94,6 +95,7 @@ export default async function ServiceLandingPage({
   const landing = getServiceLanding(locale, slug);
   if (!landing) notFound();
 
+  const answer = getServiceAnswer(locale, slug);
   const doctors = await getServiceLandingDoctors(locale, slug);
 
   const breadcrumbItems = [
@@ -140,6 +142,14 @@ export default async function ServiceLandingPage({
 
       <main id="main-content">
         <ContentHero title={landing.headline} lead={landing.description} />
+
+        {answer ? (
+          <section className="pt-5 pb-0">
+            <div className="container">
+              <p className="lead mb-0">{answer}</p>
+            </div>
+          </section>
+        ) : null}
 
         <section className="pt-5 pb-2">
           <div className="container">

@@ -55,6 +55,9 @@ function mapDoctor(row: PrismaDoctor, locale: 'en' | 'ar'): Doctor {
     areaCoverage: row.areaCoverage as string[],
     clinicDetails: row.clinicDetails as unknown as Doctor['clinicDetails'],
     testimonials: row.testimonials as unknown as Doctor['testimonials'],
+    externalProfiles: Array.isArray(row.externalProfiles)
+      ? (row.externalProfiles as string[]).filter((u): u is string => typeof u === 'string')
+      : [],
   };
 }
 
@@ -68,7 +71,9 @@ export const getDoctors = (locale: 'en' | 'ar'): Promise<Doctor[]> =>
   unstable_cache(
     async (loc: 'en' | 'ar'): Promise<Doctor[]> => {
       const rows = await prisma.doctor.findMany({
-        where: { isActive: true },
+        // isPublic gates consent to a public profile; isActive gates currently
+        // practising. A doctor must satisfy BOTH to appear on any public surface.
+        where: { isActive: true, isPublic: true },
         orderBy: { id: 'asc' },
       });
       return rows.map((row) => mapDoctor(row, loc));
@@ -82,7 +87,11 @@ export const getDoctors = (locale: 'en' | 'ar'): Promise<Doctor[]> =>
  */
 export async function getDoctorBySlug(slug: string, locale: 'en' | 'ar'): Promise<Doctor | null> {
   const row = await prisma.doctor.findUnique({ where: { slug } });
-  if (!row) return null;
+  // Treat an inactive OR non-public (unconsented) doctor as not-found so the
+  // profile page emits robots:{index:false} + notFound(). Without this, a direct
+  // hit to such a slug would still render a fully-indexable public profile
+  // even though generateStaticParams + the sitemap already exclude it.
+  if (!row || !row.isActive || !row.isPublic) return null;
   return mapDoctor(row, locale);
 }
 
@@ -91,7 +100,8 @@ export async function getDoctorBySlug(slug: string, locale: 'en' | 'ar'): Promis
  */
 export async function getAllDoctorSlugs(): Promise<string[]> {
   const rows = await prisma.doctor.findMany({
-    where: { isActive: true },
+    // Only active + publicly-consented doctors are statically built / sitemapped.
+    where: { isActive: true, isPublic: true },
     select: { slug: true },
   });
   return rows.map((r) => r.slug);

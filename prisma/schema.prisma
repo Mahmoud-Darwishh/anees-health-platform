@@ -1121,6 +1121,15 @@ model Doctor {
   educationAr           Json
 
   isActive              Boolean  @default(true)
+  // Consent to a PUBLIC, search-indexable profile. Defaults true (all existing
+  // doctors stay public). Set false to hide a clinician from every public
+  // surface — listing, grids, sitemap, static build, and the direct URL.
+  isPublic              Boolean  @default(true)
+  // Verified external profile URLs (Vezeeta / LinkedIn / syndicate page),
+  // emitted as schema.org `sameAs` to consolidate the clinician's identity for
+  // search + AI engines. Stored as Json (array of strings) to match the
+  // channels/languages/clinics convention on this model.
+  externalProfiles      Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 

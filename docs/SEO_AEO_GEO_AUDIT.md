@@ -76,7 +76,7 @@ Anees Health has a **senior-grade SEO foundation bolted to a near-empty content 
 | ID | Finding | Why it matters | Fix |
 |---|---|---|---|
 | **C1** | `/services` + `/specialties` mid-funnel built but unrouted (`search-discovery.ts` content + `buildServicesMetadata`/`buildSpecialtiesMetadata` + `servicesItemListSchema`/`medicalProcedureSchema`/`medicalSpecialtySchema` all exist; no route renders them) | Highest commercial-intent queries can't rank; AI has nothing to cite beyond home | Build the 4 routes using existing builders; re-add to sitemap |
-| **C2** | Sitewide links to 404s — `homeBanner.tsx:46` hero CTA + global Footer link to `/services` & `/specialties` | Primary hero CTA dead-ends; crawl signal leaks into 404s | Fixed when C1 ships; until then repoint to `/doctors` + `/coverage` |
+| **C2** | ✅ **RESOLVED** — Sitewide links to 404s (`homeBanner.tsx:46` hero CTA + Footer → `/services` & `/specialties`) | Primary hero CTA dead-ends; crawl signal leaks into 404s | Fixed when C1 shipped — the routes now exist and resolve 200. Doctor-profile `RelatedLinks` also re-linked to `/services` + `/specialties` (2026-06-26). |
 | **C3** | `/sitemap-doctors.xml` 404s — `src/app/sitemap-doctors.ts` is **not** a valid Next route (only `sitemap.ts` is special-cased), and it's redundant (`sitemap.ts` already lists doctors) | Google is told to fetch a URL that 404s | Delete `sitemap-doctors.ts` + the robots `/sitemap-doctors.xml` line |
 | **C4** | `config.api.baseUrl` falls back to `http://localhost:3000` if env unset (`config/index.ts:8`) | A missing prod env var silently makes every canonical/hreflang/sitemap/`@id` `localhost` → de-index. Live landmine during the Hostinger→OVH migration | Fail the prod build if `NEXT_PUBLIC_SITE_URL` is missing/not https |
 
@@ -85,7 +85,7 @@ Anees Health has a **senior-grade SEO foundation bolted to a near-empty content 
 | ID | Finding | Fix |
 |---|---|---|
 | **H1** | No `llms.txt` / `llms-full.txt` | Ship both (content in §14) — see realistic-expectations note |
-| **H2** | 5 rich schema builders never emitted (`medicalProcedureSchema`, `servicesItemListSchema`, `medicalSpecialtySchema`, `aggregateOfferSchema`, `howToBookingSchema`) | Activate when C1 ships; emit `aggregateOfferSchema` on `/pricing`, `howToBookingSchema` on how-to/services |
+| **H2** | ✅ **RESOLVED** — 5 rich schema builders never emitted | All 5 now emitted: `medicalProcedureSchema`/`servicesItemListSchema`/`medicalSpecialtySchema`/`howToBookingSchema` via the service+specialty routes; `aggregateOfferSchema` refactored to take `number[]` and wired into `/pricing` (replacing the inline duplicate) (2026-06-26). |
 | **H3** | `/about-us` uses a non-canonical `Organization` `@id` and sets `sameAs` to *founder* URLs (wrong) | Use `orgId()`/canonical schema; set `sameAs` to `site.socialProfiles` |
 | **H4** | Hardcoded "4.8★/1,000+" with a code comment about `AggregateRating` | Keep as plain visual copy, never mark up; build a real Google review corpus |
 | **H5** | Two FAQ sources can drift (visible `home.faqs` translations vs schema `faqs.ts`) | Render the visible FAQ from `faqs.ts` too (single source) |
@@ -97,7 +97,7 @@ Anees Health has a **senior-grade SEO foundation bolted to a near-empty content 
 - **M2** — Generic OG image (`about-img1.png`). Build a purpose-built 1200×630 EN/AR share card.
 - **M3** — Render-blocking third parties site-wide (Chatling, Bootstrap CDN, Slick, Clarity, FB pixel). Self-host Bootstrap CSS, reserve the Chatling launcher's space, defer Clarity/Pixel past LCP.
 - **M4** — Robots disallow not locale-aware (`/booking/` never matches `/en/booking`). Use `/*/booking/`, `/*/payment/`, `/*/portal/`. (PHI is auth-gated regardless.)
-- **M5** — No standalone `/faq` hub; breadcrumbs only on home (helper exists — emit everywhere).
+- **M5** — ✅ **RESOLVED** — `/faq` hub shipped; every new SEO hub + `[slug]` page now renders a visible `<Breadcrumb>` **and** emits `breadcrumbSchema` (verified across services/specialties/areas/pricing/faq/guides/conditions/glossary).
 
 ### 🟢 Low
 - Single prominent doctor in sitemap priority; expand as the roster grows.
@@ -507,11 +507,12 @@ The `Doctor` type (`src/lib/models/doctor.types.ts`) currently has **no `sameAs`
 - **Public/private consent flag** — today *every* doctor in the data source is publicly indexable; there is **no way to hide a clinician** who hasn't consented to a public profile. For a health platform this matters. Add an `isPublic`/`published` boolean and gate **three** places: `generateStaticParams` (don't build private profiles), `generateMetadata` (`robots: { index: false }` for private), and `sitemap.ts` (exclude private). **Owner decision needed: do all listed clinicians consent to public search profiles?**
 
 ### Implementation checklist
-- [ ] (Sprint 0) Route `/specialties` + `/services` → internal links to doctors *(in progress)*
-- [ ] Add `externalProfiles`/`sameAs` to the `Doctor` model + emit in `physicianSchema`
-- [ ] Add `practicesAt` to `physicianSchema`
-- [ ] Add `isPublic` flag → gate `generateStaticParams` + metadata `robots` + sitemap
-- [ ] Ensure each bio is unique + substantive
+- [x] (Sprint 0) Route `/specialties` + `/services` → internal links to doctors ✅ 2026-06-25
+- [x] Add `practicesAt` to `physicianSchema` ✅ 2026-06-26 (`{ '@id': orgId() }`, schema.org v24)
+- [x] **Close the doctor de-index hole** ✅ 2026-06-26 — `getDoctorBySlug` now filters `isActive`, so a deactivated doctor returns `null` → `notFound()` + `robots:{index:false}` on the direct-URL surface (previously a fully-indexable profile still rendered).
+- [x] Add `externalProfiles`/`sameAs` to the `Doctor` model + emit in `physicianSchema` ✅ 2026-06-26 — **mechanism shipped**: migration `20260626120000_add_doctor_seo_discoverability` adds `externalProfiles JSONB`; `mapDoctor` maps it; `physicianSchema` emits it as `sameAs` (omitted when empty). ⏳ **Owner data still needed**: each doctor's real, verified external-profile URLs (Vezeeta / LinkedIn / syndicate) — linking them publicly is itself a consent question, so the column ships empty until the owner supplies URLs.
+- [x] Add `isPublic`/consent flag → gate `generateStaticParams` + metadata `robots` + sitemap ✅ 2026-06-26 — **mechanism shipped**: `isPublic BOOLEAN NOT NULL DEFAULT true` added; `getDoctors`, `getAllDoctorSlugs`, and `getDoctorBySlug` all filter `isPublic` (so a private doctor disappears from the listing, grids, sitemap, static build, **and** the direct URL → `notFound()` + `noindex`). Defaults `true`, so **nothing changes until the owner marks a clinician private**. ⏳ **Owner decision**: which (if any) listed clinicians have NOT consented to a public, indexable profile → set `isPublic=false` for them.
+- [ ] Ensure each bio is unique + substantive *(content/data task — owner/editorial)*
 - [ ] Submit sitemap in Google Search Console (post-deploy)
 
 ---
@@ -546,12 +547,12 @@ The `Doctor` type (`src/lib/models/doctor.types.ts`) currently has **no `sameAs`
 - [x] **ENG** Build `/pricing` overview ✅ 2026-06-25 — **package-based model** (`src/lib/seo/pricing.ts`: named packages with monthly/annual/range tiers). Seeded with owner data (Sanad: Monthly from EGP 19,500, Annual from EGP 60,000; Home Physiotherapy 12-session program EGP 8,000–12,000); AggregateOffer auto-emits (lowPrice 8,000 / highPrice 60,000). Remaining packages show "Confirmed before booking" until priced. **⚠️ Owner to confirm Sanad monthly/annual + fill the other packages.**
 - [x] **ENG** Build location pages *(Cluster 3)* — shipped **10** Greater-Cairo neighbourhood pages (Maadi, New Cairo, Zamalek, Heliopolis, Nasr City, Mohandessin, Dokki, Sheikh Zayed, 6th October, Giza) + `/areas` hub ✅ 2026-06-25
 - [x] **ENG/MKT** Build the 1200×630 OG card *(M2)* ✅ 2026-06-25; ~~fix sitemap `lastModified`~~ ✅ done in Sprint 0
-- [ ] **MKT** Seed the AI-search brand summary into homepage meta + About + `llms.txt`
+- [x] **MKT** Seed the AI-search brand summary into homepage meta + About + `llms.txt` ✅ 2026-06-26 — set as the machine-readable `MedicalOrganization.description` in the site-wide org JSON-LD (emitted on the homepage + every page) **and** the About page's `AboutPage → mainEntity` description (`founders_search_statement`), bilingual; `llms.txt` already carried it. *(Kept out of the HTML `<meta name="description">` deliberately — it's ~80 words, too long for a SERP snippet; the entity `description` field is the correct, AI-parsed home for it.)*
 - **Acceptance:** GBP live + first reviews; `/pricing` + `/faq` indexed; 4 location pages ranking-eligible; pricing copy and `AggregateOffer` driven by one source.
 
 ### Sprint 2 — "Authority & GEO" (Wave 2)
 - [x] **ENG** Stand up the content engine — shipped as `/guides` + `/guides/[slug]` (activates `articleSchema`); content lives in `src/lib/seo/guides.ts` (no MDX dependency) ✅ 2026-06-25
-- [~] **MKT/CMO** Editorial content — **3 flagship bilingual guides shipped** (how-to: choosing home nursing; comparison: home care vs nursing home; pillar: complete 2026 guide), GEO-optimized (clear definitions, a cited market statistic, chunked sections, FAQ). *Remaining: the rest of the comparison/how-to/listicle calendar + condition pages.*
+- [x] **MKT/CMO** Editorial content — **13 bilingual guides shipped** ✅ 2026-06-26: Cluster 5 comparison/best-in-Cairo (home-care-vs-nursing-home, best-home-nursing-cairo, best-home-physiotherapy-cairo, home-visit-vs-clinic, home-nursing-vs-private-nurse) + Cluster 6 how-to (choosing home nursing, how-to-book, prepare-home-after-surgery, care-for-elderly-parent-at-home) + seasonal/high-intent (night/emergency, IV-drip, Ramadan-diabetes) + the pillar 2026 guide. GEO-optimized with web-verified cited statistics + named authorities. *Remaining (optional): further long-tail listicles as the roster/areas grow.*
 - [x] **ENG** Location pages — all 10 areas (incl. Sheikh Zayed, 6th October, Giza) shipped in Sprint 1 ✅; per-type sitemaps + index still optional (single sitemap is fine at current scale)
 - [ ] **OWNER/MKT** Directory citations (Vezeeta, Dalili Medical, Tebcan, Yellow Pages) with the canonical NAP; Crunchbase + Wikidata entities
 - [x] **ENG** CWV pass *(M3)* ✅ 2026-06-25 — self-hosted Bootstrap CSS + JS (pinned v5.3.0, same-origin, dead jsdelivr preconnect removed, `/assets/js` cache header added). *Found the rest was already optimal:* Clarity + Meta Pixel already `lazyOnload`, Bootstrap JS `afterInteractive`, Chatling lazy, fonts self-hosted with `display: swap`, preconnects present. (Optional follow-up: drop the now-unused `cdn.jsdelivr.net` from the CSP allow-list.)
@@ -578,16 +579,16 @@ The `Doctor` type (`src/lib/models/doctor.types.ts`) currently has **no `sameAs`
 
 ## 19. Master priority checklist
 
-**Do-now (highest ROI first):**
-- [ ] Route `/services` + `/specialties` (turn on built code) — *largest organic gain*
-- [ ] Fix the homepage "Services" 404 CTA
-- [ ] Delete `sitemap-doctors.ts` + the robots 404 line; make robots locale-aware
-- [ ] Config fail-fast on missing prod `NEXT_PUBLIC_SITE_URL` (before OVH migration)
-- [ ] Ship `llms.txt` (+ generate `llms-full.txt`)
-- [ ] **Create a bilingual Google Business Profile** + start collecting reviews
-- [ ] Redeploy (live site lags code)
-- [ ] Fix `/about-us` entity `@id` + `sameAs`
-- [ ] Decide the `aneesclinic.com` question
+**Do-now (highest ROI first):** *(✅ = shipped in code; ⏳ = owner action still required)*
+- [x] Route `/services` + `/specialties` (turn on built code) — *largest organic gain* ✅ 2026-06-25
+- [x] Fix the homepage "Services" 404 CTA ✅ 2026-06-25
+- [x] Delete `sitemap-doctors.ts` + the robots 404 line; make robots locale-aware ✅ 2026-06-25
+- [x] Config fail-fast on missing prod `NEXT_PUBLIC_SITE_URL` (before OVH migration) ✅ 2026-06-25
+- [x] Ship `llms.txt` (+ generate `llms-full.txt`) ✅ 2026-06-25
+- [ ] ⏳ **OWNER — Create a bilingual Google Business Profile** + start collecting reviews *(biggest transactional lever; account-owner task)*
+- [ ] ⏳ **OWNER — Redeploy** (live site still lags the code)
+- [x] Fix `/about-us` entity `@id` + `sameAs` ✅ 2026-06-25
+- [x] Decide the `aneesclinic.com` question ✅ 2026-06-25 (owner confirmed it's the stopped predecessor brand → 301 plan documented in §11; the redirect itself is a ⏳ registrar task)
 
 **Testing checklist:** Rich Results Test each new page · `sitemap.xml` 200 with all URLs · `robots.txt` blocks `/en/booking` & `/en/portal` · canonicals/hreflang resolve to https in prod · Search Console: submit sitemap + watch coverage · PageSpeed/CrUX on home + a service page · GBP verified + categories set.
 
@@ -700,7 +701,60 @@ The `Doctor` type (`src/lib/models/doctor.types.ts`) currently has **no `sameAs`
 - *Quality gates:* typecheck clean · logical-CSS guard passed · color guard clean · ESLint 0 · 59/59 tests.
 - **Remaining migration (staged):** article/[slug] pages + pricing table + areas hub (typography/utility classes), the shared chrome (`Header`/`Footer`/`Breadcrumb`/`RelatedLinks` — affects every public page), the doctors grid (Bootstrap-JS offcanvas/dropdown → Radix), home sections, then admin (21) / portal (8) / clinician (3). **Only after all 76 are converted + verified can Bootstrap (CSS + JS + CSP entries) be removed.**
 
-**Now open:** continue the Bootstrap migration (with real-browser verification), complete `pricing.ts` packages (owner numbers), seasonal editorial content. **Owner tasks:** Google Business Profile + reviews, canonical NAP, the `aneesclinic.com` 301, directory citations, redeploy.
+### 2026-06-25 — SEO/AEO/GEO content phase: high-intent + seasonal guides — ✅ typecheck + ESLint + tests + verified
+- **4 new bilingual guides** added to the engine (`guides.ts`), targeting the high-intent + seasonal demand the market research flagged as under-served:
+  1. *How to Book a Doctor Home Visit in Egypt (Step by Step)* — transactional how-to.
+  2. *Night & Emergency Doctor Home Visits in Cairo* — winter/urgent demand spike, with a clear "when to call an ambulance instead" safety section (E-E-A-T).
+  3. *IV Drip & Hydration at Home in Cairo* — summer/dehydration demand, with a medical-safety caveat (IV must be doctor-indicated).
+  4. *Managing Diabetes at Home During Ramadan* — Ramadan-specific, culturally relevant (glucose monitoring, medication timing, when to break the fast).
+- GEO-optimized (clear structure, safety notes, FAQ); each emits `Article` + `FAQ` + `Breadcrumb` and auto-appears on the `/guides` hub and sitemap.
+- *Verified:* `/en/guides` now lists **7 guides**; new pages 200 with FAQ schema; `/ar/guides/diabetes-care-ramadan` 200 (Arabic renders); sitemap carries 14 guide URLs. typecheck clean · ESLint 0 · 59/59 tests.
+
+### 2026-06-26 — Audit re-verification + next-phase batch (doctor discoverability, AEO answer blocks, GEO citations, comparison guides) — ✅ typecheck + ESLint(0 err) + 59/59 tests
+- **Re-audited the doc against the repo** (multi-agent: 6 dimension auditors + synthesis). Verdict: the doc is broadly accurate; found **one real bug** + three narrow overstatements + two stale-but-safe rows (now reconciled above).
+- **🐛 Fixed the doctor de-index hole** *(new, medium)* — `getDoctorBySlug` (`src/lib/api/doctors.ts`) now filters `isActive`. Previously `generateStaticParams` + sitemap excluded inactive doctors, but a direct hit to an inactive slug still rendered a fully-indexable profile (`index:true`). Now inactive → `null` → `notFound()` + `robots:{index:false}`. The §16 consent leak on the direct-URL surface is closed.
+- **`practicesAt` added to `physicianSchema`** *(§16)* — `{ '@id': orgId() }` alongside `worksFor`/`memberOf` (schema.org v24 recommended Physician property → entity consolidation + name-search ranking).
+- **Doctor-profile `RelatedLinks` re-linked** to `/services` + `/specialties` (stale "those routes 404" comment removed — they exist now), rejoining doctor pages to the internal-link mesh.
+- **§15 front-loaded answer blocks rendered** — new `SERVICE_ANSWER` map + `getServiceAnswer()` in `search-discovery.ts` (no baked-in prices, so no drift) renders a 40–80-word quotable direct answer under the hero on every `/services/[slug]`; a matching answer block added to `/pricing`. This is the AEO/featured-snippet + AI-citation lever the audit designed but had never put in the DOM.
+- **GEO citations added** *(top §6 lever: statistics +33%, sources +28%)* — one dated, sourced statistic + named authority woven into all **4 conditions** (NIH on the stroke recovery window; WHO on surgical-site infection; IDF + diabetic-foot research on ulcer/amputation risk; WHO on falls) and **3 guides** (IDF on Egypt's diabetes burden for the Ramadan guide; WHO oral-rehydration-first for the IV-drip guide; the "time is brain" 1.9M-neurons/min figure + the FAST stroke check for the night/emergency guide), EN + AR. *(The procedural `how-to-book` guide was deliberately left without a forced statistic — a citation there would not improve the page.)*
+- **4 new Cluster 5 comparison guides** (bilingual, GEO-structured, **no fabricated competitor rankings** — criteria-based and honest): `best-home-nursing-cairo`, `best-home-physiotherapy-cairo`, `home-visit-vs-clinic`, `home-nursing-vs-private-nurse`. Guides corpus is now **11 per locale**.
+- **Area pages now feed the link mesh** — `/areas/[area]` renders a matched home-visit `DoctorMiniGrid` (capped at 12) + `physiciansItemListSchema`, closing the "doctor home visit in `<area>`" internal-link dead-end.
+- **Dead `aggregateOfferSchema` revived** — refactored to take `number[]` (returns `null` when no price is set) and wired into `/pricing`, replacing the inline duplicate (kills the two-path drift risk). Removed the now-unused `BookingPriceMap` import from `jsonld.ts`. *(§3 H2 is now genuinely 5/5 builders emitted.)*
+- **Housekeeping** — reworded the `homeBanner.tsx` trust-strip comment so it no longer signals intent to mark up a self-serving `AggregateRating` *(H4)*; fixed the footer's visible "Specialities" → "Specialties" to match the route/header. Reconciled the §3 table (C2/H2/M5 marked resolved) + the §16 checklist.
+
+### 2026-06-26 — Doctor search discoverability + DB migration (§16) — ✅ migration applied to prod · typecheck + ESLint + 59/59 tests
+- **DB migration `20260626120000_add_doctor_seo_discoverability`** (additive, non-destructive) — applied to the production Postgres via `prisma migrate deploy` (the safe, non-resetting path; migration state was clean beforehand and is clean after). Two new columns on `doctors`:
+  - `isPublic BOOLEAN NOT NULL DEFAULT true` — public-profile **consent** flag. Default `true`, so every existing doctor stays exactly as it is; no behaviour change until a clinician is explicitly marked private.
+  - `externalProfiles JSONB` (nullable) — verified external-profile URLs, emitted as schema.org `sameAs`.
+  - *Verified*: `information_schema` confirms both columns + the `true` default; `migrate status` = up to date.
+- **`isPublic` gating wired through the single data layer** — `getDoctors`, `getAllDoctorSlugs`, and `getDoctorBySlug` (`src/lib/api/doctors.ts`) now filter `isPublic: true`. One flag therefore hides a non-consented clinician from **every** public surface at once: the `/doctors` listing, the service/specialty/area doctor grids, the sitemap, the static build (`generateStaticParams`), and the direct profile URL (`getDoctorBySlug` → `null` → `notFound()` + `robots:{index:false}`).
+- **`externalProfiles` → `sameAs`** — `mapDoctor` maps the column; `physicianSchema` emits a `sameAs` array when URLs exist (omitted when empty, which is the current state until the owner supplies verified URLs). `practicesAt` (shipped earlier today) + `sameAs` together are the §16 identity-consolidation pair that strengthens name-search ranking + Knowledge-Panel eligibility.
+- **Owner-data note:** the plumbing is live and safe; it carries no data yet. `externalProfiles` stays empty until the owner provides each doctor's verified URLs, and every doctor stays public until the owner decides which (if any) to set `isPublic=false`.
+
+### 2026-06-26 — Condition deep-dives expanded (Cluster 7) — ✅ typecheck + ESLint + 59/59 tests
+- **3 new bilingual condition pages** added to `conditions.ts` (now **7 per locale**), each GEO-structured with one web-verified cited statistic + named authority, and cross-linked to the relevant home services:
+  1. *Dementia & Alzheimer’s Care at Home* (WHO: 55M+ people live with dementia worldwide, 60%+ in LMICs) → elderly care + nursing.
+  2. *Bedsore (Pressure Ulcer) Care at Home* (EPUAP/NPIAP guidelines: reposition ≥ every 2h; most are preventable) → nursing + post-op.
+  3. *COPD & Respiratory Care at Home* (WHO: 3rd leading cause of death worldwide; ~90% of under-70 deaths in LMICs) → doctor visit + nursing.
+- All emit `MedicalWebPage` + `Article` + `FAQPage` + `Breadcrumb`, auto-route via `/conditions/[slug]`, and auto-appear on the hub + sitemap (driven by `getAllConditionSlugs`).
+
+### 2026-06-26 — Cluster 6 completed (how-to guides) — ✅ typecheck + verified
+- **2 final how-to guides** added to `guides.ts` (now **13 per locale**), completing §13 Cluster 6:
+  1. *How to Prepare Your Home for Recovery After Surgery* — discharge-prep checklist (cites WHO surgical-site-infection burden).
+  2. *How to Care for an Elderly Parent at Home in Egypt* — the sandwich-generation caregiver framework (cites the WHO projection that 1 in 6 people will be 60+ by 2030).
+- Both bilingual, GEO-structured (definition → checklist → FAQ), `Article` + `FAQ` + `Breadcrumb` schema, auto-routed + sitemapped. *Verified: both 200 EN + AR with the cited authority; hub lists all 13.*
+
+### 2026-06-26 — AI-search brand summary seeded (§12) — ✅ typecheck + valid JSON + verified
+- The §12 AI-search brand summary (doctor-founded + continuous-coordinated-care differentiator) is now the **machine-readable entity description** in two places: the site-wide `organizationSchema.description` (`jsonld.ts`, emitted on the homepage and every page) and the About page's `AboutPage → mainEntity` description (`founders_search_statement` in `messages/en|ar.json`, which previously held only a one-line founder sentence). Bilingual; `llms.txt` already carried it. *Verified: both phrases present in `/en` and `/en/about-us` JSON-LD.*
+
+### 2026-06-26 — Condition library expanded to 10 (Cluster 7) — ✅ typecheck + ESLint + verified
+- **3 more bilingual condition pages** added to `conditions.ts` (now **10 per locale**), each with a web-verified WHO statistic + named authority, cross-linked to the relevant services:
+  1. *High Blood Pressure (Hypertension) Care at Home* (WHO: 1.28 billion adults aged 30–79 have hypertension; ~half unaware) → doctor visit + nursing.
+  2. *Parkinson’s Disease Care at Home* (WHO: 8.5M+ people, doubled in 25 years) → physiotherapy + nursing.
+  3. *Cancer & Palliative Care at Home* (WHO: 56.8M need palliative care/yr, only ~14% receive it) → palliative-chronic care + nursing.
+- The full condition library now covers the highest-intent elderly/chronic/post-op verticals: stroke, post-surgery wounds, diabetic foot, fall prevention, dementia, bedsores, COPD, hypertension, Parkinson’s, cancer/palliative. *Verified: all 3 render 200 EN + AR with the cited authority; hub lists 10.*
+
+**Now open (code):** complete `pricing.ts` packages (owner numbers) · the Bootstrap → design-system migration (Phase 1 done; staged, needs real-browser verification). *(Redundant/declined, building thin duplicates would hurt SEO: a separate `/blog` — `/guides` already is the content engine; per-service `/pricing/*-cost` pages — duplicate the service answer-blocks and need owner prices.)* **Owner tasks:** Google Business Profile + reviews, canonical NAP, the `aneesclinic.com` 301, directory citations, **supply doctor external-profile URLs + decide any non-public clinicians**, redeploy.
 
 ---
 

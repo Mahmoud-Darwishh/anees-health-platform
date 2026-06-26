@@ -67,6 +67,8 @@ export interface Doctor {
   areaCoverage: string[];
   clinicDetails: DoctorClinicDetails[];
   testimonials: DoctorTestimonial[];
+  /** Verified external profile URLs (Vezeeta / LinkedIn / syndicate) → schema.org `sameAs`. */
+  externalProfiles?: string[];
 }
 
 /**

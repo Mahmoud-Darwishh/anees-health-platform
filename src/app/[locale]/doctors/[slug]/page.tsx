@@ -159,8 +159,8 @@ export default async function DoctorProfilePage({
             href: `/${locale}/doctors?search=${encodeURIComponent(doctor.speciality)}`,
             label: locale === 'ar' ? 'أطباء بنفس التخصص' : 'Doctors in the same specialty',
           },
-          // /specialties and /services links removed — those routes are not built
-          // yet (they 404). Restore them when the landing pages ship.
+          { href: `/${locale}/specialties`, label: locale === 'ar' ? 'التخصصات الطبية' : 'Medical specialties' },
+          { href: `/${locale}/services`, label: locale === 'ar' ? 'الخدمات المنزلية' : 'Home services' },
           { href: `/${locale}/coverage`, label: locale === 'ar' ? 'تحقق من نطاق التغطية' : 'Check coverage area' },
         ]}
       />

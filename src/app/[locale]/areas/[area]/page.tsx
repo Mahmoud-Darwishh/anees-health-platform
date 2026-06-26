@@ -17,12 +17,13 @@ import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
 import ContentHero from '@/components/common/content/ContentHero';
 import ContentCard from '@/components/common/content/ContentCard';
+import DoctorMiniGrid from '@/features/doctors/components/DoctorMiniGrid';
 import { serviceIcon } from '@/lib/seo/icons';
 import { buildAreaMetadata } from '@/lib/seo/metadata';
-import { webPageSchema, breadcrumbSchema, faqPageSchema, renderJsonLd } from '@/lib/seo/jsonld';
+import { webPageSchema, breadcrumbSchema, faqPageSchema, physiciansItemListSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { coverageFaqs } from '@/lib/seo/faqs';
 import { getArea, getAllAreaSlugs } from '@/lib/seo/areas';
-import { getAllServiceLandingSlugs, getServiceLanding } from '@/lib/seo/search-discovery';
+import { getAllServiceLandingSlugs, getServiceLanding, getServiceLandingDoctors } from '@/lib/seo/search-discovery';
 import { config } from '@/lib/config';
 import { site, bcp47, type SupportedLocale } from '@/lib/seo/site';
 
@@ -67,6 +68,11 @@ export default async function AreaLandingPage({
     .map((s) => getServiceLanding(locale, s))
     .filter((s): s is NonNullable<typeof s> => Boolean(s));
 
+  // All Anees doctors serve Greater Cairo today, so the home-visit roster is the
+  // same per area. Surface a capped grid to funnel internal-link equity from the
+  // local-intent "doctor home visit in <area>" query down to doctor profiles.
+  const areaDoctors = (await getServiceLandingDoctors(locale, 'doctor-at-home')).slice(0, 12);
+
   const heroLead = isAr
     ? `توفّر أنيس هيلث رعاية صحية منزلية متكاملة في ${area.name} (${area.governorate}) — زيارات أطباء، تمريض منزلي، علاج طبيعي، وتحاليل في المنزل — بكادر طبي مرخّص وأسعار واضحة قبل الزيارة، وتنسيق من منسق واحد لكل حالة.`
     : `Anees Health provides complete home healthcare in ${area.name} (${area.governorate}) — doctor home visits, home nursing, physiotherapy, and lab tests at home — with licensed clinicians, prices shown before the visit, and one coordinator per case.`;
@@ -90,6 +96,8 @@ export default async function AreaLandingPage({
     },
   };
   const faq = faqPageSchema(coverageFaqs[locale]);
+  const doctorsList =
+    areaDoctors.length > 0 ? physiciansItemListSchema(locale, areaDoctors, (d) => d.slug) : null;
   const webpage = webPageSchema({
     locale,
     path: `/${locale}/areas/${slug}`,
@@ -105,6 +113,9 @@ export default async function AreaLandingPage({
       <Script id="area-webpage-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(webpage) }} />
       <Script id="area-faq-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(faq) }} />
       <Script id="area-breadcrumb-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(crumbs) }} />
+      {doctorsList && (
+        <Script id="area-doctors-schema" type="application/ld+json" dangerouslySetInnerHTML={{ __html: renderJsonLd(doctorsList) }} />
+      )}
 
       <Header />
       <Breadcrumb
@@ -142,6 +153,17 @@ export default async function AreaLandingPage({
             </div>
           </div>
         </section>
+
+        <DoctorMiniGrid
+          doctors={areaDoctors}
+          locale={locale}
+          heading={isAr ? `أطباء زيارات منزلية يخدمون ${area.name}` : `Home-visit doctors serving ${area.name}`}
+          emptyText={
+            isAr
+              ? 'سيتولّى منسق أنيس تعيين الطبيب المناسب لمنطقتك.'
+              : 'An Anees coordinator will assign the right doctor for your area.'
+          }
+        />
 
         <section className="py-4">
           <div className="container">

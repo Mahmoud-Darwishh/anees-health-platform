@@ -12,7 +12,6 @@
 
 import { site, bcp47, absoluteUrl, brandLabel, type SupportedLocale } from './site';
 import type { Doctor } from '@/lib/models/doctor.types';
-import type { BookingPriceMap } from '@/lib/models/booking.types';
 import type { CoverageAreaFeature } from './coverage';
 import type { FaqItem } from './faqs';
 
@@ -76,10 +75,13 @@ export function organizationSchema(locale: SupportedLocale = 'en'): JsonValue {
     },
     image: site.defaultOgImage,
     foundingDate: `${site.foundedYear}-01-01`,
+    // AI-search brand summary (audit §12) — the canonical machine-readable
+    // "what is Anees" entity description AI engines parse. Leads with the
+    // doctor-founded + continuous-coordinated-care differentiator.
     description: localised(
       locale,
-      'Anees Health is an Egyptian home healthcare platform offering licensed doctor home visits, home nursing, home physiotherapy, lab tests at home, and chronic-disease care coordination across Greater Cairo and beyond.',
-      'أنيس هيلث منصة رعاية صحية منزلية في مصر تقدم زيارات أطباء منزلية وتمريضاً منزلياً وعلاجاً طبيعياً منزلياً وتحاليل في المنزل وتنسيقاً لرعاية الأمراض المزمنة عبر القاهرة الكبرى ومحيطها.'
+      'Anees Health is Egypt’s doctor-founded home healthcare platform offering doctor home visits, home nursing, home physiotherapy, and at-home lab tests for elderly, post-operative, and chronic-care patients. Unlike doctor-booking directories or one-off nursing agencies, Anees provides continuous, coordinated care: every visit is recorded in a real hospital-grade electronic medical record, every clinician is licensed and credential-verified, pricing is transparent before the visit, and a dedicated coordinator manages each case end to end. Fully bilingual (Arabic and English).',
+      'أنيس هيلث منصة رعاية صحية منزلية أسّسها أطباء في مصر، تقدّم زيارات أطباء منزلية وتمريضاً منزلياً وعلاجاً طبيعياً منزلياً وتحاليل في المنزل لكبار السن ومرضى ما بعد العمليات والحالات المزمنة. وبخلاف أدلة حجز الأطباء أو وكالات التمريض المنفردة، توفّر أنيس رعاية مستمرة ومنسّقة: كل زيارة تُسجَّل في ملف طبي إلكتروني بمستوى المستشفيات، وكل كادر طبي مرخّص ومُتحقَّق من اعتماده، والأسعار واضحة قبل الزيارة، ومنسّق مخصّص يدير كل حالة من البداية للنهاية. الخدمة ثنائية اللغة بالكامل (العربية والإنجليزية).'
     ),
     medicalSpecialty: [
       'PrimaryCare',
@@ -331,6 +333,10 @@ export function physicianSchema(
     });
   }
 
+  const externalProfiles = (doctor.externalProfiles ?? []).filter(
+    (u): u is string => typeof u === 'string' && u.length > 0
+  );
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Physician',
@@ -339,12 +345,19 @@ export function physicianSchema(
     description: doctor.bio,
     image: doctor.image?.startsWith('http') ? doctor.image : absoluteUrl(doctor.image || ''),
     url,
+    // Consolidate the clinician's identity across the web (Vezeeta / LinkedIn /
+    // syndicate). Omitted when no verified external profiles are recorded.
+    sameAs: externalProfiles.length > 0 ? externalProfiles : undefined,
     gender: doctor.gender,
     knowsLanguage: doctor.languages,
     medicalSpecialty: doctor.speciality,
     jobTitle: doctor.professionalTitle,
     worksFor: { '@id': orgId() },
     memberOf: { '@id': orgId() },
+    // schema.org v24 recommended Physician property — links the clinician to the
+    // MedicalOrganization they practise at (search/AI engines reward this for
+    // entity consolidation and name-search ranking).
+    practicesAt: { '@id': orgId() },
     address: {
       '@type': 'PostalAddress',
       addressLocality: doctor.location || 'Cairo',
@@ -475,20 +488,24 @@ export function servicesItemListSchema(
   };
 }
 
+/**
+ * AggregateOffer over a flat list of EGP prices (e.g. the published care-package
+ * tier prices). Returns null when no price is published, so the caller emits no
+ * empty/placeholder offer. Single source for the /pricing AggregateOffer.
+ */
 export function aggregateOfferSchema(
   locale: SupportedLocale,
-  prices: BookingPriceMap
-): JsonValue {
-  const values = Object.values(prices).filter((v) => v > 0);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  pricesEgp: number[]
+): JsonValue | null {
+  const values = pricesEgp.filter((v) => v > 0);
+  if (values.length === 0) return null;
   return {
     '@context': 'https://schema.org',
     '@type': 'AggregateOffer',
-    name: locale === 'ar' ? 'أسعار خدمات أنيس هيلث' : 'Anees Health service pricing',
+    name: locale === 'ar' ? 'أسعار باقات وخدمات أنيس هيلث' : 'Anees Health package & service pricing',
     priceCurrency: 'EGP',
-    lowPrice: min,
-    highPrice: max,
+    lowPrice: Math.min(...values),
+    highPrice: Math.max(...values),
     offerCount: values.length,
     seller: { '@id': orgId() },
     areaServed: { '@type': 'Country', name: 'Egypt' },

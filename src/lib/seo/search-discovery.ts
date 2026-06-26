@@ -156,6 +156,51 @@ const SERVICE_COPY: Record<SupportedLocale, Record<string, ServiceLandingContent
   },
 };
 
+/**
+ * Front-loaded 40–80 word direct-answer block per service — the AEO /
+ * featured-snippet + AI-citation lever (audit §15). Self-contained and quotable,
+ * leading with "X is…". No prices are baked in (pricing is always confirmed in
+ * the booking flow), so these never drift against the package data.
+ */
+const SERVICE_ANSWER: Record<SupportedLocale, Record<string, string>> = {
+  en: {
+    'doctor-at-home':
+      'A doctor home visit from Anees Health brings a licensed physician to the patient’s home anywhere in Greater Cairo. The doctor takes a history, examines the patient, diagnoses, prescribes, and can order home lab tests — with the price shown before you confirm and no surprise fees at the door. Routine visits are usually same-day, and you choose the time at booking.',
+    'physiotherapy-at-home':
+      'Home physiotherapy from Anees Health sends a licensed physiotherapist to the patient’s home across Greater Cairo for post-operative rehabilitation, stroke and neurological recovery, orthopedic recovery, and elderly balance and fall-prevention training. Sessions can be booked one at a time or as a structured rehabilitation program, with the price confirmed before booking.',
+    'elderly-care-at-home':
+      'Elderly care at home from Anees Health combines licensed nursing, doctor follow-ups, physiotherapy, and lab monitoring for an older parent — coordinated by one case coordinator who keeps the family updated. It covers medication management, mobility support, chronic-disease follow-up, and post-hospital recovery across Greater Cairo, available as single visits or an ongoing monthly package.',
+    'home-nursing':
+      'Home nursing from Anees Health provides licensed nurses at the patient’s home across Greater Cairo for wound and pressure-sore care, injections, IV therapy, catheter and feeding-tube care, vitals monitoring, and post-operative support. Care is available by the visit, by the shift, or as an ongoing monthly package, with the price confirmed before you book.',
+    'lab-tests-at-home':
+      'Lab tests at home from Anees Health let a trained phlebotomist collect blood and other samples at the patient’s home across Greater Cairo. Samples are processed by accredited laboratories and results returned digitally, with a doctor review available on request — ideal for elderly, bedridden, and post-operative patients. The price is shown before you confirm.',
+    'post-operative-care':
+      'Post-operative care at home from Anees Health helps patients recover safely after surgery across Greater Cairo — wound and drain care, pain and medication management, nursing visits, and physiotherapy, all coordinated by one care coordinator. It lowers the risk of hospital readmission and infection exposure, and the price is confirmed before booking.',
+    'palliative-chronic-care':
+      'Palliative and chronic-disease care at home from Anees Health gives ongoing support to patients with diabetes, hypertension, cardiac, respiratory, or advanced illness across Greater Cairo — symptom control, nursing, medication management, and regular doctor follow-up under one coordinator. Care adapts as the patient’s needs change, with the price confirmed before booking.',
+  },
+  ar: {
+    'doctor-at-home':
+      'زيارة الطبيب المنزلية من أنيس هيلث تنقل طبيباً مرخصاً إلى منزل المريض في أي مكان بالقاهرة الكبرى. يأخذ الطبيب التاريخ المرضي ويفحص المريض ويشخّص ويصف العلاج ويمكنه طلب تحاليل منزلية، مع ظهور السعر قبل التأكيد وبلا رسوم مفاجئة عند الباب. وتُجدول الزيارات الاعتيادية غالباً في نفس اليوم، وتختار أنت الموعد عند الحجز.',
+    'physiotherapy-at-home':
+      'العلاج الطبيعي المنزلي من أنيس هيلث يرسل أخصائي علاج طبيعي مرخصاً إلى منزل المريض في القاهرة الكبرى للتأهيل بعد العمليات، وتعافي الجلطات والحالات العصبية، والتعافي بعد إصابات العظام، وتدريب التوازن والوقاية من السقوط لكبار السن. ويمكن حجز الجلسات منفردة أو كبرنامج تأهيل منظم، مع تأكيد السعر قبل الحجز.',
+    'elderly-care-at-home':
+      'رعاية المسنين المنزلية من أنيس هيلث تجمع التمريض المرخّص ومتابعة الأطباء والعلاج الطبيعي ومراقبة التحاليل لكبار السن — بتنسيق منسق واحد يبقي الأسرة على اطلاع. تشمل إدارة الأدوية ودعم الحركة ومتابعة الأمراض المزمنة والتعافي بعد المستشفى في القاهرة الكبرى، وتتوفر كزيارات مفردة أو باقة شهرية مستمرة.',
+    'home-nursing':
+      'التمريض المنزلي من أنيس هيلث يوفر ممرضين مرخصين في منزل المريض بالقاهرة الكبرى للعناية بالجروح وقرح الفراش والحقن والمحاليل الوريدية والقساطر وأنابيب التغذية ومتابعة العلامات الحيوية ودعم ما بعد العمليات. وتتوفر الرعاية بالزيارة أو بالوردية أو بباقة شهرية مستمرة، مع تأكيد السعر قبل الحجز.',
+    'lab-tests-at-home':
+      'التحاليل المنزلية من أنيس هيلث تتيح لفني سحب عينات مدرَّب جمع عينات الدم وغيرها في منزل المريض بالقاهرة الكبرى. وتُحلَّل العينات في معامل معتمدة وتُرسل النتائج رقمياً، مع إمكانية مراجعة طبيب عند الطلب — وهي مثالية لكبار السن وطريحي الفراش ومرضى ما بعد العمليات. ويظهر السعر قبل التأكيد.',
+    'post-operative-care':
+      'الرعاية بعد العمليات في المنزل من أنيس هيلث تساعد المرضى على التعافي بأمان بعد الجراحة في القاهرة الكبرى — العناية بالجروح والأنابيب، وإدارة الألم والأدوية، وزيارات التمريض، والعلاج الطبيعي، بتنسيق منسق واحد. وتقلّل خطر إعادة الدخول للمستشفى والتعرض للعدوى، ويُؤكَّد السعر قبل الحجز.',
+    'palliative-chronic-care':
+      'الرعاية التلطيفية ورعاية الأمراض المزمنة في المنزل من أنيس هيلث توفر دعماً مستمراً لمرضى السكري والضغط والقلب والجهاز التنفسي والحالات المتقدمة في القاهرة الكبرى — التحكم في الأعراض، والتمريض، وإدارة الأدوية، ومتابعة طبية منتظمة بإشراف منسق واحد. وتتكيف الرعاية مع تغير احتياجات المريض، مع تأكيد السعر قبل الحجز.',
+  },
+};
+
+export function getServiceAnswer(locale: SupportedLocale, slug: string): string | null {
+  return SERVICE_ANSWER[locale][slug] ?? null;
+}
+
 function matchServiceDoctors(serviceSlug: string, doctor: Doctor, englishDoctor: Doctor): boolean {
   const haystack = [
     englishDoctor.speciality,

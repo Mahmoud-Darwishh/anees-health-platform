@@ -49,7 +49,10 @@ const HomeBanner: React.FC = () => {
                         </a>
                     </div>
 
-                    {/* Compact trust strip — keep ★ rating for SEO/AggregateRating */}
+                    {/* Compact trust strip — plain visual trust copy. Intentionally
+                        NOT marked up as schema.org AggregateRating: self-reported
+                        ratings violate Google's review-snippet policy (audit H4).
+                        Earn real Google Business Profile reviews instead. */}
                     <div className="banner-trust-strip animate-slide-up" data-delay="0.5">
                         <span
                             className="banner-trust-strip__item"

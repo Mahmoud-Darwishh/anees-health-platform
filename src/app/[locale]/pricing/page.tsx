@@ -16,7 +16,7 @@ import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
 import ContentHero from '@/components/common/content/ContentHero';
 import { buildPricingMetadata } from '@/lib/seo/metadata';
-import { faqPageSchema, webPageSchema, breadcrumbSchema, renderJsonLd } from '@/lib/seo/jsonld';
+import { faqPageSchema, webPageSchema, breadcrumbSchema, aggregateOfferSchema, renderJsonLd } from '@/lib/seo/jsonld';
 import { bookingFaqs } from '@/lib/seo/faqs';
 import { getAllPackages, allTierPricesEgp, type PriceTier } from '@/lib/seo/pricing';
 import { site, type SupportedLocale } from '@/lib/seo/site';
@@ -58,23 +58,10 @@ export default async function PricingPage({
     ? 'تعمل أنيس هيلث بأسعار شفافة: يظهر سعر كل خدمة أو باقة بوضوح قبل تأكيد الحجز، بلا رسوم مفاجئة عند الزيارة. تعتمد التكلفة على نوع الرعاية ومدتها والمنطقة.'
     : 'Anees Health works on transparent pricing: the price of every service and package is shown clearly before you confirm — no surprise fees at the door. Cost depends on the type of care, its duration, and the area.';
 
-  // AggregateOffer — only once at least one tier price is published (built inline
-  // to avoid the booking-specific BookingPriceMap type).
-  const prices = allTierPricesEgp();
-  const offerSchema =
-    prices.length > 0
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'AggregateOffer',
-          name: isAr ? 'أسعار باقات وخدمات أنيس هيلث' : 'Anees Health package & service pricing',
-          priceCurrency: 'EGP',
-          lowPrice: Math.min(...prices),
-          highPrice: Math.max(...prices),
-          offerCount: prices.length,
-          seller: { '@id': `${site.baseUrl}/#organization` },
-          areaServed: { '@type': 'Country', name: 'Egypt' },
-        }
-      : null;
+  // AggregateOffer — emitted only once at least one tier price is published.
+  // Built via the shared aggregateOfferSchema builder so the schema and the
+  // visible price table can't drift (returns null when no price is set).
+  const offerSchema = aggregateOfferSchema(locale, allTierPricesEgp());
 
   const breadcrumbItems = [
     { name: site.labels.home[locale], url: `${site.baseUrl}/${locale}` },
@@ -118,6 +105,16 @@ export default async function PricingPage({
           title={isAr ? 'أسعار الرعاية الصحية المنزلية في مصر' : 'Home Healthcare Prices in Egypt'}
           lead={heroLead}
         />
+
+        <section className="pt-5 pb-0">
+          <div className="container">
+            <p className="lead mb-0">
+              {isAr
+                ? 'تُسعَّر الرعاية الصحية المنزلية في مصر مع أنيس هيلث بشفافية: ترى السعر الدقيق لكل خدمة أو باقة قبل تأكيد الحجز، بلا رسوم مفاجئة عند الباب. تتوفر الرعاية المستمرة كباقات شهرية وسنوية، وتُسعَّر زيارات الطبيب والتمريض والعلاج الطبيعي والتحاليل المنفردة بالزيارة. وتعتمد التكلفة على نوع الرعاية ومدتها والمنطقة.'
+                : 'Home healthcare in Egypt with Anees Health is priced transparently: you see the exact price of every service or package before you confirm the booking, with no surprise fees at the door. Ongoing care is available as monthly and annual packages, while one-off doctor, nursing, physiotherapy, and lab visits are priced per visit. Cost depends on the type of care, its duration, and the area.'}
+            </p>
+          </div>
+        </section>
 
         <section className="pt-5 pb-4">
           <div className="container">
