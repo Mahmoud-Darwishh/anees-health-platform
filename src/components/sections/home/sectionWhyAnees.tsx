@@ -1,5 +1,6 @@
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
 import { Reveal } from '@/components/common/Reveal';
 import LucideIcon from '@/components/common/LucideIcon';
 import styles from './sectionWhyAnees.module.scss';
@@ -12,6 +13,7 @@ type Tile = {
 
 const SectionWhyAnees: React.FC = () => {
   const t = useTranslations('home.whyAnees');
+  const locale = useLocale();
   const items = t.raw('items') as Tile[];
 
   return (
@@ -35,6 +37,13 @@ const SectionWhyAnees: React.FC = () => {
               <p className={styles.tileDesc}>{item.desc}</p>
             </article>
           ))}
+        </div>
+
+        <div className={styles.cta}>
+          <Link href={`/${locale}/about-us`} className={styles.ctaLink}>
+            {t('aboutCta')}
+            <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </Reveal>

@@ -225,6 +225,11 @@ const DoctorGrid = ({ doctors }: DoctorGridProps) => {
       {/* Main Content */}
       <div className="content mt-5">
         <div className="container">
+          {/* Descriptive lead — gives Google page-specific snippet text and
+              orients patients before the filters/results. */}
+          <p className="text-muted mb-4" style={{ maxWidth: '880px', lineHeight: 1.7 }}>
+            {tg('intro')}
+          </p>
           <div className="row">
             {/* Sidebar Filters - Desktop */}
             <div className="col-xl-3 d-none d-xl-block">

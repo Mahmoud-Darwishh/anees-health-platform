@@ -33,6 +33,20 @@ export default function CoveragePageContent({ locale }: CoveragePageContentProps
       <Breadcrumb items={breadcrumbItems} title={t('title')} />
 
       <main id="main-content" tabIndex={-1}>
+        {/* Descriptive lead — gives Google page-specific snippet text and
+            states what Anees covers before the live check form. */}
+        <section className="coverage-intro-section pt-4 pb-2">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-lg-8">
+                <p className="text-muted text-center mb-0" style={{ lineHeight: 1.7 }}>
+                  {t('intro')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="coverage-check-section pb-5">
           <div className="container">
             <div className="row justify-content-center">

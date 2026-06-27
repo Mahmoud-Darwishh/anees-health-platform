@@ -125,3 +125,51 @@
   margin: 0;
   line-height: 1.78;
 }
+
+// ─── "About Anees" link ─────────────────────────────────────────────
+.cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 44px;
+
+  @include respond-below(custom767) {
+    margin-top: 32px;
+  }
+}
+
+.ctaLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: $font-weight-semibold;
+  color: var(--color-primary);
+  text-decoration: none;
+  padding: 12px 26px;
+  border: 1px solid rgba($primary, 0.4);
+  border-radius: 999px;
+  transition: background 0.22s ease, color 0.22s ease,
+              border-color 0.22s ease, gap 0.2s ease;
+
+  i {
+    line-height: 1;
+    font-size: 13px;
+  }
+
+  [dir='rtl'] & i {
+    transform: scaleX(-1);
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--color-primary);
+    color: $white;
+    border-color: var(--color-primary);
+    gap: 12px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.45);
+    outline-offset: 3px;
+  }
+}

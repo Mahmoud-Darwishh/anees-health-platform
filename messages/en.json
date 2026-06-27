@@ -519,11 +519,13 @@
       "geriatrician": "Geriatrician",
       "neuropsychiatrist": "Neuropsychiatrist",
       "orthopedic_surgeon": "Orthopedic Surgeon",
-      "fees_start": "Fees Start from"
+      "fees_start": "Fees Start from",
+      "viewAllCta": "Meet all our doctors"
     },
     "doctorGrid": {
       "title": "Our Doctors",
       "subtitle": "Search by speciality, language, or consultation type",
+      "intro": "Browse Anees Health’s licensed home-visit doctors across Greater Cairo — geriatricians, internists, paediatricians, orthopaedic surgeons and more. Filter by specialty, language, and experience, then book a home visit or a video consultation.",
       "breadcrumb": {
         "home": "Home",
         "doctor": "Doctors",
@@ -771,6 +773,7 @@
       "badge": "What sets us apart",
       "title": "Care that’s actually accountable",
       "subtitle": "Most platforms hand you a list. We hand you a team — and stay with you until you’re better.",
+      "aboutCta": "About Anees Health",
       "items": [
         {
           "icon": "feather-users",
@@ -1600,6 +1603,7 @@
   "coveragePage": {
     "title": "Coverage Area Check",
     "meta_description": "Check if Anees Health services are available in your area. Search by location or zone to verify our coverage.",
+    "intro": "Anees Health delivers doctor home visits, home nursing, and home physiotherapy across Greater Cairo. Enter your address below to confirm we cover your area before you book.",
     "breadcrumb": {
       "home": "Home",
       "coverage": "Coverage Check"

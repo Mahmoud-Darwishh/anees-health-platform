@@ -2,6 +2,7 @@
 
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import type SliderType from "react-slick";
 import type { Settings } from "react-slick";
 import { useTranslations, useLocale } from "next-intl";
@@ -197,6 +198,12 @@ const SectionDoctor = ({ doctors }: SectionDoctorProps) => {
               <LucideIcon iconClass="fa-solid fa-chevron-right" aria-hidden="true" />
             </button>
           </div>
+        </div>
+        <div className={styles.viewAll}>
+          <Link href={`/${locale}/doctors`} className={styles.viewAllLink}>
+            {t("doctors.viewAllCta")}
+            <LucideIcon iconClass="fa-solid fa-arrow-right" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </Reveal>
