@@ -132,7 +132,7 @@ export function organizationSchema(locale: SupportedLocale = 'en'): JsonValue {
         areaServed: 'EG',
       },
     ],
-    sameAs: site.socialProfiles.filter((u): u is string => Boolean(u)),
+    sameAs: site.sameAs.filter((u): u is string => Boolean(u)),
     founder: site.founders.map((f) => ({
       '@type': 'Person',
       name: locale === 'ar' ? f.nameAr : f.name,
@@ -207,12 +207,21 @@ export function localBusinessSchema(
     currenciesAccepted: 'EGP',
     paymentAccepted: 'Cash, Credit Card, Online (Kashier)',
     knowsLanguage: ['en', 'ar'],
+    // Reinforce the local entity for the brand knowledge panel — the same
+    // authoritative profiles carried by the parent Organization node.
+    sameAs: site.sameAs.filter((u): u is string => Boolean(u)),
   };
 }
 
 /* ───────────────────────────── WebSite ─────────────────────────── */
 
 export function websiteSchema(locale: SupportedLocale): JsonValue {
+  // NOTE: the WebSite `potentialAction`/`SearchAction` (Sitelinks Search Box)
+  // was intentionally removed. Google deprecated that feature on 2024-10-21
+  // and retired it globally on 2024-11-21, so the markup renders nothing and
+  // is no longer flagged in the Rich Results Test. The WebSite node itself is
+  // still emitted (it reinforces the canonical site name / brand entity) — it
+  // does NOT control the regular algorithmic sitelinks, which stay automated.
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -221,14 +230,6 @@ export function websiteSchema(locale: SupportedLocale): JsonValue {
     name: brandLabel(locale),
     inLanguage: bcp47(locale),
     publisher: { '@id': orgId() },
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${site.baseUrl}/${locale}/doctors?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
   };
 }
 

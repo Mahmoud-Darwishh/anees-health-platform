@@ -80,8 +80,8 @@ export const site = {
     },
   ],
 
-  /** Social profiles — sameAs targets (string[]) */
-  socialProfiles: config.brand.socialProfiles as readonly string[],
+  /** `sameAs` targets (string[]) — social profiles + authoritative entity refs */
+  sameAs: config.brand.sameAs as readonly string[],
 
   /** Default locale + supported locales */
   defaultLocale: 'en' as const,

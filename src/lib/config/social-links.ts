@@ -41,3 +41,23 @@ export const FOOTER_SOCIAL_LINKS: readonly FooterSocialLink[] = [
 ];
 
 export const SOCIAL_PROFILES = SOCIAL_LINKS.map((item) => item.href);
+
+/**
+ * Authoritative, non-social entity references for Organization/LocalBusiness
+ * `sameAs`. For Google's Knowledge Graph (and a correct, complete brand
+ * knowledge panel) these do more than social links alone. Add each URL ONLY
+ * once the real, live page exists — never point `sameAs` at a 404:
+ *   - Wikidata item                          (strongest Knowledge Graph signal)
+ *   - Google Business Profile / Maps place URL (once GBP is created + verified)
+ *   - Crunchbase / other authoritative directory listings
+ */
+export const ENTITY_PROFILES: readonly string[] = [
+  // 'https://www.wikidata.org/wiki/Q000000',                  // Wikidata (create first)
+  // 'https://www.google.com/maps?cid=0000000000000000000',    // Google Business Profile
+];
+
+/** Full `sameAs` set emitted in JSON-LD = social profiles + entity references. */
+export const SAME_AS_PROFILES: readonly string[] = [
+  ...SOCIAL_PROFILES,
+  ...ENTITY_PROFILES,
+];

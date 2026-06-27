@@ -485,7 +485,7 @@ export default function AboutUsPage() {
               ],
               // sameAs is for the ORG's own canonical profiles (social), not the
               // founders — the founders are already linked via `founder[]` above.
-              sameAs: [...site.socialProfiles],
+              sameAs: [...site.sameAs],
             },
           }),
         }}

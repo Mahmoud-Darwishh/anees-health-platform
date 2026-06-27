@@ -1,6 +1,6 @@
 // Configuration for API endpoints and environment variables
 // This file will be expanded as new features are added
-import { SOCIAL_PROFILES } from './social-links';
+import { SAME_AS_PROFILES } from './social-links';
 
 /**
  * Resolve the canonical site origin (no trailing slash).
@@ -60,9 +60,9 @@ export const config = {
     maxPageSize: 100,
   },
 
-  // Brand and social profiles used for SEO/GEO consistency
+  // Brand entity references (sameAs) used for SEO/GEO + Knowledge Graph consistency
   brand: {
-    socialProfiles: SOCIAL_PROFILES,
+    sameAs: SAME_AS_PROFILES,
   },
 };
 
