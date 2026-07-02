@@ -4,7 +4,7 @@
  */
 
 import { unstable_cache } from 'next/cache';
-import { Doctor, LocalizedDoctorData } from '@/lib/models/doctor.types';
+import { Doctor } from '@/lib/models/doctor.types';
 import { generateDoctorSlug } from '@/lib/utils/slug';
 import { prisma } from '@/lib/db/prisma';
 import type { Doctor as PrismaDoctor } from '@prisma/client';
@@ -116,26 +116,6 @@ export async function getDoctorCanonicalSlugById(id: number): Promise<string | n
     select: { slug: true },
   });
   return row?.slug ?? null;
-}
-
-/**
- * Extract city from location string
- */
-export function extractCity(location: string): string {
-  return location.split(',')[0]?.trim() || location;
-}
-
-// ── Legacy compatibility ──────────────────────────────────────────────────────
-// getDoctorsData() was used internally. Not exported — kept for reference only.
-// The JSON files in doctorgrid/ are no longer the source of truth.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * @deprecated Use getDoctors() — reads from DB
- */
-export async function getLocalizedDoctorData(): Promise<LocalizedDoctorData> {
-  const [en, ar] = await Promise.all([getDoctors('en'), getDoctors('ar')]);
-  return { en, ar };
 }
 
 // Keep generateDoctorSlug accessible for pages that still use it

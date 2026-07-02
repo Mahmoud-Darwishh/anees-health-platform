@@ -11,6 +11,7 @@ import { buildPaymentConfirmationMessage } from '@/lib/utils/booking-whatsapp';
 import { sendPortalClaimInviteForBooking } from '@/lib/billing/portal-invite';
 import { createVisitFromBooking } from '@/lib/billing/create-visit-from-booking';
 import { reconcilePaymentAmount } from '@/lib/billing/payment-reconciliation';
+import { writeAuditLog } from '@/lib/utils/audit';
 import { upsertMedplumPatient } from '@/lib/medplum/patients';
 import { createProgramCarePlan } from '@/lib/medplum/care-plans';
 import type { CareProgramCode } from '@/lib/medplum/fhir-extensions';
@@ -433,23 +434,34 @@ export async function POST(request: NextRequest) {
 
       case 'refund': {
         await prisma.$transaction(async (tx) => {
-          const refundedBooking = await tx.onlineBooking.update({
-            where: { bookingRef: data.merchantOrderId },
+          // Idempotent + replay-safe: only a currently payment_completed booking
+          // can transition to refunded. A replayed refund webhook (or one for a
+          // booking that was never paid / already refunded) matches zero rows and
+          // is a no-op — so a captured, still-validly-signed refund event cannot
+          // be replayed later to reverse a re-paid booking.
+          const refunded = await tx.onlineBooking.updateMany({
+            where: { bookingRef: data.merchantOrderId, status: 'payment_completed' },
             data: { status: 'refunded' },
           });
 
-          await tx.auditLog.create({
-            data: {
+          if (refunded.count === 0) {
+            console.warn(
+              '[Webhook] Refund ignored — booking not in payment_completed for order:',
+              data.merchantOrderId,
+            );
+            return;
+          }
+
+          await writeAuditLog(
+            {
               tableName: 'online_bookings',
-              recordId: refundedBooking.id,
+              recordId: data.merchantOrderId,
               action: 'update',
-              changedFields: {
-                source: 'api.booking.payment.webhook',
-                fields: ['status'],
-              },
+              changedFields: { source: 'api.booking.payment.webhook', fields: ['status'] },
               changedBy: 'system:kashier_webhook',
             },
-          });
+            tx,
+          );
 
           const cancelledInvoices = await tx.invoice.updateMany({
             where: { code: `INV_${data.merchantOrderId}` },
@@ -457,8 +469,8 @@ export async function POST(request: NextRequest) {
           });
 
           if (cancelledInvoices.count > 0) {
-            await tx.auditLog.create({
-              data: {
+            await writeAuditLog(
+              {
                 tableName: 'invoices',
                 recordId: data.merchantOrderId,
                 action: 'update',
@@ -469,10 +481,11 @@ export async function POST(request: NextRequest) {
                 },
                 changedBy: 'system:kashier_webhook',
               },
-            });
+              tx,
+            );
           }
         });
-        console.log('[Webhook] Refund recorded for order:', data.merchantOrderId);
+        console.log('[Webhook] Refund processed for order:', data.merchantOrderId);
         break;
       }
 

@@ -9,13 +9,6 @@
  */
 
 export const COVERED_GOVERNORATES = ['cairo', 'giza'] as const;
-export type CoveredGovernorate = (typeof COVERED_GOVERNORATES)[number];
-
-/** Selectable values in the booking form (covered + an explicit out-of-area option). */
-export const GOVERNORATE_OPTIONS = ['cairo', 'giza', 'other'] as const;
-
-export const COVERAGE_AREA_LABEL_EN = 'Greater Cairo (Cairo & Giza)';
-export const COVERAGE_AREA_LABEL_AR = 'القاهرة الكبرى (القاهرة والجيزة)';
 
 export function normalizeGovernorate(value?: string | null): string | null {
   const next = (value ?? '').trim().toLowerCase();

@@ -183,13 +183,6 @@ export function getPackageEntry(value: PackageType | null): PackageCatalogEntry 
   return PACKAGE_CATALOG.find((p) => p.value === value);
 }
 
-// Retained for legacy summary helpers — empty lists so nothing renders.
-export const SPECIALTIES: ReadonlyArray<{ value: string; label: string }> = [];
-export const PHYSIOTHERAPY_CASE_TYPES: ReadonlyArray<{ value: string; label: string }> = [];
-export const NURSING_TYPES: ReadonlyArray<{ value: string; label: string }> = [];
-export const NURSING_HOURS: ReadonlyArray<{ value: string; label: string }> = [];
-export const NURSING_DURATIONS: ReadonlyArray<{ value: string; label: string }> = [];
-
 // ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
@@ -265,13 +258,6 @@ export function validateBookingForm(state: BookingFormState): BookingValidationE
   }
 
   return errors;
-}
-
-/**
- * Get service type display key (legacy helper kept for older code paths).
- */
-export function getServiceLabel(): string {
-  return '';
 }
 
 

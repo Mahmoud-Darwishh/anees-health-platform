@@ -95,11 +95,3 @@ export function verifyWhatsAppOtp(chatId: string, code: string): VerifyOtpResult
   store.otpByChatId.delete(chatId);
   return { ok: true };
 }
-
-export function getOtpPurpose(chatId: string): string | null {
-  const nowMs = Date.now();
-  cleanupExpired(nowMs);
-
-  const entry = store.otpByChatId.get(chatId);
-  return entry?.purpose || null;
-}

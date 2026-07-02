@@ -62,16 +62,6 @@ async function getActiveCareTeamByPatient(patientId: string): Promise<MedplumCar
   })) as MedplumCareTeamResource | null;
 }
 
-export async function listPatientCareTeams(patientId: string): Promise<MedplumCareTeamResource[]> {
-  const medplum = await getMedplumClient();
-
-  return (await medplum.searchResources('CareTeam', {
-    subject: `Patient/${patientId}`,
-    _count: '20',
-    _sort: '-_lastUpdated',
-  })) as MedplumCareTeamResource[];
-}
-
 export async function getActivePatientCareTeam(patientId: string): Promise<MedplumCareTeamResource | null> {
   return getActiveCareTeamByPatient(patientId);
 }

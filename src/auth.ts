@@ -4,6 +4,7 @@ import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db/prisma';
+import { checkRateLimit } from '@/lib/utils/rate-limit';
 import type { LicenseType, UserRole, StaffRole } from '@prisma/client';
 
 async function writeLoginAudit(params: {
@@ -26,6 +27,31 @@ async function writeLoginAudit(params: {
   } catch {
     // Best-effort only; failed login audit should not block auth flow.
   }
+}
+
+/**
+ * Throttle credential logins to blunt online password-guessing and
+ * credential-stuffing. Two fail-closed buckets per 15-minute window:
+ *   - per source IP (broad — one origin hammering many accounts)
+ *   - per identifier (targeted — one account hammered from many origins)
+ * Returns false when either bucket is exhausted; the caller then rejects with
+ * the same generic failure as a wrong password, so it is not a login oracle.
+ */
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+function loginClientIp(request?: Request): string {
+  const forwarded = request?.headers.get('x-forwarded-for');
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return request?.headers.get('x-real-ip')?.trim() || 'unknown';
+}
+
+async function loginRateLimitOk(request: Request | undefined, identifier: string): Promise<boolean> {
+  const ip = loginClientIp(request);
+  const [ipOk, idOk] = await Promise.all([
+    checkRateLimit(`login-ip:${ip}`, 20, LOGIN_WINDOW_MS, true),
+    checkRateLimit(`login-id:${identifier.trim().toLowerCase()}`, 8, LOGIN_WINDOW_MS, true),
+  ]);
+  return ipOk && idOk;
 }
 
 // Augment next-auth Session so session.user carries our custom fields
@@ -84,10 +110,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         identifier: { label: 'Phone or Case ID', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const identifier = credentials?.identifier as string | undefined;
         const password = credentials?.password as string | undefined;
         if (!identifier || !password) return null;
+
+        // Fail-closed brute-force / credential-stuffing throttle.
+        if (!(await loginRateLimitOk(request, identifier))) return null;
 
         const user = await prisma.user.findFirst({
           where: {
@@ -142,10 +171,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         const email = credentials?.email as string | undefined;
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;
+
+        // Fail-closed brute-force / credential-stuffing throttle.
+        if (!(await loginRateLimitOk(request, email))) return null;
 
         const staff = await prisma.staff.findUnique({ where: { email } });
         if (!staff || staff.status !== 'active' || !staff.passwordHash) return null;

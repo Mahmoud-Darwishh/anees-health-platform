@@ -50,14 +50,16 @@ export async function POST(request: NextRequest) {
         discountEgp: true,
         promocodeCode: true,
         status: true,
+        instapayReference: true,
+        instapaySenderName: true,
       },
     });
 
     if (!booking) {
       return NextResponse.json({ success: false, message: 'Booking not found' }, { status: 404, headers: cors });
     }
-    if (booking.status === 'payment_completed') {
-      return NextResponse.json({ success: false, message: 'Booking is already paid' }, { status: 409, headers: cors });
+    if (booking.status === 'payment_completed' || booking.status === 'refunded') {
+      return NextResponse.json({ success: false, message: 'This booking has already been settled.' }, { status: 409, headers: cors });
     }
 
     const normalizedPhone = `${booking.countryCode}${booking.phoneNumber}`;
@@ -103,8 +105,12 @@ export async function POST(request: NextRequest) {
         data: {
           paymentMethod: 'instapay',
           status: 'payment_pending',
-          instapayReference: reference ?? null,
-          instapaySenderName: senderName ?? null,
+          // Write-once: never overwrite a reference/sender already recorded by an
+          // earlier submission. Stops anyone who merely knows the bookingRef from
+          // tampering with a legitimate pending payment's details before finance
+          // confirms it against the bank statement.
+          instapayReference: booking.instapayReference ?? reference ?? null,
+          instapaySenderName: booking.instapaySenderName ?? senderName ?? null,
         },
       });
 

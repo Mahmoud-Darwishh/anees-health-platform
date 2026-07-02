@@ -54,6 +54,15 @@ jobs:
       - name: Type-check
         run: npm run typecheck
 
+      # Fail the build on any CRITICAL advisory in runtime (production) deps.
+      # Dev/build-only advisories (vitest, workbox) are reported below but do
+      # not block, matching the staged "report first, then gate" rollout.
+      - name: Dependency audit — fail on critical runtime advisories
+        run: npm audit --omit=dev --audit-level=critical
+
+      - name: Dependency audit — full report (informational)
+        run: npm audit --omit=dev || true
+
   test:
     name: Unit tests & policy guards
     runs-on: ubuntu-latest

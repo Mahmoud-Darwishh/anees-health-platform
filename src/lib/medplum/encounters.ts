@@ -74,59 +74,6 @@ function encounterClassForVisitType(visitType: CreateMedplumEncounterInput['visi
   }
 }
 
-export async function createMedplumEncounter(
-  input: CreateMedplumEncounterInput,
-): Promise<MedplumEncounterResource> {
-  const medplum = await getMedplumClient();
-  const encounterClass = encounterClassForVisitType(input.visitType);
-
-  const encounter: MedplumEncounterResource = {
-    resourceType: 'Encounter',
-    status: input.status,
-    class: {
-      system: MEDPLUM_CODE_SYSTEMS.v3ActCode,
-      code: encounterClass.code,
-      display: encounterClass.display,
-    },
-    serviceType: [
-      {
-        coding: [
-          {
-            system: MEDPLUM_CODE_SYSTEMS.encounterType,
-            code: input.visitType,
-            display: input.visitType.replace('_', ' '),
-          },
-        ],
-      },
-    ],
-    subject: {
-      reference: `Patient/${input.patientId}`,
-    },
-    participant: input.recordedByName
-      ? [
-          {
-            individual: {
-              reference: input.recordedByReference ?? undefined,
-              display: input.recordedByName,
-            },
-          },
-        ]
-      : undefined,
-    period: {
-      start: input.start.toISOString(),
-    },
-    note: input.notes
-      ? [
-          {
-            text: input.notes,
-          },
-        ]
-      : undefined,
-  };
-
-  return (await medplum.createResource(encounter as never)) as MedplumEncounterResource;
-}
-
 type VisitEncounterInput = {
   patientId: string;
   visitId: string;

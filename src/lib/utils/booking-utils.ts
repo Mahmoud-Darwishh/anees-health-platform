@@ -90,8 +90,3 @@ function describeServiceAr(s: BookingFormState): string {
   }
   return '';
 }
-
-/** Encode message for URL encoding in WhatsApp links */
-export function encodeWhatsAppMessage(message: string): string {
-  return encodeURIComponent(message);
-}

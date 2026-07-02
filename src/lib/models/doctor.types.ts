@@ -72,14 +72,6 @@ export interface Doctor {
 }
 
 /**
- * Localized doctor data container
- */
-export interface LocalizedDoctorData {
-  en: Doctor[];
-  ar: Doctor[];
-}
-
-/**
  * Doctor profile view model optimized for SEO and rendering
  */
 export interface DoctorProfileData {

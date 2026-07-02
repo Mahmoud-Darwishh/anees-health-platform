@@ -1,8 +1,7 @@
 /**
  * Centralised JSON-LD generators for Anees Health.
  *
- * Replaces the older `src/lib/utils/structured-data.ts` (which still ships
- * as a thin re-export shim for legacy imports). All output is plain
+ * This is the single source of JSON-LD structured data. All output is plain
  * JSON-serialisable — render with {@link renderJsonLd} for XSS-safe
  * inlining into `<script type="application/ld+json">`.
  *

@@ -12,9 +12,6 @@
 /** WhatsApp number in E.164 form, no `+`, no spaces — required by `wa.me`. */
 export const ANEES_WHATSAPP_PHONE = '201055164595';
 
-/** Pretty / display variant for UI surfaces ("+20 10 5516 4595"). */
-export const ANEES_WHATSAPP_DISPLAY = '+20 10 5516 4595';
-
 /**
  * Build a `https://wa.me/<phone>?text=<message>` URL with the message
  * properly percent-encoded.

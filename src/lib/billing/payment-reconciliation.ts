@@ -10,16 +10,19 @@
  * money was received — and never silently books the expected figure).
  *
  * Gateways differ on units: some report major units (EGP), some minor units
- * (piastres, ×100). Because the exact Kashier unit is environment-dependent, a
- * value matching at 1×, 100×, or 1/100× scale is treated as a MATCH so we don't
- * flood finance with false positives. The trade-off: a genuine ~100× over/under
- * charge reads as a unit difference. Once the live Kashier unit is confirmed
- * (one test transaction), tighten `scaleFactors` to `[1]` for maximum sensitivity.
+ * (piastres, ×100). Only an EXACT-scale match (gateway reports the same unit we
+ * booked in) is treated as a clean pass. A value that matches ONLY at a 100× or
+ * 1/100× scale is reported as a `unit_mismatch` (matched=false) so it is flagged
+ * for finance review rather than silently accepted — this closes the hole where a
+ * genuine ~100× over/under charge was read as a harmless unit difference. If a
+ * future gateway/env genuinely reports minor units, normalise the amount at the
+ * call site before reconciling instead of re-widening the tolerance here.
  */
 
 export type PaymentReconciliationReason =
   | 'match'
   | 'amount_mismatch'
+  | 'unit_mismatch'
   | 'currency_mismatch'
   | 'missing_gateway_amount';
 
@@ -33,7 +36,6 @@ export type PaymentReconciliation = {
 };
 
 const AMOUNT_TOLERANCE = 0.01;
-const scaleFactors = [1, 100, 1 / 100];
 
 export function reconcilePaymentAmount(input: {
   expectedAmountEgp: number;
@@ -53,11 +55,19 @@ export function reconcilePaymentAmount(input: {
     return { ...base, matched: false, reason: 'missing_gateway_amount' };
   }
 
-  const amountMatches = scaleFactors.some(
-    (factor) => Math.abs(gatewayAmount - expectedAmountEgp * factor) <= AMOUNT_TOLERANCE,
-  );
-  if (!amountMatches) {
+  const exactMatch = Math.abs(gatewayAmount - expectedAmountEgp) <= AMOUNT_TOLERANCE;
+  const unitScaledMatch =
+    !exactMatch &&
+    [100, 1 / 100].some(
+      (factor) => Math.abs(gatewayAmount - expectedAmountEgp * factor) <= AMOUNT_TOLERANCE,
+    );
+
+  if (!exactMatch && !unitScaledMatch) {
     return { ...base, matched: false, reason: 'amount_mismatch' };
+  }
+  // Matches only at a 100×/0.01× scale → flag for review, never a silent pass.
+  if (unitScaledMatch) {
+    return { ...base, matched: false, reason: 'unit_mismatch' };
   }
 
   if (expectedCurrency && gatewayCurrency && expectedCurrency !== gatewayCurrency) {

@@ -151,7 +151,3 @@ export function allTierPricesEgp(): number[] {
   }
   return out;
 }
-
-export function hasPublishedPrices(): boolean {
-  return allTierPricesEgp().length > 0;
-}

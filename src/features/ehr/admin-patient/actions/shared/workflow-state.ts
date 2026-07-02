@@ -155,21 +155,43 @@ export async function persistWorkflowStateTransition(params: {
   isOverride?: boolean;
   overrideMethod?: string | null;
 }): Promise<void> {
-  const fromState = await readCurrentWorkflowState(params.visit);
   const toState = asVisitState(params.toState);
   if (!toState) {
     throw new Error(`Cannot persist unknown visit workflow state "${params.toState}".`);
   }
 
-  // Update the visit's current state and append the immutable ledger row in a
-  // single transaction so the state column and the transition history can never
-  // diverge. Both writes must succeed — failures surface, never get swallowed.
-  await prisma.$transaction([
-    prisma.visit.update({
+  // Read the authoritative state column INSIDE the transaction, then update it
+  // conditionally on that exact prior value, and append the immutable ledger row
+  // — all in one transaction so the state column and the transition history can
+  // never diverge. The conditional update is the concurrency guard: if another
+  // transition committed first, `updateMany` matches 0 rows and we fail loudly
+  // instead of silently overwriting it. This closes the TOCTOU where the prior
+  // read-outside-then-unconditional-update let two concurrent transitions both
+  // read the same prior state and both commit (a lost update on a regulated
+  // visit/billing/attendance record).
+  await prisma.$transaction(async (tx) => {
+    const current = await tx.visit.findUnique({
       where: { id: params.visit.id },
+      select: { state: true },
+    });
+    if (!current) {
+      throw new Error('Visit record not found.');
+    }
+
+    const fromColumn = current.state; // actual persisted enum (null for legacy rows)
+    const fromState: WorkflowStateValue = fromColumn
+      ? (fromColumn as unknown as WorkflowStateValue)
+      : deriveWorkflowStateFromLegacy(params.visit);
+
+    const updated = await tx.visit.updateMany({
+      where: { id: params.visit.id, state: fromColumn },
       data: { state: toState },
-    }),
-    prisma.visitStateTransition.create({
+    });
+    if (updated.count !== 1) {
+      throw new Error('Visit state changed concurrently. Please refresh and retry.');
+    }
+
+    await tx.visitStateTransition.create({
       data: {
         visitId: params.visit.id,
         fromState: asVisitState(fromState),
@@ -184,8 +206,8 @@ export async function persistWorkflowStateTransition(params: {
         isOverride: Boolean(params.isOverride),
         overrideMethod: params.overrideMethod ?? null,
       },
-    }),
-  ]);
+    });
+  });
 }
 
 export function isClosedVisitStatus(status: VisitStatus): boolean {

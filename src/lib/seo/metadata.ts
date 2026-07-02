@@ -1,8 +1,7 @@
 /**
  * Centralised page metadata builders for Anees Health.
  *
- * Replaces the older `src/lib/utils/metadata.ts` (which still ships as a
- * thin re-export shim for legacy imports).
+ * This is the single source of page metadata — import builders from here.
  *
  * Every builder returns a full Next.js {@link Metadata} object with:
  *   - bilingual EN/AR title & description

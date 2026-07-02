@@ -1,6 +1,6 @@
 'use server';
 
-import { AuditAction, VisitStatus } from '@prisma/client';
+import { AuditAction, StaffRole, VisitStatus } from '@prisma/client';
 import type { DisruptionCode } from '@/lib/billing/cancellation-policy';
 import { ensureVisitEncounter, finishVisitEncounter } from '@/lib/medplum/encounters';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
@@ -20,6 +20,27 @@ const OVERRIDE_REASON = 'Manual override (testing/correction)';
 function isManualOverride(formData: FormData): boolean {
   const value = formData.get('force');
   return value === 'on' || value === 'true' || value === '1';
+}
+
+// Only supervisory roles may FORCE an out-of-sequence transition (bypassing the
+// sequence, live-location, geofence, and clinical-evidence guards). A treating
+// clinician (nurse / physiotherapist / doctor) cannot self-authorise an override
+// — this closes the fraud / safety-control bypass where any writer could check a
+// visit OUT (flipping it to completed and triggering payout) with no GPS presence
+// and no documentation. Every allowed override is still recorded as isOverride in
+// the immutable ledger + audit.
+const OVERRIDE_AUTHORIZED_ROLES: ReadonlySet<StaffRole> = new Set<StaffRole>([
+  'medical_ops',
+  'admin',
+  'superadmin',
+]);
+
+function resolveManualOverride(formData: FormData, staffRole: StaffRole | null | undefined): boolean {
+  if (!isManualOverride(formData)) return false;
+  if (staffRole && OVERRIDE_AUTHORIZED_ROLES.has(staffRole)) return true;
+  throw new Error(
+    'Manual override requires a supervisor (medical ops / admin). Your role cannot force this transition.',
+  );
 }
 
 type EncounterSyncContext = {
@@ -92,10 +113,10 @@ async function completeVisitEncounter(ctx: EncounterSyncContext & { startAt: Dat
 
 export async function acknowledgeVisitAction(formData: FormData): Promise<void> {
   try {
-    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = acknowledgeVisitSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('visit.acknowledge', input.medplumPatientId, 'visits');
-    const override = isManualOverride(formData);
+    const override = resolveManualOverride(formData, staff.staffRole);
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -136,10 +157,10 @@ export async function acknowledgeVisitAction(formData: FormData): Promise<void> 
 
 export async function startTravelAction(formData: FormData): Promise<void> {
   try {
-    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = startTravelSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('visit.start_travel', input.medplumPatientId, 'visits');
-    const override = isManualOverride(formData);
+    const override = resolveManualOverride(formData, staff.staffRole);
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -184,10 +205,10 @@ export async function startTravelAction(formData: FormData): Promise<void> {
 
 export async function markArrivedAction(formData: FormData): Promise<void> {
   try {
-    const { changedBy } = await getCoordinationWriterWithPractitioner();
+    const { staff, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = markArrivedSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('visit.mark_arrived', input.medplumPatientId, 'visits');
-    const override = isManualOverride(formData);
+    const override = resolveManualOverride(formData, staff.staffRole);
     const visit = await getWorkflowVisitOrThrow({
       visitId: input.visitId,
       medplumPatientId: input.medplumPatientId,
@@ -235,7 +256,7 @@ export async function checkInVisitAction(formData: FormData): Promise<void> {
     const { staff, practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = checkInVisitSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('visit.check_in', input.medplumPatientId, 'visits');
-    const override = isManualOverride(formData);
+    const override = resolveManualOverride(formData, staff.staffRole);
     const checkInAt = input.checkInAt ?? new Date();
     const latitude = input.checkInLatitude;
     const longitude = input.checkInLongitude;
@@ -367,7 +388,7 @@ export async function checkOutVisitAction(formData: FormData): Promise<void> {
     const { staff, practitioner, changedBy } = await getCoordinationWriterWithPractitioner();
     const input = checkOutVisitSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('visit.check_out', input.medplumPatientId, 'visits');
-    const override = isManualOverride(formData);
+    const override = resolveManualOverride(formData, staff.staffRole);
     const checkOutAt = input.checkOutAt ?? new Date();
     const latitude = input.checkOutLatitude;
     const longitude = input.checkOutLongitude;

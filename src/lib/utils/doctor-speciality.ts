@@ -79,14 +79,6 @@ const FALLBACK_ARABIC_PATTERN = /[\u0600-\u06FF]/;
 
 const normalizeWhitespace = (value: string): string => value.trim().replace(/\s+/g, ' ');
 
-export const getDoctorSpecialityKey = (speciality: string): string => {
-  const normalized = normalizeWhitespace(speciality);
-  const found = SPECIALITY_CATEGORIES.find((category) =>
-    category.patterns.some((pattern) => pattern.test(normalized))
-  );
-  return found?.key ?? normalized.toLowerCase();
-};
-
 export const getDoctorSpecialityLabel = (speciality: string, locale: SupportedLocale): string => {
   const normalized = normalizeWhitespace(speciality);
   const found = SPECIALITY_CATEGORIES.find((category) =>

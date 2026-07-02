@@ -134,7 +134,7 @@ src/
 │   ├── security/                # 🆕 malware-scan (pluggable AV backends)
 │   ├── seo/                     # Search/discovery metadata helpers
 │   ├── storage/                 # 🆕 r2-medical (Cloudflare R2 client + key builder + sanitizer)
-│   └── utils/                   # app-logger, cors, rate-limit, coverage, slug, structured-data, metadata
+│   └── utils/                   # app-logger, cors, rate-limit, coverage, slug, audit
 │
 ├── hooks/                       # Cross-cutting hooks (useReveal)
 ├── i18n/                        # next-intl request config
@@ -494,10 +494,7 @@ EHR_DOCUMENT_SCAN_KEY=...   # alternate header for the document scan job (x-ehr-
 HASH_SALT=...
 NEXT_PUBLIC_SITE_URL=...
 NEXT_PUBLIC_API_URL=...
-ENABLE_ADMIN_DASHBOARD=true   # legacy dev-only flag; admin is now auth-gated
-STORAGE_PROVIDER=local         # legacy storage toggle; harmless now
-STORAGE_LOCAL_SIGNING_SECRET=...
-STORAGE_LOCAL_ROOT=...
+# STORAGE_PROVIDER is optional — leave unset (defaults to R2). r2-medical.ts throws if it is set to anything other than 'r2'.
 ```
 
 See [docs/DEPLOYMENT_RUNBOOK.md](../docs/DEPLOYMENT_RUNBOOK.md) for the per-environment matrix and secrets rotation cadence.
@@ -523,7 +520,7 @@ npm run db:studio            # Prisma Studio
 
 `DATABASE_URL`, all `MEDPLUM_*` vars, all `R2_*` vars, and `EHR_MALWARE_SCAN_BACKEND` must be present in `.env.local`.
 
-To enable the admin / clinician dashboards locally, ensure you have a `User` + `Staff` row with a bcrypt password hash and (for clinician) a matching `PhysioProfile`. Log in at `/en/auth/login`. `ENABLE_ADMIN_DASHBOARD` is legacy and not required now that auth is wired.
+To enable the admin / clinician dashboards locally, ensure you have a `User` + `Staff` row with a bcrypt password hash and (for clinician) a matching `PhysioProfile`. Log in at `/en/auth/login`. (Admin access is fully auth-gated — no feature flag is required.)
 
 ---
 

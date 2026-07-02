@@ -56,9 +56,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (booking.status === 'payment_completed') {
+    // Refuse to (re)initiate payment on a booking that is already settled.
+    // A `payment_failed` booking is intentionally still payable so a genuine
+    // customer can retry; only terminal-success states are locked.
+    if (booking.status === 'payment_completed' || booking.status === 'refunded') {
       return NextResponse.json(
-        { success: false, message: 'Booking is already paid' },
+        { success: false, message: 'This booking has already been settled and cannot be paid again.' },
         { status: 409 },
       );
     }

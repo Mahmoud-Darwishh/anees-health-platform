@@ -770,9 +770,9 @@ Listed in § 17 below.
 |---|---|
 | `StaffRole.finance` | Merge into `admin` — still in enum for back-compat, no new assignments |
 | `StaffRole.operator` | Rename → `medical_ops` — both kept for back-compat; new staff use `medical_ops` |
-| `ENABLE_ADMIN_DASHBOARD` env flag | Legacy dev-only; auth is now real gating. Safe to remove. |
-| `STORAGE_PROVIDER` env flag | Legacy storage toggle; R2 is the sole backend. Safe to remove. |
-| `STORAGE_LOCAL_SIGNING_SECRET`, `STORAGE_LOCAL_ROOT` env vars | Replaced by R2 + signed URLs (`src/lib/storage/r2-medical.ts`). Safe to remove. |
+| `ENABLE_ADMIN_DASHBOARD` env flag | ✅ Removed from docs (Jul 2026) — had 0 code reads; auth is the real gate. |
+| `STORAGE_PROVIDER` env flag | ⚠️ Keep — live R2 guard (`src/lib/storage/r2-medical.ts` throws on non-`r2`); optional, unset defaults to R2. |
+| `STORAGE_LOCAL_SIGNING_SECRET`, `STORAGE_LOCAL_ROOT` env vars | ✅ Removed from docs (Jul 2026) — 0 code reads; replaced by R2 (`src/lib/storage/r2-medical.ts`). |
 | `src/lib/storage/file-storage.ts` | ✅ Already deleted (Jun 2026). |
 | `src/app/caregiver/*` | ✅ Already deleted — caregivers use `/[locale]/portal` via FHIR `Consent`. |
 | HEP models (`Exercise`, `PatientHEP`, etc.) | ✅ Already dropped from schema (Jun 2026). |

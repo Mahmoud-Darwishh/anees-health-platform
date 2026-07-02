@@ -6,7 +6,7 @@ import { getPrivateMedicalObject } from '@/lib/storage/r2-medical';
 import { ensureCachedMedplumPractitionerForStaff } from '@/lib/medplum/practitioners';
 import { listCareTeamPatientIdsForPractitioner } from '@/lib/medplum/care-teams';
 import { getOwnPatientRecord } from '@/lib/portal/patient-record';
-import { prisma } from '@/lib/db/prisma';
+import { recordAudit } from '@/lib/utils/audit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -26,28 +26,26 @@ async function writeDocumentAudit(params: {
   expectedChecksumSha256?: string | null;
   actualChecksumSha256?: string | null;
 }) {
-  try {
-    const actorId = params.user.staffId ?? params.user.patientId ?? params.user.id;
+  const actorId = params.user.staffId ?? params.user.patientId ?? params.user.id;
 
-    await prisma.auditLog.create({
-      data: {
-        tableName: 'document_reference',
-        recordId: params.documentId,
-        action: params.action,
-        changedFields: {
-          patientMedplumId: params.patientMedplumId ?? null,
-          actorRole: params.user.role,
-          staffRole: params.user.staffRole ?? null,
-          reason: params.reason ?? null,
-          expectedChecksumSha256: params.expectedChecksumSha256 ?? null,
-          actualChecksumSha256: params.actualChecksumSha256 ?? null,
-        },
-        changedBy: actorId,
-      },
-    });
-  } catch {
-    // Best-effort only.
-  }
+  // Route through recordAudit so PHI document access (export / access_denied) is
+  // tamper-evident (hash-chained) AND mirrored to the FHIR AuditEvent store —
+  // the highest-value access records must not bypass the audit chain.
+  await recordAudit({
+    tableName: 'document_reference',
+    recordId: params.documentId,
+    action: params.action,
+    changedFields: {
+      patientMedplumId: params.patientMedplumId ?? null,
+      actorRole: params.user.role,
+      staffRole: params.user.staffRole ?? null,
+      reason: params.reason ?? null,
+      expectedChecksumSha256: params.expectedChecksumSha256 ?? null,
+      actualChecksumSha256: params.actualChecksumSha256 ?? null,
+    },
+    changedBy: actorId,
+    patientId: params.patientMedplumId ?? null,
+  });
 }
 
 function patientIdFromReference(reference?: string): string | null {

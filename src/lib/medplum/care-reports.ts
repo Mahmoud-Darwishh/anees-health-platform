@@ -50,12 +50,6 @@ type CreateBaseReportInput = {
   recordedAt?: Date;
 };
 
-export type CreateNursingReportInput = CreateBaseReportInput & {
-  conditionSummary?: string | null;
-  escalationNeeded?: boolean | null;
-  followUpPlan?: string | null;
-};
-
 export type CreatePhysioReportInput = CreateBaseReportInput & {
   sessionTemplate?: 'post_op_knee' | 'stroke_rehab' | 'low_back_pain' | 'geriatric_mobility' | 'custom' | null;
   sessionNumberLabel?: string | null;
@@ -137,40 +131,6 @@ function reportAuthorWho(input: CreateBaseReportInput): FhirReference {
   return input.performerReference
     ? { reference: input.performerReference, display: input.performerDisplay ?? undefined }
     : { display: input.performerDisplay ?? 'Clinician' };
-}
-
-export async function createNursingReport(input: CreateNursingReportInput): Promise<CareReportResource> {
-  const medplum = await getMedplumClient();
-
-  const report = (await medplum.createResource({
-    resourceType: 'Observation',
-    ...baseReport(input),
-    code: {
-      coding: [
-        {
-          system: MEDPLUM_CODE_SYSTEMS.reportType,
-          code: 'nursing-daily-report',
-          display: 'Nursing Daily Report',
-        },
-      ],
-      text: 'Nursing Daily Report',
-    },
-    component: compactComponents([
-      stringComponent('condition-summary', 'Condition Summary', input.conditionSummary),
-      booleanComponent('escalation-needed', 'Escalation Needed', input.escalationNeeded),
-      stringComponent('follow-up-plan', 'Follow-up Plan', input.followUpPlan),
-    ]),
-  } as never)) as CareReportResource;
-
-  if (report.id) {
-    await recordProvenance({
-      targetReference: `Observation/${report.id}`,
-      activity: 'CREATE',
-      agents: [{ role: 'author', who: reportAuthorWho(input) }],
-    });
-  }
-
-  return report;
 }
 
 /**

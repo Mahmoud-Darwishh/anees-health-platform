@@ -13,13 +13,13 @@ describe('reconcilePaymentAmount', () => {
     expect(r.reason).toBe('match');
   });
 
-  it('matches when the gateway reports minor units (×100)', () => {
+  it('flags a ×100 unit discrepancy for review instead of silently matching', () => {
     const r = reconcilePaymentAmount({
       expectedAmountEgp: 1500,
       gatewayAmount: 150000,
     });
-    expect(r.matched).toBe(true);
-    expect(r.reason).toBe('match');
+    expect(r.matched).toBe(false);
+    expect(r.reason).toBe('unit_mismatch');
   });
 
   it('flags a genuine amount mismatch (underpayment)', () => {
