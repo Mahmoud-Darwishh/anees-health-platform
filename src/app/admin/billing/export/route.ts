@@ -29,7 +29,13 @@ export async function GET() {
   const visits = await prisma.visit.findMany({
     where: {
       tenantId,
-      OR: [{ status: 'completed' }, { checkOutAt: { not: null } }],
+      OR: [
+        { status: 'completed' },
+        { checkOutAt: { not: null } },
+        // Disrupted visits (no-show, late cancel, etc.) carry partial payout per
+        // policy — include them so finance actually pays the compensation.
+        { primaryDisruptionCode: { not: null }, providerPayoutEgp: { gt: 0 } },
+      ],
     },
     orderBy: [{ checkOutAt: 'desc' }, { scheduledDate: 'desc' }],
     take: 5000,

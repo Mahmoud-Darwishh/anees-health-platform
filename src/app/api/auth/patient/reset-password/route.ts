@@ -6,28 +6,13 @@ import { normalizeWhatsAppChatId } from '@/lib/auth/wapilot';
 import { verifyWhatsAppOtp } from '@/lib/auth/whatsapp-otp-store';
 import { hashPassword } from '@/lib/auth/password';
 import { passwordSchema } from '@/lib/auth/password-rules';
+import { phoneVariants } from '@/lib/auth/phone-variants';
 
 /**
  * Patient self-service password reset. The WhatsApp OTP IS the authorization:
  * we verify the code and set the new password in ONE atomic call, so a verified
  * code can't be replayed against a separate endpoint. Patient-only.
  */
-
-/** Egypt-aware phone variants so the entered number matches the stored one. */
-function phoneVariants(input: string): string[] {
-  const digits = input.replace(/\D/g, '');
-  const set = new Set<string>([input.trim(), digits, `+${digits}`]);
-  if (digits.startsWith('20')) {
-    const local = digits.slice(2);
-    set.add(local).add(`0${local}`).add(`20${local}`).add(`+20${local}`);
-  } else if (digits.startsWith('0')) {
-    const local = digits.slice(1);
-    set.add(local).add(`20${local}`).add(`+20${local}`);
-  } else {
-    set.add(`0${digits}`).add(`20${digits}`).add(`+20${digits}`);
-  }
-  return [...set].filter(Boolean);
-}
 
 export async function POST(request: NextRequest) {
   const cors = resolveCorsHeaders(request.headers.get('origin'));

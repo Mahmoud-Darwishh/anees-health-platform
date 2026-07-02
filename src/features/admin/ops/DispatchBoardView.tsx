@@ -43,7 +43,10 @@ function AssignControl({ visit, clinicians }: { visit: DispatchVisit; clinicians
 function VisitRow({ visit, clinicians }: { visit: DispatchVisit; clinicians: ClinicianOption[] }) {
   return (
     <tr>
-      <td className="small text-nowrap">{whenLabel(visit)}</td>
+      <td className="small text-nowrap">
+        {whenLabel(visit)}
+        {visit.overdue ? <div><span className="badge text-bg-danger mt-1">Overdue</span></div> : null}
+      </td>
       <td>
         <div className="fw-semibold">{visit.patient.fullName}</div>
         <div className="small text-muted">{visit.patient.code}{visit.patient.dnr ? ' · ' : ''}{visit.patient.dnr ? <span className="badge text-bg-warning">DNR</span> : null}</div>

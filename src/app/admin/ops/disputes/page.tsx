@@ -5,6 +5,7 @@ import { requireStaffCan } from '@/lib/auth/policy/enforce';
 import { rolesForRoute } from '@/lib/auth/route-access';
 import { prisma } from '@/lib/db/prisma';
 import { sessionTenantId } from '@/lib/db/tenant-scope';
+import { DisputeResolveControl } from '@/features/admin/ops/DisputeResolveControl';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,7 +99,8 @@ export default async function AdminOpsDisputesPage() {
                   <th>Disruption</th>
                   <th>Scheduled</th>
                   <th>Updated</th>
-                  <th>Action</th>
+                  <th>Chart</th>
+                  <th>Resolve</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,6 +126,13 @@ export default async function AdminOpsDisputesPage() {
                         </Link>
                       ) : (
                         <span className="text-muted small">No chart link</span>
+                      )}
+                    </td>
+                    <td>
+                      {visit.state === 'disputed' ? (
+                        <DisputeResolveControl visitId={visit.id} code={visit.code} />
+                      ) : (
+                        <span className="text-muted small">Disruption only — no open dispute</span>
                       )}
                     </td>
                   </tr>

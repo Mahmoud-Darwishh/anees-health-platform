@@ -1986,6 +1986,88 @@
     font-size: 0.66rem;
     line-height: 1.4;
   }
+
+  .anees-vda {
+    margin-top: 0.55rem;
+    border: 1px solid rgba(207, 35, 63, 0.16);
+    border-radius: 8px;
+    background: #fffafa;
+  }
+
+  .anees-vda-summary {
+    padding: 0.5rem 0.65rem;
+    color: #a23048;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+
+  .anees-vda-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .anees-vda-summary::before {
+    content: '▸';
+    display: inline-block;
+    margin-inline-end: 0.4rem;
+    font-size: 0.7rem;
+  }
+
+  .anees-vda[open] .anees-vda-summary::before {
+    content: '▾';
+  }
+
+  .anees-vda-body {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.2rem 0.65rem 0.7rem;
+  }
+
+  .anees-vda-field {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0;
+  }
+
+  .anees-vda-label {
+    color: #5a687b;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .anees-vda-hint {
+    margin: 0;
+    color: #6b6071;
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
+
+  .anees-vda-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .anees-vda-error {
+    margin: 0;
+    padding: 0.42rem 0.55rem;
+    border: 1px solid rgba(207, 35, 63, 0.25);
+    border-radius: 6px;
+    background: var(--status-danger-bg);
+    color: var(--status-danger-fg);
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .anees-vda-submit {
+    justify-self: start;
+    font-weight: 700;
+  }
 }
 
 // Generic responsive table: real table on desktop, labeled cards on mobile.

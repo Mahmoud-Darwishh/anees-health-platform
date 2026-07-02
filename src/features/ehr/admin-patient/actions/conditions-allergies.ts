@@ -163,7 +163,9 @@ export async function retireConditionAction(formData: FormData): Promise<void> {
     const input = retireConditionSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('condition.retire', input.medplumPatientId, 'conditions');
 
-    const condition = await markConditionEnteredInError(input.conditionId);
+    const condition = await markConditionEnteredInError(input.conditionId, {
+      expectedVersionId: input.conditionVersionId ?? null,
+    });
 
     await writeMedplumAuditMirror({
       tableName: 'MedplumCondition',
@@ -186,7 +188,9 @@ export async function retireAllergyAction(formData: FormData): Promise<void> {
     const input = retireAllergySchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('allergy.retire', input.medplumPatientId, 'allergies');
 
-    const allergy = await markAllergyEnteredInError(input.allergyId);
+    const allergy = await markAllergyEnteredInError(input.allergyId, {
+      expectedVersionId: input.allergyVersionId ?? null,
+    });
 
     await writeMedplumAuditMirror({
       tableName: 'MedplumAllergyIntolerance',
@@ -209,7 +213,9 @@ export async function updateConditionStatusAction(formData: FormData): Promise<v
     const input = updateConditionStatusSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('condition.retire', input.medplumPatientId, 'conditions');
 
-    const condition = await setConditionClinicalStatus(input.conditionId, input.conditionStatus);
+    const condition = await setConditionClinicalStatus(input.conditionId, input.conditionStatus, {
+      expectedVersionId: input.conditionVersionId ?? null,
+    });
 
     await writeMedplumAuditMirror({
       tableName: 'MedplumCondition',
@@ -232,7 +238,9 @@ export async function updateAllergyStatusAction(formData: FormData): Promise<voi
     const input = updateAllergyStatusSchema.parse(formDataToInput(formData));
     await requireAdminPatientAction('allergy.retire', input.medplumPatientId, 'allergies');
 
-    const allergy = await setAllergyClinicalStatus(input.allergyId, input.allergyStatus);
+    const allergy = await setAllergyClinicalStatus(input.allergyId, input.allergyStatus, {
+      expectedVersionId: input.allergyVersionId ?? null,
+    });
 
     await writeMedplumAuditMirror({
       tableName: 'MedplumAllergyIntolerance',

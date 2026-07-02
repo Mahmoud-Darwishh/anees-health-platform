@@ -1,11 +1,26 @@
 import { z } from 'zod';
-import { optionalTrimmedString, optionalNumber, requiredDate, requiredPatientId } from './primitives';
+import { optionalTrimmedString, optionalNumber, clinicLocalDate, requiredPatientId } from './primitives';
+
+/** Physiological plausibility bounds — a hard server-side guard against typos
+ *  (e.g. a weight of 700kg or an SpO2 of 950%). Not a clinical-normal range. */
+const VITAL_BOUNDS: Record<string, { min: number; max: number; label: string }> = {
+  systolicBp: { min: 40, max: 300, label: 'Systolic BP (40–300 mmHg)' },
+  diastolicBp: { min: 20, max: 200, label: 'Diastolic BP (20–200 mmHg)' },
+  heartRate: { min: 20, max: 300, label: 'Heart rate (20–300 bpm)' },
+  respiratoryRate: { min: 3, max: 80, label: 'Respiratory rate (3–80 /min)' },
+  temperatureC: { min: 25, max: 45, label: 'Temperature (25–45 °C)' },
+  glucoseMgDl: { min: 10, max: 1500, label: 'Glucose (10–1500 mg/dL)' },
+  weightKg: { min: 0.3, max: 500, label: 'Weight (0.3–500 kg)' },
+  heightCm: { min: 10, max: 260, label: 'Height (10–260 cm)' },
+  spo2Pct: { min: 40, max: 100, label: 'SpO₂ (40–100 %)' },
+  painScore: { min: 0, max: 10, label: 'Pain score (0–10)' },
+};
 
 export const recordVitalsSchema = z
   .object({
     medplumPatientId: requiredPatientId,
     encounterId: optionalTrimmedString,
-    recordedAt: requiredDate,
+    recordedAt: clinicLocalDate,
     systolicBp: optionalNumber,
     diastolicBp: optionalNumber,
     heartRate: optionalNumber,
@@ -39,10 +54,19 @@ export const recordVitalsSchema = z
       ].some((value) => value !== null),
     'Provide at least one vital value.',
   )
-  .refine(
-    (input) => input.painScore === null || (input.painScore >= 0 && input.painScore <= 10),
-    'Pain score must be between 0 and 10.',
-  );
+  .superRefine((input, ctx) => {
+    for (const [field, bound] of Object.entries(VITAL_BOUNDS)) {
+      const value = (input as unknown as Record<string, number | null>)[field];
+      if (value === null || value === undefined || Number.isNaN(value)) continue;
+      if (value < bound.min || value > bound.max) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [field],
+          message: `${bound.label} is out of the plausible range.`,
+        });
+      }
+    }
+  });
 
 export const createAssessmentSchema = z
   .object({

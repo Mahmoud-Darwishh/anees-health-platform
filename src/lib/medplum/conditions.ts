@@ -53,6 +53,8 @@ export type ConditionSummary = {
   recordedDate?: string;
   note?: string;
   restrictedTier: boolean;
+  /** FHIR version at read time — round-tripped as an optimistic-lock guard. */
+  versionId?: string | null;
 };
 
 export type ConditionVerification = 'confirmed' | 'provisional' | 'differential' | 'unconfirmed';
@@ -136,6 +138,7 @@ function normalizeCondition(resource: ConditionResource): ConditionSummary | nul
     recordedDate: resource.recordedDate,
     note: resource.note?.[0]?.text,
     restrictedTier,
+    versionId: resource.meta?.versionId ?? null,
   };
 }
 
@@ -222,9 +225,16 @@ export async function createPatientCondition(input: CreateConditionInput): Promi
   } as never)) as ConditionResource;
 }
 
-export async function markConditionEnteredInError(conditionId: string): Promise<ConditionResource> {
+export async function markConditionEnteredInError(
+  conditionId: string,
+  options?: { expectedVersionId?: string | null },
+): Promise<ConditionResource> {
   const medplum = await getMedplumClient();
   const existing = (await medplum.readResource('Condition', conditionId)) as ConditionResource;
+
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('This problem was updated by another user. Please refresh and try again.');
+  }
 
   // FHIR con-5: clinicalStatus SHALL NOT be present when verificationStatus is
   // entered-in-error. Drop the existing clinicalStatus before persisting.
@@ -242,7 +252,11 @@ export async function markConditionEnteredInError(conditionId: string): Promise<
         },
       ],
     },
-  } as never)) as ConditionResource;
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as ConditionResource;
 }
 
 export type ConditionClinicalStatus = 'active' | 'resolved' | 'inactive' | 'remission';
@@ -263,9 +277,14 @@ const CONDITION_CLINICAL_STATUS_DISPLAY: Record<ConditionClinicalStatus, string>
 export async function setConditionClinicalStatus(
   conditionId: string,
   status: ConditionClinicalStatus,
+  options?: { expectedVersionId?: string | null },
 ): Promise<ConditionResource> {
   const medplum = await getMedplumClient();
   const existing = (await medplum.readResource('Condition', conditionId)) as ConditionResource;
+
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('This problem was updated by another user. Please refresh and try again.');
+  }
 
   return (await medplum.updateResource({
     ...existing,
@@ -287,5 +306,9 @@ export async function setConditionClinicalStatus(
         },
       ],
     },
-  } as never)) as ConditionResource;
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as ConditionResource;
 }

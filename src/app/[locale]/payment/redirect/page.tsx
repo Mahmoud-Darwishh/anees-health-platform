@@ -88,8 +88,15 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
       const transactionId = searchParams.transactionId;
 
       if (status === 'SUCCESS') {
+        // Replay-safe (B12): a signed redirect URL can be re-opened at any time.
+        // Only advance a booking that is still awaiting payment — never resurrect
+        // a refunded/cancelled/converted booking back to payment_completed. The
+        // webhook remains the authoritative source for the ledger + conversion.
         const paymentCompleted = await prisma.onlineBooking.updateMany({
-          where: { bookingRef: orderId },
+          where: {
+            bookingRef: orderId,
+            status: { in: ['pending', 'payment_pending', 'payment_failed'] },
+          },
           data: {
             status: 'payment_completed',
             ...(transactionId ? { kashierTransactionId: transactionId } : {}),
@@ -115,12 +122,15 @@ export default async function PaymentRedirectPage(props: PaymentRedirectPageProp
       } else if (status === 'FAILED' || status === 'FAILURE') {
         await prisma.$transaction(async (tx) => {
           const failedBookings = await tx.onlineBooking.updateMany({
-            where: { bookingRef: orderId },
+            where: {
+              bookingRef: orderId,
+              status: { in: ['pending', 'payment_pending'] },
+            },
             data: { status: 'payment_failed' },
           });
 
           const cancelledInvoices = await tx.invoice.updateMany({
-            where: { code: `INV_${orderId}` },
+            where: { code: `INV_${orderId}`, status: { not: 'paid' } },
             data: { status: 'cancelled' },
           });
 

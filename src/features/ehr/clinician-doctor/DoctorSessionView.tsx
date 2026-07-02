@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { VisitTransitionForm } from '@/features/ehr/clinician-physio/VisitTransitionForm';
+import { VisitTransitionForm, type TransitionAction } from '@/features/ehr/clinician-physio/VisitTransitionForm';
 import type { ClinicianVisitFlowState } from '@/features/ehr/clinician-shared/visit-flow';
 import type { DoctorSessionData } from './field-data';
 import {
@@ -15,7 +15,7 @@ import { DoctorNoteForm } from './DoctorNoteForm';
 type TransitionConfig = {
   label: string;
   transitionType: 'acknowledge' | 'start_travel' | 'mark_arrived' | 'check_in' | 'check_out';
-  action: (formData: FormData) => Promise<void>;
+  action: TransitionAction;
 };
 
 function nextTransition(flowState: ClinicianVisitFlowState): TransitionConfig | null {

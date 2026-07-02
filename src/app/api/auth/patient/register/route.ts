@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db/prisma';
 import { resolveCorsHeaders } from '@/lib/utils/cors';
 import { checkRateLimit, getClientIp } from '@/lib/utils/rate-limit';
+import { normalizeWhatsAppChatId } from '@/lib/auth/wapilot';
+import { verifyWhatsAppOtp } from '@/lib/auth/whatsapp-otp-store';
+import { phoneVariants, phonesMatch } from '@/lib/auth/phone-variants';
 
 export async function POST(request: NextRequest) {
   const cors = resolveCorsHeaders(request.headers.get('origin'));
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body.' }, { status: 400, headers: cors });
   }
 
-  const { name, phone, caseId, password } = body as Record<string, string>;
+  const { name, phone, caseId, password, code } = body as Record<string, string>;
 
   if (!name?.trim() || !phone?.trim() || !caseId?.trim() || !password) {
     return NextResponse.json(
@@ -39,11 +42,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Validate phone format (basic — Egyptian numbers or international)
-  const cleanPhone = phone.replace(/\s+/g, '');
-  if (!/^\+?[0-9]{10,15}$/.test(cleanPhone)) {
+  // Validate the phone as a WhatsApp-reachable number and derive the OTP chat id.
+  // `normalizeWhatsAppChatId` accepts local Egyptian formats (01…) as well as
+  // international ones, so a valid local number is no longer rejected.
+  const chatId = normalizeWhatsAppChatId(phone);
+  if (!chatId) {
     return NextResponse.json({ error: 'Invalid phone number.' }, { status: 400, headers: cors });
   }
+
+  // Possession proof: a 6-digit WhatsApp OTP the caller must have received.
+  if (typeof code !== 'string' || !/^\d{6}$/.test(code.trim())) {
+    return NextResponse.json(
+      { error: 'A valid 6-digit verification code is required.' },
+      { status: 400, headers: cors }
+    );
+  }
+
+  const cleanPhone = phone.replace(/\s+/g, '');
 
   // Find the Patient record by Case ID
   const patient = await prisma.patient.findUnique({
@@ -59,10 +74,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Verify phone matches the patient record
-  const normalizedInput = cleanPhone.replace(/^(\+20|0020|00)/, '0');
-  const normalizedRecord = (patient.phone ?? '').replace(/^(\+20|0020|00)/, '0');
-  if (normalizedInput !== normalizedRecord) {
+  // Verify phone matches the patient record (Egypt-aware across formats).
+  if (!patient.phone || !phonesMatch(phone, patient.phone)) {
     return NextResponse.json(
       { error: 'Case ID or phone number does not match our records.' },
       { status: 400, headers: cors }
@@ -77,13 +90,32 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Reject if phone is already taken by another User
-  const phoneConflict = await prisma.user.findUnique({ where: { phone: cleanPhone } });
+  // Reject if phone is already taken by another User (any stored format).
+  const phoneConflict = await prisma.user.findFirst({
+    where: { phone: { in: phoneVariants(phone) } },
+    select: { id: true },
+  });
   if (phoneConflict) {
     return NextResponse.json(
       { error: 'This phone number is already registered. Please sign in.' },
       { status: 409, headers: cors }
     );
+  }
+
+  // All non-destructive checks passed — now consume the OTP (single-use). Doing
+  // this last means a wrong Case ID doesn't burn the caller's valid code.
+  const otp = verifyWhatsAppOtp(chatId, code.trim());
+  if (!otp.ok) {
+    const message =
+      otp.reason === 'too_many_attempts'
+        ? 'Too many incorrect attempts. Request a new code.'
+        : otp.reason === 'expired'
+          ? 'The code has expired. Request a new one.'
+          : otp.reason === 'not_found'
+            ? 'No verification code was requested for this number. Request a new one.'
+            : 'Invalid code. Please try again.';
+    const status = otp.reason === 'too_many_attempts' ? 429 : 400;
+    return NextResponse.json({ error: message }, { status, headers: cors });
   }
 
   const passwordHash = await bcrypt.hash(password, 12);

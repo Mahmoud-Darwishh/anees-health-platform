@@ -6,6 +6,7 @@ import {
   upsertSubscription,
 } from '@/lib/pwa/subscription-store';
 import { checkRateLimit, getClientIp, tooManyRequests } from '@/lib/utils/rate-limit';
+import { getSessionUser } from '@/lib/auth/rbac';
 
 type PushSubscriptionPayload = {
   endpoint: string;
@@ -54,6 +55,10 @@ export async function POST(request: NextRequest) {
 
     const locale: AppLocale = body.locale === 'ar' ? 'ar' : 'en';
 
+    // Attach the authenticated owner (if any) so events can target this person's
+    // devices. Anonymous marketing opt-ins simply leave userId null.
+    const sessionUser = await getSessionUser();
+
     await upsertSubscription({
       endpoint: body.subscription.endpoint,
       keys: {
@@ -61,6 +66,7 @@ export async function POST(request: NextRequest) {
         auth: body.subscription.keys.auth,
       },
       locale,
+      userId: sessionUser?.id ?? null,
     });
 
     const totalSubscriptions = await countSubscriptions();

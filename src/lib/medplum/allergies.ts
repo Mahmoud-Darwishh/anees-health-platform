@@ -51,6 +51,8 @@ export type AllergySummary = {
   note?: string;
   /** True for the affirmative "No Known Allergies" record. */
   isNoKnownAllergy?: boolean;
+  /** FHIR version at read time — round-tripped as an optimistic-lock guard. */
+  versionId?: string | null;
 };
 
 export type CreateAllergyInput = {
@@ -84,6 +86,7 @@ function normalizeAllergy(resource: AllergyIntoleranceResource): AllergySummary 
     statusCode: resource.clinicalStatus?.coding?.[0]?.code ?? 'active',
     note: resource.note?.[0]?.text,
     isNoKnownAllergy,
+    versionId: resource.meta?.versionId ?? null,
   };
 }
 
@@ -182,9 +185,16 @@ export async function createNoKnownAllergyRecord(input: {
   } as never)) as AllergyIntoleranceResource;
 }
 
-export async function markAllergyEnteredInError(allergyId: string): Promise<AllergyIntoleranceResource> {
+export async function markAllergyEnteredInError(
+  allergyId: string,
+  options?: { expectedVersionId?: string | null },
+): Promise<AllergyIntoleranceResource> {
   const medplum = await getMedplumClient();
   const existing = (await medplum.readResource('AllergyIntolerance', allergyId)) as AllergyIntoleranceResource;
+
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('This allergy was updated by another user. Please refresh and try again.');
+  }
 
   // FHIR ait-2: clinicalStatus SHALL NOT be present when verificationStatus is
   // entered-in-error. Drop the existing clinicalStatus before persisting.
@@ -202,7 +212,11 @@ export async function markAllergyEnteredInError(allergyId: string): Promise<Alle
         },
       ],
     },
-  } as never)) as AllergyIntoleranceResource;
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as AllergyIntoleranceResource;
 }
 
 export type AllergyClinicalStatus = 'active' | 'inactive' | 'resolved';
@@ -221,9 +235,14 @@ const ALLERGY_CLINICAL_STATUS_DISPLAY: Record<AllergyClinicalStatus, string> = {
 export async function setAllergyClinicalStatus(
   allergyId: string,
   status: AllergyClinicalStatus,
+  options?: { expectedVersionId?: string | null },
 ): Promise<AllergyIntoleranceResource> {
   const medplum = await getMedplumClient();
   const existing = (await medplum.readResource('AllergyIntolerance', allergyId)) as AllergyIntoleranceResource;
+
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('This allergy was updated by another user. Please refresh and try again.');
+  }
 
   return (await medplum.updateResource({
     ...existing,
@@ -245,5 +264,9 @@ export async function setAllergyClinicalStatus(
         },
       ],
     },
-  } as never)) as AllergyIntoleranceResource;
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as AllergyIntoleranceResource;
 }

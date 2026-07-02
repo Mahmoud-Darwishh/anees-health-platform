@@ -365,6 +365,11 @@
   font-size: 0.78rem;
 }
 
+.clinician-form-success {
+  color: var(--status-success-fg);
+  font-size: 0.78rem;
+}
+
 .clinician-dashboard-grid {
   display: grid;
   gap: 0.6rem;

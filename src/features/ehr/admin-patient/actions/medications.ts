@@ -219,7 +219,9 @@ export async function updateMedicationStatusAction(formData: FormData): Promise<
       throw new Error('Only doctors and admins can manage medications.');
     }
 
-    const medication = await setMedicationStatus(input.medicationId, input.medicationManageStatus);
+    const medication = await setMedicationStatus(input.medicationId, input.medicationManageStatus, {
+      expectedVersionId: input.medicationVersionId ?? null,
+    });
 
     await writeMedplumAuditMirror({
       tableName: 'MedplumMedicationStatement',
@@ -245,7 +247,9 @@ export async function retireMedicationAction(formData: FormData): Promise<void> 
       throw new Error('Only doctors and admins can manage medications.');
     }
 
-    const medication = await markMedicationEnteredInError(input.medicationId);
+    const medication = await markMedicationEnteredInError(input.medicationId, {
+      expectedVersionId: input.medicationVersionId ?? null,
+    });
 
     await writeMedplumAuditMirror({
       tableName: 'MedplumMedicationStatement',

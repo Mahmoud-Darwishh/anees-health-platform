@@ -1,8 +1,12 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useActionState, useRef, useState } from 'react';
+import { CLINICIAN_ACTION_INITIAL_STATE, type ClinicianActionState } from './action-state';
 
-type TransitionAction = (formData: FormData) => Promise<void>;
+export type TransitionAction = (
+  prev: ClinicianActionState,
+  formData: FormData,
+) => Promise<ClinicianActionState>;
 
 type Props = {
   action: TransitionAction;
@@ -46,8 +50,9 @@ async function getCurrentCoordinates(): Promise<Coordinates> {
 export function VisitTransitionForm({ action, label, visitId, transitionType }: Props) {
   const formRef = useRef<HTMLFormElement | null>(null);
   const preparedSubmitRef = useRef(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, formAction, isPending] = useActionState(action, CLINICIAN_ACTION_INITIAL_STATE);
+  const [preparing, setPreparing] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const timeFieldName =
     transitionType === 'acknowledge'
@@ -67,13 +72,13 @@ export function VisitTransitionForm({ action, label, visitId, transitionType }: 
     }
 
     event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    setLocalError(null);
+    setPreparing(true);
 
     const form = formRef.current;
     if (!form) {
-      setError('Form is unavailable. Please refresh and try again.');
-      setIsSubmitting(false);
+      setLocalError('Form is unavailable. Please refresh and try again.');
+      setPreparing(false);
       return;
     }
 
@@ -100,19 +105,22 @@ export function VisitTransitionForm({ action, label, visitId, transitionType }: 
           accuracyInput.value = String(coordinates.accuracy);
         }
       } catch {
-        setError('Location is required for check-in/out. Please enable GPS and try again.');
-        setIsSubmitting(false);
+        setLocalError('Location is required for check-in/out. Please enable GPS and try again.');
+        setPreparing(false);
         return;
       }
     }
 
     preparedSubmitRef.current = true;
+    setPreparing(false);
     form.requestSubmit();
-    setIsSubmitting(false);
   }
 
+  const busy = preparing || isPending;
+  const errorMessage = localError ?? (state.status === 'error' ? state.message : null);
+
   return (
-    <form ref={formRef} action={action} onSubmit={handleSubmit}>
+    <form ref={formRef} action={formAction} onSubmit={handleSubmit}>
       <input type="hidden" name="visitId" value={visitId} />
 
       <input type="hidden" name={timeFieldName} defaultValue="" />
@@ -156,10 +164,13 @@ export function VisitTransitionForm({ action, label, visitId, transitionType }: 
         </>
       ) : null}
 
-      <button type="submit" className="btn btn-sm btn-primary" disabled={isSubmitting}>
-        {isSubmitting ? 'Working...' : label}
+      <button type="submit" className="btn btn-sm btn-primary" disabled={busy}>
+        {busy ? 'Working...' : label}
       </button>
-      {error ? <p className="clinician-form-error mt-2 mb-0">{error}</p> : null}
+      {errorMessage ? <p className="clinician-form-error mt-2 mb-0">{errorMessage}</p> : null}
+      {state.status === 'success' && !localError ? (
+        <p className="clinician-form-success mt-2 mb-0">{state.message}</p>
+      ) : null}
     </form>
   );
 }

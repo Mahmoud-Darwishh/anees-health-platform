@@ -31,11 +31,14 @@ export async function failAction(
   if (medplumPatientId) {
     refreshClinicalPaths(medplumPatientId);
   }
-  // Clinician field wrappers pass { rethrow: true } so a real write failure
-  // propagates to their useActionState form (which renders the error) instead of
-  // only landing in the /admin flash cookie the field clinician never sees. The
-  // admin chart pages call failAction without opts → behaviour unchanged.
-  if (opts?.rethrow) {
+  // Clinician field wrappers pass { rethrow: true } (or stamp a `__rethrow`
+  // marker on the trusted FormData) so a real write failure propagates to their
+  // useActionState form (which renders the error inline) instead of only landing
+  // in the /admin flash cookie the field clinician never sees. The admin chart
+  // pages call failAction without opts and never set the marker → behaviour
+  // unchanged.
+  const shouldRethrow = opts?.rethrow === true || formData.get('__rethrow') === '1';
+  if (shouldRethrow) {
     throw error;
   }
 }

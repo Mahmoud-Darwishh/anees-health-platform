@@ -62,9 +62,7 @@ export function EarningsPageView({ data }: { data: ClinicianEarningsData }) {
                 <th>Date</th>
                 <th>Patient</th>
                 <th>Service</th>
-                <th>Gross</th>
-                <th>Deductions</th>
-                <th>Net</th>
+                <th>Earned</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -74,8 +72,6 @@ export function EarningsPageView({ data }: { data: ClinicianEarningsData }) {
                   <td>{formatDateLabel(visit.visitDateIso)}</td>
                   <td>{visit.patientInitials}</td>
                   <td>{visit.serviceCode}</td>
-                  <td>{formatCurrency(visit.grossEgp)} EGP</td>
-                  <td>{formatCurrency(visit.deductionsEgp)} EGP</td>
                   <td>{formatCurrency(visit.netEgp)} EGP</td>
                   <td>{visit.stateLabel}</td>
                 </tr>

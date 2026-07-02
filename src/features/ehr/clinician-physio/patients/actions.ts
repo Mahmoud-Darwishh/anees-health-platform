@@ -466,6 +466,17 @@ export async function createDischargeSummaryAction(formData: FormData): Promise<
     throw new Error('Patient Medplum identifier is missing.');
   }
 
+  // A discharge summary is a signed clinical document. Gate it on the licensed
+  // physiotherapy sign action (licence validity + discipline + case-scope) exactly
+  // like every other note; an expired-licence clinician is blocked here.
+  await requireStaffCan('discharge_summary.create', {
+    targetPatientMedplumId: patient.medplumPatientId,
+  });
+
+  if (!staffContext.practitionerReference) {
+    throw new Error('Your practitioner identity could not be resolved. Cannot sign the discharge summary.');
+  }
+
   const [totalGoals, metGoals] = await Promise.all([
     prisma.patientGoal.count({ where: { patientId: input.patientId } }),
     prisma.patientGoal.count({ where: { patientId: input.patientId, status: 'met' } }),
@@ -481,23 +492,35 @@ export async function createDischargeSummaryAction(formData: FormData): Promise<
     .filter(Boolean)
     .join('\n\n');
 
-  // TODO(audit): wire when auth lands
   const draft = await createClinicalNoteDraft({
     patientId: patient.medplumPatientId,
     title: 'Physio Discharge Summary',
     noteBody: body,
     discipline: 'physiotherapy',
-    authorReference: undefined,
-    authorDisplay: staffContext.staffName,
+    authorReference: staffContext.practitionerReference,
+    authorDisplay: staffContext.practitionerDisplay,
   });
 
   if (!draft.id) {
     throw new Error('Failed to create discharge summary draft.');
   }
 
-  await signClinicalNote(draft.id, {
-    authorReference: undefined,
-    authorDisplay: staffContext.staffName,
+  const signed = await signClinicalNote(
+    draft.id,
+    {
+      authorReference: staffContext.practitionerReference,
+      authorDisplay: staffContext.practitionerDisplay,
+    },
+    { expectedVersionId: draft.meta?.versionId ?? null },
+  );
+
+  await writeMedplumAuditMirror({
+    tableName: 'MedplumClinicalNote',
+    recordId: signed.id ?? draft.id,
+    action: AuditAction.create,
+    changedFields: ['status', 'type', 'subject', 'author', 'attester', 'section', 'extension'],
+    changedBy: staffContext.staffId,
+    patientId: patient.medplumPatientId,
   });
 
   revalidateClinicianPatientsViews();

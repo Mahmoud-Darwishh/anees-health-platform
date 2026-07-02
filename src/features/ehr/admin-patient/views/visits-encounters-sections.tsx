@@ -5,6 +5,7 @@ import { VisitBoard } from './visit-board';
 import { ScheduleAppointmentForm } from './schedule-appointment-form';
 import { AppointmentTimeline } from './appointment-timeline';
 import { EncounterHistory } from './encounter-history';
+import { ClinicalNotesHistory } from './clinical-notes-history';
 
 export function VisitsEncountersSections({ ctx }: { ctx: AdminPatientViewContext }) {
   const {
@@ -16,6 +17,8 @@ export function VisitsEncountersSections({ ctx }: { ctx: AdminPatientViewContext
     appointmentsError,
     localVisits,
     localVisitsError,
+    clinicalNotes,
+    clinicalNotesError,
     isTab,
   } = ctx;
 
@@ -58,6 +61,9 @@ export function VisitsEncountersSections({ ctx }: { ctx: AdminPatientViewContext
 
       {/* 4 — Read-only clinical record history. */}
       <EncounterHistory encounters={encounters} encountersError={encountersError} />
+
+      {/* 5 — Signed clinical documentation (notes authored during visits). */}
+      <ClinicalNotesHistory clinicalNotes={clinicalNotes} clinicalNotesError={clinicalNotesError} />
     </>
   );
 }

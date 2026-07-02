@@ -31,22 +31,26 @@ export const recordNoKnownAllergiesSchema = z.object({
 export const retireConditionSchema = z.object({
   medplumPatientId: requiredPatientId,
   conditionId: z.string().trim().min(1, 'Condition id is required'),
+  conditionVersionId: optionalTrimmedString,
 });
 
 export const retireAllergySchema = z.object({
   medplumPatientId: requiredPatientId,
   allergyId: z.string().trim().min(1, 'Allergy id is required'),
+  allergyVersionId: optionalTrimmedString,
 });
 
 export const updateConditionStatusSchema = z.object({
   medplumPatientId: requiredPatientId,
   conditionId: z.string().trim().min(1, 'Condition id is required'),
   conditionStatus: z.enum(['active', 'resolved', 'inactive', 'remission']),
+  conditionVersionId: optionalTrimmedString,
 });
 
 export const updateAllergyStatusSchema = z.object({
   medplumPatientId: requiredPatientId,
   allergyId: z.string().trim().min(1, 'Allergy id is required'),
   allergyStatus: z.enum(['active', 'inactive', 'resolved']),
+  allergyVersionId: optionalTrimmedString,
 });
 

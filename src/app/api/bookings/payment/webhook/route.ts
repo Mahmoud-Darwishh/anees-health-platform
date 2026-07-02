@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
           where: { bookingRef: data.merchantOrderId },
           select: {
             bookingRef: true,
+            status: true,
             fullName: true,
             countryCode: true,
             phoneNumber: true,
@@ -80,6 +81,23 @@ export async function POST(request: NextRequest) {
 
         if (!booking) {
           return NextResponse.json({ received: false, error: 'Booking not found' }, { status: 404 });
+        }
+
+        // ── Replay guard (B12) ────────────────────────────────────────────────
+        // A `pay` webhook is signed and can be re-delivered at any time. Once a
+        // booking has moved to a terminal/locked state, re-processing a `pay`
+        // event would resurrect it — most dangerously un-refunding a refunded
+        // booking, or regressing a converted one back to payment_completed.
+        // These states are settled: acknowledge the delivery (200, so Kashier
+        // stops retrying) but do nothing.
+        const REPLAY_LOCKED_STATUSES = new Set(['refunded', 'cancelled', 'converted']);
+        if (REPLAY_LOCKED_STATUSES.has(booking.status)) {
+          console.warn(
+            '[Webhook] Ignoring pay event for %s — booking already in terminal status %s',
+            booking.bookingRef,
+            booking.status,
+          );
+          return NextResponse.json({ received: true, ignored: true, reason: 'terminal_status' });
         }
 
         if (data.status === 'SUCCESS') {
@@ -389,15 +407,31 @@ export async function POST(request: NextRequest) {
           await createVisitFromBooking(booking.bookingRef);
         } else {
           await prisma.$transaction(async (tx) => {
-            const failedBooking = await tx.onlineBooking.update({
-              where: { bookingRef: data.merchantOrderId },
+            // Replay-safe (B12): only fail a booking that is still awaiting
+            // payment. A stale/duplicate FAILED event must never regress an
+            // already payment_completed booking or cancel its paid invoice —
+            // reversals go through the `refund` event, not a late `pay` failure.
+            const failed = await tx.onlineBooking.updateMany({
+              where: {
+                bookingRef: data.merchantOrderId,
+                status: { in: ['pending', 'payment_pending'] },
+              },
               data: { status: 'payment_failed' },
             });
+
+            if (failed.count === 0) {
+              console.warn(
+                '[Webhook] Ignoring FAILED event for %s — booking not awaiting payment (%s)',
+                data.merchantOrderId,
+                booking.status,
+              );
+              return;
+            }
 
             await tx.auditLog.create({
               data: {
                 tableName: 'online_bookings',
-                recordId: failedBooking.id,
+                recordId: data.merchantOrderId,
                 action: 'update',
                 changedFields: {
                   source: 'api.booking.payment.webhook',
@@ -408,7 +442,7 @@ export async function POST(request: NextRequest) {
             });
 
             const cancelledInvoices = await tx.invoice.updateMany({
-              where: { code: `INV_${data.merchantOrderId}` },
+              where: { code: `INV_${data.merchantOrderId}`, status: { not: 'paid' } },
               data: { status: 'cancelled' },
             });
 

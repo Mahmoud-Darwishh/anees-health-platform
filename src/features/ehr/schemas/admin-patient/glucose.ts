@@ -4,7 +4,7 @@ import {
   GLUCOSE_MEAL_VALUES,
 } from '@/lib/clinical/glucose-profile';
 import { isPlausibleEnteredGlucose, type GlucoseUnit } from '@/lib/clinical/glucose-units';
-import { optionalTrimmedString, optionalBoolean, requiredDate, requiredPatientId } from './primitives';
+import { optionalTrimmedString, optionalBoolean, clinicLocalDate, requiredPatientId } from './primitives';
 
 const glucoseValue = z
   .union([z.string(), z.number(), z.null(), z.undefined()])
@@ -21,7 +21,7 @@ export const recordGlucoseSchema = z
   .object({
     medplumPatientId: requiredPatientId,
     encounterId: optionalTrimmedString,
-    recordedAt: requiredDate,
+    recordedAt: clinicLocalDate,
     glucoseTiming: z.enum(GLUCOSE_TIMING_VALUES),
     glucoseMeal: z
       .union([z.enum(GLUCOSE_MEAL_VALUES), z.literal(''), z.null(), z.undefined()])

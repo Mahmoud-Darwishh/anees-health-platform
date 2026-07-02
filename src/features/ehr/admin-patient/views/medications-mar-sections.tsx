@@ -117,6 +117,7 @@ export function MedicationsMarSections({ ctx }: { ctx: AdminPatientViewContext }
                                 <form action={updateMedicationStatusAction} className="d-inline-flex gap-1 align-items-center">
                                   <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                   <input type="hidden" name="medicationId" value={medication.id} />
+                                  <input type="hidden" name="medicationVersionId" value={medication.versionId ?? ''} />
                                   <label className="visually-hidden" htmlFor={`medicationStatus-${medication.id}`}>Update status</label>
                                   <select
                                     id={`medicationStatus-${medication.id}`}
@@ -133,6 +134,7 @@ export function MedicationsMarSections({ ctx }: { ctx: AdminPatientViewContext }
                                 <form action={retireMedicationAction} className="d-inline">
                                   <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                   <input type="hidden" name="medicationId" value={medication.id} />
+                                  <input type="hidden" name="medicationVersionId" value={medication.versionId ?? ''} />
                                   <button type="submit" className="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
                               </div>

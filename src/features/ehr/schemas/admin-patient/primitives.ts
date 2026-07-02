@@ -92,6 +92,68 @@ export const requiredDate = z
   .transform((value) => new Date(value))
   .refine((value) => !Number.isNaN(value.getTime()), 'Invalid date value');
 
+/**
+ * The clinic operates in Egypt; `datetime-local` inputs submit a bare wall-clock
+ * value (`YYYY-MM-DDTHH:mm`) with no timezone. Parsing that with `new Date()`
+ * silently interprets it in the *server's* timezone, so a UTC host shifts a
+ * Cairo clinician's "now" 2–3h into the future and breaks the check-out evidence
+ * window. We interpret bare values explicitly in Africa/Cairo (deterministic,
+ * host-TZ-independent); values that already carry an offset/`Z` are honoured.
+ */
+export const CLINIC_TIME_ZONE = 'Africa/Cairo';
+
+function zonedOffsetMinutes(instant: Date, timeZone: string): number {
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  const parts = dtf.formatToParts(instant);
+  const map: Record<string, string> = {};
+  for (const part of parts) map[part.type] = part.value;
+  const asUtc = Date.UTC(
+    Number(map.year),
+    Number(map.month) - 1,
+    Number(map.day),
+    Number(map.hour === '24' ? '0' : map.hour),
+    Number(map.minute),
+    Number(map.second),
+  );
+  return (asUtc - instant.getTime()) / 60000;
+}
+
+export function parseClinicLocalDate(value: string): Date {
+  const trimmed = value.trim();
+  // Already timezone-qualified (…Z or …±hh:mm) — parse as-is.
+  if (/[zZ]$|[+-]\d{2}:?\d{2}$/.test(trimmed)) {
+    return new Date(trimmed);
+  }
+  // Bare local wall-clock value → interpret in the clinic timezone.
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(trimmed);
+  if (!match) {
+    return new Date(trimmed);
+  }
+  const [, y, mo, d, h, mi, s] = match;
+  const asUtc = Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s ?? '0'));
+  const provisional = new Date(asUtc);
+  const offsetMinutes = zonedOffsetMinutes(provisional, CLINIC_TIME_ZONE);
+  return new Date(asUtc - offsetMinutes * 60000);
+}
+
+/** Clinic-local datetime with a future-plausibility guard (no back-dated future entries). */
+export const clinicLocalDate = z
+  .string()
+  .trim()
+  .refine((value) => !!value, 'Required date value is missing')
+  .transform((value) => parseClinicLocalDate(value))
+  .refine((value) => !Number.isNaN(value.getTime()), 'Invalid date value')
+  .refine((value) => value.getTime() <= Date.now() + 2 * 60 * 1000, 'Recorded time cannot be in the future.');
+
 export const requiredPatientId = z.string().trim().min(1, 'Patient id is required');
 export const optionalEmail = optionalTrimmedString.transform((value) => value?.toLowerCase());
 
@@ -191,7 +253,7 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     handoffLongitude: formData.get('handoffLongitude'),
     handoffAccuracyMeters: formData.get('handoffAccuracyMeters'),
     handoffConfirmed: formData.get('handoffConfirmed'),
-    physioVisitId: formData.get('physioVisitId'),
+    physioVisitId: formData.get('physioVisitId') ?? formData.get('visitId'),
     sessionTemplate: formData.get('sessionTemplate'),
     sessionNumberLabel: formData.get('sessionNumberLabel'),
     subjectiveFunction: formData.get('subjectiveFunction'),
@@ -224,11 +286,13 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     conditionNote: formData.get('conditionNote'),
     conditionId: formData.get('conditionId'),
     conditionStatus: formData.get('conditionStatus'),
+    conditionVersionId: formData.get('conditionVersionId'),
     allergen: formData.get('allergen'),
     allergySeverity: formData.get('allergySeverity'),
     allergyNote: formData.get('allergyNote'),
     allergyId: formData.get('allergyId'),
     allergyStatus: formData.get('allergyStatus'),
+    allergyVersionId: formData.get('allergyVersionId'),
     medicationName: formData.get('medicationName'),
     dosageText: formData.get('dosageText'),
     routeText: formData.get('routeText'),
@@ -238,6 +302,7 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     medicationNote: formData.get('medicationNote'),
     medicationId: formData.get('medicationId'),
     medicationManageStatus: formData.get('medicationManageStatus'),
+    medicationVersionId: formData.get('medicationVersionId'),
     medicationStatementId: formData.get('medicationStatementId'),
     administrationStatus: formData.get('administrationStatus'),
     scheduledAt: formData.get('scheduledAt'),
@@ -267,6 +332,7 @@ export function formDataToInput(formData: FormData): Record<string, FormDataEntr
     linkedLabOrderId: formData.get('linkedLabOrderId'),
     assessmentTitle: formData.get('assessmentTitle'),
     assessmentType: formData.get('assessmentType'),
+    assessmentInstrument: formData.get('assessmentInstrument'),
     assessmentScore: formData.get('assessmentScore'),
     assessmentSummary: formData.get('assessmentSummary'),
     assessmentNote: formData.get('assessmentNote'),

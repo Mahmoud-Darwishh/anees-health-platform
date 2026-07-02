@@ -1,6 +1,7 @@
 'use client';
 
 import { VisitWorkflowActions } from './visit-workflow-actions';
+import { VisitDisruptionActions } from './visit-disruption-actions';
 import type { VisitVM } from './visit-types';
 
 /** Timeline + geo + recent activity + the live action panel. Shared by the
@@ -34,6 +35,7 @@ function VisitDetail({ visit, medplumPatientId }: { visit: VisitVM; medplumPatie
       )}
 
       <VisitWorkflowActions medplumPatientId={medplumPatientId} visitId={visit.id} flags={visit.flags} />
+      <VisitDisruptionActions medplumPatientId={medplumPatientId} visitId={visit.id} flags={visit.flags} />
     </>
   );
 }

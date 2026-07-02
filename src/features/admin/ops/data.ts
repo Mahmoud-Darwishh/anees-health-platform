@@ -16,6 +16,8 @@ export type DispatchVisit = {
   state: string | null;
   patient: { fullName: string; code: string; medplumPatientId: string | null; dnr: boolean };
   clinicianName: string | null;
+  /** Scheduled before today and still open — i.e. a backlog item at risk of being dropped. */
+  overdue: boolean;
 };
 
 export type ClinicianOption = {
@@ -39,6 +41,46 @@ export type DispatchBoardData = {
   clinicians: ClinicianOption[];
 };
 
+export type SchedulingServiceOption = {
+  id: string;
+  name: string;
+  categoryName: string;
+  listPriceEgp: number;
+  durationMins: number;
+};
+
+export type SchedulingCatalog = {
+  services: SchedulingServiceOption[];
+};
+
+/**
+ * Lookup data for the ops "create visit" form: the active service catalogue with
+ * default price + duration. Tenant-agnostic (services are a shared catalogue).
+ */
+export async function getSchedulingCatalog(): Promise<SchedulingCatalog> {
+  const services = await prisma.service.findMany({
+    where: { status: 'active' },
+    orderBy: [{ category: { name: 'asc' } }, { name: 'asc' }],
+    select: {
+      id: true,
+      name: true,
+      listPriceEgp: true,
+      durationMins: true,
+      category: { select: { name: true } },
+    },
+  });
+
+  return {
+    services: services.map((s) => ({
+      id: s.id,
+      name: s.name,
+      categoryName: s.category.name,
+      listPriceEgp: Number(s.listPriceEgp),
+      durationMins: s.durationMins,
+    })),
+  };
+}
+
 const CLINICAL_DISCIPLINES: StaffRole[] = ['doctor', 'nurse', 'physiotherapist'];
 
 function mapVisit(
@@ -55,6 +97,7 @@ function mapVisit(
     patient: { fullName: string; code: string; medplumPatientId: string | null; dnrStatus: string | null };
   },
   providerNameById: Map<string, string>,
+  todayStartMs: number,
 ): DispatchVisit {
   return {
     id: visit.id,
@@ -72,6 +115,7 @@ function mapVisit(
       dnr: visit.patient.dnrStatus === 'dnr',
     },
     clinicianName: visit.providerId ? providerNameById.get(visit.providerId) ?? 'Assigned' : null,
+    overdue: visit.scheduledDate.getTime() < todayStartMs,
   };
 }
 
@@ -118,7 +162,11 @@ export async function getDispatchBoardData(tenantId: string): Promise<DispatchBo
       select: VISIT_SELECT,
     }),
     prisma.visit.findMany({
-      where: { tenantId, providerId: null, status: 'scheduled', scheduledDate: { gte: todayStart } },
+      // Unassigned scheduled visits are a backlog that must be cleared regardless
+      // of date. Including overdue (pre-today) rows here is what stops a paid
+      // customer from being silently dropped; oldest-first so the most overdue
+      // surface at the top.
+      where: { tenantId, providerId: null, status: 'scheduled' },
       orderBy: [{ scheduledDate: 'asc' }, { scheduledTime: 'asc' }],
       take: 100,
       select: VISIT_SELECT,
@@ -160,11 +208,12 @@ export async function getDispatchBoardData(tenantId: string): Promise<DispatchBo
     availabilityByRef = new Map();
   }
   const todayCode = dayCodeForDate(now);
+  const todayStartMs = todayStart.getTime();
 
   return {
-    todays: todaysRows.map((v) => mapVisit(v, providerNameById)),
-    unassigned: unassignedRows.map((v) => mapVisit(v, providerNameById)),
-    upcoming: upcomingRows.map((v) => mapVisit(v, providerNameById)),
+    todays: todaysRows.map((v) => mapVisit(v, providerNameById, todayStartMs)),
+    unassigned: unassignedRows.map((v) => mapVisit(v, providerNameById, todayStartMs)),
+    upcoming: upcomingRows.map((v) => mapVisit(v, providerNameById, todayStartMs)),
     clinicians: clinicianStaff.map((staff) => {
       const availability = staff.medplumPractitionerId
         ? availabilityByRef.get(`Practitioner/${staff.medplumPractitionerId}`)

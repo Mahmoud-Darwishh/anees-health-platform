@@ -96,6 +96,7 @@ export async function getOwnPatientRecord() {
       dateOfBirth: true,
       status: true,
       medplumPatientId: true,
+      tenantId: true,
       addressDetail: true,
       landmark: true,
       addressMapUrl: true,

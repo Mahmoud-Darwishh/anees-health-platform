@@ -30,11 +30,13 @@ export const updateMedicationStatusSchema = z.object({
   medplumPatientId: requiredPatientId,
   medicationId: z.string().trim().min(1, 'Medication id is required'),
   medicationManageStatus: z.enum(['active', 'on-hold', 'completed', 'stopped']),
+  medicationVersionId: optionalTrimmedString,
 });
 
 export const retireMedicationSchema = z.object({
   medplumPatientId: requiredPatientId,
   medicationId: z.string().trim().min(1, 'Medication id is required'),
+  medicationVersionId: optionalTrimmedString,
 });
 
 export const retireMedicationAdministrationSchema = z.object({

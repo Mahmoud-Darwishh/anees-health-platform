@@ -190,7 +190,12 @@ export async function POST(request: NextRequest) {
       const patient = existingPatient
         ? await tx.patient.update({
             where: { id: existingPatient.id },
-            data: { fullName, status: 'active' },
+            // Identity is phone-keyed, and the booker may be booking *for someone
+            // else* on their own phone (or simply mistype). Never overwrite an
+            // established patient's canonical name from a booking form — the
+            // booker-provided name is preserved on `OnlineBooking.fullName`
+            // instead. We only (re)activate the record.
+            data: { status: 'active' },
             select: {
               id: true,
               code: true,
@@ -228,7 +233,7 @@ export async function POST(request: NextRequest) {
           action: patientAction,
           changedFields: {
             source: 'api.booking.create',
-            fields: ['fullName', 'status', 'phone'],
+            fields: existingPatient ? ['status'] : ['fullName', 'status', 'phone'],
           },
           changedBy: `system_ip:${ip}`,
         },

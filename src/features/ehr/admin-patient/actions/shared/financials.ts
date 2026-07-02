@@ -77,13 +77,20 @@ export async function applyDisruptionFinancials(params: {
     disruptionCode: params.disruptionCode,
   });
 
-  const nextNetPrice = roundMoney(Math.max(servicePrice - feeEgp, 0));
+  // The cancellation FEE is what the patient still owes for a disrupted visit —
+  // it is NOT a discount. Net price owed = the fee; the waived remainder of the
+  // list price is the discount. This keeps the visit ledger in agreement with
+  // the refund ledger (refund = paid − fee), where fee is retained revenue.
+  // (Previously inverted: discount=fee, net=price−fee, so a free early cancel
+  //  booked full price and a last-minute cancel booked zero.)
+  const feeOwed = roundMoney(Math.max(Math.min(feeEgp, servicePrice), 0));
+  const waived = roundMoney(Math.max(servicePrice - feeOwed, 0));
 
   await prisma.visit.update({
     where: { id: params.visit.id },
     data: {
-      discountEgp: feeEgp,
-      netPriceEgp: nextNetPrice,
+      discountEgp: waived,
+      netPriceEgp: feeOwed,
       providerPayoutEgp: payoutEgp,
     },
   });

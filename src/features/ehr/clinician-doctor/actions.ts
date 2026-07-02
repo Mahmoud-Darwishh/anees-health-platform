@@ -23,6 +23,7 @@ import {
   createDoctorNoteSchema,
 } from '@/features/ehr/schemas/admin-patient-actions';
 import type { DoctorFormState } from './types';
+import type { ClinicianActionState } from '@/features/ehr/clinician-physio/action-state';
 
 type DoctorWorkspaceContext = {
   staffId: string;
@@ -118,27 +119,37 @@ function toErrorState(error: unknown): DoctorFormState {
 async function runTransition(
   formData: FormData,
   adminAction: (formData: FormData) => Promise<void>,
-): Promise<void> {
-  const context = await assertDoctorWorkspaceAccess();
-  const medplumPatientId = await resolveDoctorVisitMedplumId(formData, context);
-  await adminAction(withTrustedPatientId(formData, medplumPatientId));
-  revalidateDoctorViews();
+  successMessage: string,
+): Promise<ClinicianActionState> {
+  try {
+    const context = await assertDoctorWorkspaceAccess();
+    const medplumPatientId = await resolveDoctorVisitMedplumId(formData, context);
+    const trusted = withTrustedPatientId(formData, medplumPatientId);
+    // Surface a real failure inline instead of letting the admin action swallow
+    // it into the /admin flash cookie the field clinician never sees.
+    trusted.set('__rethrow', '1');
+    await adminAction(trusted);
+    revalidateDoctorViews();
+    return { status: 'success', message: successMessage };
+  } catch (error) {
+    return toErrorState(error);
+  }
 }
 
-export async function doctorAcknowledgeVisitAction(formData: FormData): Promise<void> {
-  await runTransition(formData, acknowledgeVisitAdminAction);
+export async function doctorAcknowledgeVisitAction(_prev: ClinicianActionState, formData: FormData): Promise<ClinicianActionState> {
+  return runTransition(formData, acknowledgeVisitAdminAction, 'Visit acknowledged.');
 }
-export async function doctorStartTravelAction(formData: FormData): Promise<void> {
-  await runTransition(formData, startTravelAdminAction);
+export async function doctorStartTravelAction(_prev: ClinicianActionState, formData: FormData): Promise<ClinicianActionState> {
+  return runTransition(formData, startTravelAdminAction, 'Travel started.');
 }
-export async function doctorMarkArrivedAction(formData: FormData): Promise<void> {
-  await runTransition(formData, markArrivedAdminAction);
+export async function doctorMarkArrivedAction(_prev: ClinicianActionState, formData: FormData): Promise<ClinicianActionState> {
+  return runTransition(formData, markArrivedAdminAction, 'Marked as arrived.');
 }
-export async function doctorCheckInVisitAction(formData: FormData): Promise<void> {
-  await runTransition(formData, checkInVisitAdminAction);
+export async function doctorCheckInVisitAction(_prev: ClinicianActionState, formData: FormData): Promise<ClinicianActionState> {
+  return runTransition(formData, checkInVisitAdminAction, 'Checked in.');
 }
-export async function doctorCheckOutVisitAction(formData: FormData): Promise<void> {
-  await runTransition(formData, checkOutVisitAdminAction);
+export async function doctorCheckOutVisitAction(_prev: ClinicianActionState, formData: FormData): Promise<ClinicianActionState> {
+  return runTransition(formData, checkOutVisitAdminAction, 'Checked out.');
 }
 
 // ── Clinical documentation (vitals, physician note). Validate up front for

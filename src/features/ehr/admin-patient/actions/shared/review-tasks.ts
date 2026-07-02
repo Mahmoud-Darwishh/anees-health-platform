@@ -4,6 +4,7 @@ import { AuditAction } from '@prisma/client';
 import { listRecentPatientVitals } from '@/lib/medplum/observations';
 import { listPatientClinicalNotes } from '@/lib/medplum/clinical-notes';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
+import { listPatientCareReports } from '@/lib/medplum/care-reports';
 import { createPatientTask, listPatientTasks } from '@/lib/medplum/tasks';
 import { writeMedplumAuditMirror } from '@/lib/medplum/audit';
 import { prisma } from '@/lib/db/prisma';
@@ -101,10 +102,11 @@ export async function assertVisitHasClinicalEvidence(params: {
   startedAt: Date;
   endedAt: Date;
 }): Promise<void> {
-  const [vitals, notes, assessments] = await Promise.all([
+  const [vitals, notes, assessments, careReports] = await Promise.all([
     listRecentPatientVitals(params.medplumPatientId, 80),
     listPatientClinicalNotes(params.medplumPatientId, 80, { signedOnly: true }),
     listPatientAssessments(params.medplumPatientId, 80),
+    listPatientCareReports(params.medplumPatientId, 80),
   ]);
 
   const inWindow = (value: string | Date | null | undefined): boolean => {
@@ -121,9 +123,13 @@ export async function assertVisitHasClinicalEvidence(params: {
   const hasVitals = vitals.some((item) => inWindow(item.measuredAt));
   const hasSignedNote = notes.some((item) => inWindow(item.date));
   const hasAssessment = assessments.some((item) => inWindow(item.authored));
+  // A structured physio/nursing session report (category `survey`) is a signed
+  // clinical entry too — without this the physio session note (the physio's only
+  // documentation surface) never satisfies the check-out gate.
+  const hasCareReport = careReports.some((item) => inWindow(item.effectiveDateTime));
 
-  if (!hasVitals && !hasSignedNote && !hasAssessment) {
-    throw new Error('Check-out requires at least one signed clinical entry (vitals, note, or assessment) during this visit window.');
+  if (!hasVitals && !hasSignedNote && !hasAssessment && !hasCareReport) {
+    throw new Error('Check-out requires at least one signed clinical entry (vitals, note, assessment, or session report) during this visit window.');
   }
 }
 

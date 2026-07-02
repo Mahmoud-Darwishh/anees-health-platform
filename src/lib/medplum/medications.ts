@@ -43,6 +43,8 @@ export type MedicationSummary = {
   start?: string;
   end?: string;
   note?: string;
+  /** FHIR version at read time — round-tripped as an optimistic-lock guard. */
+  versionId?: string | null;
 };
 
 export type CreateMedicationInput = {
@@ -79,6 +81,7 @@ function normalizeMedication(resource: MedicationStatementResource): MedicationS
     start: resource.effectivePeriod?.start,
     end: resource.effectivePeriod?.end,
     note: resource.note?.[0]?.text,
+    versionId: resource.meta?.versionId ?? null,
   };
 }
 
@@ -140,14 +143,23 @@ export type MedicationManageStatus = 'active' | 'on-hold' | 'completed' | 'stopp
 export async function setMedicationStatus(
   medicationId: string,
   status: MedicationManageStatus,
+  options?: { expectedVersionId?: string | null },
 ): Promise<MedicationStatementResource> {
   const medplum = await getMedplumClient();
   const existing = (await medplum.readResource('MedicationStatement', medicationId)) as MedicationStatementResource;
 
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('This medication was updated by another user. Please refresh and try again.');
+  }
+
   return (await medplum.updateResource({
     ...existing,
     status,
-  } as never)) as MedicationStatementResource;
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as MedicationStatementResource;
 }
 
 /**
@@ -156,12 +168,21 @@ export async function setMedicationStatus(
  */
 export async function markMedicationEnteredInError(
   medicationId: string,
+  options?: { expectedVersionId?: string | null },
 ): Promise<MedicationStatementResource> {
   const medplum = await getMedplumClient();
   const existing = (await medplum.readResource('MedicationStatement', medicationId)) as MedicationStatementResource;
 
+  if (options?.expectedVersionId && existing.meta?.versionId !== options.expectedVersionId) {
+    throw new Error('This medication was updated by another user. Please refresh and try again.');
+  }
+
   return (await medplum.updateResource({
     ...existing,
     status: 'entered-in-error',
-  } as never)) as MedicationStatementResource;
+  } as never, {
+    headers: options?.expectedVersionId
+      ? { 'If-Match': `W/\"${options.expectedVersionId}\"` }
+      : undefined,
+  })) as MedicationStatementResource;
 }

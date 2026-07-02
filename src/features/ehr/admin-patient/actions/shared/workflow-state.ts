@@ -3,6 +3,7 @@ import 'server-only';
 import { VisitState, VisitStatus } from '@prisma/client';
 import type { DisruptionCode } from '@/lib/billing/cancellation-policy';
 import { prisma } from '@/lib/db/prisma';
+import { assertLegalTransition } from './workflow-legality';
 
 export type WorkflowStateValue =
   | 'scheduled'
@@ -21,6 +22,7 @@ export type WorkflowStateValue =
   | 'rescheduled_in_place'
   | 'checked_out'
   | 'disputed'
+  | 'force_closed_by_admin'
   | 'completed'
   | 'cancelled'
   | 'no_show';
@@ -182,6 +184,11 @@ export async function persistWorkflowStateTransition(params: {
     const fromState: WorkflowStateValue = fromColumn
       ? (fromColumn as unknown as WorkflowStateValue)
       : deriveWorkflowStateFromLegacy(params.visit);
+
+    // The state machine is law: reject any move not on the legality map BEFORE
+    // touching the row. This is what stops a closed visit (e.g. `completed`)
+    // being re-marked `refused_at_door` and having its money rewritten.
+    assertLegalTransition(fromState, params.toState);
 
     const updated = await tx.visit.updateMany({
       where: { id: params.visit.id, state: fromColumn },

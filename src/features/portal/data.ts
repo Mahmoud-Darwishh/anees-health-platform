@@ -12,7 +12,71 @@ import { listPatientMedications } from '@/lib/medplum/medications';
 import { listPatientDocuments } from '@/lib/medplum/documents';
 import { listPatientLabOrders, listPatientDiagnosticReports } from '@/lib/medplum/labs';
 import { listPatientAssessments } from '@/lib/medplum/assessments';
+import { prisma } from '@/lib/db/prisma';
 import type { PortalRecord, PortalWorkspaceTab } from './types';
+
+/** A portal-safe view of an upcoming operational visit (Postgres source of truth for scheduling). */
+export type PortalUpcomingVisit = {
+  id: string;
+  code: string;
+  status: string;
+  state: string | null;
+  scheduledDate: string; // ISO date (yyyy-mm-dd)
+  scheduledTime: string | null;
+  visitType: string;
+  serviceName: string;
+  providerName: string | null;
+  /** True once a request (cancel/reschedule) is already pending for this visit. */
+  requestPending: boolean;
+};
+
+/**
+ * Bridge the operational schedule (Postgres `Visit`) into the portal. Medplum
+ * `Encounter`s are the clinical record of what happened; the patient's UPCOMING
+ * appointments live in Postgres, so the portal reads them straight from there.
+ * Session-scoped by the resolved patient id — never a client-supplied id.
+ */
+async function loadUpcomingVisits(patientId: string, tenantId: string): Promise<PortalUpcomingVisit[]> {
+  const startOfToday = new Date();
+  startOfToday.setUTCHours(0, 0, 0, 0);
+
+  const visits = await prisma.visit.findMany({
+    where: {
+      patientId,
+      tenantId,
+      status: { in: ['scheduled', 'in_progress', 'rescheduled'] },
+      scheduledDate: { gte: startOfToday },
+    },
+    orderBy: [{ scheduledDate: 'asc' }, { scheduledTime: 'asc' }],
+    take: 20,
+    select: {
+      id: true,
+      code: true,
+      status: true,
+      state: true,
+      scheduledDate: true,
+      scheduledTime: true,
+      visitType: true,
+      service: { select: { name: true } },
+      provider: { select: { fullName: true } },
+      notes: true,
+    },
+  });
+
+  return visits.map((v) => ({
+    id: v.id,
+    code: v.code,
+    status: v.status,
+    state: v.state,
+    scheduledDate: v.scheduledDate.toISOString().slice(0, 10),
+    scheduledTime: v.scheduledTime,
+    visitType: v.visitType,
+    serviceName: v.service.name,
+    providerName: v.provider?.fullName ?? null,
+    // A pending self-service request is tagged into notes as a marker (see actions.ts).
+    requestPending: (v.notes ?? '').includes('[PORTAL_REQUEST_PENDING]'),
+  }));
+}
 
 /**
  * Tab-aware data loader for the patient portal. Loads only the datasets the
@@ -34,6 +98,7 @@ export async function loadPortalData(record: PortalRecord, activeTab: PortalWork
   const canSeeClinicalDepth = record.access.mode === 'patient';
 
   const loadVisits = medplumPatientId && canSeeVisits && (activeTab === 'overview' || activeTab === 'visits');
+  const loadUpcoming = canSeeVisits && (activeTab === 'overview' || activeTab === 'visits');
   const loadVitals = medplumPatientId && canSeeVitals && (activeTab === 'overview' || activeTab === 'vitals');
   const loadNotes = medplumPatientId && canSeeNotes && (activeTab === 'overview' || activeTab === 'notes');
   const loadTasks = medplumPatientId && canSeeTasks && (activeTab === 'overview' || activeTab === 'tasks');
@@ -55,6 +120,7 @@ export async function loadPortalData(record: PortalRecord, activeTab: PortalWork
     labOrders,
     labResults,
     assessments,
+    upcomingVisits,
   ] = await Promise.all([
     loadVisits ? listPatientEncounters(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
     loadVitals ? listRecentPatientVitals(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
@@ -75,6 +141,7 @@ export async function loadPortalData(record: PortalRecord, activeTab: PortalWork
     loadFiles ? listPatientLabOrders(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
     loadFiles ? listPatientDiagnosticReports(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
     loadClinical ? listPatientAssessments(medplumPatientId, 20).catch(() => []) : Promise.resolve([]),
+    loadUpcoming ? loadUpcomingVisits(record.patient.id, record.patient.tenantId).catch(() => []) : Promise.resolve([]),
   ]);
 
   const careTeamMembers = careTeam?.participant ?? [];
@@ -95,6 +162,7 @@ export async function loadPortalData(record: PortalRecord, activeTab: PortalWork
     labOrders,
     labResults,
     assessments,
+    upcomingVisits,
     careTeamMembers,
     nextAppointment,
     flags: { canSeeVisits, canSeeVitals, canSeeNotes, canSeeTasks, canSeeClinicalDepth },

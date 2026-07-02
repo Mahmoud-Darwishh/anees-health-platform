@@ -10,8 +10,6 @@ export type EarningsVisitItem = {
   visitDateIso: string;
   patientInitials: string;
   serviceCode: string;
-  grossEgp: number;
-  deductionsEgp: number;
   netEgp: number;
   stateLabel: string;
 };
@@ -118,7 +116,14 @@ export async function getClinicianEarningsData(): Promise<ClinicianEarningsData>
   const settledFilter = {
     tenantId: sessionTenantId(user),
     providerId: staff.providerId,
-    OR: [{ status: 'completed' as const }, { checkOutAt: { not: null } }],
+    OR: [
+      { status: 'completed' as const },
+      { checkOutAt: { not: null } },
+      // Disrupted visits (no-show, late cancel, etc.) carry partial pay per the
+      // disruption pay policy. Without this they never reach the clinician's
+      // earnings and the compensation is silently withheld.
+      { primaryDisruptionCode: { not: null }, providerPayoutEgp: { gt: 0 } },
+    ],
   };
 
   const [
@@ -186,17 +191,15 @@ export async function getClinicianEarningsData(): Promise<ClinicianEarningsData>
   ]);
 
   const recentVisits: EarningsVisitItem[] = recentVisitsRaw.map((visit) => {
-    const gross = toNumber(visit.servicePriceEgp);
+    // Only the clinician's own payout is surfaced. The patient's list price and
+    // the platform margin are deliberately NOT computed or shipped to the client.
     const net = toNumber(visit.providerPayoutEgp);
-    const deductions = Math.max(0, gross - net);
 
     return {
       id: visit.id,
       visitDateIso: visit.scheduledDate.toISOString(),
       patientInitials: patientInitials(visit.patient.fullName),
       serviceCode: visit.service.code,
-      grossEgp: Number(gross.toFixed(2)),
-      deductionsEgp: Number(deductions.toFixed(2)),
       netEgp: Number(net.toFixed(2)),
       stateLabel: statusLabel(visit.status, Boolean(visit.checkOutAt)),
     };

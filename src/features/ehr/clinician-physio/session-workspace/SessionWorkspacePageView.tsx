@@ -290,16 +290,11 @@ export function SessionWorkspacePageView({ data }: { data: PhysioSessionWorkspac
               <h3 className="h6 mb-3">Structured Physio Session Note</h3>
 
               <form action={createPhysioSessionReportAction} className="row g-3">
-                <input type="hidden" name="physioVisitId" value={visit.id} />
+                <input type="hidden" name="visitId" value={visit.id} />
 
                 <div className="col-md-6">
                   <label className="form-label">Session Number</label>
                   <input name="sessionNumberLabel" className="form-control" placeholder="e.g. Session 4" dir="auto" />
-                </div>
-
-                <div className="col-md-6">
-                  <label className="form-label">Encounter ID (optional)</label>
-                  <input name="encounterId" className="form-control" placeholder="FHIR Encounter id" dir="auto" />
                 </div>
 
                 <div className="col-12">
@@ -392,7 +387,7 @@ export function SessionWorkspacePageView({ data }: { data: PhysioSessionWorkspac
               <p className="small text-muted mb-3">Capture structured outcome measures during the session.</p>
 
               <form action={createPhysioAssessmentAction} className="mb-3">
-                <input type="hidden" name="physioVisitId" value={visit.id} />
+                <input type="hidden" name="visitId" value={visit.id} />
 
                 <div className="mb-2">
                   <label className="form-label small mb-1">Validated instrument</label>

@@ -115,6 +115,7 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                                 <form action={updateConditionStatusAction} className="d-inline-flex gap-1 align-items-center">
                                   <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                   <input type="hidden" name="conditionId" value={condition.id} />
+                                  <input type="hidden" name="conditionVersionId" value={condition.versionId ?? ''} />
                                   <label className="visually-hidden" htmlFor={`conditionStatus-${condition.id}`}>Update status</label>
                                   <select
                                     id={`conditionStatus-${condition.id}`}
@@ -131,6 +132,7 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                                 <form action={retireConditionAction} className="d-inline">
                                   <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                   <input type="hidden" name="conditionId" value={condition.id} />
+                                  <input type="hidden" name="conditionVersionId" value={condition.versionId ?? ''} />
                                   <button type="submit" className="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
                               </div>
@@ -242,6 +244,7 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                               <form action={updateAllergyStatusAction} className="d-inline-flex gap-1 align-items-center">
                                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                 <input type="hidden" name="allergyId" value={allergy.id} />
+                                <input type="hidden" name="allergyVersionId" value={allergy.versionId ?? ''} />
                                 <label className="visually-hidden" htmlFor={`allergyStatus-${allergy.id}`}>Update status</label>
                                 <select
                                   id={`allergyStatus-${allergy.id}`}
@@ -258,6 +261,7 @@ export function ProblemsRisksSections({ ctx }: { ctx: AdminPatientViewContext })
                               <form action={retireAllergyAction} className="d-inline">
                                 <input type="hidden" name="medplumPatientId" value={patient.id ?? ''} />
                                 <input type="hidden" name="allergyId" value={allergy.id} />
+                                <input type="hidden" name="allergyVersionId" value={allergy.versionId ?? ''} />
                                 <button type="submit" className="btn btn-sm btn-outline-danger">Delete</button>
                               </form>
                             </div>

@@ -13,6 +13,7 @@ import {
 import { DocumentsSection, LabsSection } from './views/files-sections';
 import { CarePlansSection, CareTeamSection } from './views/care-sections';
 import { VisitsSection, VitalsSection, NotesSection, TasksSection } from './views/activity-sections';
+import { UpcomingVisitsSection } from './views/upcoming-visits-section';
 import styles from './portal.module.scss';
 
 /**
@@ -123,6 +124,7 @@ export function PortalPageView({ ctx }: { ctx: PortalContext }) {
       {activeTab === 'care' && <CareTeamSection ctx={ctx} />}
       {(activeTab === 'care' || activeTab === 'overview') && <EngagementSection ctx={ctx} />}
 
+      {(activeTab === 'visits' || activeTab === 'overview') && <UpcomingVisitsSection ctx={ctx} />}
       {activeTab === 'visits' && <VisitsSection ctx={ctx} />}
       {activeTab === 'vitals' && <VitalsSection ctx={ctx} />}
       {activeTab === 'notes' && <NotesSection ctx={ctx} />}

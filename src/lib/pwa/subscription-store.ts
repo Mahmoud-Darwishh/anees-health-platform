@@ -11,20 +11,28 @@ export type StoredPushSubscription = {
 };
 
 export async function upsertSubscription(
-  subscription: Pick<StoredPushSubscription, 'endpoint' | 'keys' | 'locale'>
+  subscription: Pick<StoredPushSubscription, 'endpoint' | 'keys' | 'locale'> & {
+    userId?: string | null;
+  }
 ): Promise<StoredPushSubscription> {
+  // Only overwrite userId when a value is supplied, so a re-subscribe from an
+  // anonymous context never unlinks an already-owned subscription.
+  const ownerPatch = subscription.userId ? { userId: subscription.userId } : {};
+
   const record = await prisma.pushSubscription.upsert({
     where: { endpoint: subscription.endpoint },
     update: {
       p256dh: subscription.keys.p256dh,
       auth: subscription.keys.auth,
       locale: subscription.locale,
+      ...ownerPatch,
     },
     create: {
       endpoint: subscription.endpoint,
       p256dh: subscription.keys.p256dh,
       auth: subscription.keys.auth,
       locale: subscription.locale,
+      userId: subscription.userId ?? null,
     },
   });
 
@@ -35,6 +43,20 @@ export async function upsertSubscription(
     createdAt: record.createdAt.toISOString(),
     updatedAt: record.updatedAt.toISOString(),
   };
+}
+
+/** All subscriptions owned by a specific authenticated user. */
+export async function listSubscriptionsForUser(
+  userId: string
+): Promise<StoredPushSubscription[]> {
+  const records = await prisma.pushSubscription.findMany({ where: { userId } });
+  return records.map((r) => ({
+    endpoint: r.endpoint,
+    keys: { p256dh: r.p256dh, auth: r.auth },
+    locale: r.locale as AppLocale,
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  }));
 }
 
 export async function removeSubscription(endpoint: string) {
