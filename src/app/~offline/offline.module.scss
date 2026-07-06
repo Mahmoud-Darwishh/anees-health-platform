@@ -3,110 +3,127 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(160deg, #eef4ff 0%, #f8faff 60%, #ffffff 100%);
-  padding: 24px;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--marketing-accent-sky) 22%, transparent), transparent 36rem),
+    linear-gradient(160deg, var(--surface-clinical-soft) 0%, var(--surface-base) 100%);
 }
 
 .card {
-  max-width: 500px;
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid #d3e4f8;
-  border-radius: 20px;
-  padding: 32px 28px 28px;
-  box-shadow: 0 16px 48px rgba(10, 40, 90, 0.12);
+  width: min(100%, 34rem);
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.95rem;
+  padding: clamp(1.5rem, 5vw, 2.3rem);
   text-align: center;
-  gap: 0;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elevated);
 }
 
 .logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
+  width: 4.5rem;
+  height: 4.5rem;
   object-fit: cover;
-  margin-bottom: 20px;
+  border-radius: 1.05rem;
+  box-shadow: var(--shadow-soft);
 }
 
 .iconWrap {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: #fef0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
+  width: 4.5rem;
+  height: 4.5rem;
+  display: grid;
+  place-items: center;
+  color: var(--status-danger-fg);
+  background: var(--status-danger-bg);
+  border: 1px solid var(--status-danger-border);
+  border-radius: var(--radius-pill);
 }
 
 .wifiIcon {
-  width: 36px;
-  height: 36px;
-  color: #c0392b;
+  width: 2.15rem;
+  height: 2.15rem;
 }
 
 .title {
-  margin: 0 0 14px;
-  color: #0d3b70;
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1.35;
+  max-width: 28rem;
+  margin: 0;
+  color: var(--text-strong);
+  font-size: clamp(1.35rem, 4vw, 1.8rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
 }
 
 .divider {
-  color: #aac4e0;
+  color: var(--text-muted);
 }
 
-.description {
-  margin: 0 0 6px;
-  color: #3f5c80;
-  font-size: 0.88rem;
-  line-height: 1.6;
+.description,
+.descriptionAr {
+  max-width: 29rem;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+  line-height: 1.65;
 }
 
 .descriptionAr {
-  margin: 0 0 20px;
-  color: #3f5c80;
-  font-size: 0.88rem;
-  line-height: 1.6;
-  direction: rtl;
+  line-height: 1.9;
 }
 
 .actions {
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 18px;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
 }
 
 .homeLink {
+  min-height: var(--mobile-action-min-height);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #0a67c6;
-  font-size: 0.85rem;
-  font-weight: 600;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  color: var(--color-brand-dark-blue);
+  font-size: 0.9rem;
+  font-weight: var(--font-weight-semibold);
   text-decoration: none;
-  padding: 10px 18px;
-  border: 1.5px solid #b3d0f5;
-  border-radius: 999px;
+  background: var(--surface-ops-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 
-  &:hover {
-    background: #f0f7ff;
+  &:hover,
+  &:focus-visible {
+    color: var(--color-brand-dark-blue);
+    background: var(--surface-elevated);
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
   }
 }
 
 .hint {
-  margin: 0;
-  font-size: 0.76rem;
-  color: #7a9ab5;
-  line-height: 1.5;
-  border-top: 1px solid #e8f0fb;
-  padding-top: 16px;
   width: 100%;
-  text-align: center;
+  margin: 0.35rem 0 0;
+  padding-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  border-top: 1px solid var(--border-soft);
+}
+
+@media (max-width: 520px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .homeLink {
+    width: 100%;
+  }
 }

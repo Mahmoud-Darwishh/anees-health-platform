@@ -9,6 +9,7 @@ const iconMap: Record<string, string> = {
   'fa-arrow-left': 'ArrowLeft',
   'fa-arrow-right': 'ArrowRight',
   'fa-award': 'Award',
+  'fa-bell': 'Bell',
   'fa-bolt': 'Zap',
   'fa-box-open': 'PackageOpen',
   'fa-briefcase': 'Briefcase',

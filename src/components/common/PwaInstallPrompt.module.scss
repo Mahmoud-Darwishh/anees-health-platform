@@ -135,6 +135,30 @@
   }
 }
 
+.settingsLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 2px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-mobile-bar);
+  border-radius: var(--radius-control);
+  background: var(--surface-mobile-bar-strong);
+  color: variables.$brand-dark-blue;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    color: variables.$brand-dark-blue;
+    background: var(--surface-clinical-soft);
+    text-decoration: none;
+  }
+}
+
 /* ── "Not now" link-style button ── */
 .notNowBtn {
   border: 0;

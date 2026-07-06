@@ -1,14 +1,15 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui';
 import { usePwaManager } from '@/features/pwa/hooks/usePwaManager';
 import styles from './PwaInstallPrompt.module.scss';
 
 const DISMISS_KEY = 'anees-pwa-dismissed-at';
-const NOTIFICATION_DISMISS_KEY = 'anees-pwa-notifications-dismissed-at';
 const DISMISS_DAYS = 7;
 
 function detectIos(): boolean {
@@ -57,8 +58,8 @@ function ShareIcon() {
 
 export default function PwaInstallPrompt() {
   const t = useTranslations('pwa');
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
-  const [showNotificationStep, setShowNotificationStep] = useState(false);
   const [isIos] = useState<boolean>(() => detectIos());
   const [isSafari] = useState<boolean>(() => detectSafari());
 
@@ -66,56 +67,39 @@ export default function PwaInstallPrompt() {
     isInstalled,
     canInstall,
     hasUpdate,
-    notificationPermission,
-    isSubscribed,
     statusMessage,
     installApp,
-    enableNotifications,
     applyAppUpdate,
     setStatusMessage,
   } = usePwaManager();
 
-  const shouldOfferNotifications = (isInstalled || showNotificationStep) && notificationPermission === 'default' && !isSubscribed;
+  const locale = pathname.split('/').filter(Boolean)[0] === 'ar' ? 'ar' : 'en';
+  const settingsHref = `/${locale}/settings/pwa`;
 
   // Auto-show after 2.5 s once conditions are ready
   useEffect(() => {
-    const shouldShowNotifications = shouldOfferNotifications && !wasDismissedRecently(NOTIFICATION_DISMISS_KEY);
     const shouldShowInstall = !isInstalled && !wasDismissedRecently(DISMISS_KEY) && (isIos || canInstall);
-    const shouldShow = hasUpdate || shouldShowNotifications || shouldShowInstall;
+    const shouldShow = hasUpdate || shouldShowInstall;
     if (!shouldShow) return;
     const timer = setTimeout(() => setVisible(true), 2500);
     return () => clearTimeout(timer);
-  }, [isInstalled, canInstall, hasUpdate, isIos, shouldOfferNotifications]);
+  }, [isInstalled, canInstall, hasUpdate, isIos]);
 
   const dismiss = () => {
     setVisible(false);
     if (typeof window !== 'undefined') {
-      const dismissKey = shouldOfferNotifications && !hasUpdate ? NOTIFICATION_DISMISS_KEY : DISMISS_KEY;
-      window.localStorage.setItem(dismissKey, String(Date.now()));
+      window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
     }
   };
 
   const handleInstall = async () => {
     const accepted = await installApp();
     setStatusMessage(accepted ? t('installAccepted') : t('installDismissed'));
-    if (accepted) {
-      setShowNotificationStep(true);
-      setVisible(true);
-    }
   };
 
   const handleUpdate = () => {
     applyAppUpdate();
     setVisible(false);
-  };
-
-  const handleEnableNotifications = async () => {
-    const enabled = await enableNotifications();
-    if (enabled) {
-      setStatusMessage(t('notificationsEnabled'));
-      setShowNotificationStep(false);
-      setVisible(false);
-    }
   };
 
   if (!visible) return null;
@@ -132,7 +116,7 @@ export default function PwaInstallPrompt() {
 
         {/* App icon */}
         <div className={styles.iconWrap}>
-          <Image src="/assets/img/pwa-icon-192.png" alt="Anees Health" width={80} height={80} className={styles.appIcon} />
+          <Image src="/assets/img/anees-app-icon-192.png" alt="Anees Health" width={80} height={80} className={styles.appIcon} />
         </div>
 
         {hasUpdate ? (
@@ -149,14 +133,6 @@ export default function PwaInstallPrompt() {
               className={`${styles.installBtn} ${styles.update}`}
             >
               {t('updateButton')}
-            </Button>
-          </>
-        ) : shouldOfferNotifications ? (
-          <>
-            <h2 className={styles.modalTitle}>{t('notificationPromptTitle')}</h2>
-            <p className={styles.modalDesc}>{t('notificationPromptDescription')}</p>
-            <Button type="button" onClick={handleEnableNotifications} experience="mobile" fullWidth className={styles.installBtn}>
-              {t('notificationPromptButton')}
             </Button>
           </>
         ) : isIos ? (
@@ -189,12 +165,16 @@ export default function PwaInstallPrompt() {
             <h2 className={styles.modalTitle}>{t('title')}</h2>
             <p className={styles.modalDesc}>{t('description')}</p>
             <Button type="button" onClick={handleInstall} experience="mobile" fullWidth className={styles.installBtn}>
-              {t('installAndAlertsButton')}
+              {t('installButton')}
             </Button>
           </>
         ) : null}
 
         {statusMessage ? <p className={styles.status}>{statusMessage}</p> : null}
+
+        <Link href={settingsHref} className={styles.settingsLink} onClick={() => setVisible(false)}>
+          {t('enableNotifications')}
+        </Link>
 
         <button type="button" onClick={dismiss} className={styles.notNowBtn}>
           {t('dismissButton')}

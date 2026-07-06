@@ -1916,10 +1916,10 @@
     "notificationPromptButton": "Enable health alerts"
   },
   "pwaSettings": {
-    "metaTitle": "PWA Control Center",
-    "metaDescription": "Review install readiness, notifications, updates, and offline availability.",
-    "title": "PWA Control Center",
-    "subtitle": "Prepare your app for launch with install, push, update, and offline readiness checks.",
+    "metaTitle": "App & Alert Settings",
+    "metaDescription": "Install Anees, enable health alerts, and verify this device can receive notifications.",
+    "title": "App & Alert Settings",
+    "subtitle": "One controlled page for install, push permission, updates, and offline readiness.",
     "installCardTitle": "Install App",
     "notificationsCardTitle": "Push Notifications",
     "updatesCardTitle": "App Updates",

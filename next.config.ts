@@ -54,6 +54,41 @@ const phiSafeRuntimeCaching: RuntimeCaching[] = [
     },
   },
   {
+    urlPattern: ({ request, url }: { request: Request; url: URL }) => {
+      if (request.mode !== 'navigate' || url.origin !== location.origin) {
+        return false;
+      }
+
+      const pathname = url.pathname.replace(/\/$/, '') || '/';
+
+      if (pathname === '/' || pathname === '/~offline') {
+        return true;
+      }
+
+      return /^\/(?:en|ar)(?:$|\/(?:about-us|contact-us|privacy-policy|terms-and-conditions|areas|coverage|doctors|services|pricing|conditions|specialties|blog|guides|glossary|faq|booking|settings\/pwa)(?:\/.*)?$)/.test(pathname);
+    },
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'anees-public-pages',
+      networkTimeoutSeconds: 4,
+      expiration: {
+        maxEntries: 64,
+        maxAgeSeconds: 7 * 24 * 60 * 60,
+      },
+      cacheableResponse: {
+        statuses: [0, 200],
+      },
+    },
+  },
+  {
+    urlPattern: ({ request, url }: { request: Request; url: URL }) =>
+      request.mode === 'navigate' && url.origin === location.origin,
+    handler: 'NetworkOnly',
+    options: {
+      cacheName: 'anees-private-navigation',
+    },
+  },
+  {
     urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
     handler: 'CacheFirst',
     options: {

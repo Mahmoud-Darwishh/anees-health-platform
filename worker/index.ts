@@ -66,7 +66,7 @@ self.addEventListener('push', (event: Event) => {
 
   const notificationOptions: AneesNotificationOptions = {
     body: payload.body,
-    icon: '/assets/img/pwa-icon-192.png',
+    icon: '/assets/img/anees-app-icon-192.png',
     badge: '/assets/img/fav.png',
     tag: 'anees-health-update',
     actions: [

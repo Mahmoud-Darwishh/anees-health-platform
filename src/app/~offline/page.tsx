@@ -6,17 +6,15 @@ export default function OfflinePage() {
   return (
     <main className={styles.page}>
       <section className={styles.card} aria-labelledby="offline-title">
-        {/* App icon */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/assets/img/fav.png"
+          src="/assets/img/anees-app-icon-192.png"
           alt="Anees Health"
-          width={64}
-          height={64}
+          width={72}
+          height={72}
           className={styles.logo}
         />
 
-        {/* Wifi-off icon */}
         <div className={styles.iconWrap} aria-hidden="true">
           <svg
             className={styles.wifiIcon}
@@ -38,42 +36,30 @@ export default function OfflinePage() {
         </div>
 
         <h1 id="offline-title" className={styles.title}>
-          <span lang="en">No Internet Connection</span>
-          <span className={styles.divider} aria-hidden="true"> · </span>
-          <span lang="ar">لا يوجد اتصال بالإنترنت</span>
+          <span lang="en">You&apos;re offline</span>
+          <span className={styles.divider} aria-hidden="true"> / </span>
+          <span lang="ar">أنت غير متصل</span>
         </h1>
 
         <p className={styles.description} lang="en">
-          You&apos;re offline. Pages you&apos;ve visited recently may still be available — try going back or
-          check your connection.
+          Anees can still show saved public pages. Clinical, payment, and account pages stay protected until the internet returns.
         </p>
-        <p className={styles.descriptionAr} lang="ar">
-          أنت غير متصل بالإنترنت. الصفحات التي زرتها مؤخراً قد تكون متاحة — جرّب الرجوع أو تحقق من الاتصال.
+        <p className={styles.descriptionAr} lang="ar" dir="rtl">
+          يمكن لأنيس عرض الصفحات العامة المحفوظة. صفحات الحساب والدفع والبيانات الطبية تبقى محمية حتى يعود الاتصال.
         </p>
 
         <div className={styles.actions}>
           <RetryButton />
-          <Link href="/" className={styles.homeLink}>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            Go Home / الصفحة الرئيسية
+          <Link href="/en" className={styles.homeLink}>
+            English home
+          </Link>
+          <Link href="/ar" className={styles.homeLink}>
+            الرئيسية
           </Link>
         </div>
 
         <p className={styles.hint} lang="en">
-          Tip: pages like Booking and Doctors are available offline after your first visit.
+          For best offline access, open the pages you need once while connected.
         </p>
       </section>
     </main>

@@ -16,8 +16,6 @@ import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
 import ContentHero from '@/components/common/content/ContentHero';
 import DoctorMiniGrid from '@/features/doctors/components/DoctorMiniGrid';
-import PwaNotificationNudge from '@/features/pwa/components/PwaNotificationNudge';
-import { Container } from '@/components/common/layout';
 import { buildServiceLandingMetadata } from '@/lib/seo/metadata';
 import {
   medicalProcedureSchema,
@@ -147,10 +145,6 @@ export default async function ServiceLandingPage({
 
       <main id="main-content">
         <ContentHero title={landing.headline} lead={landing.description} />
-        <Container>
-          <PwaNotificationNudge locale={locale} />
-        </Container>
-
         {answer ? (
           <section className="pt-5 pb-0">
             <div className="container">

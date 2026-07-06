@@ -1,232 +1,284 @@
-@use '../../../assets/scss/utils/variables';
-
 .wrapper {
-  max-width: 840px;
-  margin: 0 auto;
-  padding: 20px 12px 56px;
+  min-height: 100dvh;
+  padding: clamp(18px, 4vw, 34px) 12px calc(72px + env(safe-area-inset-bottom, 0px));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-mobile-bar) 68%, transparent) 0%, transparent 34%),
+    var(--surface-body);
 }
 
-.header {
-  margin-bottom: 14px;
-  background: linear-gradient(145deg, var(--surface-elevated) 0%, var(--surface-clinical-soft) 100%);
-  border: 1px solid var(--border-clinical-soft);
-  border-radius: 18px;
-  padding: 14px;
-  box-shadow: 0 10px 30px rgba(10, 40, 80, 0.08);
+.hero,
+.mainGrid,
+.grid {
+  width: min(100%, 1040px);
+  margin-inline: auto;
 }
 
-.brandRow {
-  display: flex;
+.hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(150px, 0.28fr);
+  gap: clamp(14px, 3vw, 24px);
   align-items: center;
-  gap: 10px;
+  margin-bottom: 16px;
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--border-mobile-bar);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, var(--surface-elevated) 0%, var(--surface-mobile-bar) 100%);
+  box-shadow: var(--shadow-mobile-bar);
 }
 
-.appIcon {
-  border-radius: 12px;
-  width: 44px;
-  height: 44px;
+.heroIconWrap {
+  width: 106px;
+  height: 106px;
+  padding: 5px;
+  border: 1px solid var(--border-mobile-bar);
+  border-radius: 25px;
+  background: var(--surface-mobile-bar-strong);
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--surface-inverse) 16%, transparent);
+}
+
+.heroIcon {
+  width: 100%;
+  height: 100%;
+  border-radius: 21px;
   object-fit: cover;
+  display: block;
+}
+
+.heroText {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
 }
 
 .title {
   margin: 0;
-  color: variables.$brand-dark-blue;
-  font-size: 1.45rem;
-  font-weight: 700;
+  color: var(--text-strong);
+  font-size: clamp(1.55rem, 4vw, 2.55rem);
+  font-weight: 800;
+  line-height: 1.08;
+}
+
+.subtitle,
+.deviceNote,
+.meta {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.58;
 }
 
 .subtitle {
-  margin-top: 4px;
-  color: var(--text-clinical-soft);
+  font-size: 1rem;
+}
+
+.deviceNote {
+  max-width: 68ch;
+  padding: 10px 12px;
+  border: 1px solid var(--status-info-border);
+  border-radius: 12px;
+  background: var(--status-info-bg);
+  color: var(--status-info-fg);
   font-size: 0.9rem;
+  font-weight: 650;
 }
 
-.progressWrap {
-  margin-top: 12px;
+.heroMeter {
+  display: grid;
+  gap: 8px;
+  align-self: stretch;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-clinical-soft);
+  border-radius: 16px;
+  background: var(--surface-elevated);
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  font-weight: 700;
 }
 
-.progressTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.progressLabel {
-  font-size: 0.82rem;
-  color: var(--text-clinical-soft);
-  font-weight: 600;
-}
-
-.progressValue {
-  color: var(--action-install);
-  font-size: 0.9rem;
+.heroMeter strong {
+  color: var(--text-strong);
+  font-size: 2rem;
+  line-height: 1;
 }
 
 .progressTrack {
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--surface-clinical-muted);
+  height: 9px;
   overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--surface-clinical-muted);
 }
 
 .progressFill {
   display: block;
   height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--action-install), var(--color-success));
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-brand-gold), var(--status-success-fg));
 }
 
+.mainGrid,
 .grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
   gap: 14px;
 }
 
-.card {
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-clinical-soft);
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 10px 30px rgba(15, 48, 87, 0.08);
+.grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
 }
 
-.readinessCard {
-  margin-bottom: 14px;
-}
-
-.quickAlertsCard {
-  margin-bottom: 14px;
+.setupCard {
   border-color: var(--status-info-border);
-  background: linear-gradient(145deg, var(--surface-elevated) 0%, var(--surface-mobile-bar) 100%);
+  background:
+    linear-gradient(150deg, var(--surface-elevated) 0%, var(--surface-mobile-bar) 100%);
 }
 
-.iosCard {
-  margin-bottom: 14px;
-  background: linear-gradient(160deg, var(--surface-ops-accent) 0%, var(--surface-elevated) 100%);
-  border-color: var(--status-warning-border);
+.howCard,
+.guideCard,
+.managementCard,
+.diagnosticsCard {
+  background: var(--surface-elevated);
 }
 
-.cardTitle {
-  margin: 0;
-  font-size: 1.05rem;
-  color: variables.$brand-dark-blue;
-}
-
-.meta {
-  margin-top: 8px;
-  color: var(--text-clinical-soft);
-  font-size: 0.92rem;
-}
-
-.checks {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.checkItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-clinical-soft);
-  font-size: 0.88rem;
-}
-
-.checkOn,
-.checkOff {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-}
-
-.checkOn {
-  background: var(--status-success-bg);
-  color: var(--status-success-fg);
-}
-
-.checkOff {
-  background: var(--status-warning-bg);
-  color: var(--status-warning-fg);
-}
-
-.badge {
-  margin-top: 10px;
-  display: inline-flex;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-}
-
-.badgeGood {
-  background: var(--status-success-bg);
-  color: var(--status-success-fg);
-}
-
-.badgeWarn {
-  background: var(--status-warning-bg);
-  color: var(--status-warning-fg);
-}
-
-.badgeMuted {
-  background: var(--surface-clinical-soft);
-  color: var(--text-clinical-soft);
-}
-
-.actions {
-  margin-top: 12px;
+.statusStrip {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.button {
-  border: 0;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.primary {
-  background: var(--action-install);
-  color: var(--text-on-dark);
-}
-
-.secondary {
-  background: var(--surface-clinical-soft);
-  color: var(--text-clinical-soft);
-}
-
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.58;
-}
-
-.status {
-  margin-top: 12px;
-  padding: 10px 12px;
+.statusStrip span {
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border-clinical-soft);
   border-radius: 10px;
-  background: var(--surface-clinical-soft);
-  color: var(--text-clinical-soft);
-  font-size: 0.86rem;
+  background: var(--surface-mobile-bar-strong);
+  color: var(--text-soft);
+  font-size: 0.88rem;
 }
 
-@media (min-width: 768px) {
+.statusStrip strong {
+  color: var(--text-strong);
+}
+
+.actionGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.steps {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  color: var(--text-soft);
+}
+
+.steps li {
+  padding-inline-start: 4px;
+  margin-bottom: 9px;
+  line-height: 1.5;
+}
+
+.checks {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid var(--border-clinical-soft);
+  border-radius: 12px;
+  background: var(--surface-mobile-bar-strong);
+}
+
+.checkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-brand-gold) 14%, var(--surface-elevated));
+  color: var(--color-brand-dark-blue);
+  font-size: 1.15rem;
+}
+
+.checkText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.checkText strong {
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.checkText small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.toast {
+  position: fixed;
+  z-index: 1100;
+  inset-inline: 12px;
+  inset-block-end: calc(78px + env(safe-area-inset-bottom, 0px));
+  width: min(420px, calc(100% - 24px));
+  margin-inline: auto;
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .mainGrid,
   .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    align-items: start;
+  }
+
+  .heroIconWrap {
+    width: 92px;
+    height: 92px;
+  }
+
+  .heroMeter {
+    align-self: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .wrapper {
+    padding-inline: 10px;
+  }
+
+  .hero {
+    border-radius: 18px;
+  }
+
+  .actionGrid > * {
+    width: 100%;
+  }
+
+  .checkItem {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .checkItem > :last-child {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 }

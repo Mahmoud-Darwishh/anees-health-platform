@@ -46,9 +46,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/assets/img/fav.png', type: 'image/png' },
-      { url: '/assets/img/pwa-icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/assets/img/anees-app-icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: '/assets/img/pwa-icon-512.png',
+    apple: '/assets/img/anees-app-icon-512.png',
   },
   category: 'Healthcare',
   other: {
