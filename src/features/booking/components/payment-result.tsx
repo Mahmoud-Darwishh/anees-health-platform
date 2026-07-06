@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { ButtonLink } from '@/components/ui';
 import styles from './payment-result.module.scss';
 
 interface PaymentResultProps {
@@ -102,17 +102,17 @@ export default function PaymentResult({
           {/* Actions */}
           <div className={styles.actions}>
             {isSuccess ? (
-              <Link href={`/${locale}`} className={styles.primaryButton}>
+              <ButtonLink href={`/${locale}`} experience="marketing" className={styles.primaryButton}>
                 {t('result.backToHome')}
-              </Link>
+              </ButtonLink>
             ) : (
               <>
-                <Link href={`/${locale}/booking`} className={styles.primaryButton}>
+                <ButtonLink href={`/${locale}/booking`} experience="marketing" className={styles.primaryButton}>
                   {t('result.tryAgain')}
-                </Link>
-                <Link href={`/${locale}/contact`} className={styles.secondaryButton}>
+                </ButtonLink>
+                <ButtonLink href={`/${locale}/contact`} variant="outline" experience="marketing" className={styles.secondaryButton}>
                   {t('result.contactSupport')}
-                </Link>
+                </ButtonLink>
               </>
             )}
           </div>

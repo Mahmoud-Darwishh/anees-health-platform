@@ -17,7 +17,7 @@ interface PaymentMethodChooserProps {
   instapayUrl: string;
 }
 
-type Method = 'card' | 'instapay' | null;
+type Method = 'card' | 'wallet' | 'instapay' | null;
 
 export default function PaymentMethodChooser(props: PaymentMethodChooserProps) {
   const t = useTranslations('payment');
@@ -48,6 +48,20 @@ export default function PaymentMethodChooser(props: PaymentMethodChooserProps) {
         <button
           type="button"
           role="radio"
+          aria-checked={method === 'wallet'}
+          className={`${styles.choice} ${method === 'wallet' ? styles.active : ''}`}
+          onClick={() => setMethod('wallet')}
+        >
+          <span className={styles.choiceIcon} aria-hidden>📱</span>
+          <span className={styles.choiceBody}>
+            <span className={styles.choiceTitle}>{t('method.wallet')}</span>
+            <span className={styles.choiceHint}>{t('method.walletHint')}</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="radio"
           aria-checked={method === 'instapay'}
           className={`${styles.choice} ${method === 'instapay' ? styles.active : ''}`}
           onClick={() => setMethod('instapay')}
@@ -60,7 +74,7 @@ export default function PaymentMethodChooser(props: PaymentMethodChooserProps) {
         </button>
       </div>
 
-      {method === 'card' ? (
+      {method === 'card' || method === 'wallet' ? (
         <PaymentGateway
           orderId={props.orderId}
           amount={props.amount}
@@ -68,6 +82,7 @@ export default function PaymentMethodChooser(props: PaymentMethodChooserProps) {
           customerName={props.customerName}
           customerPhone={props.customerPhone}
           locale={props.locale}
+          method={method}
         />
       ) : null}
 

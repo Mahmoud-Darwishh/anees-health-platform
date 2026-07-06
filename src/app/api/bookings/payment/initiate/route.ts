@@ -18,11 +18,12 @@ export async function POST(request: NextRequest) {
     if (!allowed) return tooManyRequests();
 
     const body = await request.json();
-    const { bookingId, locale, customerName, customerPhone } = body as {
+    const { bookingId, locale, customerName, customerPhone, method } = body as {
       bookingId: string;
       locale: string;
       customerName?: string;
       customerPhone?: string;
+      method?: 'card' | 'wallet';
     };
 
     // ── Validate request ──────────────────────────────────────────────
@@ -129,7 +130,19 @@ export async function POST(request: NextRequest) {
         : 'https://test-api.kashier.io';
 
     // ── Allowed payment methods from env or fallback ──────────────────
-    const allowedMethods = process.env.KASHIER_ALLOWED_METHODS || 'card,wallet';
+    // The client may pass a `method` hint (from the payment-method tiles) to
+    // focus the Kashier iframe on cards or on mobile wallets. We only ever
+    // NARROW to a method the merchant has actually configured — never widen —
+    // so an unconfigured method can't be forced on. The server, not the client,
+    // still owns the amount.
+    const configuredMethods = (process.env.KASHIER_ALLOWED_METHODS || 'card,wallet')
+      .split(',')
+      .map((m) => m.trim().toLowerCase())
+      .filter(Boolean);
+    let allowedMethods = configuredMethods.join(',');
+    if ((method === 'wallet' || method === 'card') && configuredMethods.includes(method)) {
+      allowedMethods = method;
+    }
 
     // ── Build session payload per Kashier v3 docs ─────────────────────
     // Note: `mode` must NOT be in the body — it is determined by the API

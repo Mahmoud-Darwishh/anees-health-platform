@@ -7,6 +7,7 @@ import {
   getPackageEntry,
 } from '@/lib/models/booking.types';
 import type { SpecialtyOption } from '@/lib/api/specialties';
+import { Button, Card, EmptyState, Input, StatusPill } from '@/components/ui';
 import { generateBookingMessage } from '@/lib/utils/booking-utils';
 import styles from '@/assets/scss/components/booking-summary.module.scss';
 
@@ -130,7 +131,7 @@ export default function BookingSummary(props: BookingSummaryProps) {
   };
 
   return (
-    <div className={styles.summaryContainer}>
+    <Card experience="clinical" padding="none" className={styles.summaryContainer}>
       <div className={styles.summaryHeader}>
         <h2 className={styles.summaryTitle}>{t('summary.title')}</h2>
         {hasServiceSelection && totalPrice > 0 && (
@@ -142,7 +143,12 @@ export default function BookingSummary(props: BookingSummaryProps) {
 
       <div className={styles.summaryContent}>
         {!hasServiceSelection ? (
-          <p className={styles.emptyState}>{t('summary.empty')}</p>
+          <EmptyState
+            experience="clinical"
+            compact
+            title={t('summary.empty')}
+            className={styles.emptyState}
+          />
         ) : (
           <>
             <div className={styles.summarySection}>
@@ -166,21 +172,24 @@ export default function BookingSummary(props: BookingSummaryProps) {
                   {isPromoApplied ? (
                     <div className={styles.promoInputWrapper}>
                       <span className={styles.promoChip}>✓ {promo.code}</span>
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
+                        experience="clinical"
                         className={styles.promoRemove}
                         onClick={removePromocode}
                         disabled={isSubmitting}
                       >
                         {t('promocode.remove')}
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className={styles.promoInputWrapper}>
-                      <input
+                      <Input
                         id="promocode"
                         type="text"
-                        className={styles.promoInput}
+                        className={styles.promoInputField}
                         placeholder={t('promocode.placeholder')}
                         value={promoInput}
                         onChange={(e) => setPromoInput(e.target.value)}
@@ -194,26 +203,31 @@ export default function BookingSummary(props: BookingSummaryProps) {
                         autoComplete="off"
                         spellCheck={false}
                         dir="ltr"
+                        experience="clinical"
+                        controlSize="sm"
                       />
-                      <button
+                      <Button
                         type="button"
+                        size="sm"
+                        experience="clinical"
                         className={styles.promoApply}
                         onClick={() => void applyPromocode()}
+                        loading={promo.status === 'loading'}
                         disabled={isSubmitting || promo.status === 'loading' || !promoInput.trim()}
                       >
                         {promo.status === 'loading' ? '…' : t('promocode.apply')}
-                      </button>
+                      </Button>
                     </div>
                   )}
                   {isPromoApplied && (
-                    <span className={`${styles.promoStatus} ${styles.promoStatusOk}`}>
+                    <StatusPill tone="success" className={`${styles.promoStatus} ${styles.promoStatusOk}`}>
                       {t('promocode.applied', { code: promo.code ?? '' })}
-                    </span>
+                    </StatusPill>
                   )}
                   {promo.status === 'error' && promo.errorKey && (
-                    <span className={`${styles.promoStatus} ${styles.promoStatusError}`}>
+                    <StatusPill tone="danger" className={`${styles.promoStatus} ${styles.promoStatusError}`}>
                       {t(`promocode.errors.${promo.errorKey}`)}
-                    </span>
+                    </StatusPill>
                   )}
                 </div>
               )}
@@ -288,18 +302,20 @@ export default function BookingSummary(props: BookingSummaryProps) {
 
             {/* Action Buttons */}
             <div className={styles.actionButtons}>
-              <button
+              <Button
                 className={styles.whatsappButton}
                 onClick={handleWhatsAppClick}
                 disabled={isSubmitting}
                 type="button"
+                experience="mobile"
+                fullWidth
               >
                 {t('actions.chatWithTeam')}
-              </button>
+              </Button>
             </div>
           </>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

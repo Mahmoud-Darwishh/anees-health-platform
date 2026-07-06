@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Badge, ButtonLink, Card, EmptyState } from '@/components/ui';
 import { dayGreeting } from './helpers';
 import type { PortalContext } from './view-context';
 import type { PortalWorkspaceTab } from './types';
@@ -65,48 +66,46 @@ export function PortalPageView({ ctx }: { ctx: PortalContext }) {
           <h1 className={styles.heroTitle}>{t('title')}</h1>
           <p className={styles.heroSupport}>{supportMessage}</p>
           {record.access.mode === 'caregiver' ? (
-            <p className={styles.caregiverBadge}>{t('caregiverAccessBadge')}</p>
+            <Badge tone="brand" className={styles.caregiverBadge}>{t('caregiverAccessBadge')}</Badge>
           ) : null}
         </div>
-        <div className={styles.portalChip}>{record.patient.code}</div>
-        <Link href={`/${locale}`} className={`btn btn-sm ${styles.backButton}`}>
+        <Badge tone="brand" className={styles.portalChip}>{record.patient.code}</Badge>
+        <ButtonLink href={`/${locale}`} size="sm" variant="outline" experience="ops" className={styles.backButton}>
           {t('goHomeCta')}
-        </Link>
+        </ButtonLink>
       </div>
 
-      <div className={`card ${styles.sectionCard}`}>
-        <div className="card-body py-2">
-          <nav className={styles.tabNav} aria-label={t('workspace.tabsLabel')}>
-            {portalTabs.map((portalTab) => {
-              const isActive = activeTab === portalTab.id;
+      <Card experience="ops" padding="sm" className={styles.sectionCard}>
+        <nav className={styles.tabNav} aria-label={t('workspace.tabsLabel')}>
+          {portalTabs.map((portalTab) => {
+            const isActive = activeTab === portalTab.id;
 
-              return (
-                <Link
-                  key={portalTab.id}
-                  href={tabHref(portalTab.id)}
-                  className={`${styles.tabLink} ${isActive ? styles.tabLinkActive : ''}`}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  {portalTab.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
+            return (
+              <Link
+                key={portalTab.id}
+                href={tabHref(portalTab.id)}
+                className={`${styles.tabLink} ${isActive ? styles.tabLinkActive : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {portalTab.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </Card>
 
       {activeTab === 'overview' && <JourneyHeroSection ctx={ctx} />}
       {activeTab === 'overview' && <ProfileSection ctx={ctx} />}
       {activeTab === 'overview' && <ClinicalDepthSection ctx={ctx} />}
 
       {clinicalRestricted ? (
-        <div className={`card ${styles.sectionCard}`}>
-          <div className="card-body">
-            <div className="alert alert-warning mb-0" role="alert">
-              {t('consentRestricted')}
-            </div>
-          </div>
-        </div>
+        <Card experience="clinical" className={styles.sectionCard}>
+          <EmptyState
+            experience="clinical"
+            compact
+            title={t('consentRestricted')}
+          />
+        </Card>
       ) : null}
 
       {canSeeClinicalDepth && (activeTab === 'clinical' || activeTab === 'files') ? (

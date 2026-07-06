@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { signOut } from 'next-auth/react';
+import { Button, ButtonLink } from '@/components/ui';
 
 export function ClinicianTopbarActions() {
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -26,19 +26,22 @@ export function ClinicianTopbarActions() {
 
   return (
     <div className="clinician-topbar-actions">
-      <Link href="/en" className="clinician-topbar-btn clinician-topbar-btn--ghost">
+      <ButtonLink href="/en" variant="ghost" size="sm" experience="clinical" className="clinician-topbar-btn clinician-topbar-btn--ghost">
         Home
-      </Link>
-      <button
+      </ButtonLink>
+      <Button
         type="button"
+        size="sm"
+        experience="clinical"
         className="clinician-topbar-btn clinician-topbar-btn--solid"
         onClick={() => {
           void auditedSignOut();
         }}
         disabled={isSigningOut}
+        loading={isSigningOut}
       >
         {isSigningOut ? 'Signing out...' : 'Sign out'}
-      </button>
+      </Button>
     </div>
   );
 }

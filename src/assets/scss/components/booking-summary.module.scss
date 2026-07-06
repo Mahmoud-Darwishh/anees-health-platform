@@ -7,7 +7,8 @@
    ============================================================================ */
 
 .summaryContainer {
-  background: #fff;
+  gap: 0;
+  background: var(--surface-elevated);
   border-radius: 16px;
   border: 1px solid rgba($brand-dark-blue, 0.12);
   box-shadow: 0 10px 20px rgba($brand-dark-blue, 0.08);
@@ -27,14 +28,14 @@
   gap: 0.75rem;
   padding: 1rem 1.1rem;
   border-bottom: 1px solid var(--border-soft);
-  background: #f8fbff;
+  background: var(--surface-clinical-soft);
 }
 
 .summaryTitle {
   margin: 0;
   font-size: 0.92rem;
   font-weight: 700;
-  color: #102845;
+  color: var(--text-strong);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -45,7 +46,7 @@
   gap: 0.3rem;
   font-size: 1.08rem;
   font-weight: 700;
-  color: #102845;
+  color: var(--text-strong);
 
   span {
     font-size: 0.72rem;
@@ -64,7 +65,7 @@
   justify-content: space-between;
   width: 100%;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #112845 0%, #0c1f37 65%, #b28b3e 100%);
+  background: linear-gradient(135deg, var(--surface-inverse) 0%, var(--color-brand-dark-blue) 65%, var(--color-brand-gold) 100%);
   color: $white;
   border: none;
   cursor: pointer;
@@ -179,7 +180,7 @@
 .sectionTitle {
   font-size: 0.75rem;
   font-weight: $font-weight-semibold;
-  color: #1b3558;
+  color: var(--text-strong);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.75rem;
@@ -192,7 +193,7 @@
     display: inline-block;
     width: 3px;
     height: 1rem;
-    background: linear-gradient(180deg, #102845 0%, #b28b3e 100%);
+    background: linear-gradient(180deg, var(--text-strong) 0%, var(--color-brand-gold) 100%);
     border-radius: 1.5px;
   }
 }
@@ -276,15 +277,15 @@
 .pricingValue {
   font-size: 1.1rem;
   font-weight: $font-weight-semibold;
-  color: #102845;
+  color: var(--text-strong);
   flex-shrink: 0;
 }
 
 .priceBox {
-  background: #f8fbff;
+  background: var(--surface-clinical-soft);
   padding: 0.9rem;
   border-radius: 12px;
-  border-inline-start: 3px solid #102845;
+  border-inline-start: 3px solid var(--text-strong);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -303,7 +304,7 @@
 .priceValue {
   font-size: 1.3rem;
   font-weight: $font-weight-bold;
-  color: #102845;
+  color: var(--text-strong);
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
@@ -347,6 +348,11 @@
 }
 
 .whatsappButton {
+  --button-bg: var(--action-whatsapp);
+  --button-border: var(--action-whatsapp);
+  --button-fg: var(--text-on-dark);
+  --button-hover-bg: var(--action-whatsapp-strong);
+
   padding: 1rem 1.5rem;
   font-size: 0.95rem;
   font-weight: $font-weight-semibold;
@@ -374,13 +380,13 @@
 }
 
 .whatsappButton {
-  background: #25d366;
-  color: $white;
-  border: 2px solid #25d366;
+  background: var(--action-whatsapp);
+  color: var(--text-on-dark);
+  border: 2px solid var(--action-whatsapp);
 
   &:hover:not(:disabled) {
-    background: #20ba5a;
-    border-color: #20ba5a;
+    background: var(--action-whatsapp-strong);
+    border-color: var(--action-whatsapp-strong);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
   }
@@ -602,7 +608,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.85rem;
-  background: #f7f9fd;
+  background: var(--surface-clinical-soft);
   border: 1px solid rgba($brand-dark-blue, 0.24);
   border-radius: 10px;
   margin-top: 0.75rem;
@@ -620,29 +626,20 @@
   gap: 0.45rem;
   align-items: stretch;
 }
-.promoInput {
+.promoInputField {
   flex: 1;
   min-width: 0;
-  padding: 0.625rem 0.75rem;
-  border: 1px solid rgba($brand-dark-blue, 0.18);
-  border-radius: 8px;
-  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background: $white;
-  color: $dark;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  &:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba($primary, 0.18);
-  }
-  &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 .promoApply, .promoRemove {
+  --button-bg: var(--text-strong);
+  --button-border: var(--text-strong);
+  --button-fg: var(--text-on-dark);
+  --button-hover-bg: color-mix(in srgb, var(--text-strong) 88%, var(--color-brand-gold));
+
   flex-shrink: 0;
   padding: 0.58rem 0.85rem;
-  border: none;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -651,22 +648,22 @@
   &:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 }
 .promoApply {
-  background: #102845;
-  color: $white;
   &:hover:not(:disabled) { transform: translateY(-1px); }
 }
 .promoRemove {
-  background: transparent;
-  color: var(--color-secondary);
-  border: 1px solid rgba($brand-dark-blue, 0.25);
+  --button-bg: transparent;
+  --button-border: rgba(19, 44, 77, 0.25);
+  --button-fg: var(--color-secondary);
+  --button-hover-bg: rgba(19, 44, 77, 0.06);
+
   &:hover:not(:disabled) { background: rgba($brand-dark-blue, 0.06); }
 }
 .promoStatus {
   font-size: 0.8rem;
   font-weight: 500;
 }
-.promoStatusOk { color: #15803d; }
-.promoStatusError { color: #b91c1c; }
+.promoStatusOk { color: var(--status-success-fg); }
+.promoStatusError { color: var(--status-danger-fg); }
 .promoChip {
   display: inline-flex;
   align-items: center;
@@ -680,7 +677,7 @@
   letter-spacing: 0.3px;
 }
 .discountRow {
-  color: #15803d;
+  color: var(--status-success-fg);
   font-weight: 600;
 }
 .strikethrough {

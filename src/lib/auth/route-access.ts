@@ -50,6 +50,7 @@ const ROUTE_RULES: RouteRule[] = [
   // Admin + superadmin only (the `staff_user_mgmt` matrix module grants admin
   // `sign`); compliance has matrix READ but no dedicated screen, by design.
   { prefix: '/admin/staff', roles: ['superadmin', 'admin'] },
+  { prefix: '/admin/notifications', roles: ['superadmin', 'admin'] },
   { prefix: '/admin/compliance', roles: ['superadmin', 'admin', 'compliance_officer'] },
   { prefix: '/admin/insurance', roles: ['superadmin', 'admin', 'insurance_coordinator', 'finance'] },
   // Payments + reconciliation (InstaPay confirm queue, delivered-visits export).

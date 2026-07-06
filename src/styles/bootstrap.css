@@ -1,0 +1,6 @@
+/*
+ * Bootstrap stays load-bearing for grid/utilities, but it must enter through
+ * Next's managed CSS graph. A raw <link> in <head> can load after Anees styles
+ * and override token-backed body/chrome defaults.
+ */
+@import '../../public/assets/css/bootstrap.min.css';

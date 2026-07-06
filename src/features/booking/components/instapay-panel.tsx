@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Button, ButtonLink, Input, Toast } from '@/components/ui';
 import styles from './payment-method.module.scss';
 
 interface InstaPayPanelProps {
@@ -65,9 +66,16 @@ export default function InstaPayPanel({ orderId, amount, currency, instapayHandl
       </div>
 
       {instapayUrl ? (
-        <a href={instapayUrl} target="_blank" rel="noopener noreferrer" className={styles.submit} style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: '1rem' }}>
+        <ButtonLink
+          href={instapayUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          experience="mobile"
+          className={styles.submit}
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none', marginBottom: '1rem' }}
+        >
           {t('instapay.openApp')}
-        </a>
+        </ButtonLink>
       ) : null}
 
       <ol className={styles.steps}>
@@ -77,33 +85,33 @@ export default function InstaPayPanel({ orderId, amount, currency, instapayHandl
       </ol>
 
       <form onSubmit={handleSubmit}>
-        <div className={styles.field}>
-          <label htmlFor="instapay-reference">{t('instapay.referenceLabel')}</label>
-          <input
-            id="instapay-reference"
-            type="text"
-            value={reference}
-            onChange={(e) => setReference(e.target.value)}
-            placeholder={t('instapay.referencePlaceholder')}
-            dir="ltr"
-          />
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="instapay-sender">{t('instapay.senderLabel')}</label>
-          <input
-            id="instapay-sender"
-            type="text"
-            value={senderName}
-            onChange={(e) => setSenderName(e.target.value)}
-            dir="auto"
-          />
-        </div>
+        <Input
+          id="instapay-reference"
+          type="text"
+          label={t('instapay.referenceLabel')}
+          value={reference}
+          onChange={(e) => setReference(e.target.value)}
+          placeholder={t('instapay.referencePlaceholder')}
+          dir="ltr"
+          experience="mobile"
+          className={styles.field}
+        />
+        <Input
+          id="instapay-sender"
+          type="text"
+          label={t('instapay.senderLabel')}
+          value={senderName}
+          onChange={(e) => setSenderName(e.target.value)}
+          dir="auto"
+          experience="mobile"
+          className={styles.field}
+        />
 
-        {error ? <p className={styles.error}>{error}</p> : null}
+        {error ? <Toast experience="mobile" tone="danger" description={error} className={styles.error} /> : null}
 
-        <button type="submit" className={styles.submit} disabled={submitting}>
+        <Button type="submit" experience="mobile" className={styles.submit} disabled={submitting} loading={submitting}>
           {submitting ? t('instapay.submitting') : t('instapay.submit')}
-        </button>
+        </Button>
       </form>
     </div>
   );

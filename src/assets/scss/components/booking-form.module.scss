@@ -9,7 +9,7 @@
 .bookingContainer {
   width: 100%;
   padding: 1rem 0.75rem;
-  background: #fff;
+  background: var(--surface-elevated);
   min-height: 100vh;
   box-sizing: border-box;
   overflow-x: hidden;
@@ -130,7 +130,7 @@
 .sectionTitle {
   font-size: 1.1rem;
   font-weight: $font-weight-semibold;
-  color: #102845;
+  color: var(--text-strong);
   margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
@@ -517,7 +517,7 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #fff;
+  background: var(--surface-elevated);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
   box-sizing: border-box;
   width: 100%;
@@ -889,9 +889,7 @@
   }
 }
 
-input:focus-visible,
-select:focus-visible,
-button:focus-visible {
+.bookingContainer :where(input, select, button):focus-visible {
   outline: 2px solid $primary;
   outline-offset: 2px;
 }
@@ -909,7 +907,7 @@ button:focus-visible {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $brand-dark-blue 0%, #132f56 100%);
+  background: linear-gradient(135deg, $brand-dark-blue 0%, var(--color-brand-dark-blue) 100%);
   color: $Crayola-Gold;
   font-weight: 700;
   font-size: 0.85rem;
@@ -922,8 +920,8 @@ button:focus-visible {
   padding: 1rem 1.1rem;
   border-radius: 12px;
   border: 1px solid rgba($brand-dark-blue, 0.14);
-  background: #f8fbff;
-  color: #102845;
+  background: var(--surface-clinical-soft);
+  color: var(--text-strong);
 }
 
 .formIntroKicker {
@@ -956,7 +954,7 @@ button:focus-visible {
   padding: 0.55rem;
   border: 1px solid rgba($brand-dark-blue, 0.14);
   border-radius: 12px;
-  background: #fff;
+  background: var(--surface-elevated);
   overflow-x: auto;
 }
 
@@ -966,22 +964,22 @@ button:focus-visible {
   gap: 0.4rem;
   padding: 0.4rem 0.6rem;
   border-radius: 999px;
-  background: #f3f6fb;
+  background: var(--surface-ops-muted);
   color: var(--text-soft);
   white-space: nowrap;
 }
 
 .progressItemDone {
-  background: #e7eef8;
-  color: #102845;
+  background: var(--surface-clinical-muted);
+  color: var(--text-strong);
 }
 
 .progressNumber {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #102845;
-  color: #fff;
+  background: var(--color-secondary);
+  color: var(--text-on-dark);
   font-size: 0.7rem;
   font-weight: 700;
   display: inline-flex;
@@ -1013,7 +1011,7 @@ button:focus-visible {
   gap: 0.85rem;
   padding: 1rem 1rem;
   min-height: 150px;
-  background: #fff;
+  background: var(--surface-elevated);
   border: 1px solid rgba($brand-dark-blue, 0.18);
   border-radius: 16px;
   cursor: pointer;
@@ -1041,7 +1039,7 @@ button:focus-visible {
 
 .svcCardActive {
   border-color: rgba($brand-dark-blue, 0.8);
-  background: #f6faff;
+  background: var(--surface-clinical-soft);
   box-shadow: 0 10px 20px rgba($brand-dark-blue, 0.12);
 }
 
@@ -1075,7 +1073,7 @@ button:focus-visible {
 .svcTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: #0f2745;
+  color: var(--text-strong);
   line-height: 1.25;
 }
 
@@ -1096,7 +1094,7 @@ button:focus-visible {
   position: relative;
   font-size: 0.75rem;
   line-height: 1.35;
-  color: #365074;
+  color: var(--text-clinical-soft);
   padding-inline-start: 0.95rem;
 
   &::before {
@@ -1107,7 +1105,7 @@ button:focus-visible {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #b28b3e 0%, #193961 100%);
+    background: linear-gradient(135deg, var(--color-brand-gold) 0%, var(--surface-inverse) 100%);
   }
 }
 
@@ -1131,7 +1129,7 @@ button:focus-visible {
 .svcPriceValue {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #0f2745;
+  color: var(--text-strong);
   white-space: nowrap;
 
   @media (min-width: map.get($breakpoints, md)) {
@@ -1164,7 +1162,7 @@ button:focus-visible {
   gap: 0.2rem;
   padding: 0.85rem 1rem;
   min-height: 60px;
-  background: #fff;
+  background: var(--surface-elevated);
   border: 1px solid rgba($brand-dark-blue, 0.14);
   border-radius: 10px;
   cursor: pointer;
@@ -1184,7 +1182,7 @@ button:focus-visible {
 
 .durationPillActive {
   border-color: rgba($brand-dark-blue, 0.8);
-  background: #f2f8ff;
+  background: var(--surface-clinical-soft);
 }
 
 .durationLabel {
@@ -1209,6 +1207,26 @@ button:focus-visible {
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
   }
+}
+
+.phoneFieldGroup {
+  display: grid;
+  grid-template-columns: minmax(7.25rem, 0.42fr) minmax(0, 1fr);
+  gap: 0.65rem;
+  min-width: 0;
+  direction: ltr;
+
+  > * {
+    min-width: 0;
+  }
+
+  @media (max-width: map.get($breakpoints, custom479)) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.countryCodeField {
+  min-width: 0;
 }
 
 /* Text input ï¿½ matches existing .select styling */
@@ -1240,12 +1258,10 @@ button:focus-visible {
   bottom: 0;
   inset-inline-start: 0;
   inset-inline-end: 0;
-  z-index: 70;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  z-index: 960;
+  display: block;
   padding: 0.8rem 0.9rem calc(0.85rem + env(safe-area-inset-bottom));
-  background: rgba($white, 0.98);
+  background: var(--surface-mobile-bar);
   border-top: 1px solid rgba($brand-dark-blue, 0.14);
   box-shadow: 0 -8px 18px rgba($brand-dark-blue, 0.1);
   backdrop-filter: blur(12px);
@@ -1285,12 +1301,17 @@ button:focus-visible {
 }
 
 .mobileBarCta {
+  --button-bg: var(--surface-inverse);
+  --button-border: var(--surface-inverse);
+  --button-fg: var(--text-on-dark);
+  --button-hover-bg: color-mix(in srgb, var(--surface-inverse) 92%, var(--color-brand-gold));
+
   flex: 1;
   min-height: 52px;
   padding: 0 1rem;
   border-radius: 12px;
   border: none;
-  background: #0f2948;
+  background: var(--surface-inverse);
   color: $white;
   font-size: 0.95rem;
   font-weight: 600;
@@ -1310,12 +1331,17 @@ button:focus-visible {
 }
 
 .mobileBarPromo {
+  --button-bg: var(--surface-elevated);
+  --button-border: rgba(19, 44, 77, 0.22);
+  --button-fg: var(--surface-inverse);
+  --button-hover-bg: var(--surface-clinical-soft);
+
   min-height: 48px;
   padding: 0 0.8rem;
   border-radius: 11px;
   border: 1px solid rgba($brand-dark-blue, 0.22);
-  background: #fff;
-  color: #0f2948;
+  background: var(--surface-elevated);
+  color: var(--surface-inverse);
   font-size: 0.78rem;
   font-weight: 700;
   white-space: nowrap;
@@ -1324,7 +1350,7 @@ button:focus-visible {
 
   &:hover {
     border-color: rgba($brand-dark-blue, 0.4);
-    background: #f7faff;
+    background: var(--surface-clinical-soft);
   }
 }
 

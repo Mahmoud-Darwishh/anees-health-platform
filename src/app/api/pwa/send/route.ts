@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AppLocale, listSubscriptions, removeSubscription } from '@/lib/pwa/subscription-store';
+import { createHash, timingSafeEqual } from 'crypto';
+import { listSubscriptions, removeSubscription } from '@/lib/pwa/subscription-store';
+import type { AppLocale } from '@/lib/pwa/subscription-store';
 import { sendPushToSubscription } from '@/lib/pwa/push';
 
 type SendPushRequest = {
@@ -18,7 +20,13 @@ function isAuthorized(request: NextRequest) {
   }
 
   const incoming = request.headers.get('x-pwa-server-key') || request.headers.get('authorization')?.replace('Bearer ', '');
-  return incoming === configuredKey;
+  if (!incoming) {
+    return false;
+  }
+
+  const configuredDigest = createHash('sha256').update(configuredKey).digest();
+  const incomingDigest = createHash('sha256').update(incoming).digest();
+  return timingSafeEqual(configuredDigest, incomingDigest);
 }
 
 export async function POST(request: NextRequest) {

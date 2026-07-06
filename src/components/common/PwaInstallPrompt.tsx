@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { Button } from '@/components/ui';
 import { usePwaManager } from '@/features/pwa/hooks/usePwaManager';
 import styles from './PwaInstallPrompt.module.scss';
 
@@ -109,8 +111,7 @@ export default function PwaInstallPrompt() {
 
         {/* App icon */}
         <div className={styles.iconWrap}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/img/fav.png" alt="Anees Health" width={80} height={80} className={styles.appIcon} />
+          <Image src="/assets/img/pwa-icon-192.png" alt="Anees Health" width={80} height={80} className={styles.appIcon} />
         </div>
 
         {hasUpdate ? (
@@ -118,9 +119,16 @@ export default function PwaInstallPrompt() {
           <>
             <h2 className={styles.modalTitle}>{t('updateButton')}</h2>
             <p className={styles.modalDesc}>{t('description')}</p>
-            <button type="button" onClick={handleUpdate} className={`${styles.installBtn} ${styles.update}`}>
+            <Button
+              type="button"
+              onClick={handleUpdate}
+              experience="mobile"
+              variant="success"
+              fullWidth
+              className={`${styles.installBtn} ${styles.update}`}
+            >
               {t('updateButton')}
-            </button>
+            </Button>
           </>
         ) : isIos ? (
           /* ── iOS: show visual guide (Apple has no programmatic install API) ── */
@@ -151,9 +159,9 @@ export default function PwaInstallPrompt() {
           <>
             <h2 className={styles.modalTitle}>{t('title')}</h2>
             <p className={styles.modalDesc}>{t('description')}</p>
-            <button type="button" onClick={handleInstall} className={styles.installBtn}>
+            <Button type="button" onClick={handleInstall} experience="mobile" fullWidth className={styles.installBtn}>
               {t('installButton')}
-            </button>
+            </Button>
           </>
         ) : null}
 

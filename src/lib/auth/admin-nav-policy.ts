@@ -65,6 +65,11 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     description: 'Onboard staff, assign roles + licences, and issue access links.',
   },
   {
+    href: '/admin/notifications',
+    label: 'Notifications',
+    description: 'Send PHI-light app alerts to opted-in users.',
+  },
+  {
     href: '/admin/compliance',
     label: 'Compliance',
     description: 'Audit log, break-glass overrides, and access events.',

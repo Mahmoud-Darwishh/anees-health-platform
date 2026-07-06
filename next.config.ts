@@ -1,9 +1,71 @@
 ﻿import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import type { RuntimeCaching } from 'workbox-build';
 import withPWAInit from '@ducanh2912/next-pwa';
-import { runtimeCaching } from '@ducanh2912/next-pwa';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const phiSafeRuntimeCaching: RuntimeCaching[] = [
+  {
+    urlPattern: ({ url }: { url: URL }) =>
+      url.origin === location.origin && url.pathname.startsWith('/_next/static/'),
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'anees-next-static',
+      expiration: {
+        maxEntries: 80,
+        maxAgeSeconds: 365 * 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }: { url: URL }) =>
+      url.origin === location.origin && url.pathname.startsWith('/assets/'),
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'anees-public-assets',
+      expiration: {
+        maxEntries: 160,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }: { url: URL }) =>
+      url.origin === location.origin && url.pathname.startsWith('/_next/image'),
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'anees-optimized-images',
+      expiration: {
+        maxEntries: 80,
+        maxAgeSeconds: 7 * 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: ({ url }: { url: URL }) =>
+      url.origin === location.origin && /^\/manifest-(en|ar)\.webmanifest$/.test(url.pathname),
+    handler: 'StaleWhileRevalidate',
+    options: {
+      cacheName: 'anees-pwa-manifests',
+      expiration: {
+        maxEntries: 4,
+        maxAgeSeconds: 24 * 60 * 60,
+      },
+    },
+  },
+  {
+    urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'anees-google-fonts',
+      expiration: {
+        maxEntries: 30,
+        maxAgeSeconds: 365 * 24 * 60 * 60,
+      },
+    },
+  },
+];
+
 const withPWA = withPWAInit({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development' && process.env.ENABLE_PWA_DEV !== 'true',
@@ -14,7 +76,7 @@ const withPWA = withPWAInit({
   aggressiveFrontEndNavCaching: false,
   customWorkerSrc: 'worker',
   workboxOptions: {
-    runtimeCaching,
+    runtimeCaching: phiSafeRuntimeCaching,
     cleanupOutdatedCaches: true,
   },
   fallbacks: {

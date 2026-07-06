@@ -1,7 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Button, Card, StatusPill, Toast } from '@/components/ui';
 import { usePwaManager } from '@/features/pwa/hooks/usePwaManager';
 import styles from './PwaSettingsPanel.module.scss';
 
@@ -27,9 +29,7 @@ function isSecureContextForPwa(): boolean {
 
 export default function PwaSettingsPanel() {
   const t = useTranslations('pwaSettings');
-  const [isIos] = useState<boolean>(() => detectIos());
-  const [isSafari] = useState<boolean>(() => detectSafari());
-  const [isSecure] = useState<boolean>(() => isSecureContextForPwa());
+  const [hasHydrated, setHasHydrated] = useState(false);
 
   const {
     isSupported,
@@ -48,6 +48,21 @@ export default function PwaSettingsPanel() {
     refreshStatus,
     setStatusMessage,
   } = usePwaManager();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setHasHydrated(true), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const isIos = hasHydrated ? detectIos() : false;
+  const isSafari = hasHydrated ? detectSafari() : false;
+  const isSecure = hasHydrated ? isSecureContextForPwa() : false;
+  const displayedIsSupported = hasHydrated && isSupported;
+  const displayedIsInstalled = hasHydrated && isInstalled;
+  const displayedCanInstall = hasHydrated && canInstall;
+  const displayedHasUpdate = hasHydrated && hasUpdate;
+  const displayedNotificationPermission = hasHydrated ? notificationPermission : 'default';
+  const displayedIsSubscribed = hasHydrated && isSubscribed;
 
   const onInstall = async () => {
     const accepted = await installApp();
@@ -72,23 +87,34 @@ export default function PwaSettingsPanel() {
   const readinessChecks = useMemo(
     () => [
       { label: t('checkSecureContext'), ready: isSecure },
-      { label: t('checkPwaSupport'), ready: isSupported },
-      { label: t('checkInstalled'), ready: isInstalled },
-      { label: t('checkNotifications'), ready: notificationPermission === 'granted' && isSubscribed },
-      { label: t('checkUpdate'), ready: !hasUpdate },
+      { label: t('checkPwaSupport'), ready: displayedIsSupported },
+      { label: t('checkInstalled'), ready: displayedIsInstalled },
+      {
+        label: t('checkNotifications'),
+        ready: displayedNotificationPermission === 'granted' && displayedIsSubscribed,
+      },
+      { label: t('checkUpdate'), ready: !displayedHasUpdate },
     ],
-    [hasUpdate, isInstalled, isSecure, isSubscribed, isSupported, notificationPermission, t]
+    [
+      displayedHasUpdate,
+      displayedIsInstalled,
+      displayedIsSubscribed,
+      displayedIsSupported,
+      displayedNotificationPermission,
+      isSecure,
+      t,
+    ]
   );
 
   const readyCount = readinessChecks.filter((item) => item.ready).length;
   const readinessPercent = Math.round((readyCount / readinessChecks.length) * 100);
+  const notificationsReady = displayedNotificationPermission === 'granted' && displayedIsSubscribed;
 
   return (
     <section className={styles.wrapper}>
-      <header className={styles.header}>
+      <Card experience="mobile" className={styles.header}>
         <div className={styles.brandRow}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/img/fav.png" alt="" width={44} height={44} className={styles.appIcon} />
+          <Image src="/assets/img/fav.png" alt="" width={44} height={44} className={styles.appIcon} />
           <div>
             <h1 className={styles.title}>{t('title')}</h1>
             <p className={styles.subtitle}>{t('subtitle')}</p>
@@ -103,104 +129,111 @@ export default function PwaSettingsPanel() {
             <span className={styles.progressFill} style={{ width: `${readinessPercent}%` }} />
           </div>
         </div>
-      </header>
+      </Card>
 
-      <article className={`${styles.card} ${styles.readinessCard}`}>
-        <h2 className={styles.cardTitle}>{t('readinessTitle')}</h2>
+      <Card experience="mobile" title={t('readinessTitle')} className={styles.readinessCard}>
         <ul className={styles.checks}>
           {readinessChecks.map((item) => (
             <li key={item.label} className={styles.checkItem}>
-              <span className={item.ready ? styles.checkOn : styles.checkOff}>{item.ready ? 'OK' : 'TODO'}</span>
+              <StatusPill tone={item.ready ? 'success' : 'warning'} withDot={false}>
+                {item.ready ? 'OK' : 'TODO'}
+              </StatusPill>
               <span>{item.label}</span>
             </li>
           ))}
         </ul>
-      </article>
+      </Card>
 
       {isIos ? (
-        <article className={`${styles.card} ${styles.iosCard}`}>
-          <h2 className={styles.cardTitle}>{t('iosCardTitle')}</h2>
+        <Card experience="mobile" title={t('iosCardTitle')} className={styles.iosCard}>
           <p className={styles.meta}>{isSafari ? t('iosInstallHint') : t('iosOpenSafariHint')}</p>
-        </article>
+        </Card>
       ) : null}
 
       <div className={styles.grid}>
-        <article className={styles.card}>
-          <h2 className={styles.cardTitle}>{t('installCardTitle')}</h2>
-          <p className={styles.meta}>{isInstalled ? t('installed') : t('notInstalled')}</p>
-          <span className={`${styles.badge} ${isInstalled ? styles.badgeGood : styles.badgeMuted}`}>
-            {isInstalled ? t('stateActive') : t('statePending')}
-          </span>
-          <div className={styles.actions}>
-            {canInstall ? (
-              <button type="button" className={`${styles.button} ${styles.primary}`} onClick={onInstall}>
-                {t('installButton')}
-              </button>
-            ) : null}
-            <button type="button" className={`${styles.button} ${styles.secondary}`} onClick={refreshStatus}>
-              {t('refreshButton')}
-            </button>
-          </div>
-        </article>
+        <Card
+          experience="mobile"
+          title={t('installCardTitle')}
+          footer={
+            <div className={styles.actions}>
+              {displayedCanInstall ? (
+                <Button type="button" experience="mobile" onClick={onInstall}>
+                  {t('installButton')}
+                </Button>
+              ) : null}
+              <Button type="button" variant="outline" experience="mobile" onClick={refreshStatus}>
+                {t('refreshButton')}
+              </Button>
+            </div>
+          }
+        >
+          <p className={styles.meta}>{displayedIsInstalled ? t('installed') : t('notInstalled')}</p>
+          <StatusPill tone={displayedIsInstalled ? 'success' : 'neutral'} withDot={false}>
+            {displayedIsInstalled ? t('stateActive') : t('statePending')}
+          </StatusPill>
+        </Card>
 
-        <article className={styles.card}>
-          <h2 className={styles.cardTitle}>{t('notificationsCardTitle')}</h2>
+        <Card
+          experience="mobile"
+          title={t('notificationsCardTitle')}
+          footer={
+            <div className={styles.actions}>
+              <Button type="button" experience="mobile" onClick={onEnableNotifications}>
+                {t('enableNotifications')}
+              </Button>
+              <Button type="button" variant="outline" experience="mobile" onClick={onDisableNotifications}>
+                {t('disableNotifications')}
+              </Button>
+            </div>
+          }
+        >
           <p className={styles.meta}>
-            {t('permission')}: <strong>{notificationPermission}</strong>
+            {t('permission')}: <strong>{displayedNotificationPermission}</strong>
           </p>
           <p className={styles.meta}>
-            {t('subscription')}: <strong>{isSubscribed ? t('subscribed') : t('notSubscribed')}</strong>
+            {t('subscription')}: <strong>{displayedIsSubscribed ? t('subscribed') : t('notSubscribed')}</strong>
           </p>
-          <span
-            className={`${styles.badge} ${
-              notificationPermission === 'granted' && isSubscribed ? styles.badgeGood : styles.badgeMuted
-            }`}
-          >
-            {notificationPermission === 'granted' && isSubscribed ? t('stateActive') : t('statePending')}
-          </span>
-          <div className={styles.actions}>
-            <button type="button" className={`${styles.button} ${styles.primary}`} onClick={onEnableNotifications}>
-              {t('enableNotifications')}
-            </button>
-            <button type="button" className={`${styles.button} ${styles.secondary}`} onClick={onDisableNotifications}>
-              {t('disableNotifications')}
-            </button>
-          </div>
-        </article>
+          <StatusPill tone={notificationsReady ? 'success' : 'neutral'} withDot={false}>
+            {notificationsReady ? t('stateActive') : t('statePending')}
+          </StatusPill>
+        </Card>
 
-        <article className={styles.card}>
-          <h2 className={styles.cardTitle}>{t('updatesCardTitle')}</h2>
-          <p className={styles.meta}>{hasUpdate ? t('updateReady') : t('upToDate')}</p>
-          <span className={`${styles.badge} ${hasUpdate ? styles.badgeWarn : styles.badgeGood}`}>
-            {hasUpdate ? t('stateActionNeeded') : t('stateActive')}
-          </span>
-          <div className={styles.actions}>
-            <button
-              type="button"
-              className={`${styles.button} ${styles.primary}`}
-              onClick={applyAppUpdate}
-              disabled={!hasUpdate}
-            >
-              {t('applyUpdateButton')}
-            </button>
-          </div>
-        </article>
+        <Card
+          experience="mobile"
+          title={t('updatesCardTitle')}
+          footer={
+            <div className={styles.actions}>
+              <Button type="button" experience="mobile" onClick={applyAppUpdate} disabled={!displayedHasUpdate}>
+                {t('applyUpdateButton')}
+              </Button>
+            </div>
+          }
+        >
+          <p className={styles.meta}>{displayedHasUpdate ? t('updateReady') : t('upToDate')}</p>
+          <StatusPill tone={displayedHasUpdate ? 'warning' : 'success'} withDot={false}>
+            {displayedHasUpdate ? t('stateActionNeeded') : t('stateActive')}
+          </StatusPill>
+        </Card>
 
-        <article className={styles.card}>
-          <h2 className={styles.cardTitle}>{t('storageCardTitle')}</h2>
+        <Card
+          experience="mobile"
+          title={t('storageCardTitle')}
+          footer={
+            <div className={styles.actions}>
+              <Button type="button" variant="outline" experience="mobile" onClick={onClearCaches}>
+                {t('clearCacheButton')}
+              </Button>
+            </div>
+          }
+        >
           <p className={styles.meta}>
             {t('appVersion')}: <strong>{appVersion}</strong>
           </p>
-          <p className={styles.meta}>{isSupported ? t('pwaSupported') : t('pwaNotSupported')}</p>
-          <div className={styles.actions}>
-            <button type="button" className={`${styles.button} ${styles.secondary}`} onClick={onClearCaches}>
-              {t('clearCacheButton')}
-            </button>
-          </div>
-        </article>
+          <p className={styles.meta}>{displayedIsSupported ? t('pwaSupported') : t('pwaNotSupported')}</p>
+        </Card>
       </div>
 
-      {statusMessage ? <p className={styles.status}>{statusMessage}</p> : null}
+      {statusMessage ? <Toast experience="mobile" tone="info" description={statusMessage} /> : null}
     </section>
   );
 }

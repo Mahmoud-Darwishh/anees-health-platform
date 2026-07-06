@@ -1,6 +1,5 @@
 ﻿import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Script from 'next/script';
@@ -47,7 +46,6 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages({ locale });
-  const t = await getTranslations({ locale, namespace: 'common' });
     const direction = locale === 'ar' ? 'rtl' : 'ltr';
   const seoLocale: SupportedLocale = locale === 'ar' ? 'ar' : 'en';
 
@@ -63,7 +61,6 @@ export default async function LocaleLayout({
       <NextIntlClientProvider messages={messages} locale={locale} timeZone="Africa/Cairo">
       <SessionProvider>
         <div dir={direction} lang={locale}>
-        <a href="#main-content" className="skip-link">{t('skip_to_main_content')}</a>
         {/* Site-wide JSON-LD — emitted ONCE here so we don't ship duplicate
             schema blocks from the root layout. Per-route JSON-LD (breadcrumb,
             FAQ, Physician, MedicalProcedure, Place) is emitted by each

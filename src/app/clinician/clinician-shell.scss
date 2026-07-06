@@ -7,8 +7,8 @@
 .clinician-shell {
   min-height: 100vh;
   width: 100%;
-  background: #f4f6f8;
-  color: #163149;
+  background: var(--surface-clinical-base);
+  color: var(--text-clinical-strong);
   padding-bottom: 5.6rem;
 }
 
@@ -18,8 +18,8 @@
   justify-content: space-between;
   gap: 0.85rem;
   padding: 1rem;
-  background: #0f2a40;
-  color: #f5f9fd;
+  background: var(--surface-clinical-inverse);
+  color: var(--text-clinical-inverse);
   position: sticky;
   top: 0;
   z-index: 30;
@@ -35,7 +35,7 @@
   font-size: clamp(1.03rem, 2.1vw, 1.28rem);
   font-weight: 700;
   line-height: 1.2;
-  color: #f9fcff;
+  color: var(--text-clinical-inverse);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -45,7 +45,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 0.7rem;
-  color: #b8cad9;
+  color: var(--border-clinical-strong);
   font-weight: 600;
   line-height: 1.15;
 }
@@ -74,28 +74,28 @@
 
 .clinician-topbar-btn--ghost {
   border-color: rgba(225, 237, 247, 0.82);
-  color: #eef5fb;
+  color: var(--text-clinical-inverse);
   background: rgba(255, 255, 255, 0.02);
 }
 
 .clinician-topbar-btn--ghost:hover,
 .clinician-topbar-btn--ghost:focus-visible {
-  border-color: #f4f9ff;
-  color: #ffffff;
+  border-color: var(--surface-clinical-soft);
+  color: var(--text-clinical-inverse);
   background: rgba(255, 255, 255, 0.09);
 }
 
 .clinician-topbar-btn--solid {
   border-color: rgba(255, 255, 255, 0.96);
-  color: #12314b;
-  background: #f4f8fc;
+  color: var(--text-clinical-strong);
+  background: var(--surface-clinical-soft);
 }
 
 .clinician-topbar-btn--solid:hover,
 .clinician-topbar-btn--solid:focus-visible {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #102d45;
+  background: var(--surface-clinical-elevated);
+  border-color: var(--text-clinical-inverse);
+  color: var(--text-clinical-strong);
 }
 
 .clinician-topbar-btn:disabled {
@@ -115,7 +115,7 @@
 
 .clinician-surface {
   border: 1px solid rgba(22, 49, 73, 0.14);
-  background: #ffffff;
+  background: var(--surface-clinical-elevated);
   border-radius: 16px;
   box-shadow: 0 9px 20px rgba(22, 49, 73, 0.08);
   padding: 1rem;
@@ -129,7 +129,7 @@
 .clinician-placeholder-card {
   border-radius: 12px;
   border: 1px dashed rgba(22, 49, 73, 0.25);
-  background: #fbfdff;
+  background: var(--surface-clinical-soft);
   padding: 0.85rem;
 }
 
@@ -142,7 +142,7 @@
 .clinician-stat-card {
   border: 1px solid rgba(22, 49, 73, 0.14);
   border-radius: 12px;
-  background: #fbfdff;
+  background: var(--surface-clinical-soft);
   padding: 0.75rem;
 }
 
@@ -150,13 +150,13 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
 }
 
 .clinician-stat-value {
   font-size: 1.18rem;
   font-weight: 700;
-  color: #173653;
+  color: var(--text-clinical-strong);
 }
 
 .clinician-visit-list {
@@ -181,8 +181,8 @@
   border-radius: 999px;
   border: 1px solid rgba(22, 49, 73, 0.2);
   padding: 0.35rem 0.75rem;
-  background: #f7fafc;
-  color: #244966;
+  background: var(--surface-clinical-soft);
+  color: var(--text-clinical-soft);
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 600;
@@ -191,7 +191,7 @@
 .clinician-filter-chip.is-active {
   background: rgba(166, 131, 65, 0.2);
   border-color: rgba(166, 131, 65, 0.5);
-  color: #173653;
+  color: var(--text-clinical-strong);
 }
 
 .clinician-patient-list {
@@ -202,7 +202,7 @@
 .clinician-patient-card {
   border-radius: 14px;
   border: 1px solid rgba(22, 49, 73, 0.16);
-  background: #ffffff;
+  background: var(--surface-clinical-elevated);
   padding: 0.85rem;
   box-shadow: 0 8px 18px rgba(22, 49, 73, 0.08);
 }
@@ -210,7 +210,7 @@
 .clinician-patient-panel-card {
   border-radius: 12px;
   border: 1px solid rgba(22, 49, 73, 0.14);
-  background: #f8fbff;
+  background: var(--surface-clinical-soft);
   padding: 0.7rem;
 }
 
@@ -222,7 +222,7 @@
 .clinician-goal-item {
   border: 1px solid rgba(22, 49, 73, 0.14);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--surface-clinical-elevated);
   padding: 0.55rem;
 }
 
@@ -247,24 +247,24 @@
   font-size: 0.71rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
   font-weight: 700;
 }
 
 .clinician-profile-title {
-  color: #0f2e46;
+  color: var(--text-clinical-strong);
   letter-spacing: 0.01em;
 }
 
 .clinician-profile-subtitle {
-  color: #4f6478;
+  color: var(--text-clinical-soft);
   max-width: 70ch;
 }
 
 .clinician-profile-card {
   border-radius: 14px;
   border: 1px solid rgba(22, 49, 73, 0.16);
-  background: #ffffff;
+  background: var(--surface-clinical-elevated);
   padding: 0.85rem;
   box-shadow: 0 8px 18px rgba(22, 49, 73, 0.08);
 }
@@ -275,19 +275,19 @@
 
 .clinician-profile-overview {
   border-color: rgba(22, 49, 73, 0.2);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  background: linear-gradient(180deg, var(--surface-clinical-elevated) 0%, var(--surface-clinical-soft) 100%);
 }
 
 .clinician-profile-overview-label {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
   font-weight: 700;
 }
 
 .clinician-profile-overview-name {
-  color: #0f2e46;
+  color: var(--text-clinical-strong);
 }
 
 .clinician-profile-chip-row .clinician-chip {
@@ -304,27 +304,27 @@
   font-size: 0.73rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
   margin-bottom: 0.1rem;
 }
 
 .clinician-definition-list dd {
   margin: 0;
-  color: #173653;
+  color: var(--text-clinical-strong);
   font-weight: 600;
 }
 
 .clinician-visit-card {
   border-radius: 14px;
   border: 1px solid rgba(22, 49, 73, 0.16);
-  background: #ffffff;
+  background: var(--surface-clinical-elevated);
   padding: 0.85rem;
   box-shadow: 0 8px 18px rgba(22, 49, 73, 0.08);
 }
 
 .clinician-visit-time {
   font-size: 0.85rem;
-  color: #2f5676;
+  color: var(--text-clinical-soft);
   font-weight: 700;
 }
 
@@ -336,8 +336,8 @@
   font-size: 0.72rem;
   font-weight: 700;
   border: 1px solid rgba(22, 49, 73, 0.2);
-  color: #2a4966;
-  background: #f4f8fc;
+  color: var(--text-clinical-soft);
+  background: var(--surface-clinical-soft);
 }
 
 // Status chips share the site-wide status palette (tokens.scss) so amber/blue/
@@ -379,7 +379,7 @@
 .clinician-kpi-card {
   border: 1px solid rgba(22, 49, 73, 0.14);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--surface-clinical-elevated);
   padding: 0.75rem;
 }
 
@@ -387,13 +387,13 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
 }
 
 .clinician-kpi-value {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #163149;
+  color: var(--text-clinical-strong);
 }
 
 .clinician-kpi-value--small {
@@ -414,18 +414,18 @@
   width: 100%;
   height: 9px;
   border-radius: 999px;
-  background: #e6edf3;
+  background: var(--surface-clinical-muted);
   overflow: hidden;
 }
 
 .clinician-progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: #163149;
+  background: var(--surface-clinical-inverse);
 }
 
 .clinician-progress-fill.is-outcome {
-  background: #1f4d74;
+  background: var(--status-info-fg);
 }
 
 .clinician-pain-chart {
@@ -459,38 +459,38 @@
 }
 
 .clinician-pain-bar.is-before {
-  background: #8ea3b6;
+  background: var(--border-clinical-strong);
 }
 
 .clinician-pain-bar.is-after {
-  background: #163149;
+  background: var(--surface-clinical-inverse);
 }
 
 .clinician-pain-date {
   font-size: 0.68rem;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
 }
 
 .clinician-sparkline {
   width: 100%;
   height: 56px;
   display: block;
-  background: #f6f9fc;
-  border: 1px solid #e1e9f0;
+  background: var(--surface-clinical-soft);
+  border: 1px solid var(--border-clinical-soft);
   border-radius: 10px;
   padding: 4px;
 }
 
 .clinician-sparkline-line {
   fill: none;
-  stroke: #163149;
+  stroke: var(--text-clinical-strong);
   stroke-width: 2.25;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .clinician-sparkline-dot {
-  fill: #163149;
+  fill: var(--text-clinical-strong);
 }
 
 .clinician-sparkline-labels {
@@ -507,12 +507,12 @@
 
 .clinician-sparkline-day {
   font-size: 0.66rem;
-  color: #5f7182;
+  color: var(--text-clinical-muted);
 }
 
 .clinician-sparkline-value {
   font-size: 0.72rem;
-  color: #173653;
+  color: var(--text-clinical-strong);
   font-weight: 700;
 }
 
@@ -520,8 +520,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: #f6f9fc;
-  border: 1px solid #d4e0ea;
+  background: var(--surface-clinical-soft);
+  border: 1px solid var(--border-clinical-soft);
   border-radius: 999px;
   padding: 0.2rem;
 }
@@ -534,14 +534,14 @@
   padding: 0.2rem 0.45rem;
   border-radius: 999px;
   text-decoration: none;
-  color: #31516f;
+  color: var(--text-clinical-soft);
   font-size: 0.72rem;
   font-weight: 700;
 }
 
 .clinician-window-switch-btn.is-active {
-  background: #163149;
-  color: #ffffff;
+  background: var(--surface-clinical-inverse);
+  color: var(--text-clinical-inverse);
 }
 
 .clinician-bottom-nav {
@@ -564,7 +564,7 @@
   justify-content: center;
   text-align: center;
   text-decoration: none;
-  color: #31516f;
+  color: var(--text-clinical-soft);
   font-size: 0.74rem;
   font-weight: 600;
   border-radius: 10px;
@@ -574,7 +574,7 @@
 
 .clinician-nav-link.is-active {
   background: rgba(166, 131, 65, 0.2);
-  color: #173653;
+  color: var(--text-clinical-strong);
 }
 
 @media (max-width: 767.98px) {

@@ -15,7 +15,6 @@
   "common": {
     "home": "Home",
     "search": "Search",
-    "skip_to_main_content": "Skip to main content",
     "open_menu": "Open navigation menu",
     "close_menu": "Close navigation menu",
     "loading": "Loading...",
@@ -1963,6 +1962,8 @@
       "subtitle": "Pay securely to confirm your visit",
       "card": "Credit / Debit Card",
       "cardHint": "Visa, Mastercard, Meeza — instant",
+      "wallet": "Mobile Wallet",
+      "walletHint": "Vodafone Cash, Orange, Etisalat, WE — instant",
       "instapay": "InstaPay / Bank Transfer",
       "instapayHint": "Transfer from your bank app, confirmed within hours"
     },

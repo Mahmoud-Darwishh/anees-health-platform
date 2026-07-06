@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { ButtonLink } from '@/components/ui';
 import { encounterTypeLabel } from '../helpers';
 import type { PortalContext } from '../view-context';
 import styles from '../portal.module.scss';
@@ -39,8 +39,10 @@ export function JourneyHeroSection({ ctx }: { ctx: PortalContext }) {
                 <div className="small text-muted">{t('journey.noUpcoming')}</div>
               )}
               <div className="mt-3 d-flex gap-2 flex-wrap">
-                <Link href={`/${locale}/booking`} className="btn btn-sm btn-primary">{t('journey.book')}</Link>
-                <Link href={`/${locale}/portal?tab=visits`} className="btn btn-sm btn-outline-secondary">{t('journey.viewAll')}</Link>
+                <ButtonLink href={`/${locale}/booking`} size="sm" experience="ops">{t('journey.book')}</ButtonLink>
+                <ButtonLink href={`/${locale}/portal?tab=visits`} size="sm" variant="outline" experience="ops">
+                  {t('journey.viewAll')}
+                </ButtonLink>
               </div>
             </div>
           </div>

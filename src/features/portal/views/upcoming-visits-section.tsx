@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { Badge, Button, EmptyState, Input, StatusPill } from '@/components/ui';
 import { requestVisitChangeAction, idlePortalRequestState } from '../actions';
 import type { PortalContext } from '../view-context';
 import type { PortalUpcomingVisit } from '../data';
@@ -24,9 +25,7 @@ export function UpcomingVisitsSection({ ctx }: { ctx: PortalContext }) {
       </div>
       <div className="card-body">
         {upcomingVisits.length === 0 ? (
-          <div className="alert alert-info mb-0" role="alert">
-            {t('requests.empty')}
-          </div>
+          <EmptyState experience="ops" compact title={t('requests.empty')} />
         ) : (
           <ul className="list-group list-group-flush">
             {upcomingVisits.map((visit) => (
@@ -58,15 +57,27 @@ function UpcomingVisitRow({ visit, ctx }: { visit: PortalUpcomingVisit; ctx: Por
           </div>
         </div>
         {visit.requestPending || done ? (
-          <span className="badge text-bg-light border align-self-center">{t('requests.title')}</span>
+          <Badge tone="info" className="align-self-center">{t('requests.title')}</Badge>
         ) : (
           <div className="d-flex gap-2">
-            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setMode(mode === 'reschedule' ? 'none' : 'reschedule')}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              experience="ops"
+              onClick={() => setMode(mode === 'reschedule' ? 'none' : 'reschedule')}
+            >
               {t('requests.reschedule')}
-            </button>
-            <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setMode(mode === 'cancel' ? 'none' : 'cancel')}>
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="danger"
+              experience="ops"
+              onClick={() => setMode(mode === 'cancel' ? 'none' : 'cancel')}
+            >
               {t('requests.cancel')}
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -76,31 +87,38 @@ function UpcomingVisitRow({ visit, ctx }: { visit: PortalUpcomingVisit; ctx: Por
           <input type="hidden" name="visitId" value={visit.id} />
           <input type="hidden" name="requestType" value={mode} />
           {mode === 'reschedule' ? (
-            <div>
-              <label className="form-label small mb-1" htmlFor={`pd-${visit.id}`}>{t('requests.preferredDate')}</label>
-              <input id={`pd-${visit.id}`} type="date" name="preferredDate" className="form-control form-control-sm" />
-            </div>
-          ) : null}
-          <div>
-            <label className="form-label small mb-1" htmlFor={`nt-${visit.id}`}>{t('requests.notes')}</label>
-            <input
-              id={`nt-${visit.id}`}
-              type="text"
-              name="note"
-              className="form-control form-control-sm"
-              placeholder={mode === 'reschedule' ? t('requests.reschedulePlaceholder') : t('requests.cancelPlaceholder')}
+            <Input
+              id={`pd-${visit.id}`}
+              type="date"
+              name="preferredDate"
+              label={t('requests.preferredDate')}
+              controlSize="sm"
+              experience="ops"
             />
-          </div>
+          ) : null}
+          <Input
+            id={`nt-${visit.id}`}
+            type="text"
+            name="note"
+            label={t('requests.notes')}
+            placeholder={mode === 'reschedule' ? t('requests.reschedulePlaceholder') : t('requests.cancelPlaceholder')}
+            controlSize="sm"
+            experience="ops"
+          />
           <div>
-            <button type="submit" className="btn btn-sm btn-primary" disabled={pending}>
+            <Button type="submit" size="sm" experience="ops" disabled={pending} loading={pending}>
               {mode === 'reschedule' ? t('requests.reschedule') : t('requests.cancel')}
-            </button>
+            </Button>
           </div>
         </form>
       ) : null}
 
-      {state.status === 'success' ? <div className="small text-success mt-2">{state.message}</div> : null}
-      {state.status === 'error' ? <div className="small text-danger mt-2">{state.message}</div> : null}
+      {state.status === 'success' ? (
+        <StatusPill tone="success" className="mt-2">{state.message}</StatusPill>
+      ) : null}
+      {state.status === 'error' ? (
+        <StatusPill tone="danger" className="mt-2">{state.message}</StatusPill>
+      ) : null}
     </li>
   );
 }

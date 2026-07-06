@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
+import { ButtonLink, Toast } from '@/components/ui';
 import { resolveAccountToken } from '@/lib/auth/account-tokens';
 import { SetPasswordForm } from './SetPasswordForm';
 
@@ -36,10 +36,12 @@ export default async function SetPasswordPage({ searchParams }: Props) {
             <SetPasswordForm token={token} />
           ) : (
             <div className="d-flex flex-column gap-3">
-              <div className="alert alert-danger mb-0" role="alert">
-                This link is invalid or has expired. Ask an administrator to send you a new one.
-              </div>
-              <Link href="/admin/login" className="btn btn-outline-secondary">Back to sign in</Link>
+              <Toast
+                experience="ops"
+                tone="danger"
+                description="This link is invalid or has expired. Ask an administrator to send you a new one."
+              />
+              <ButtonLink href="/admin/login" variant="outline" experience="ops">Back to sign in</ButtonLink>
             </div>
           )}
         </div>

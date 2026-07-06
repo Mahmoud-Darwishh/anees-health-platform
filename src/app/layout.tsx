@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans_Arabic, Plus_Jakarta_Sans } from 'next/font/google';
 import Script from 'next/script';
+import '@/styles/bootstrap.css';
 import { locales } from '@/i18n/request';
 import { buildSiteMetadata } from '@/lib/seo/metadata';
 import { site } from '@/lib/seo/site';
@@ -18,6 +19,17 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   display: 'swap',
   variable: '--font-ibm-plex-sans-arabic',
 });
+
+const documentLocaleScript = `
+(function () {
+  var firstSegment = window.location.pathname.split('/').filter(Boolean)[0];
+  var locale = firstSegment === 'ar' ? 'ar' : 'en';
+  var root = document.documentElement;
+  root.lang = locale;
+  root.dir = locale === 'ar' ? 'rtl' : 'ltr';
+  root.dataset.locale = locale;
+})();
+`;
 
 /**
  * Site-wide default metadata. Per-route metadata (in `[locale]/...`) overrides
@@ -61,10 +73,16 @@ export default function RootLayout({
     <html
       lang="en"
       dir="ltr"
+      data-locale="en"
+      suppressHydrationWarning
       className={`${plusJakartaSans.variable} ${ibmPlexSansArabic.variable}`}
       data-scroll-behavior="smooth"
     >
       <head>
+        <script
+          id="anees-document-locale"
+          dangerouslySetInnerHTML={{ __html: documentLocaleScript }}
+        />
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="theme-color" content="#132c4d" />
@@ -79,15 +97,6 @@ export default function RootLayout({
             is now self-hosted, so the jsdelivr warm-up was removed. */}
         <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
         <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossOrigin="anonymous" />
-
-        {/* Bootstrap (render-critical for shared grid/utilities) — self-hosted,
-            pinned v5.3.0: render-critical CSS is same-origin (faster first paint,
-            resilient if a CDN is blocked, and no third-party request per visit).
-            Deliberate <link> rather than a CSS import: it stays render-critical in
-            <head> without entering the app's CSS-order graph (avoids FOUC /
-            specificity shifts across the public, admin, and portal shells). */}
-        {/* eslint-disable-next-line @next/next/no-css-tags */}
-        <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
 
         {/* Meta Pixel NoScript */}
         <noscript>

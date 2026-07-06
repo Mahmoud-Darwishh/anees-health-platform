@@ -1,4 +1,5 @@
 import type { PortalContext } from '../view-context';
+import { ButtonLink, EmptyState } from '@/components/ui';
 import styles from '../portal.module.scss';
 
 /** Files tab — medical documents (lab PDFs, scans) with view/download. */
@@ -13,7 +14,7 @@ export function DocumentsSection({ ctx }: { ctx: PortalContext }) {
       </div>
       <div className="card-body">
         {documents.length === 0 ? (
-          <div className="alert alert-info mb-0" role="alert">{t('none')}</div>
+          <EmptyState experience="ops" compact title={t('none')} />
         ) : (
           <div className={`table-responsive ${styles.tableWrap}`}>
             <table className={`table table-sm align-middle mb-0 ${styles.documentsTable}`}>
@@ -38,17 +39,19 @@ export function DocumentsSection({ ctx }: { ctx: PortalContext }) {
                     <td data-label={t('documentDate')}>{formatDateTime(document.createdAt)}</td>
                     <td className={`text-end ${styles.docActions}`} data-label={t('documentAction')}>
                       <div className={styles.docActionsWrap}>
-                        <a
+                        <ButtonLink
                           href={`/api/ehr/documents/${document.id}?disposition=inline`}
-                          className="btn btn-sm btn-outline-secondary"
+                          size="sm"
+                          variant="outline"
+                          experience="ops"
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           {t('documentView')}
-                        </a>
-                        <a href={`/api/ehr/documents/${document.id}`} className="btn btn-sm btn-outline-primary">
+                        </ButtonLink>
+                        <ButtonLink href={`/api/ehr/documents/${document.id}`} size="sm" experience="ops">
                           {t('documentDownload')}
-                        </a>
+                        </ButtonLink>
                       </div>
                     </td>
                   </tr>
@@ -79,7 +82,7 @@ export function LabsSection({ ctx }: { ctx: PortalContext }) {
           <div className="col-lg-6">
             <h3 className="h6">{t('labsOrdersTitle')}</h3>
             {labOrders.length === 0 ? (
-              <div className="alert alert-info mb-0" role="alert">{t('none')}</div>
+              <EmptyState experience="ops" compact title={t('none')} />
             ) : (
               <div className={`table-responsive ${styles.tableWrap}`}>
                 <table className="table table-sm align-middle mb-0">
@@ -109,7 +112,7 @@ export function LabsSection({ ctx }: { ctx: PortalContext }) {
           <div className="col-lg-6">
             <h3 className="h6">{t('labsResultsTitle')}</h3>
             {labResults.length === 0 ? (
-              <div className="alert alert-info mb-0" role="alert">{t('none')}</div>
+              <EmptyState experience="ops" compact title={t('none')} />
             ) : (
               <div className={`table-responsive ${styles.tableWrap}`}>
                 <table className="table table-sm align-middle mb-0">

@@ -21,14 +21,28 @@
   position: relative;
   width: 100%;
   max-width: 420px;
-  background: #ffffff;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-mobile-bar);
   border-radius: 24px 24px 0 0;
   padding: 28px 24px 36px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  box-shadow: var(--shadow-mobile-bar);
   animation: slideUp 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 44px;
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--border-mobile-bar);
+    transform: translateX(-50%);
+  }
 
   @media (min-width: 480px) {
     border-radius: 24px;
@@ -56,8 +70,8 @@
   height: 30px;
   border: 0;
   border-radius: 50%;
-  background: #edf2fa;
-  color: #5a7499;
+  background: var(--surface-clinical-soft);
+  color: var(--text-clinical-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,22 +79,26 @@
   padding: 0;
   flex-shrink: 0;
 
-  &:hover { background: #dce7f8; }
+  &:hover { background: var(--surface-clinical-muted); }
 }
 
 /* ── App icon ── */
 .iconWrap {
-  width: 80px;
-  height: 80px;
-  border-radius: 18px;
+  width: 88px;
+  height: 88px;
+  border: 1px solid var(--border-mobile-bar);
+  border-radius: 22px;
+  background: var(--surface-mobile-bar-strong);
   overflow: hidden;
   margin-bottom: 16px;
-  box-shadow: 0 4px 18px rgba(10, 40, 80, 0.16);
+  padding: 4px;
+  box-shadow: var(--shadow-mobile-bar);
 }
 
 .appIcon {
-  width: 80px;
-  height: 80px;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
   object-fit: cover;
   display: block;
 }
@@ -96,30 +114,24 @@
 
 .modalDesc {
   margin: 0 0 20px;
-  color: #4a6585;
+  color: var(--text-clinical-soft);
   font-size: 0.88rem;
   line-height: 1.5;
 }
 
 /* ── Install / Update button ── */
 .installBtn {
+  --button-bg: #{variables.$brand-dark-blue};
+  --button-border: #{variables.$brand-dark-blue};
+  --button-hover-bg: color-mix(in srgb, #{variables.$brand-dark-blue} 88%, var(--surface-inverse));
+
   width: 100%;
-  padding: 14px 20px;
-  border: 0;
-  border-radius: 14px;
-  background: variables.$brand-dark-blue;
-  color: #ffffff;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: filter 0.18s, transform 0.1s;
   margin-bottom: 10px;
 
-  &:hover  { filter: brightness(1.12); transform: translateY(-1px); }
-  &:active { transform: translateY(0); }
-
   &.update {
-    background: #0a7c4b;
+    --button-bg: var(--status-success-fg);
+    --button-border: var(--status-success-fg);
+    --button-hover-bg: color-mix(in srgb, var(--status-success-fg) 88%, var(--surface-inverse));
   }
 }
 
@@ -127,7 +139,7 @@
 .notNowBtn {
   border: 0;
   background: transparent;
-  color: #6b88a8;
+  color: var(--text-clinical-muted);
   font-size: 0.85rem;
   cursor: pointer;
   padding: 6px 12px;
@@ -154,7 +166,7 @@
   align-items: center;
   gap: 10px;
   font-size: 0.88rem;
-  color: #2c4a6e;
+  color: var(--text-clinical-soft);
   font-weight: 500;
   line-height: 1.3;
 }
@@ -165,7 +177,7 @@
   height: 26px;
   border-radius: 50%;
   background: variables.$brand-dark-blue;
-  color: #ffffff;
+  color: var(--text-on-dark);
   font-size: 0.78rem;
   font-weight: 700;
   display: flex;
@@ -184,9 +196,9 @@
   width: 100%;
   margin: 0 0 16px;
   font-size: 0.83rem;
-  color: #7a5c1e;
-  background: #fff8e1;
-  border: 1px solid #f5d76e;
+  color: var(--safety-caution-fg);
+  background: var(--safety-caution-bg);
+  border: 1px solid var(--safety-caution-border);
   border-radius: 10px;
   padding: 10px 12px;
   line-height: 1.5;
@@ -197,7 +209,7 @@
 .status {
   margin: 4px 0 6px;
   font-size: 0.82rem;
-  color: #2a6a2a;
+  color: var(--status-success-fg);
   font-weight: 500;
 }
 

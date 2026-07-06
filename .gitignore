@@ -16,6 +16,10 @@
 # next.js
 /.next/
 /out/
+/public/sw.js
+/public/workbox-*.js
+/public/worker-*.js
+/public/fallback-*.js
 
 # production
 /build
@@ -45,4 +49,13 @@ next-env.d.ts
 
 # Private EHR file storage (never commit PHI)
 private-storage/
+
+# design-sync (claude.ai/design) — staged scripts, regenerated build output, machine state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+.design-sync/tokens-pkg/styles.css
+.design-sync/tokens-pkg/fonts/
 

@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useActionState } from 'react';
+import { Button, ButtonLink, Input, Toast } from '@/components/ui';
 import { setStaffPasswordAction } from '@/features/admin/staff/actions';
 import { idleStaffActionState } from '@/features/admin/staff/types';
 import { PASSWORD_REQUIREMENTS_TEXT } from '@/lib/auth/password-rules';
@@ -12,8 +12,8 @@ export function SetPasswordForm({ token }: { token: string }) {
   if (state.status === 'success') {
     return (
       <div className="d-flex flex-column gap-3">
-        <div className="alert alert-success mb-0" role="status">{state.message}</div>
-        <Link href="/admin/login" className="btn btn-primary">Go to sign in</Link>
+        <Toast experience="ops" tone="success" description={state.message} />
+        <ButtonLink href="/admin/login" experience="ops">Go to sign in</ButtonLink>
       </div>
     );
   }
@@ -21,21 +21,31 @@ export function SetPasswordForm({ token }: { token: string }) {
   return (
     <form action={formAction} className="d-flex flex-column gap-3" noValidate>
       <input type="hidden" name="token" value={token} />
-      <div>
-        <label htmlFor="password" className="form-label">New password</label>
-        <input id="password" name="password" type="password" className="form-control" autoComplete="new-password" required />
-        <div className="form-text">{PASSWORD_REQUIREMENTS_TEXT}</div>
-      </div>
-      <div>
-        <label htmlFor="confirmPassword" className="form-label">Confirm password</label>
-        <input id="confirmPassword" name="confirmPassword" type="password" className="form-control" autoComplete="new-password" required />
-      </div>
+      <Input
+        id="password"
+        name="password"
+        type="password"
+        label="New password"
+        hint={PASSWORD_REQUIREMENTS_TEXT}
+        autoComplete="new-password"
+        required
+        experience="ops"
+      />
+      <Input
+        id="confirmPassword"
+        name="confirmPassword"
+        type="password"
+        label="Confirm password"
+        autoComplete="new-password"
+        required
+        experience="ops"
+      />
 
-      {state.status === 'error' ? <div className="alert alert-danger py-2 mb-0" role="alert">{state.message}</div> : null}
+      {state.status === 'error' ? <Toast experience="ops" tone="danger" description={state.message} /> : null}
 
-      <button type="submit" className="btn btn-primary" disabled={isPending}>
-        {isPending ? 'Saving…' : 'Set password'}
-      </button>
+      <Button type="submit" experience="ops" disabled={isPending} loading={isPending}>
+        {isPending ? 'Saving...' : 'Set password'}
+      </Button>
     </form>
   );
 }

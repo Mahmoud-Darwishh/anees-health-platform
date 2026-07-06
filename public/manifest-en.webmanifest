@@ -7,8 +7,8 @@
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone"],
-  "background_color": "#ffffff",
-  "theme_color": "#0066cc",
+  "background_color": "#f7fbff",
+  "theme_color": "#132c4d",
   "orientation": "portrait-primary",
   "lang": "en",
   "dir": "ltr",
@@ -37,17 +37,47 @@
     {
       "name": "Book a service",
       "short_name": "Book",
-      "url": "/en/booking"
+      "url": "/en/booking",
+      "icons": [
+        {
+          "src": "/assets/img/pwa-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Find doctors",
       "short_name": "Doctors",
-      "url": "/en/doctors"
+      "url": "/en/doctors",
+      "icons": [
+        {
+          "src": "/assets/img/pwa-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "PWA settings",
       "short_name": "Settings",
-      "url": "/en/settings/pwa"
+      "url": "/en/settings/pwa",
+      "icons": [
+        {
+          "src": "/assets/img/pwa-icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/img/og-default.png",
+      "sizes": "1731x909",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Book care, manage visits, and receive health updates"
     }
   ],
   "prefer_related_applications": false

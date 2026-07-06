@@ -64,6 +64,26 @@
   --surface-muted: #efe9de;
   --surface-inverse: #{v.$brand-navy};
 
+  // Experience surfaces: marketing stays warm; clinical/ops stay calm and dense.
+  --surface-marketing-base: var(--surface-base);
+  --surface-marketing-elevated: var(--surface-elevated);
+  --surface-marketing-soft: #faf8f3;
+  --surface-marketing-accent: #f4ecdc;
+  --surface-marketing-band-from: #f5efe2;
+  --surface-marketing-band-to: #eee4d2;
+  --surface-clinical-base: #f4f6f8;
+  --surface-clinical-elevated: #ffffff;
+  --surface-clinical-soft: #f8fbff;
+  --surface-clinical-muted: #e6edf3;
+  --surface-clinical-inverse: #0f2a40;
+  --surface-ops-base: #f7f3e8;
+  --surface-ops-elevated: #ffffff;
+  --surface-ops-soft: #fcfaf5;
+  --surface-ops-muted: #f4f6f9;
+  --surface-ops-accent: #fffdf7;
+  --surface-mobile-bar: rgba(255, 255, 255, 0.94);
+  --surface-mobile-bar-strong: rgba(255, 255, 255, 0.98);
+
   // Text — strong text is the navy anchor.
   --text-strong: #{v.$brand-navy};
   --text-soft: #556377;
@@ -71,13 +91,29 @@
   // Text on dark/brand surfaces (navy buttons, inverse banners).
   --text-on-dark: #f7f2e7;
   --text-on-gold: #{v.$brand-navy};
+  --text-marketing-accent: #8e6b27;
+  --text-clinical-strong: #163149;
+  --text-clinical-soft: #31516f;
+  --text-clinical-muted: #5f7182;
+  --text-clinical-inverse: #f5f9fd;
+  --text-ops-strong: #142f50;
+  --text-ops-soft: #4f5f74;
+  --text-ops-muted: #7a8696;
 
   // Borders & effects — focus ring + shadows derive from the gold/navy anchors.
   --border-soft: #e6ddcd;
   --border-strong: #d5c7ae;
+  --border-clinical-soft: #d4e0ea;
+  --border-clinical-strong: #b8cad9;
+  --border-ops-soft: rgba(19, 44, 77, 0.12);
+  --border-ops-strong: rgba(19, 44, 77, 0.2);
+  --border-mobile-bar: rgba(19, 44, 77, 0.14);
   --ring-focus: #{rgba(v.$brand-gold, 0.42)};
   --shadow-soft: 0 10px 30px -24px #{rgba(v.$brand-navy, 0.28)};
   --shadow-elevated: 0 22px 55px -35px #{rgba(v.$brand-navy, 0.3)};
+  --shadow-clinical: 0 9px 20px rgba(22, 49, 73, 0.08);
+  --shadow-ops: 0 10px 24px rgba(19, 44, 77, 0.07);
+  --shadow-mobile-bar: 0 -18px 44px -34px rgba(19, 44, 77, 0.56);
 
   // Radius — the canonical scale for the whole site. New code uses these;
   // legacy Sass $border-radius-* survive only where they're already wired.
@@ -86,6 +122,21 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
   --radius-control: var(--radius-md);
+  --radius-clinical-card: 12px;
+  --radius-clinical-control: 8px;
+  --radius-ops-card: 12px;
+  --radius-ops-control: 8px;
+  --radius-mobile-bar: 16px;
+
+  // Density: clinical and ops workflows show more signal per screen.
+  --density-marketing-gap: 1.5rem;
+  --density-marketing-padding: 1.35rem;
+  --density-clinical-gap: 0.6rem;
+  --density-clinical-padding: 0.85rem;
+  --density-clinical-row: 2.75rem;
+  --density-ops-gap: 0.55rem;
+  --density-ops-padding: 0.75rem;
+  --density-ops-row: 2.5rem;
 
   // Typography
   --font-sans-en: var(--font-plus-jakarta), 'Avenir Next', 'Segoe UI', sans-serif;
@@ -106,6 +157,27 @@
   --reveal-delay: 0ms;
   --mobile-bottom-nav-height: 58px;
   --mobile-bottom-nav-offset: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  --mobile-action-min-height: 48px;
+  --mobile-tap-target: 44px;
+  --mobile-bar-backdrop: blur(16px) saturate(160%);
+
+  // Marketing accents and product/action colours that are not clinical status.
+  --marketing-accent-navy-mid: #1f436f;
+  --marketing-accent-navy-soft: #31567f;
+  --marketing-accent-gold-strong: #98793b;
+  --marketing-accent-sky: #75b9e6;
+  --action-whatsapp: #25d366;
+  --action-whatsapp-strong: #20ba5a;
+  --action-install: #0a67c6;
+  --action-install-strong: #0758a9;
+
+  // Safety/warning tones for clinical alerts beyond generic UI status.
+  --safety-critical-fg: #6b3a38;
+  --safety-critical-bg: #fdf6f6;
+  --safety-critical-border: #c4302b;
+  --safety-caution-fg: #7a5c1e;
+  --safety-caution-bg: #fff8e1;
+  --safety-caution-border: #f5d76e;
 
   // Bootstrap bridge
   --bs-body-bg: var(--surface-base);

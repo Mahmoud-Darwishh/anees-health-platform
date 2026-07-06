@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui';
 import styles from './payment-gateway.module.scss';
 
 interface PaymentGatewayProps {
@@ -11,6 +12,8 @@ interface PaymentGatewayProps {
   customerName?: string;
   customerPhone?: string;
   locale: string;
+  /** Narrows the Kashier method list — 'wallet' opens focused on mobile wallets. */
+  method?: 'card' | 'wallet';
 }
 
 type GatewayState = 'loading' | 'ready' | 'error';
@@ -22,6 +25,7 @@ export default function PaymentGateway({
   customerName,
   customerPhone,
   locale,
+  method,
 }: PaymentGatewayProps) {
   const t = useTranslations('payment');
   const [state, setState] = useState<GatewayState>('loading');
@@ -45,6 +49,7 @@ export default function PaymentGateway({
             locale,
             customerName,
             customerPhone,
+            method,
           }),
         });
 
@@ -69,7 +74,7 @@ export default function PaymentGateway({
 
     createSession();
     return () => { cancelled = true; };
-  }, [orderId, amount, currency, locale, t]);
+  }, [orderId, amount, currency, locale, customerName, customerPhone, method, t]);
 
   return (
     <section className={styles.paymentGateway} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
@@ -107,12 +112,13 @@ export default function PaymentGateway({
                 <line x1="9" y1="9" x2="15" y2="15" />
               </svg>
               <p className={styles.errorMessage}>{errorMessage}</p>
-              <button
+              <Button
                 className={styles.retryButton}
                 onClick={() => window.location.reload()}
+                experience="ops"
               >
                 {t('retry')}
-              </button>
+              </Button>
             </div>
           )}
 

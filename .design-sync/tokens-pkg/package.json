@@ -1,0 +1,7 @@
+{
+  "name": "@anees/design-tokens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "design-sync shim package: the Anees brand tokens + base styles, compiled from the repo's real SCSS by .design-sync/build-tokens.mjs. Not consumed by the app.",
+  "main": "index.mjs"
+}

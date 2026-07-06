@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Button, Input, Toast } from '@/components/ui';
 
 export function StaffLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawCallback = searchParams.get('callbackUrl');
-  // Only allow same-origin admin/clinician callbacks to avoid open-redirects.
   const safeCallback =
     rawCallback && rawCallback.startsWith('/') && !rawCallback.startsWith('//') ? rawCallback : '/admin';
 
@@ -41,37 +41,33 @@ export function StaffLoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="d-flex flex-column gap-3" noValidate>
-      <div>
-        <label htmlFor="email" className="form-label">Work email</label>
-        <input
-          id="email"
-          type="email"
-          className="form-control"
-          autoComplete="username"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          required
-          dir="ltr"
-        />
-      </div>
-      <div>
-        <label htmlFor="password" className="form-label">Password</label>
-        <input
-          id="password"
-          type="password"
-          className="form-control"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          required
-        />
-      </div>
+      <Input
+        id="email"
+        type="email"
+        label="Work email"
+        autoComplete="username"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        required
+        dir="ltr"
+        experience="ops"
+      />
+      <Input
+        id="password"
+        type="password"
+        label="Password"
+        autoComplete="current-password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        required
+        experience="ops"
+      />
 
-      {error ? <div className="alert alert-danger py-2 mb-0" role="alert">{error}</div> : null}
+      {error ? <Toast experience="ops" tone="danger" description={error} /> : null}
 
-      <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? 'Signing in…' : 'Sign in'}
-      </button>
+      <Button type="submit" experience="ops" disabled={loading} loading={loading}>
+        {loading ? 'Signing in...' : 'Sign in'}
+      </Button>
       <p className="text-muted small mb-0">
         Forgot your password? Ask an administrator to send you a new set-password link.
       </p>

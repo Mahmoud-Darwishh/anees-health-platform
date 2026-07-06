@@ -1,0 +1,12 @@
+{
+  "projectId": "ee13b2e2-1db9-44bb-a770-b2dfe518a26c",
+  "pkg": "@anees/design-tokens",
+  "globalName": "Anees",
+  "shape": "package",
+  "entry": ".design-sync/tokens-pkg/index.mjs",
+  "buildCmd": "node .design-sync/build-tokens.mjs",
+  "cssEntry": "styles.css",
+  "extraFonts": ["fonts/fonts.css"],
+  "runtimeFontPrefixes": ["Avenir Next"],
+  "readmeHeader": ".design-sync/conventions.md"
+}

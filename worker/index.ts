@@ -21,6 +21,13 @@ type ServiceWorkerClientLike = {
   focus: () => Promise<unknown>;
 };
 
+type AneesNotificationOptions = NotificationOptions & {
+  actions?: Array<{
+    action: string;
+    title: string;
+  }>;
+};
+
 type ServiceWorkerGlobalLike = typeof globalThis & {
   registration: {
     showNotification: (title: string, options: NotificationOptions) => Promise<void>;
@@ -57,15 +64,24 @@ self.addEventListener('push', (event: Event) => {
     }
   }
 
-  pushEvent.waitUntil(
-    sw.registration.showNotification(payload.title, {
-      body: payload.body,
-      icon: '/assets/img/fav.png',
-      badge: '/assets/img/fav.png',
-      data: {
-        url: payload.url || '/en',
+  const notificationOptions: AneesNotificationOptions = {
+    body: payload.body,
+    icon: '/assets/img/pwa-icon-192.png',
+    badge: '/assets/img/fav.png',
+    tag: 'anees-health-update',
+    actions: [
+      {
+        action: 'open',
+        title: 'Open Anees',
       },
-    })
+    ],
+    data: {
+      url: payload.url || '/en',
+    },
+  };
+
+  pushEvent.waitUntil(
+    sw.registration.showNotification(payload.title, notificationOptions)
   );
 });
 

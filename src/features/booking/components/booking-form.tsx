@@ -25,6 +25,7 @@ import {
   getPackageEntry,
 } from '@/lib/models/booking.types';
 import type { SpecialtyOption } from '@/lib/api/specialties';
+import { Badge, BottomActionBar, Button, Input, Select, StatusPill } from '@/components/ui';
 import BookingSummary from './booking-summary';
 import styles from '@/assets/scss/components/booking-form.module.scss';
 
@@ -241,13 +242,15 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
 
             <div className={styles.progressRail} aria-label={t('booking.form.step')}>
               {stepItems.map((step) => (
-                <span
+                <StatusPill
                   key={step.id}
+                  tone={step.done ? 'success' : 'neutral'}
+                  withDot={false}
                   className={`${styles.progressItem} ${step.done ? styles.progressItemDone : ''}`}
                 >
                   <span className={styles.progressNumber}>{step.number}</span>
                   <span className={styles.progressLabel}>{step.label}</span>
-                </span>
+                </StatusPill>
               ))}
             </div>
 
@@ -280,7 +283,7 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
                       aria-pressed={isActive}
                     >
                       {entry.featured && (
-                        <span className={styles.svcBadge}>{t('booking.packages.mostPopular')}</span>
+                        <Badge tone="brand" className={styles.svcBadge}>{t('booking.packages.mostPopular')}</Badge>
                       )}
                       <span className={styles.svcBody}>
                         <span className={styles.svcTitle}>{t(entry.titleKey)}</span>
@@ -352,89 +355,85 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
                 </h2>
 
                 <div className={styles.contactGrid}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="fullName" className={styles.label}>
-                      {t('booking.form.fullName')} <span className={styles.required}>*</span>
-                    </label>
-                    <input
-                      id="fullName"
-                      type="text"
-                      className={styles.input}
-                      placeholder={t('booking.form.fullNamePlaceholder')}
-                      value={formState.fullName}
-                      onChange={(e) => handleField('fullName', e.target.value)}
-                      autoComplete="name"
-                      dir="auto"
-                    />
-                    {errors.fullName && <p className={styles.errorText}>{t(errors.fullName)}</p>}
-                  </div>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    label={<>{t('booking.form.fullName')} <span className={styles.required}>*</span></>}
+                    placeholder={t('booking.form.fullNamePlaceholder')}
+                    value={formState.fullName}
+                    onChange={(e) => handleField('fullName', e.target.value)}
+                    autoComplete="name"
+                    dir="auto"
+                    experience="clinical"
+                    className={styles.formGroup}
+                    error={errors.fullName ? t(errors.fullName) : undefined}
+                  />
 
-                  <div className={styles.formGroup}>
-                    <label htmlFor="phoneNumber" className={styles.label}>
-                      {t('booking.form.phoneNumber')} <span className={styles.required}>*</span>
-                    </label>
-                    <div className={styles.phoneInputWrapper} dir="ltr">
-                      <select
-                        className={styles.countryCodeSelect}
-                        value={formState.countryCode}
-                        onChange={(e) => handleField('countryCode', e.target.value)}
-                        aria-label={t('booking.form.countryCode')}
-                      >
-                        {COUNTRIES.map((c) => (
-                          <option key={c.code} value={c.code}>{c.flag} +{c.code}</option>
-                        ))}
-                      </select>
-                      <input
-                        id="phoneNumber"
-                        type="tel"
-                        inputMode="numeric"
-                        className={styles.phoneNumberInput}
-                        placeholder={t('booking.form.phoneNumberPlaceholder')}
-                        value={formState.phoneNumber}
-                        onChange={(e) => handleField('phoneNumber', e.target.value)}
-                        autoComplete="tel-national"
-                        maxLength={11}
-                      />
-                    </div>
-                    {errors.phoneNumber && <p className={styles.errorText}>{t(errors.phoneNumber)}</p>}
+                  <div className={styles.phoneFieldGroup} dir="ltr">
+                    <Select
+                      id="countryCode"
+                      label={t('booking.form.countryCode')}
+                      value={formState.countryCode}
+                      onChange={(e) => handleField('countryCode', e.target.value)}
+                      experience="clinical"
+                      className={styles.countryCodeField}
+                    >
+                      {COUNTRIES.map((c) => (
+                        <option key={c.code} value={c.code}>{c.flag} +{c.code}</option>
+                      ))}
+                    </Select>
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      inputMode="numeric"
+                      label={<>{t('booking.form.phoneNumber')} <span className={styles.required}>*</span></>}
+                      placeholder={t('booking.form.phoneNumberPlaceholder')}
+                      value={formState.phoneNumber}
+                      onChange={(e) => handleField('phoneNumber', e.target.value)}
+                      autoComplete="tel-national"
+                      maxLength={11}
+                      experience="clinical"
+                      error={errors.phoneNumber ? t(errors.phoneNumber) : undefined}
+                    />
                   </div>
 
                   {requiresGovernorate && (
-                    <div className={styles.formGroup}>
-                      <label htmlFor="governorate" className={styles.label}>
-                        {t('booking.form.governorate')} <span className={styles.required}>*</span>
-                      </label>
-                      <select
-                        id="governorate"
-                        className={styles.input}
-                        value={formState.governorate ?? ''}
-                        onChange={(e) => handleField('governorate', e.target.value)}
-                        aria-label={t('booking.form.governorate')}
-                      >
-                        <option value="">{t('booking.form.governoratePlaceholder')}</option>
-                        <option value="cairo">{t('booking.form.governorateCairo')}</option>
-                        <option value="giza">{t('booking.form.governorateGiza')}</option>
-                        <option value="other">{t('booking.form.governorateOther')}</option>
-                      </select>
-                      {errors.governorate ? (
-                        <p className={styles.errorText}>{t(errors.governorate)}</p>
-                      ) : formState.governorate === 'other' ? (
-                        <p className={styles.errorText}>{t('booking.form.outOfCoverage')}</p>
-                      ) : null}
-                    </div>
+                    <Select
+                      id="governorate"
+                      label={<>{t('booking.form.governorate')} <span className={styles.required}>*</span></>}
+                      value={formState.governorate ?? ''}
+                      onChange={(e) => handleField('governorate', e.target.value)}
+                      experience="clinical"
+                      className={styles.formGroup}
+                      error={
+                        errors.governorate
+                          ? t(errors.governorate)
+                          : formState.governorate === 'other'
+                            ? t('booking.form.outOfCoverage')
+                            : undefined
+                      }
+                    >
+                      <option value="">{t('booking.form.governoratePlaceholder')}</option>
+                      <option value="cairo">{t('booking.form.governorateCairo')}</option>
+                      <option value="giza">{t('booking.form.governorateGiza')}</option>
+                      <option value="other">{t('booking.form.governorateOther')}</option>
+                    </Select>
                   )}
                 </div>
               </section>
             )}
 
             {/* ── Desktop submit ──────────────────────────────────────── */}
-            <button
+            <Button
               type="submit"
+              experience="clinical"
+              size="lg"
+              fullWidth
               className={styles.submitButton}
               disabled={isSubmitting || basePrice <= 0 || !showContactStep}
             >
               {isSubmitting ? t('booking.actions.processing') : t('booking.actions.submitBooking')}
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -452,50 +451,60 @@ export default function BookingForm({ onSubmit, preSelectedPackage, prices, spec
 
       {/* Mobile sticky action bar — total + CTA */}
       {basePrice > 0 && (
-        <div className={styles.mobileBar} aria-hidden={!showContactStep && basePrice <= 0}>
-          <div className={styles.mobileBarPrice}>
-            <span className={styles.mobileBarLabel}>{t('booking.summary.totalPrice')}</span>
-            <span className={styles.mobileBarValue}>
-              {formatPrice(effectivePrice)} <span className={styles.mobileBarUnit}>{currency}</span>
-            </span>
-          </div>
-          <button
-            type="button"
-            className={styles.mobileBarPromo}
-            onClick={() => {
-              const promoInput = document.getElementById('promocode');
-              promoInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              if (promoInput instanceof HTMLInputElement) {
-                window.setTimeout(() => promoInput.focus(), 220);
-              }
-            }}
-          >
-            {t('booking.promocode.label')}
-          </button>
-          <button
-            type="button"
-            className={styles.mobileBarCta}
-            onClick={() => {
-              const submitBtn = document.querySelector<HTMLButtonElement>(`form button[type="submit"]`);
-              if (showContactStep) {
-                submitBtn?.click();
-              } else {
-                // Nudge to next unanswered step
-                const target = document.getElementById(
-                  needsDuration && formState.packageDuration === null ? 'step-duration' : 'step-contact',
-                );
-                target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-            }}
-            disabled={isSubmitting}
-          >
-            {showContactStep
-              ? isSubmitting
-                ? t('booking.actions.processing')
-                : t('booking.actions.submitBooking')
-              : t('booking.actions.continue')}
-          </button>
-        </div>
+        <BottomActionBar
+          className={styles.mobileBar}
+          mobileOnly={false}
+          summary={
+            <div className={styles.mobileBarPrice}>
+              <span className={styles.mobileBarLabel}>{t('booking.summary.totalPrice')}</span>
+              <span className={styles.mobileBarValue}>
+                {formatPrice(effectivePrice)} <span className={styles.mobileBarUnit}>{currency}</span>
+              </span>
+            </div>
+          }
+          actions={
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                experience="mobile"
+                className={styles.mobileBarPromo}
+                onClick={() => {
+                  const promoInput = document.getElementById('promocode');
+                  promoInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  if (promoInput instanceof HTMLInputElement) {
+                    window.setTimeout(() => promoInput.focus(), 220);
+                  }
+                }}
+              >
+                {t('booking.promocode.label')}
+              </Button>
+              <Button
+                type="button"
+                experience="mobile"
+                className={styles.mobileBarCta}
+                onClick={() => {
+                  const submitBtn = document.querySelector<HTMLButtonElement>(`form button[type="submit"]`);
+                  if (showContactStep) {
+                    submitBtn?.click();
+                  } else {
+                    const target = document.getElementById(
+                      needsDuration && formState.packageDuration === null ? 'step-duration' : 'step-contact',
+                    );
+                    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                disabled={isSubmitting}
+              >
+                {showContactStep
+                  ? isSubmitting
+                    ? t('booking.actions.processing')
+                    : t('booking.actions.submitBooking')
+                  : t('booking.actions.continue')}
+              </Button>
+            </>
+          }
+        />
       )}
     </div>
   );

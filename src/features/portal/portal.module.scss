@@ -3,8 +3,8 @@
 .portalShell {
   // Brand custom-properties flow from the canonical Anees anchors in
   // utils/variables.scss (navy / gold) — never re-hardcode the brand hexes here.
-  --anees-surface: #fffefb;
-  --anees-surface-soft: #fcfaf5;
+  --anees-surface: var(--surface-elevated);
+  --anees-surface-soft: var(--surface-ops-soft);
   --anees-ink: #{$brand-navy};
   --anees-ink-muted: var(--text-soft);
   --anees-accent: #{$brand-gold};
@@ -26,7 +26,7 @@
     background:
       radial-gradient(1200px 520px at -8% -18%, rgba(166, 131, 65, 0.09), transparent 62%),
       radial-gradient(1000px 460px at 102% 0%, rgba(19, 44, 77, 0.08), transparent 60%),
-      #f7f3e8;
+      var(--surface-ops-base);
     border-radius: 24px;
   }
 }
@@ -37,9 +37,9 @@
   justify-content: space-between;
   gap: 1rem;
   border-radius: var(--anees-radius-card);
-  background: linear-gradient(135deg, var(--color-secondary) 0%, #1f436f 68%, #31567f 100%);
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--marketing-accent-navy-mid) 68%, var(--marketing-accent-navy-soft) 100%);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #eef4fb;
+  color: var(--text-on-dark);
   padding: 1.15rem 1.3rem;
   box-shadow: 0 14px 28px rgba(19, 44, 77, 0.2);
 }
@@ -63,7 +63,7 @@
   height: 56px;
   border-radius: var(--anees-radius-control);
   border: 1px solid rgba(19, 44, 77, 0.14);
-  background: #fff;
+  background: var(--surface-elevated);
   padding: 0.2rem;
   object-fit: contain;
 }
@@ -71,7 +71,7 @@
 .brandLoyalty {
   margin: 0.12rem 0 0;
   font-size: 0.75rem;
-  color: #d7e3f0;
+  color: var(--text-clinical-inverse);
   font-weight: 600;
 }
 
@@ -79,7 +79,7 @@
   margin: 0.58rem 0 0;
   font-size: 0.86rem;
   font-weight: 600;
-  color: #d9e4f1;
+  color: var(--text-clinical-inverse);
 }
 
 .heroTitle {
@@ -101,7 +101,7 @@
   margin-bottom: 0;
   border-radius: var(--anees-radius-pill);
   background: rgba(244, 236, 220, 0.16);
-  color: #f7efe0;
+  color: var(--text-on-dark);
   border: 1px solid rgba(244, 236, 220, 0.36);
   padding: 0.2rem 0.65rem;
   font-size: 0.76rem;
@@ -118,7 +118,7 @@
   font-size: 0.72rem;
   font-weight: 600;
   background: rgba(244, 236, 220, 0.16);
-  color: #f7efe0;
+  color: var(--text-on-dark);
   white-space: nowrap;
 }
 
@@ -132,7 +132,7 @@
 
   :global(.card-header) {
     border-bottom: 1px solid var(--anees-border);
-    background: linear-gradient(180deg, #fdfaf2 0%, #f9f3e6 100%);
+    background: linear-gradient(180deg, var(--surface-ops-soft) 0%, var(--surface-ops-base) 100%);
     color: var(--anees-ink);
     font-weight: 600;
   }
@@ -159,9 +159,9 @@
   padding: 0.35rem 0.78rem;
   border-radius: var(--anees-radius-pill);
   border: 1px solid rgba(19, 44, 77, 0.16);
-  color: #284262;
+  color: var(--text-ops-soft);
   text-decoration: none;
-  background: #ffffff;
+  background: var(--surface-elevated);
   font-size: 0.82rem;
   font-weight: 600;
   white-space: nowrap;
@@ -177,8 +177,8 @@
 
 .tabLinkActive {
   border-color: var(--color-primary);
-  background: #f4ecdc;
-  color: #6f5321;
+  background: var(--surface-marketing-accent);
+  color: var(--text-marketing-accent);
 }
 
 .tableWrap {
@@ -197,12 +197,12 @@
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: var(--color-secondary);
-    background: #f6eddd;
+    background: var(--surface-marketing-accent);
     border-bottom-color: rgba(19, 44, 77, 0.15);
   }
 
   :global(.table tbody td) {
-    color: #284262;
+    color: var(--text-ops-soft);
     border-color: rgba(19, 44, 77, 0.08);
     vertical-align: middle;
   }
@@ -223,7 +223,7 @@
 
 .backButton {
   border-color: rgba(244, 236, 220, 0.55) !important;
-  color: #eef4fb !important;
+  color: var(--text-on-dark) !important;
   background: rgba(18, 32, 55, 0.14) !important;
 }
 
@@ -318,7 +318,7 @@
     :global(tr) {
       border: 1px solid var(--anees-border);
       border-radius: var(--anees-radius-control);
-      background: #fff;
+      background: var(--surface-elevated);
       padding: 0.65rem 0.72rem;
       box-shadow: 0 6px 14px rgba(19, 44, 77, 0.06);
     }
