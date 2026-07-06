@@ -6,33 +6,10 @@ import { getStaffUser } from '@/lib/auth/rbac';
 import { ensurePushConfigured, sendPushToSubscription } from '@/lib/pwa/push';
 import { listSubscriptions, removeSubscription } from '@/lib/pwa/subscription-store';
 import type { AppLocale } from '@/lib/pwa/subscription-store';
+import type { PushBroadcastActionState } from './state';
 
 const NOTIFICATION_ADMIN_ROLES: StaffRole[] = ['superadmin', 'admin'];
 const DEAD_SUBSCRIPTION_STATUSES = new Set([404, 410]);
-
-export type PushBroadcastActionState = {
-  status: 'idle' | 'success' | 'warning' | 'error';
-  message?: string;
-  requested?: number;
-  sent?: number;
-  failed?: number;
-  fields?: {
-    title?: string;
-    body?: string;
-    url?: string;
-    locale?: 'all' | AppLocale;
-  };
-};
-
-export const idlePushBroadcastState: PushBroadcastActionState = {
-  status: 'idle',
-  fields: {
-    title: 'Anees Health',
-    body: '',
-    url: '/en/portal',
-    locale: 'all',
-  },
-};
 
 function valueOf(formData: FormData, key: string) {
   const value = formData.get(key);
