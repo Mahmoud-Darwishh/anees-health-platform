@@ -59,11 +59,24 @@ function statusCodeFrom(error: unknown): number | null {
   return null;
 }
 
+function safeErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    if (error.message.includes('push_subscriptions') || error.message.includes('PushSubscription')) {
+      return 'Push notification storage is not ready. Run the latest database migrations, then try again.';
+    }
+
+    if (error.message.includes('VAPID') || error.message.includes('Push notifications are not configured')) {
+      return 'Push is not configured on this server. Add the VAPID environment variables, then redeploy.';
+    }
+  }
+
+  return 'Notification sending failed before delivery. Please try again or share this with engineering.';
+}
+
 export async function sendPushBroadcastAction(
   _previousState: PushBroadcastActionState,
   formData: FormData
 ): Promise<PushBroadcastActionState> {
-  const user = await getStaffUser(NOTIFICATION_ADMIN_ROLES);
   const fields = {
     title: valueOf(formData, 'title'),
     body: valueOf(formData, 'body'),
@@ -71,102 +84,113 @@ export async function sendPushBroadcastAction(
     locale: normalizeLocale(valueOf(formData, 'locale')),
   };
 
-  if (!user) {
-    return {
-      status: 'error',
-      message: 'You do not have permission to send app notifications.',
-      fields,
-    };
-  }
+  try {
+    const user = await getStaffUser(NOTIFICATION_ADMIN_ROLES);
 
-  if (fields.title.length < 3 || fields.title.length > 80) {
-    return {
-      status: 'error',
-      message: 'Use a title between 3 and 80 characters.',
-      fields,
-    };
-  }
+    if (!user) {
+      return {
+        status: 'error',
+        message: 'You do not have permission to send app notifications.',
+        fields,
+      };
+    }
 
-  if (fields.body.length < 5 || fields.body.length > 180) {
-    return {
-      status: 'error',
-      message: 'Use a message between 5 and 180 characters.',
-      fields,
-    };
-  }
+    if (fields.title.length < 3 || fields.title.length > 80) {
+      return {
+        status: 'error',
+        message: 'Use a title between 3 and 80 characters.',
+        fields,
+      };
+    }
 
-  const url = normalizeUrl(fields.url);
-  if (!url) {
-    return {
-      status: 'error',
-      message: 'Use an internal path only, for example /en/portal or /ar/booking.',
-      fields,
-    };
-  }
+    if (fields.body.length < 5 || fields.body.length > 180) {
+      return {
+        status: 'error',
+        message: 'Use a message between 5 and 180 characters.',
+        fields,
+      };
+    }
 
-  if (!ensurePushConfigured()) {
-    return {
-      status: 'error',
-      message: 'Push is not configured. Add NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT.',
-      fields,
-    };
-  }
+    const url = normalizeUrl(fields.url);
+    if (!url) {
+      return {
+        status: 'error',
+        message: 'Use an internal path only, for example /en/portal or /ar/booking.',
+        fields,
+      };
+    }
 
-  const targetLocale = fields.locale === 'all' ? undefined : fields.locale;
-  const targets = await listSubscriptions(targetLocale);
+    if (!ensurePushConfigured()) {
+      return {
+        status: 'error',
+        message: 'Push is not configured. Add NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT.',
+        fields,
+      };
+    }
 
-  if (targets.length === 0) {
+    const targetLocale = fields.locale === 'all' ? undefined : fields.locale;
+    const targets = await listSubscriptions(targetLocale);
+
+    if (targets.length === 0) {
+      return {
+        status: 'warning',
+        message: 'No subscribed devices matched this audience yet.',
+        requested: 0,
+        sent: 0,
+        failed: 0,
+        fields: { ...fields, url },
+      };
+    }
+
+    let sent = 0;
+    let failed = 0;
+    let pruned = 0;
+
+    await Promise.all(
+      targets.map(async (subscription) => {
+        try {
+          await sendPushToSubscription(
+            {
+              endpoint: subscription.endpoint,
+              keys: subscription.keys,
+            },
+            {
+              title: fields.title,
+              body: fields.body,
+              url,
+            }
+          );
+          sent += 1;
+        } catch (error) {
+          failed += 1;
+          const statusCode = statusCodeFrom(error);
+          if (statusCode && DEAD_SUBSCRIPTION_STATUSES.has(statusCode)) {
+            await removeSubscription(subscription.endpoint);
+            pruned += 1;
+          }
+        }
+      })
+    );
+
+    revalidatePath('/admin/notifications');
+
     return {
-      status: 'warning',
-      message: 'No subscribed devices matched this audience yet.',
-      requested: 0,
-      sent: 0,
-      failed: 0,
+      status: sent > 0 ? 'success' : 'warning',
+      message:
+        sent > 0
+          ? `Sent ${sent} of ${targets.length} subscribed devices.${pruned ? ` Removed ${pruned} expired subscriptions.` : ''}`
+          : `No devices accepted this notification. ${pruned ? `Removed ${pruned} expired subscriptions.` : 'Check VAPID/browser subscription status.'}`,
+      requested: targets.length,
+      sent,
+      failed,
       fields: { ...fields, url },
     };
+  } catch (error) {
+    console.error('[Admin Push Broadcast Error]', error);
+    return {
+      status: 'error',
+      message: safeErrorMessage(error),
+      fields,
+    };
   }
-
-  let sent = 0;
-  let failed = 0;
-  let pruned = 0;
-
-  await Promise.all(
-    targets.map(async (subscription) => {
-      try {
-        await sendPushToSubscription(
-          {
-            endpoint: subscription.endpoint,
-            keys: subscription.keys,
-          },
-          {
-            title: fields.title,
-            body: fields.body,
-            url,
-          }
-        );
-        sent += 1;
-      } catch (error) {
-        failed += 1;
-        const statusCode = statusCodeFrom(error);
-        if (statusCode && DEAD_SUBSCRIPTION_STATUSES.has(statusCode)) {
-          await removeSubscription(subscription.endpoint);
-          pruned += 1;
-        }
-      }
-    })
-  );
-
-  revalidatePath('/admin/notifications');
-
-  return {
-    status: sent > 0 ? 'success' : 'warning',
-    message:
-      sent > 0
-        ? `Sent ${sent} of ${targets.length} subscribed devices.${pruned ? ` Removed ${pruned} expired subscriptions.` : ''}`
-        : `No devices accepted this notification. ${pruned ? `Removed ${pruned} expired subscriptions.` : 'Check VAPID/browser subscription status.'}`,
-    requested: targets.length,
-    sent,
-    failed,
-    fields: { ...fields, url },
-  };
 }

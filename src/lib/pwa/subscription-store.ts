@@ -10,6 +10,34 @@ export type StoredPushSubscription = {
   updatedAt: string;
 };
 
+const subscriptionSelect = {
+  endpoint: true,
+  p256dh: true,
+  auth: true,
+  locale: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+type SelectedPushSubscription = {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  locale: AppLocale | string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+function toStoredSubscription(record: SelectedPushSubscription): StoredPushSubscription {
+  return {
+    endpoint: record.endpoint,
+    keys: { p256dh: record.p256dh, auth: record.auth },
+    locale: record.locale as AppLocale,
+    createdAt: record.createdAt.toISOString(),
+    updatedAt: record.updatedAt.toISOString(),
+  };
+}
+
 export async function upsertSubscription(
   subscription: Pick<StoredPushSubscription, 'endpoint' | 'keys' | 'locale'> & {
     userId?: string | null;
@@ -32,31 +60,23 @@ export async function upsertSubscription(
       p256dh: subscription.keys.p256dh,
       auth: subscription.keys.auth,
       locale: subscription.locale,
-      userId: subscription.userId ?? null,
+      ...ownerPatch,
     },
+    select: subscriptionSelect,
   });
 
-  return {
-    endpoint: record.endpoint,
-    keys: { p256dh: record.p256dh, auth: record.auth },
-    locale: record.locale as AppLocale,
-    createdAt: record.createdAt.toISOString(),
-    updatedAt: record.updatedAt.toISOString(),
-  };
+  return toStoredSubscription(record);
 }
 
 /** All subscriptions owned by a specific authenticated user. */
 export async function listSubscriptionsForUser(
   userId: string
 ): Promise<StoredPushSubscription[]> {
-  const records = await prisma.pushSubscription.findMany({ where: { userId } });
-  return records.map((r) => ({
-    endpoint: r.endpoint,
-    keys: { p256dh: r.p256dh, auth: r.auth },
-    locale: r.locale as AppLocale,
-    createdAt: r.createdAt.toISOString(),
-    updatedAt: r.updatedAt.toISOString(),
-  }));
+  const records = await prisma.pushSubscription.findMany({
+    where: { userId },
+    select: subscriptionSelect,
+  });
+  return records.map(toStoredSubscription);
 }
 
 export async function removeSubscription(endpoint: string) {
@@ -66,15 +86,10 @@ export async function removeSubscription(endpoint: string) {
 export async function listSubscriptions(locale?: AppLocale): Promise<StoredPushSubscription[]> {
   const records = await prisma.pushSubscription.findMany({
     where: locale ? { locale } : undefined,
+    select: subscriptionSelect,
   });
 
-  return records.map((r) => ({
-    endpoint: r.endpoint,
-    keys: { p256dh: r.p256dh, auth: r.auth },
-    locale: r.locale as AppLocale,
-    createdAt: r.createdAt.toISOString(),
-    updatedAt: r.updatedAt.toISOString(),
-  }));
+  return records.map(toStoredSubscription);
 }
 
 export async function countSubscriptions(locale?: AppLocale): Promise<number> {
