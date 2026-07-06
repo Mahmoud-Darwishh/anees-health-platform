@@ -15,6 +15,7 @@ import RelatedLinks from '@/components/common/RelatedLinks';
 import FaqSection from '@/components/common/FaqSection';
 import ContentHero from '@/components/common/content/ContentHero';
 import ContentCard from '@/components/common/content/ContentCard';
+import PwaNotificationNudge from '@/features/pwa/components/PwaNotificationNudge';
 import { Container, Section, Grid } from '@/components/common/layout';
 import { serviceIcon } from '@/lib/seo/icons';
 import { buildServicesMetadata } from '@/lib/seo/metadata';
@@ -101,6 +102,9 @@ export default async function ServicesPage({
           title={isAr ? 'خدمات الرعاية الصحية المنزلية في مصر' : 'Home Healthcare Services in Egypt'}
           lead={heroLead}
         />
+        <Container>
+          <PwaNotificationNudge locale={locale} />
+        </Container>
 
         <Section>
           <Container>

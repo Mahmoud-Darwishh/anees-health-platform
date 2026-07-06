@@ -1881,12 +1881,17 @@
     "navLabel": "التنقل على الهاتف المحمول",
     "ourDoctors": "أطباؤنا",
     "bookNow": "احجز الآن",
-    "bookingAvailable": "حجز جديد متاح"
+    "bookingAvailable": "حجز جديد متاح",
+    "alerts": "التنبيهات",
+    "alertsEnabled": "التنبيهات الصحية مفعّلة.",
+    "alertsTryAgain": "تعذر تفعيل التنبيهات. حاول مرة أخرى من التطبيق المثبت.",
+    "alertsInstallFirst": "افتح Anees من أيقونة الشاشة الرئيسية أولاً."
   },
   "pwa": {
     "title": "احصل على تطبيق أنيس هيلث",
     "description": "ثبّت التطبيق للوصول السريع، والعمل دون اتصال، واستقبال تنبيهات صحية فورية.",
     "installButton": "أضف إلى الشاشة الرئيسية",
+    "installAndAlertsButton": "ثبّت التطبيق ثم فعّل التنبيهات",
     "updateButton": "تحديث متاح — اضغط للتحديث",
     "enableNotifications": "تفعيل التنبيهات الصحية",
     "dismissButton": "ليس الآن",
@@ -1905,7 +1910,10 @@
     "iosStep1": "اضغط على زر المشاركة",
     "iosStep2": "اختر \"إضافة إلى الشاشة الرئيسية\"",
     "iosStep3": "اضغط \"إضافة\" للتأكيد",
-    "iosUseSafari": "هذه الميزة تتطلب متصفح Safari. افتح هذه الصفحة في Safari لتثبيت التطبيق."
+    "iosUseSafari": "هذه الميزة تتطلب متصفح Safari. افتح هذه الصفحة في Safari لتثبيت التطبيق.",
+    "notificationPromptTitle": "فعّل التنبيهات الصحية",
+    "notificationPromptDescription": "استقبل تحديثات الزيارة وتذكيرات الرعاية على هذا الجهاز.",
+    "notificationPromptButton": "تفعيل التنبيهات الصحية"
   },
   "pwaSettings": {
     "metaTitle": "مركز التحكم لتطبيق الويب",
@@ -1939,6 +1947,11 @@
     "notificationsNotEnabled": "تعذر تفعيل الإشعارات.",
     "notificationsDisabled": "تم إيقاف الإشعارات.",
     "notificationsDisableFailed": "تعذر إيقاف الإشعارات.",
+    "quickAlertsTitle": "فعّل التنبيهات الصحية",
+    "quickAlertsReady": "هذا الجهاز جاهز لاستقبال تنبيهات Anees.",
+    "quickAlertsHelp": "فعّل التنبيهات مرة واحدة ليستطيع Anees إرسال تحديثات الزيارة والتذكيرات ورسائل الرعاية الآمنة إلى هذا الجهاز.",
+    "quickAlertsInstallFirst": "على iPhone، افتح Anees من أيقونة الشاشة الرئيسية قبل تفعيل التنبيهات.",
+    "quickAlertsBlocked": "الإشعارات محظورة على هذا الجهاز. أعد تفعيلها من إعدادات الجهاز.",
     "cacheCleared": "تم مسح التخزين دون اتصال.",
     "cacheClearFailed": "تعذر مسح التخزين دون اتصال.",
     "readinessTitle": "قائمة جاهزية الإطلاق",

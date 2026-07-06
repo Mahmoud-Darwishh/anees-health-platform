@@ -1881,12 +1881,17 @@
     "navLabel": "Mobile Navigation",
     "ourDoctors": "Our Doctors",
     "bookNow": "Book Now",
-    "bookingAvailable": "New booking available"
+    "bookingAvailable": "New booking available",
+    "alerts": "Alerts",
+    "alertsEnabled": "Health alerts are on.",
+    "alertsTryAgain": "Could not enable alerts. Try again from the installed app.",
+    "alertsInstallFirst": "Open Anees from the Home Screen icon first."
   },
   "pwa": {
     "title": "Get the Anees Health App",
     "description": "Install for faster loading, offline access, and real-time health updates.",
     "installButton": "Add to Home Screen",
+    "installAndAlertsButton": "Install app, then alerts",
     "updateButton": "Update Available — Tap to Refresh",
     "enableNotifications": "Enable Health Alerts",
     "dismissButton": "Not Now",
@@ -1905,7 +1910,10 @@
     "iosStep1": "Tap the Share button",
     "iosStep2": "Tap \"Add to Home Screen\"",
     "iosStep3": "Tap \"Add\" to confirm",
-    "iosUseSafari": "This feature requires Safari. Please open this page in Safari to install the app."
+    "iosUseSafari": "This feature requires Safari. Please open this page in Safari to install the app.",
+    "notificationPromptTitle": "Turn on health alerts",
+    "notificationPromptDescription": "Get visit updates and care reminders on this device.",
+    "notificationPromptButton": "Enable health alerts"
   },
   "pwaSettings": {
     "metaTitle": "PWA Control Center",
@@ -1939,6 +1947,11 @@
     "notificationsNotEnabled": "Could not enable notifications.",
     "notificationsDisabled": "Notifications were disabled.",
     "notificationsDisableFailed": "Could not disable notifications.",
+    "quickAlertsTitle": "Turn on health alerts",
+    "quickAlertsReady": "This device is ready to receive Anees notifications.",
+    "quickAlertsHelp": "Enable alerts once and Anees can send visit updates, reminders, and safe care messages to this device.",
+    "quickAlertsInstallFirst": "On iPhone, open Anees from the Home Screen icon before enabling alerts.",
+    "quickAlertsBlocked": "Notifications are blocked on this device. Re-enable them from device settings.",
     "cacheCleared": "Offline cache cleared.",
     "cacheClearFailed": "Could not clear offline cache.",
     "readinessTitle": "Launch Readiness Checklist",

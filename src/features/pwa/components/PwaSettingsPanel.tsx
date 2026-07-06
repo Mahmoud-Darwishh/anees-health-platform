@@ -71,7 +71,9 @@ export default function PwaSettingsPanel() {
 
   const onEnableNotifications = async () => {
     const enabled = await enableNotifications();
-    setStatusMessage(enabled ? t('notificationsEnabled') : t('notificationsNotEnabled'));
+    if (enabled) {
+      setStatusMessage(t('notificationsEnabled'));
+    }
   };
 
   const onDisableNotifications = async () => {
@@ -109,6 +111,16 @@ export default function PwaSettingsPanel() {
   const readyCount = readinessChecks.filter((item) => item.ready).length;
   const readinessPercent = Math.round((readyCount / readinessChecks.length) * 100);
   const notificationsReady = displayedNotificationPermission === 'granted' && displayedIsSubscribed;
+  const notificationsBlocked = displayedNotificationPermission === 'denied';
+  const needsInstalledIosApp = isIos && !displayedIsInstalled;
+  const quickAlertDisabled = notificationsReady || notificationsBlocked || needsInstalledIosApp || !displayedIsSupported;
+  const quickAlertHelp = notificationsReady
+    ? t('quickAlertsReady')
+    : notificationsBlocked
+      ? t('quickAlertsBlocked')
+      : needsInstalledIosApp
+        ? t('quickAlertsInstallFirst')
+        : t('quickAlertsHelp');
 
   return (
     <section className={styles.wrapper}>
@@ -129,6 +141,27 @@ export default function PwaSettingsPanel() {
             <span className={styles.progressFill} style={{ width: `${readinessPercent}%` }} />
           </div>
         </div>
+      </Card>
+
+      <Card
+        experience="mobile"
+        title={t('quickAlertsTitle')}
+        description={quickAlertHelp}
+        className={styles.quickAlertsCard}
+        footer={
+          <div className={styles.actions}>
+            <Button type="button" experience="mobile" onClick={onEnableNotifications} disabled={quickAlertDisabled}>
+              {notificationsReady ? t('stateActive') : t('enableNotifications')}
+            </Button>
+            <Button type="button" variant="outline" experience="mobile" onClick={refreshStatus}>
+              {t('refreshButton')}
+            </Button>
+          </div>
+        }
+      >
+        <StatusPill tone={notificationsReady ? 'success' : notificationsBlocked ? 'danger' : 'warning'} withDot={false}>
+          {notificationsReady ? t('stateActive') : notificationsBlocked ? t('stateActionNeeded') : t('statePending')}
+        </StatusPill>
       </Card>
 
       <Card experience="mobile" title={t('readinessTitle')} className={styles.readinessCard}>

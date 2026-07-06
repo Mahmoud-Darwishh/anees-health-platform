@@ -96,6 +96,12 @@
   margin-bottom: 14px;
 }
 
+.quickAlertsCard {
+  margin-bottom: 14px;
+  border-color: var(--status-info-border);
+  background: linear-gradient(145deg, var(--surface-elevated) 0%, var(--surface-mobile-bar) 100%);
+}
+
 .iosCard {
   margin-bottom: 14px;
   background: linear-gradient(160deg, var(--surface-ops-accent) 0%, var(--surface-elevated) 100%);

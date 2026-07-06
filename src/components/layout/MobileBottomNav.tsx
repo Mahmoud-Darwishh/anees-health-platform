@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './MobileBottomNav.module.scss';
 import LucideIcon from '@/components/common/LucideIcon';
+import { usePwaManager } from '@/features/pwa/hooks/usePwaManager';
 
 /**
  * Mobile Bottom Navigation Bar - Advanced Elite Design
@@ -20,9 +22,27 @@ import LucideIcon from '@/components/common/LucideIcon';
  * - Full RTL/LTR support with logical properties
  * - SSR compatible
  */
+function detectIos(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  const isIphoneIpad = /iphone|ipad|ipod/i.test(ua);
+  const isMacWithTouch = /macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+  return isIphoneIpad || isMacWithTouch;
+}
+
 export default function MobileBottomNav() {
   const t = useTranslations('mobileNav');
   const pathname = usePathname();
+  const [isEnablingAlerts, setIsEnablingAlerts] = useState(false);
+  const [localStatus, setLocalStatus] = useState('');
+  const {
+    isSupported,
+    isInstalled,
+    notificationPermission,
+    isSubscribed,
+    statusMessage,
+    enableNotifications,
+  } = usePwaManager();
 
   // Extract locale from pathname (e.g., /en/... -> 'en', /ar/... -> 'ar')
   const locale = pathname.split('/')[1] || 'en';
@@ -32,6 +52,28 @@ export default function MobileBottomNav() {
   // Check if current page matches link (for active state)
   const isDoctorsPage = pathname.includes('/doctors');
   const isBookingPage = pathname.includes('/booking');
+  const notificationsReady = notificationPermission === 'granted' && isSubscribed;
+  const showAlertsAction = !notificationsReady && notificationPermission !== 'denied';
+  const displayedStatus = statusMessage || localStatus;
+
+  const onEnableAlerts = async () => {
+    setLocalStatus('');
+
+    if (detectIos() && !isInstalled) {
+      setLocalStatus(t('alertsInstallFirst'));
+      return;
+    }
+
+    if (!isSupported) {
+      setLocalStatus(t('alertsTryAgain'));
+      return;
+    }
+
+    setIsEnablingAlerts(true);
+    const enabled = await enableNotifications();
+    setIsEnablingAlerts(false);
+    setLocalStatus(enabled ? t('alertsEnabled') : t('alertsTryAgain'));
+  };
 
   return (
     <nav
@@ -106,7 +148,35 @@ export default function MobileBottomNav() {
             {t('bookNow')}
           </span>
         </Link>
+
+        {showAlertsAction ? (
+          <button
+            type="button"
+            className={`${styles.navLink} ${styles.navButton}`}
+            aria-label={t('alerts')}
+            title={t('alerts')}
+            onClick={onEnableAlerts}
+            disabled={isEnablingAlerts}
+          >
+            <span className={styles.navBlob} aria-hidden="true" />
+
+            <span className={styles.navIconWrapper} aria-hidden="true">
+              <LucideIcon iconClass="fas fa-bell" aria-hidden="true" />
+              <span className={styles.iconRing} />
+            </span>
+
+            <span className={styles.navLabel}>
+              {t('alerts')}
+            </span>
+          </button>
+        ) : null}
       </div>
+
+      {displayedStatus && showAlertsAction ? (
+        <p className={styles.navStatus} role="status">
+          {displayedStatus}
+        </p>
+      ) : null}
 
       {/* Bottom safe area for notched devices */}
       <div className={styles.safeArea} aria-hidden="true" />

@@ -41,6 +41,15 @@ function isStandaloneMode() {
   );
 }
 
+function isSecurePwaContext() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const host = window.location.hostname;
+  return window.isSecureContext || host === 'localhost' || host === '127.0.0.1';
+}
+
 export function usePwaManager(options?: UsePwaManagerOptions) {
   const locale = useLocale() as Locale;
   const dismissStorageKey = options?.dismissStorageKey ?? DEFAULT_DISMISS_KEY;
@@ -51,7 +60,7 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
       return false;
     }
 
-    return 'serviceWorker' in navigator && 'PushManager' in window;
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   });
   const [isInstalled, setIsInstalled] = useState<boolean>(() => isStandaloneMode());
   const [dismissedInstallPrompt, setDismissedInstallPrompt] = useState<boolean>(() => {
@@ -174,25 +183,46 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
   }, [dismissStorageKey]);
 
   const enableNotifications = useCallback(async () => {
-    if (!registration) {
-      setStatusMessage('Service worker is not ready yet.');
-      return false;
-    }
-
     if (typeof Notification === 'undefined') {
-      setStatusMessage('Notifications are not supported in this browser.');
+      setStatusMessage('This browser does not support web push notifications.');
       return false;
     }
 
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setStatusMessage('This browser cannot receive Anees app notifications.');
+      return false;
+    }
+
+    if (!isSecurePwaContext()) {
+      setStatusMessage('Open Anees over HTTPS before enabling notifications.');
+      return false;
+    }
+
+    if (Notification.permission === 'denied') {
+      setStatusMessage('Notifications are blocked. Enable them from iPhone Settings, then reopen Anees.');
+      return false;
+    }
+
+    // Keep the native permission prompt directly tied to the user's tap. On iOS,
+    // awaiting the service worker before this call can lose the user gesture.
     const permission = await Notification.requestPermission();
     setNotificationPermission(permission);
 
     if (permission !== 'granted') {
-      setStatusMessage('Notification permission denied.');
+      setStatusMessage('Notifications were not allowed on this device.');
       return false;
     }
 
-    const existingSubscription = await registration.pushManager.getSubscription();
+    const swRegistration = registration ?? (await navigator.serviceWorker.ready.catch(() => null));
+
+    if (!swRegistration) {
+      setStatusMessage('Anees is still preparing app notifications. Reopen the app and try once more.');
+      return false;
+    }
+
+    setRegistration(swRegistration);
+
+    const existingSubscription = await swRegistration.pushManager.getSubscription();
     let subscription = existingSubscription;
 
     if (!subscription) {
@@ -207,10 +237,16 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
         return false;
       }
 
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: base64ToUint8Array(publicKeyResult.publicKey),
-      });
+      try {
+        subscription = await swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: base64ToUint8Array(publicKeyResult.publicKey),
+        });
+      } catch (error) {
+        console.error('[PWA] Failed to create push subscription', error);
+        setStatusMessage('Could not create a notification subscription on this device.');
+        return false;
+      }
     }
 
     const subscriptionPayload = subscription.toJSON();
@@ -237,12 +273,16 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
   }, [locale, registration]);
 
   const disableNotifications = useCallback(async () => {
-    if (!registration) {
-      setStatusMessage('Service worker is not ready yet.');
+    const swRegistration = registration ?? (await navigator.serviceWorker.ready.catch(() => null));
+
+    if (!swRegistration) {
+      setStatusMessage('Anees app notifications are not ready on this device.');
       return false;
     }
 
-    const subscription = await registration.pushManager.getSubscription();
+    setRegistration(swRegistration);
+
+    const subscription = await swRegistration.pushManager.getSubscription();
 
     if (!subscription) {
       setIsSubscribed(false);
