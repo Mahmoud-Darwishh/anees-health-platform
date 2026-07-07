@@ -1099,6 +1099,7 @@
     "for_patients": "For Patients",
     "search_doctors": "Search for Doctors",
     "booking": "Booking",
+    "app_alerts": "App & Alerts",
     "patient_dashboard": "Patient Dashboard",
     "quick_links": "Quick Links",
     "our_services": "Our Services",
@@ -1879,6 +1880,7 @@
   },
   "mobileNav": {
     "navLabel": "Mobile Navigation",
+    "home": "Home",
     "ourDoctors": "Our Doctors",
     "bookNow": "Book Now",
     "bookingAvailable": "New booking available",

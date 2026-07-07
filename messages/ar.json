@@ -1099,6 +1099,7 @@
     "for_patients": "للمرضى",
     "search_doctors": "ابحث عن الأطباء",
     "booking": "الحجز",
+    "app_alerts": "التطبيق والتنبيهات",
     "patient_dashboard": "لوحة تحكم المريض",
     "quick_links": "روابط سريعة",
     "our_services": "خدماتنا",
@@ -1879,6 +1880,7 @@
   },
   "mobileNav": {
     "navLabel": "التنقل على الهاتف المحمول",
+    "home": "الرئيسية",
     "ourDoctors": "أطباؤنا",
     "bookNow": "احجز الآن",
     "bookingAvailable": "حجز جديد متاح",

@@ -97,6 +97,11 @@ const Footer = () => {
                     {t('footer.specialities')}
                   </Link>
                 </li>
+                <li>
+                  <Link href={href('/settings/pwa')} className={styles.link}>
+                    {t('footer.app_alerts')}
+                  </Link>
+                </li>
               </ul>
             </nav>
 

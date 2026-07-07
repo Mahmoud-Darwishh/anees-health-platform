@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -27,14 +28,24 @@ export default function MobileBottomNav() {
 
   // Extract locale from pathname (e.g., /en/... -> 'en', /ar/... -> 'ar')
   const locale = pathname.split('/')[1] || 'en';
+  const homeLink = `/${locale}`;
   const doctorLink = `/${locale}/doctors`;
   const bookLink = `/${locale}/booking`;
-  const alertsLink = `/${locale}/settings/pwa`;
 
   // Check if current page matches link (for active state)
+  const isHomePage = pathname === `/${locale}` || pathname === `/${locale}/`;
   const isDoctorsPage = pathname.includes('/doctors');
   const isBookingPage = pathname.includes('/booking');
-  const isAlertsPage = pathname.includes('/settings/pwa');
+
+  // Remember the visitor's locale so the (locale-less) PWA offline fallback page
+  // can render quick links in the right language.
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('anees-locale', locale === 'ar' ? 'ar' : 'en');
+    } catch {
+      // Private-mode storage failures are non-fatal.
+    }
+  }, [locale]);
 
   return (
     <nav
@@ -49,34 +60,34 @@ export default function MobileBottomNav() {
       <div className={styles.navGlow} aria-hidden="true" />
 
       <div className={styles.navContainer}>
-        {/* Secondary CTA: Our Doctors */}
+        {/* Secondary CTA: Home */}
         <Link
-          href={doctorLink}
-          className={`${styles.navLink} ${isDoctorsPage ? styles.navLinkActive : ''}`}
-          aria-label={t('ourDoctors')}
-          aria-current={isDoctorsPage ? 'page' : undefined}
-          title={t('ourDoctors')}
+          href={homeLink}
+          className={`${styles.navLink} ${isHomePage ? styles.navLinkActive : ''}`}
+          aria-label={t('home')}
+          aria-current={isHomePage ? 'page' : undefined}
+          title={t('home')}
           tabIndex={0}
         >
           {/* Animated background blob */}
           <span className={styles.navBlob} aria-hidden="true" />
-          
+
           <span className={styles.navIconWrapper} aria-hidden="true">
-            {/* FontAwesome stethoscope icon */}
-            <LucideIcon iconClass="fas fa-user-doctor" aria-hidden="true" />
-            
+            {/* FontAwesome home icon */}
+            <LucideIcon iconClass="fas fa-house" aria-hidden="true" />
+
             {/* Animated icon ring */}
             <span className={styles.iconRing} />
           </span>
-          
+
           <span className={styles.navLabel}>
-            {t('ourDoctors')}
+            {t('home')}
             {/* Active indicator dot */}
-            {isDoctorsPage && <span className={styles.activeDot} aria-hidden="true" />}
+            {isHomePage && <span className={styles.activeDot} aria-hidden="true" />}
           </span>
         </Link>
 
-        {/* Primary CTA: Book Now - Floating Action Button Style */}
+        {/* Primary CTA: Book Now — calm, healthtech-grade primary action */}
         <Link
           href={bookLink}
           className={`${styles.navLink} ${styles.navLinkPrimary} ${isBookingPage ? styles.navLinkActive : ''}`}
@@ -85,49 +96,33 @@ export default function MobileBottomNav() {
           title={t('bookNow')}
           tabIndex={0}
         >
-          {/* Floating action button glow */}
-          <span className={styles.fabGlow} aria-hidden="true" />
-          
-          {/* Particle effects container */}
-          <span className={styles.particles} aria-hidden="true">
-            <span className={styles.particle} />
-            <span className={styles.particle} />
-            <span className={styles.particle} />
-          </span>
-          
           <span className={styles.navIconWrapper} aria-hidden="true">
-            {/* FontAwesome calendar icon */}
             <LucideIcon iconClass="fas fa-calendar-check" aria-hidden="true" />
-            
-            {/* Notification badge */}
-            <span className={styles.badge} aria-label={t('bookingAvailable')}>
-              <span className={styles.badgePulse} />
-            </span>
           </span>
-          
+
           <span className={styles.navLabel}>
             {t('bookNow')}
           </span>
         </Link>
 
         <Link
-          href={alertsLink}
-          className={`${styles.navLink} ${isAlertsPage ? styles.navLinkActive : ''}`}
-          aria-label={t('alerts')}
-          aria-current={isAlertsPage ? 'page' : undefined}
-          title={t('alerts')}
+          href={doctorLink}
+          className={`${styles.navLink} ${isDoctorsPage ? styles.navLinkActive : ''}`}
+          aria-label={t('ourDoctors')}
+          aria-current={isDoctorsPage ? 'page' : undefined}
+          title={t('ourDoctors')}
           tabIndex={0}
         >
           <span className={styles.navBlob} aria-hidden="true" />
 
           <span className={styles.navIconWrapper} aria-hidden="true">
-            <LucideIcon iconClass="fas fa-bell" aria-hidden="true" />
+            <LucideIcon iconClass="fas fa-user-doctor" aria-hidden="true" />
             <span className={styles.iconRing} />
           </span>
 
           <span className={styles.navLabel}>
-            {t('alerts')}
-            {isAlertsPage && <span className={styles.activeDot} aria-hidden="true" />}
+            {t('ourDoctors')}
+            {isDoctorsPage && <span className={styles.activeDot} aria-hidden="true" />}
           </span>
         </Link>
       </div>

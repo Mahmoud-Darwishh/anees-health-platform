@@ -1,6 +1,12 @@
 import Link from 'next/link';
+// This route renders under the ROOT layout, which does NOT load globals.scss,
+// so the design tokens (var(--color-*), var(--surface-*), …) are otherwise
+// undefined here. Import the runtime token :root block directly so the offline
+// page and its quick-links render in full brand styling.
+import '@/assets/scss/base/tokens.scss';
 import styles from './offline.module.scss';
 import RetryButton from './RetryButton';
+import OfflineQuickLinks from './OfflineQuickLinks';
 
 export default function OfflinePage() {
   return (
@@ -57,6 +63,8 @@ export default function OfflinePage() {
             الرئيسية
           </Link>
         </div>
+
+        <OfflineQuickLinks />
 
         <p className={styles.hint} lang="en">
           For best offline access, open the pages you need once while connected.

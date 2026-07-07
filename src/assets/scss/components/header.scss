@@ -1068,7 +1068,24 @@ html.menu-opened {
     margin: 14px 8px;
   }
 
-  // ─── Secondary actions (lang/login/account/signout) ───────────
+  // ─── Secondary actions (alerts/lang/login/account/signout) ────
+  &__alerts {
+    background: rgba($primary, 0.06) !important;
+    color: $h-text !important;
+    border: 1.5px solid rgba($primary, 0.28);
+
+    > i:first-child { color: var(--color-primary); opacity: 1 !important; }
+
+    &:hover,
+    &:focus-visible {
+      background: rgba($primary, 0.12) !important;
+      color: var(--color-primary) !important;
+      border-color: rgba($primary, 0.5);
+
+      > i:first-child { color: var(--color-primary); }
+    }
+  }
+
   &__lang {
     background: $h-sky-soft !important;
     color: $h-sky-hover !important;

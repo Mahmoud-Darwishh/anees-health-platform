@@ -87,19 +87,7 @@ export default async function LocaleLayout({
         <MobileBottomNav />
         <PwaInstallPrompt />
       </div>
-      <Script id="chatling-script" strategy="lazyOnload">
-        {`
-          window.chtlConfig = { chatbotId: "9941775766" };
-          (function () {
-            var s = document.createElement('script');
-            s.async = true;
-            s.id = 'chtl-script';
-            s.setAttribute('data-id', '9941775766');
-            s.src = 'https://chatling.ai/js/embed.js';
-            document.body.appendChild(s);
-          })();
-        `}
-      </Script>
+      {/* Chatling chatbot removed for now (was lazy-loaded here). */}
       {/* Bootstrap JS — self-hosted (pinned v5.3.0). */}
       <Script
         src="/assets/js/bootstrap.bundle.min.js"

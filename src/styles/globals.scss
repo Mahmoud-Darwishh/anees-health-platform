@@ -449,38 +449,43 @@ select:focus,
   transform: none;
 }
 
-/* WhatsApp Floating Button */
+/* WhatsApp Floating Button — official brand green, calm interaction */
 .whatsapp-floating-btn {
   position: fixed;
   bottom: 85px;
   right: 20px;
-  width: 55px;
-  height: 55px;
-  background: linear-gradient(135deg, #25d366 0%, #20ba5a 100%);
+  width: 56px;
+  height: 56px;
+  background: var(--action-whatsapp);
   border-radius: 50% !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 28px;
+  color: #ffffff;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  box-shadow:
+    0 6px 18px rgba(37, 211, 102, 0.32),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   z-index: 999;
-  
+
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+    background: #1eb457;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow:
+      0 10px 24px rgba(37, 211, 102, 0.4),
+      0 3px 8px rgba(0, 0, 0, 0.14);
   }
-  
+
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
-  
-  i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+
+  svg {
+    width: 30px;
+    height: 30px;
+    display: block;
   }
 }
 

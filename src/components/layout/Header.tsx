@@ -487,6 +487,16 @@ const Header = () => {
           <ul className="mobile-drawer__secondary">
             <li>
               <Link
+                href={`/${locale}/settings/pwa`}
+                className="mobile-drawer__alerts"
+                onClick={onHandleLinkClick}
+              >
+                <LucideIcon iconClass="fa-solid fa-bell" />
+                <span>{t('footer.app_alerts')}</span>
+              </Link>
+            </li>
+            <li>
+              <Link
                 href={altLocalePath}
                 className="mobile-drawer__lang"
                 onClick={onHandleLinkClick}

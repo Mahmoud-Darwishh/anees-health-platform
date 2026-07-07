@@ -1,55 +1,13 @@
 @use '@/assets/scss/utils/variables' as variables;
 
 /**
- * Mobile Bottom Navigation Bar - Advanced Elite Design System
- * Premium features: Glassmorphism, particle effects, icon animations, badge notifications
+ * Mobile Bottom Navigation Bar — calm, healthtech-grade.
+ * Restrained motion: gentle color/opacity transitions and a subtle press
+ * response only. No infinite float, particles, or pulsing badges — a medical
+ * product should feel steady and trustworthy, not busy.
  */
 
-// ============================================
-// KEYFRAME ANIMATIONS
-// ============================================
-
-@keyframes float {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-8px) scale(1.05); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.8; }
-}
-
-@keyframes badgePulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0; }
-}
-
-@keyframes particleFloat {
-  0% { transform: translate(0, 0) scale(0); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translate(var(--tx), var(--ty)) scale(1); opacity: 0; }
-}
-
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.3; transform: scale(0.95); }
-  50% { opacity: 0.6; transform: scale(1.05); }
-}
-
-@keyframes iconRotate {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-@keyframes blobMorph {
-  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-  50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-}
-
-@keyframes ringExpand {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
+$nav-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
 // ============================================
 // MAIN NAVIGATION CONTAINER
@@ -68,15 +26,11 @@
   -webkit-backdrop-filter: var(--mobile-bar-backdrop);
 
   box-shadow:
-    0 -8px 16px rgba(0, 0, 0, 0.04),
-    0 -3px 8px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 color-mix(in srgb, var(--surface-mobile-bar-strong) 90%, transparent);
-  
-  border-top: 1px solid color-mix(in srgb, var(--color-brand-gold) 20%, transparent);
-  will-change: transform;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  
+    0 -6px 20px rgba(0, 0, 0, 0.05),
+    0 -1px 4px rgba(0, 0, 0, 0.03);
+
+  border-top: 1px solid color-mix(in srgb, var(--color-brand-gold) 22%, transparent);
+
   @media (min-width: 768px) {
     display: none;
   }
@@ -85,20 +39,29 @@
 .navBackdrop {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-mobile-bar-strong) 90%, transparent) 0%, var(--surface-mobile-bar) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface-mobile-bar-strong) 92%, transparent) 0%,
+    var(--surface-mobile-bar) 100%
+  );
   z-index: -1;
 }
 
+// Static, whisper-thin gold accent centred on the top edge.
 .navGlow {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 70%;
+  width: 54%;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, #{variables.$primary} 50%, transparent 100%);
-  opacity: 0.25;
-  animation: glowPulse 3s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #{variables.$primary} 50%,
+    transparent 100%
+  );
+  opacity: 0.35;
 }
 
 // ============================================
@@ -109,11 +72,11 @@
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  height: 58px;
-  padding: 5px 7px 3px;
-  gap: 7px;
+  height: 60px;
+  padding: 6px 10px 4px;
+  gap: 8px;
   position: relative;
-  
+
   > * {
     flex: 1;
   }
@@ -129,185 +92,94 @@
   justify-content: center;
   align-items: center;
   gap: 3px;
-  padding: 5px 7px;
+  padding: 5px 6px;
   text-decoration: none;
   position: relative;
   overflow: hidden;
-  
+
   color: var(--text-muted);
-  background: rgba(243, 244, 246, 0.5);
-  border: 2px solid transparent;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 14px;
   cursor: pointer;
-  
-  will-change: transform, box-shadow;
-  transform: translateZ(0);
-  
+
   transition:
-    all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.3s ease-out;
-  
+    color 0.18s $nav-ease,
+    background-color 0.18s $nav-ease,
+    border-color 0.18s $nav-ease,
+    transform 0.12s $nav-ease;
+
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
-  
+
   &:focus-visible {
     outline: 3px solid #{variables.$primary};
     outline-offset: 2px;
-    box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--color-brand-gold) 15%, transparent),
-      0 8px 20px color-mix(in srgb, var(--color-brand-gold) 20%, transparent);
   }
-  
+
   &:hover {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--color-brand-gold) 12%, transparent) 0%, color-mix(in srgb, var(--color-brand-gold) 6%, transparent) 100%);
     color: #{variables.$primary};
-    border-color: color-mix(in srgb, var(--color-brand-gold) 25%, transparent);
-    box-shadow:
-      0 6px 18px color-mix(in srgb, var(--color-brand-gold) 12%, transparent),
-      0 3px 8px rgba(0, 0, 0, 0.05);
-    transform: translateY(-3px) scale(1.02);
-    
-    .navBlob {
-      opacity: 1;
-      animation: blobMorph 3s ease-in-out infinite;
-    }
-    
-    .navIconWrapper i {
-      animation: iconRotate 0.6s ease-in-out;
-    }
-    
-    .iconRing {
-      animation: ringExpand 0.8s ease-out;
-    }
+    background: color-mix(in srgb, var(--color-brand-gold) 8%, transparent);
   }
-  
+
   &:active {
-    transform: translateY(-1px) scale(0.98);
-    box-shadow:
-      0 2px 8px color-mix(in srgb, var(--color-brand-gold) 10%, transparent),
-      inset 0 1px 4px rgba(0, 0, 0, 0.06);
+    transform: scale(0.97);
   }
 }
 
 .navLinkActive {
-  background: linear-gradient(135deg, rgba(170, 134, 66, 0.14) 0%, color-mix(in srgb, var(--color-brand-gold) 8%, transparent) 100%);
   color: #{variables.$primary};
-  border-color: color-mix(in srgb, var(--color-brand-gold) 30%, transparent);
-  box-shadow:
-    0 3px 12px color-mix(in srgb, var(--color-brand-gold) 10%, transparent),
-    inset 0 1px 2px color-mix(in srgb, var(--text-on-dark) 60%, transparent);
+  background: color-mix(in srgb, var(--color-brand-gold) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-brand-gold) 22%, transparent);
+
+  .navBlob {
+    opacity: 1;
+  }
 }
 
+// Subtle static tint behind the active item (no morph animation).
 .navBlob {
   position: absolute;
-  inset: -10%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-brand-gold) 10%, transparent) 0%, transparent 70%);
-  border-radius: 40%;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 30%,
+    color-mix(in srgb, var(--color-brand-gold) 10%, transparent) 0%,
+    transparent 70%
+  );
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.18s $nav-ease;
   z-index: 0;
 }
 
 // ============================================
-// PRIMARY CTA (BOOK NOW) - FAB STYLE
+// PRIMARY CTA (BOOK NOW) — steady, filled
 // ============================================
 
 .navLinkPrimary {
   background: linear-gradient(135deg, #{variables.$primary} 0%, var(--marketing-accent-gold-strong) 100%);
   color: var(--text-on-dark);
   font-weight: 700;
-  border-color: color-mix(in srgb, var(--text-on-dark) 15%, transparent);
-  
+  border-color: color-mix(in srgb, var(--text-on-dark) 14%, transparent);
+
   box-shadow:
-    0 6px 20px color-mix(in srgb, var(--color-brand-gold) 25%, transparent),
-    0 3px 10px color-mix(in srgb, var(--color-brand-gold) 15%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--text-on-dark) 25%, transparent);
-  
-  animation: float 3s ease-in-out infinite;
-  
+    0 4px 14px color-mix(in srgb, var(--color-brand-gold) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--text-on-dark) 22%, transparent);
+
   &:hover {
-    background: linear-gradient(135deg, #{variables.$brand-dark-blue} 0%, var(--surface-inverse) 100%);
     color: var(--text-on-dark);
-    border-color: color-mix(in srgb, var(--text-on-dark) 30%, transparent);
-    box-shadow:
-      0 10px 28px color-mix(in srgb, var(--color-brand-gold) 30%, transparent),
-      0 5px 14px color-mix(in srgb, var(--color-brand-gold) 20%, transparent),
-      inset 0 1px 0 color-mix(in srgb, var(--text-on-dark) 30%, transparent);
-    transform: translateY(-4px) scale(1.04);
-    animation: none;
-    
-    .fabGlow {
-      opacity: 0.8;
-      transform: scale(1.2);
-    }
-    
-    .particles .particle {
-      animation: particleFloat 1.2s ease-out infinite;
-    }
+    background: linear-gradient(135deg, var(--marketing-accent-gold-strong) 0%, #{variables.$brand-dark-blue} 100%);
   }
-  
+
   &:active {
-    transform: translateY(-2px) scale(1);
-    box-shadow:
-      0 4px 12px color-mix(in srgb, var(--color-brand-gold) 20%, transparent),
-      inset 0 2px 6px rgba(0, 0, 0, 0.15);
+    transform: scale(0.97);
   }
-  
+
   &:focus-visible {
     outline-color: var(--text-on-dark);
     box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--text-on-dark) 40%, transparent),
-      0 20px 48px color-mix(in srgb, var(--color-brand-gold) 50%, transparent);
-  }
-}
-
-.fabGlow {
-  position: absolute;
-  inset: -20%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--color-brand-gold) 40%, transparent) 0%, transparent 70%);
-  opacity: 0.5;
-  transition: all 0.4s ease;
-  z-index: -1;
-}
-
-.particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: color-mix(in srgb, var(--text-on-dark) 80%, transparent);
-  border-radius: 50%;
-  opacity: 0;
-  
-  &:nth-child(1) {
-    top: 20%;
-    left: 30%;
-    --tx: -20px;
-    --ty: -30px;
-    animation-delay: 0s;
-  }
-  
-  &:nth-child(2) {
-    top: 30%;
-    right: 30%;
-    --tx: 25px;
-    --ty: -35px;
-    animation-delay: 0.2s;
-  }
-  
-  &:nth-child(3) {
-    bottom: 30%;
-    left: 50%;
-    --tx: 0px;
-    --ty: -40px;
-    animation-delay: 0.4s;
+      0 0 0 4px color-mix(in srgb, var(--color-brand-gold) 45%, transparent),
+      0 4px 14px color-mix(in srgb, var(--color-brand-gold) 22%, transparent);
   }
 }
 
@@ -321,68 +193,31 @@
   justify-content: center;
   align-items: center;
   width: 28px;
-  height: 30px;
+  height: 28px;
   z-index: 2;
-  
+
   i {
     font-size: 18px;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  
-  .navLink:hover & i {
-    transform: scale(1.15);
-  }
-  
-  .navLink:active & i {
-    transform: scale(1.05);
-  }
-  
+
   .navLinkPrimary & {
-    background: color-mix(in srgb, var(--text-on-dark) 15%, transparent);
-    border-radius: 10px;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
-    
+    width: 30px;
+    height: 30px;
+    background: color-mix(in srgb, var(--text-on-dark) 16%, transparent);
+    border-radius: 9px;
+
     i {
-      font-size: 20px;
+      font-size: 19px;
     }
   }
 }
 
+// Legacy ring element — retired (kept as a no-op so markup stays valid).
 .iconRing {
-  position: absolute;
-  inset: -4px;
-  border: 2px solid #{variables.$primary};
-  border-radius: 50%;
-  opacity: 0;
-}
-
-// ============================================
-// BADGE NOTIFICATION
-// ============================================
-
-.badge {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background: linear-gradient(135deg, var(--status-danger-fg) 0%, var(--safety-critical-border) 100%);
-  border-radius: 50%;
-  border: 2px solid var(--text-on-dark);
-  box-shadow: 0 2px 6px rgba(255, 68, 68, 0.3);
-  z-index: 10;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.badgePulse {
-  position: absolute;
-  inset: -6px;
-  background: rgba(255, 68, 68, 0.5);
-  border-radius: 50%;
-  animation: badgePulse 2s ease-out infinite;
+  display: none;
 }
 
 // ============================================
@@ -390,36 +225,33 @@
 // ============================================
 
 .navLabel {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 600;
   line-height: 1.2;
   text-align: center;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
   word-break: break-word;
   white-space: normal;
   max-width: 100%;
-  min-height: 18px;
+  min-height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   position: relative;
   z-index: 2;
-  transition: all 0.3s ease;
-  
+
   .navLinkPrimary & {
     font-size: 11px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   }
 }
 
+// Small, static active indicator (no pulse).
 .activeDot {
   width: 4px;
   height: 4px;
   background: #{variables.$primary};
   border-radius: 50%;
-  box-shadow: 0 0 6px color-mix(in srgb, var(--color-brand-gold) 50%, transparent);
-  animation: pulse 1.5s ease-in-out infinite;
 }
 
 // ============================================
@@ -435,28 +267,22 @@
 // RESPONSIVE BREAKPOINTS
 // ============================================
 
-@media (min-width: 1024px) {
-  .mobileBottomNav {
-    display: none;
-  }
-}
-
 @media (min-width: 600px) and (max-width: 767px) {
   .navContainer {
     height: 66px;
-    gap: 9px;
-    padding: 7px 10px 5px;
+    gap: 10px;
+    padding: 8px 12px 6px;
   }
-  
+
   .navIconWrapper {
-    width: 32px;
-    height: 32px;
-    
+    width: 30px;
+    height: 30px;
+
     i {
-      font-size: 20px;
+      font-size: 19px;
     }
   }
-  
+
   .navLabel {
     font-size: 11px;
   }
@@ -464,22 +290,22 @@
 
 @media (max-width: 374px) {
   .navContainer {
-    height: 54px;
-    padding: 4px 5px 2px;
-    gap: 5px;
+    height: 56px;
+    padding: 5px 7px 3px;
+    gap: 6px;
   }
-  
+
   .navIconWrapper {
     width: 24px;
     height: 24px;
-    
+
     i {
       font-size: 16px;
     }
   }
-  
+
   .navLabel {
-    font-size: 9px;
+    font-size: 9.5px;
   }
 }
 
@@ -490,17 +316,12 @@
 @media (prefers-reduced-motion: reduce) {
   .navLink,
   .navLinkPrimary,
-  .navIconWrapper,
-  .navGlow,
-  .badge,
-  .badgePulse,
-  .particles,
-  .activeDot {
-    animation: none !important;
+  .navBlob {
     transition: none !important;
   }
-  
-  .navLink:hover {
+
+  .navLink:active,
+  .navLinkPrimary:active {
     transform: none;
   }
 }

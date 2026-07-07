@@ -89,6 +89,32 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
     return subscription;
   }, []);
 
+  // Silently re-register the browser's live subscription with the server. Runs
+  // on every load when notifications are already granted so the saved
+  // subscriber list survives DB restores, endpoint rotation, and re-installs —
+  // the user never has to re-enable alerts just to stay reachable.
+  const resyncSubscription = useCallback(
+    async (subscription: PushSubscription | null) => {
+      if (!subscription || typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+        return;
+      }
+
+      try {
+        await fetch('/api/pwa/subscriptions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            locale,
+            subscription: subscription.toJSON(),
+          }),
+        });
+      } catch {
+        // Best-effort keep-alive; the next load retries.
+      }
+    },
+    [locale]
+  );
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -142,7 +168,8 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
           });
         });
 
-        await checkSubscription(swRegistration);
+        const subscription = await checkSubscription(swRegistration);
+        await resyncSubscription(subscription);
       })
       .catch((error) => {
         console.error('[PWA] Failed to access service worker readiness', error);
@@ -154,7 +181,7 @@ export function usePwaManager(options?: UsePwaManagerOptions) {
       window.removeEventListener('appinstalled', onAppInstalled);
       navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
     };
-  }, [checkSubscription]);
+  }, [checkSubscription, resyncSubscription]);
 
   const installApp = useCallback(async () => {
     if (!deferredPrompt) {
