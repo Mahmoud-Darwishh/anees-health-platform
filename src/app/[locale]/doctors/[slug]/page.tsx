@@ -9,6 +9,7 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
 import { notFound, permanentRedirect } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import { getDoctorBySlug, getAllDoctorSlugs, getDoctorCanonicalSlugById } from '@/lib/api/doctors';
 import {
   physicianSchema as physicianJsonLd,
@@ -82,6 +83,7 @@ export default async function DoctorProfilePage({
   params,
 }: DoctorProfilePageProps) {
   const { locale, slug } = await params;
+  setRequestLocale(locale);
   const doctor = await getDoctorBySlug(slug, locale as 'en' | 'ar');
 
   if (!doctor) {

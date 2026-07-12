@@ -37,6 +37,7 @@ import { getCostExplainerSlugForService } from '@/lib/seo/pricing-explainers';
 import Link from 'next/link';
 import { config } from '@/lib/config';
 import { site, type SupportedLocale } from '@/lib/seo/site';
+import { setRequestLocale } from 'next-intl/server';
 
 export const revalidate = 3600;
 
@@ -91,6 +92,7 @@ export default async function ServiceLandingPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale: raw, slug } = await params;
+  setRequestLocale(raw);
   const locale: SupportedLocale = raw === 'ar' ? 'ar' : 'en';
   const isAr = locale === 'ar';
 

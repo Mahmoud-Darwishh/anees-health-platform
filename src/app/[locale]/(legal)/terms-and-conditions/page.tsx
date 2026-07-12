@@ -1,4 +1,6 @@
+import { use } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 import Script from 'next/script';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 // Route-scoped styles — shared by the two (legal) pages, loaded only on them.
@@ -22,7 +24,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   });
 }
 
-export default function TermsAndConditionsPage() {
+export default function TermsAndConditionsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  // Prime next-intl's request locale (raw, from the URL) so this page can be
+  // statically generated instead of dynamically rendered. Must run before any
+  // useTranslations/useLocale read. Kept synchronous (via React `use`) so the
+  // existing next-intl hooks below continue to work.
+  const { locale: routeLocale } = use(params);
+  setRequestLocale(routeLocale);
+
   const t = useTranslations('terms');
   const common = useTranslations('common');
   const locale = useLocale();

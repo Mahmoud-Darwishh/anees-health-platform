@@ -21,6 +21,7 @@ import { bookingFaqs } from '@/lib/seo/faqs';
 import { getAllPackages, allTierPricesEgp, type PriceTier } from '@/lib/seo/pricing';
 import { getAllCostExplainers } from '@/lib/seo/pricing-explainers';
 import { site, type SupportedLocale } from '@/lib/seo/site';
+import { setRequestLocale } from 'next-intl/server';
 
 export const revalidate = 3600;
 
@@ -39,6 +40,7 @@ export default async function PricingPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: raw } = await params;
+  setRequestLocale(raw);
   const locale: SupportedLocale = raw === 'ar' ? 'ar' : 'en';
   const isAr = locale === 'ar';
 

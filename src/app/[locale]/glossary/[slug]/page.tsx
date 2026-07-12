@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { setRequestLocale } from 'next-intl/server';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Breadcrumb from '@/components/layout/Breadcrumb';
@@ -55,6 +56,7 @@ export default async function GlossaryTermPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale: raw, slug } = await params;
+  setRequestLocale(raw);
   const locale: SupportedLocale = raw === 'ar' ? 'ar' : 'en';
   const isAr = locale === 'ar';
 

@@ -22,6 +22,7 @@ import {
   breadcrumbSchema,
   renderJsonLd,
 } from '@/lib/seo/jsonld';
+import { setRequestLocale } from 'next-intl/server';
 import { getGuide, getAllGuideSlugs } from '@/lib/seo/guides';
 import { config } from '@/lib/config';
 import { site, type SupportedLocale } from '@/lib/seo/site';
@@ -57,6 +58,7 @@ export default async function GuideArticlePage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale: raw, slug } = await params;
+  setRequestLocale(raw);
   const locale: SupportedLocale = raw === 'ar' ? 'ar' : 'en';
   const isAr = locale === 'ar';
 

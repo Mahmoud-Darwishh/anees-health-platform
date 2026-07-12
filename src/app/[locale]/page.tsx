@@ -8,7 +8,7 @@ import {
   webPageSchema,
   renderJsonLd,
 } from '@/lib/seo/jsonld';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 import { getDoctors } from '@/lib/api/doctors';
 
@@ -29,6 +29,7 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: rawLocale } = await params;
+  setRequestLocale(rawLocale);
   const locale: SupportedLocale = rawLocale === 'ar' ? 'ar' : 'en';
 
   const doctors = await getDoctors(locale);

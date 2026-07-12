@@ -1,4 +1,6 @@
+import { use } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 import Script from 'next/script';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -39,7 +41,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return buildAboutMetadata((locale === 'ar' ? 'ar' : 'en') as SupportedLocale);
 }
 
-export default function AboutUsPage() {
+export default function AboutUsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = use(params);
+  setRequestLocale(rawLocale);
+
   const t = useTranslations('aboutPage');
   const common = useTranslations('common');
   const locale = useLocale();

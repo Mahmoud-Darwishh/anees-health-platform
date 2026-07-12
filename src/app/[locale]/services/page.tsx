@@ -28,6 +28,7 @@ import {
 import { servicesFaqs } from '@/lib/seo/faqs';
 import { getAllServiceLandingSlugs, getServiceLanding } from '@/lib/seo/search-discovery';
 import { site, type SupportedLocale } from '@/lib/seo/site';
+import { setRequestLocale } from 'next-intl/server';
 
 export const revalidate = 3600;
 
@@ -46,6 +47,7 @@ export default async function ServicesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: raw } = await params;
+  setRequestLocale(raw);
   const locale: SupportedLocale = raw === 'ar' ? 'ar' : 'en';
   const isAr = locale === 'ar';
 

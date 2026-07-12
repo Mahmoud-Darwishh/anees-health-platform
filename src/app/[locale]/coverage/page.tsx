@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { setRequestLocale } from 'next-intl/server';
 import CoveragePageContent from '@/features/coverage/components/CoveragePageContent';
 import { buildCoverageMetadata } from '@/lib/seo/metadata';
 import {
@@ -29,6 +30,7 @@ export default async function CoveragePage({
   params: Promise<{ locale: string }>;
 }) {
   const $locale = (await params).locale;
+  setRequestLocale($locale);
   const loc = ($locale === 'ar' ? 'ar' : 'en') as SupportedLocale;
   const baseUrl = site.baseUrl;
   const areas = await getCoverageAreas();

@@ -161,6 +161,10 @@ async function review(formData: FormData, decision: 'approved' | 'rejected'): Pr
             actorRole: reviewer.staffRole ?? null,
             changedFields: { source: 'admin.profile.publish', fields: Object.keys(data) },
           });
+          // Public doctor pages are now statically/ISR cached; this change goes
+          // live on the next revalidate window (getDoctors TTL / page revalidate).
+          // TODO(cache): for instant publish, wire Next 16's revalidateTag(tag,
+          // profile) once its interop with unstable_cache tags is confirmed.
           publishedNote = ' Published to the public profile.';
         }
       }

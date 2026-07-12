@@ -1,4 +1,6 @@
+import { use } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 import Script from 'next/script';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -17,7 +19,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return buildContactMetadata((locale === 'ar' ? 'ar' : 'en') as SupportedLocale);
 }
 
-export default function ContactUsPage() {
+export default function ContactUsPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = use(params);
+  setRequestLocale(rawLocale);
+
   const t = useTranslations('contactPage');
   const common = useTranslations('common');
   const locale = useLocale();

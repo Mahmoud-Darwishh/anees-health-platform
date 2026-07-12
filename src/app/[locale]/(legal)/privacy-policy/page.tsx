@@ -1,4 +1,6 @@
+import { use } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { setRequestLocale } from 'next-intl/server';
 import Script from 'next/script';
 import Breadcrumb from '@/components/layout/Breadcrumb';
 // Route-scoped styles — shared by the two (legal) pages, loaded only on them.
@@ -22,7 +24,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   });
 }
 
-export default function PrivacyPolicyPage() {
+export default function PrivacyPolicyPage({ params }: { params: Promise<{ locale: string }> }) {
+  // Prime next-intl's request locale from the raw URL segment BEFORE any
+  // translation hooks run, so this page can be statically generated (ISR).
+  const { locale: routeLocale } = use(params);
+  setRequestLocale(routeLocale);
+
   const t = useTranslations('privacy');
   const common = useTranslations('common');
   const locale = useLocale();

@@ -12,6 +12,7 @@ import {
 } from '@/lib/seo/jsonld';
 import { site, type SupportedLocale } from '@/lib/seo/site';
 import { getDoctors } from '@/lib/api/doctors';
+import { setRequestLocale } from 'next-intl/server';
 
 export const revalidate = 3600;
 
@@ -30,6 +31,7 @@ export default async function DoctorsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: rawLocale } = await params;
+  setRequestLocale(rawLocale);
   const locale: SupportedLocale = rawLocale === 'ar' ? 'ar' : 'en';
 
   const doctors = await getDoctors(locale);
