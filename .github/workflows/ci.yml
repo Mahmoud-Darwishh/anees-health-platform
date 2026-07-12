@@ -152,6 +152,10 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://anees:anees@localhost:5432/anees_ci
+      # Canonical site origin. src/lib/config throws during a production build if
+      # this is missing or non-https (it feeds every canonical/hreflang/sitemap
+      # URL + JSON-LD @id). Public value, not a secret.
+      NEXT_PUBLIC_SITE_URL: https://anees.health
       # Build-time placeholders only — never real secrets. Public pages that are
       # prerendered at build time read Postgres only; Medplum/R2 are not called.
       AUTH_SECRET: ci-build-placeholder-secret

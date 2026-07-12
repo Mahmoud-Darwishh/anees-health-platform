@@ -46,6 +46,8 @@ next-env.d.ts
 
 # logs and data
 /data/
+tmp-dev-server.log
+*.local.log
 
 # Private EHR file storage (never commit PHI)
 private-storage/
