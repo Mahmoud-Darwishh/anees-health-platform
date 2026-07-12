@@ -1,8 +1,8 @@
 # FHIR Resource Catalog — Anees Health Platform (Medplum)
 
 > **Audience:** engineers, hospital-integration partners, security auditors.
-> **Last refresh:** 2026-06-18.
-> **Source of truth:** `src/lib/medplum/*.ts` (29 files; ~22 own a FHIR resource, the rest are client/config/constants/extensions/terminology helpers). This doc summarises what each module does in FHIR terms; **the code is authoritative — where this doc and the code disagree, the code wins and this doc is the bug.**
+> **Last refresh:** 2026-07-12.
+> **Source of truth:** `src/lib/medplum/*.ts` (~35 files; ~24 own a FHIR resource, the rest are client/config/constants/extensions/terminology/scheduling helpers). This doc summarises what each module does in FHIR terms; **the code is authoritative — where this doc and the code disagree, the code wins and this doc is the bug.**
 >
 > **⚠️ Accuracy pass (2026-06-18):** an internal audit found several sections below described an *intended* design rather than the *shipped* code. Those sections now carry a **Status** line using the legend here. The full gap register and the plan to close each gap live in **[EHR_AUDIT.md](EHR_AUDIT.md)**.
 >
@@ -147,7 +147,7 @@ Lightweight wrapper used for scheduling proposals before a `Visit` is confirmed.
 
 **Live + server alerting:** the charting form shows an **at-entry** Low/High warning as the clinician types (thresholds passed from `nursing-ops-policy`), and `recordVitalsAction` still raises a debounced escalation `Communication` on a breach (now incl. respiratory rate) — see resources #18/#19.
 
-**Glucose — two purposes by design:** the vitals glucose (LOINC `2339-0`) is a point-of-care reading; the dedicated **Blood Glucose Profile** (LOINC `41653-7`, with timing/meal context) is the structured monitoring feature. The vitals form links to it.
+**Blood glucose — one stream (`src/lib/medplum/glucose.ts`):** glucose is a single Observation stream, not two. Every reading — whether a quick vitals-form entry or a context-rich entry from the glucose recorder — is written under LOINC `2339-0` in the `vital-signs` category. The recorder adds only **optional** meal-timing context (fasting / pre-meal / post-meal / bedtime …) as Anees `glucose-timing` / `glucose-meal` extensions, plus an `interpretation` flag (`L / LL / N / H / HH`) derived from a timing-aware classification (`@/lib/clinical/glucose-profile`). Values are always canonical mg/dL. The reader also matches the **legacy capillary-glucometer code `41653-7`** so readings written by the earlier separate-stream design still surface in the profile. (An earlier revision of this doc described glucose as two streams with `41653-7` as a dedicated profile code — that no longer matches the code.)
 
 **Example (heart rate)**
 ```json
@@ -303,7 +303,7 @@ The single most important resource for the **caregiver portal**. A patient's car
 
 - `status` — `active | inactive`.
 - `scope` — `patient-privacy` (typical) or `treatment`.
-- `category[]` — Anees `portal-scope` extension: `profile | visits | vitals | notes | tasks | files | care-team | messaging`.
+- `category[]` — Anees `portal-scope` extension. The resolvable scope set (`PortalScope` in `consent-policy.ts`) is **five**: `profile | visits | vitals | notes | tasks`. There is no files / care-team / messaging scope today.
 - `patient`, `dateTime`, `performer` (the patient or their guardian), `actor` (the caregiver Practitioner / RelatedPerson).
 - `policyRule.coding` — internal policy code.
 
@@ -438,6 +438,22 @@ License gating: the calling action checks `canSignClinical` before moving a note
 
 ---
 
+## 22. PractitionerRole (Clinician availability)
+
+**Module:** `src/lib/medplum/availability.ts` (+ client-safe `availability-types.ts`) · **Sync:** write-through (Medplum-authoritative; no Postgres schema)
+
+**Status:** 🟡 Partial — availability capture + the dispatch "who's free, where, today?" read, no auto-matching yet.
+
+Clinician availability lives on a FHIR **`PractitionerRole`** (one per practitioner, upserted via `createResource` / `updateResource`) — keeping scheduling in the practitioner source of truth without a Postgres migration.
+
+- `practitioner` → Practitioner reference; `active`.
+- `availableTime[]` — weekly recurring windows (`daysOfWeek` FHIR day codes `mon…sun`, `availableStartTime` / `availableEndTime` as `HH:MM`).
+- **Anees extensions** — covered service areas (`clinician-service-areas`, comma-joined) + a free-text availability note.
+
+The editor (client) and the ops board (server) share the pure helpers and day-code types from `availability-types.ts`, so the client bundle never pulls Medplum I/O. This is scheduling metadata, not PHI, so it does not emit a FHIR `AuditEvent` mirror.
+
+---
+
 ## Resources not currently used
 
 The following base FHIR resources are **not** in active use and should not be added without an architectural review:
@@ -470,7 +486,7 @@ All under `https://anees.health/fhir/StructureDefinition/`:
 | `clinical-note-signed-at` | Composition | dateTime |
 | `clinical-note-amends` | Composition | reference (prior Composition) |
 
-Caregiver scope flags (consent extension): `portal-scope` system maps to `profile | visits | vitals | notes | tasks | files | care-team | messaging`.
+Caregiver scope flags (consent extension): `portal-scope` system maps to the five resolvable scopes — `profile | visits | vitals | notes | tasks`.
 
 ---
 

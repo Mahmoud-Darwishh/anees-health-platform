@@ -1,6 +1,8 @@
 # EHR Internal Audit — Gaps, Problems & Phased Remediation Plan
 
-> **Created:** 2026-06-18
+> **HISTORICAL SNAPSHOT (2026-06-18) — not live status.** This records the June clinical-core hardening pass. For current platform status and gaps, see the current audit of record: [CTO_AUDIT_2026-07-01.md](CTO_AUDIT_2026-07-01.md), plus [EHR_SYSTEM_BLUEPRINT.md](EHR_SYSTEM_BLUEPRINT.md) and [EHR_NOW.md](EHR_NOW.md).
+
+> **Created:** 2026-06-18 · **Historical:** frozen remediation ledger, not live status (see banner above).
 > **Status:** AUDIT ONLY — no code or docs changed yet. This file is the master plan.
 > **Scope:** the clinical core (`src/lib/medplum/*`), the patient chart (`src/features/ehr/admin-patient/*`), the clinician workspace (`src/features/ehr/clinician-physio/*`), and the engineering docs (`.claude/CLAUDE.md`, `docs/*`).
 > **Method:** read every clinical write module line-by-line and cross-checked each against `docs/FHIR_CATALOG.md`. Findings below are grounded in the code as of this date, not the docs.

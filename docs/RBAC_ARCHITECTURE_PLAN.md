@@ -1,7 +1,11 @@
 # Anees RBAC — Architecture Plan
 
-> **Status:** Phase 0 shipped (the spine is in code); Phase 1 in progress. Last
-> updated **2026-06-11**.
+> **Status:** Phase 0 shipped (the spine is in code); Phase 1 in progress. The
+> matrix is now a single code source of truth with the §22 action×role table
+> auto-generated from it, `lint:rbac` + `test:security-policy` gating CI, the PIP
+> centralised, and an RBAC matrix test suite green. Remaining Phase 1 work: the
+> async audit emitter, service-account identities, and moving `admin-patient`
+> onto `can()`. Last updated **2026-07-12**.
 > **Purpose:** The canonical design for a world-class, scalable, compliance-grade
 > authorization system for the Anees Health Platform.
 > **Audience:** Founder, senior engineer, future hires, hospital procurement reviewers, auditors.
@@ -45,10 +49,12 @@ L1  DATA            Postgres RLS + Medplum per-tenant Project (defense in depth)
 L0  AUDIT           Decisions emitted as events → written asynchronously
 ```
 
-Each layer is a **wall**. Bypass one, you still hit the next. As of 2026-06-11 the
+Each layer is a **wall**. Bypass one, you still hit the next. As of 2026-07-12 the
 edge (L6), enforcement (L5), decision (L4) and information (L3) layers are live; L6
-now **denies by default** for unlisted staff routes. The audit writer (L0) and
-Postgres RLS (L1) are the remaining gaps — see §13.
+now **denies by default** for unlisted staff routes, and the PIP (L3) is centralised
+in `policy/pip.ts` (`loadPolicyFacts` — license + CareTeam case-scope + tenant per
+request). The async audit writer (L0) and Postgres RLS (L1) are the remaining gaps —
+see §13.
 
 | Layer | Owns | Does NOT own |
 |---|---|---|
@@ -145,7 +151,7 @@ storage.
 
 | Wall | Enforces | Status |
 |---|---|---|
-| **App layer** | PDP rejects `actor.tenant != resource.tenant`; scope filters add `WHERE tenantId` | partial — columns exist, no helper |
+| **App layer** | PDP rejects `actor.tenant != resource.tenant`; scope filters add `WHERE tenantId` | partial — columns + manual scope helpers (`src/lib/db/tenant-scope.ts`: `tenantWhere` / `assertTenantMatch`); per-call, not auto-injected |
 | **Database (Postgres RLS)** | even raw SQL cannot cross tenants | **not enabled — must add before hospital onboarding** |
 | **FHIR (Medplum)** | one Project per tenant | today single project w/ tags; split when 2nd hospital lands |
 
@@ -178,7 +184,7 @@ architecture is identical. Stage 2→3 is unlikely to be needed.
 | 5 | Add scope-filter helpers (`patientReadScope`, etc.) returning Prisma WHERE fragments | No |
 | 6 | Add `middleware.ts` for edge gating of `/admin/*`, `/clinician/*`, `/partner/*`, `/api/internal/*` | No |
 | 7 | Service-account identity — replace ad-hoc bypasses in cron + webhook + scanner | No |
-| 8 | Refactor server actions to call the PDP — one feature module at a time (start with `admin-patient/actions.ts`, 3,592 LOC) | Incremental |
+| 8 | Refactor server actions to call the PDP — one feature module at a time (start with `admin-patient/actions/`, now domain-split into ~16 files) | Incremental |
 | 9 | Unify break-glass on `DestructiveApprovalToken`; remove restricted-access cookie | No |
 | 10 | Enable Postgres RLS on the 11 tenant-bearing tables | No (careful migration) |
 | 11 | RBAC test suite — every (role × action × resource type) | No |
@@ -267,18 +273,19 @@ The single source of truth + the decision function, proven on one real vertical.
 **✅ Milestone:** *A physiotherapist can do only physiotherapist things, enforced
 server-side, and a new action with a forgotten check fails closed — not open.*
 
-### Phase 1 — Spread & harden · *next*
-| §7 step | Plain terms |
-|---|---|
-| 5. Scope-filter helpers | Reusable "only my patients" / "only my tenant" query fragments. |
-| 7. Service accounts | Cron, webhook, scanner become named identities with tiny allowlists. |
-| 8b. Remaining modules | Every other role + `admin-patient/actions.ts` onto `can()`. |
-| 9. Unify break-glass | One mechanism (`DestructiveApprovalToken`); delete the restricted-access cookie. |
-| 11. Test suite | Every (role × action) combination tested. |
-| 12. CI lint | Build fails if matrix code and the matrix doc drift apart. |
+### Phase 1 — Spread & harden · *in progress*
+| §7 step | Plain terms | State |
+|---|---|---|
+| 5. Scope-filter helpers | Reusable "only my patients" / "only my tenant" query fragments. | 🟡 tenant helpers landed (`tenant-scope.ts`); per-patient scope centralised in the PIP |
+| 7. Service accounts | Cron, webhook, scanner become named identities with tiny allowlists. | ❌ not yet |
+| 8b. Remaining modules | Every other role + `admin-patient/actions/` onto `can()`. | ❌ still on the enforced legacy path |
+| 9. Unify break-glass | One mechanism (`DestructiveApprovalToken`); delete the restricted-access cookie. | ❌ not yet |
+| 11. Test suite | RBAC matrix + route-access decisions pinned in Vitest. | ✅ `rbac-matrix.test.ts` + `route-access.test.ts` (not yet exhaustive per combination) |
+| 12. CI lint | Build fails if matrix code and the matrix doc drift apart. | ✅ `lint:rbac` + `test:security-policy` run in CI |
 
-**✅ Milestone:** *Every role is behind the matrix, and the build itself blocks an
-accidental permission change.*
+**✅ Milestone (partly reached):** *Every role is behind the matrix, and the build
+itself blocks an accidental permission change* — the CI drift guard + matrix tests
+are green; the remaining hold-out is migrating the last legacy modules onto `can()`.
 
 ### Phase 2 — Tenant isolation · *trigger: before 1st hospital goes live / OVH migration*
 | §7 step | Plain terms |
@@ -358,13 +365,23 @@ loops. Touched: `lib/auth/route-access.ts` (deny-by-default + exact rules),
 `app/clinician/layout.tsx`, and the login redirects in
 `app/[locale]/auth/login/{page.tsx,LoginForm.tsx}`.
 
+### Phase 0 — since shipped (2026-07-12)
+- **Step 3 — PIP for case scope: DONE.** `policy/pip.ts` (`loadPolicyFacts`) now
+  resolves license + CareTeam case-scope + tenant once per request and hands the
+  facts to `can()`, replacing the inline scope resolution the physio writes used to
+  do. It is the L3 information layer named in §1.
+- **Step 12 — `lint:rbac` + doc sync: DONE (no longer blocked).** The matrix-fork
+  question in §15 was resolved: `scripts/lint-rbac.ts` *derives* the granular §22
+  action×role table from `ehr-matrix.ts` and writes it between the
+  `<!-- RBAC_MATRIX:BEGIN/END -->` markers in `EHR_ROLE_MATRIX.md`. CI runs both
+  `npm run lint:rbac` (drift guard) and `npm run test:security-policy` in the `test`
+  job, so the build fails if code and doc drift apart.
+
 ### Phase 0 remaining (not yet done)
 - **Step 4 — audit emitter:** `can()` returns a `reason` + `trace` ready to log,
-  but the separate async writer isn't built yet.
-- **Step 3 — PIP for case scope:** `can()` accepts `inCaseScope`, but most physio
-  writes still resolve scope inline (e.g. `withTrustedVisitFormData`). Centralise
-  next.
-- **Step 12 — `lint:rbac` + doc sync:** BLOCKED on a decision — see §15 below.
+  but the separate async decision-event writer isn't built yet. (Mutation auditing
+  is covered separately by `recordAudit` / the FHIR `AuditEvent` mirror; this is the
+  PDP decision stream specifically.)
 
 ---
 
@@ -380,15 +397,15 @@ loops. Touched: `lib/auth/route-access.ts` (deny-by-default + exact rules),
   enforced only for `medical_ops` / `operator` via `isLicensedMedOps`. This
   contradicts CLAUDE.md's claim that "expired licences cannot sign." Pre-existing;
   not changed in Phase 0. Decide whether expiry should hard-block the named roles.
-- **The `scripts/` 
-  (2026-06-11). All backing files are present again: `lint-rbac.ts`,
-  `security-policy-selftest.cjs`, `ehr-audit-gap-report.ts`, `ehr-audit-backfill.ts`,
-  `migrate-medplum-binaries-to-r2.ts`, `backfill-patient-goals-to-fhir.ts` +
-  `run-backfill-patient-goals-to-fhir.cjs`, `trigger-document-scan.cjs`, plus
-  `tsconfig.json` and `server-only-stub.js`. `scripts/tsconfig.json` previously set
-  `"ignoreDeprecations": "6.0"`, which TypeScript 5.9 rejects (`TS5103`); corrected
-  to `"5.0"`. `lint:rbac` and `test:security-policy` now run green. Remaining action
-  item: wire `lint:rbac` into CI (step 12).
+- **The `scripts/` directory was restored** (2026-06-11). All backing files are
+  present: `lint-rbac.ts`, `security-policy-selftest.cjs`, `ehr-audit-gap-report.ts`,
+  `ehr-audit-backfill.ts`, `migrate-medplum-binaries-to-r2.ts`,
+  `backfill-patient-goals-to-fhir.ts` + `run-backfill-patient-goals-to-fhir.cjs`,
+  `trigger-document-scan.cjs`, plus `tsconfig.json` and `server-only-stub.js`.
+  `scripts/tsconfig.json` previously set `"ignoreDeprecations": "6.0"`, which
+  TypeScript 5.9 rejects (`TS5103`); corrected to `"5.0"`. **Resolved:** `lint:rbac`
+  and `test:security-policy` run green and are now wired into CI's `test` job (step 12
+  done).
 
 ---
 
@@ -413,31 +430,31 @@ The npm scripts intended to support RBAC. The `scripts/` directory was restored 
    Record<string, ActionDefinition>` and `ModuleKey` is a union, so a typo in a
    module name or action is a **compile error**.
 2. `npm run build` — proves every page/route still type-checks and compiles.
-3. Manual matrix review against `EHR_ROLE_MATRIX.md` §3 when a permission changes.
+3. `npm run lint:rbac` (CI) — the §22 action×role table in `EHR_ROLE_MATRIX.md` is
+   regenerated from `ehr-matrix.ts`; the build fails on any drift. Backed by
+   `test:security-policy` and the `rbac-matrix` / `route-access` Vitest suites. Manual
+   matrix review against §3 is now a sanity check, not the primary gate.
 
 ---
 
-## 15. Open fork — representation of the matrix (needs a decision)
+## 15. Matrix representation — RESOLVED (the grid is the single source)
 
-Two representations of "who can do what" now exist and must be reconciled before
-`lint:rbac` (step 12) can be built:
+This was an open fork; it has been decided and implemented along the recommended
+path. The **module × role grid** (`ehr-matrix.ts`, ~37 modules, each role given
+`hidden/read/write/sign` + scope) is the single editable code source of truth, and
+mirrors `EHR_ROLE_MATRIX.md` §3.
 
-1. **Module × role grid** (`ehr-matrix.ts`, built Phase 0) — ~37 modules, each role
-   given `hidden/read/write/sign` + scope. Mirrors `EHR_ROLE_MATRIX.md` §3.
-   Compact, non-technical-friendly, the current code source of truth.
-2. **Flat 104-action × role table** (`EHR_ROLE_MATRIX.md` §22) — hand-written,
-   marked "AUTO-GENERATED" but with no generator and no matching code. More
-   granular (`patient.delete`, `note.nursing.amend`, `breakglass.approve`).
+The granular action×role table in `EHR_ROLE_MATRIX.md` §22 is no longer hand-written:
+`scripts/lint-rbac.ts` **derives** it from the grid (each module expands into its
+`*.read / *.write / *.sign` rows by capability) and writes it between the
+`<!-- RBAC_MATRIX:BEGIN -->` / `<!-- RBAC_MATRIX:END -->` markers. The current output
+is a ~95-action × 12-role grid. `npm run lint:rbac` (check) runs in CI and fails the
+build if the committed §22 differs from what the script would generate;
+`npm run lint:rbac:fix` regenerates it.
 
-Recommended resolution: **keep the grid as the single human source**, and make
-`lint:rbac` *derive* the granular action×role table (§22) FROM the grid — each
-module expands into its `*.read / *.write / *.sign` rows by capability, plus a small
-hand-listed set of cross-cutting actions (break-glass, two-person, feature-flag)
-that aren't modules. This keeps one editable source and an auto-generated granular
-view. Alternative: adopt the 104-action catalog as canonical and rebuild the code
-around it (more granular, but a bigger catalog to hand-maintain).
-
-Until this is decided, §22 stays hand-written and is NOT trusted as code-canonical.
+So there is now exactly one editable source (the grid) and one auto-generated,
+marker-delimited, CI-guarded view (§22). **§22 is code-canonical** — it is derived
+from the code and kept honest by the build. Editing it by hand is a CI failure.
 
 ---
 

@@ -1,7 +1,7 @@
 # Security Architecture — Anees Health Platform
 
 > **Audience:** engineers, hospital procurement teams, security auditors.
-> **Last refresh:** 2026-06-05.
+> **Last refresh:** 2026-07-12.
 > Pairs with [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) (control mapping) and [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) (operational procedures).
 
 This document describes how the platform protects PHI and access to it, layer by layer. Every control points to the file(s) that implement it, so an auditor can trace control → code in one click.
@@ -35,13 +35,13 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 │  Soft delete only on clinical                                                 │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │  AUDIT & MONITORING                                                          │
-│  AuditLog (Postgres, durable) + FHIR AuditEvent (Medplum mirror)             │
+│  AuditLog (Postgres, durable, hash-chained) + FHIR AuditEvent (Medplum mirror)│
 │  Login + logout audit  →  /admin/compliance dashboard                         │
-│  (Sentry + log aggregator: planned)                                          │
+│  Sentry: wired + DSN-gated (inactive until DSN set); log aggregator: planned │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │  SECRETS & VULN MGMT                                                          │
 │  .env.local (dev) → managed env (prod) → rotation cadence                    │
-│  Dependabot, npm audit, malware-scan on uploads                              │
+│  Renovate + CI audit gate, npm audit, malware-scan on uploads                │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -56,8 +56,10 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 
 ### 3.2 Content Security Policy
 - CSP is set in `next.config.ts` `headers()`.
-- Allow-list today: Anees domains, Kashier (payments), Cloudflare, Vercel, Chatling (chat widget), Microsoft Clarity (analytics), Facebook (pixel).
-- **Adding a new third-party origin requires updating CSP.** Daily.co (telemed), Sentry, R2's public CDN, and any new ad/analytics vendor must be added explicitly.
+- Allow-list today: Anees domains, Kashier (payments), Cloudflare, Vercel, Chatling (chat widget), Microsoft Clarity (analytics), Facebook (pixel), Sentry (error reporting), PostHog, and Daily.co (telemedicine groundwork).
+- The public marketing site actively loads three third-party scripts: **Microsoft Clarity** (session analytics) and **Facebook Pixel** (both in `src/app/layout.tsx`), and the **Chatling** chat widget (in `src/app/[locale]/layout.tsx`). These are the current PHI-blast-radius surfaces to keep in mind; they run only on public pages, never inside `/admin/*` or `/clinician/*`.
+- **Sentry, Daily.co, and PostHog are allow-listed but not all wired yet:** Sentry init is DSN-gated (activates only when the DSN is set — see §7.4); Daily.co (telemedicine) and PostHog are CSP groundwork only, with no code using them today.
+- **Adding a new third-party origin requires updating CSP.** R2's public CDN and any new ad/analytics vendor must be added explicitly.
 
 ### 3.3 CORS
 - Every API route response goes through `resolveCorsHeaders` from `src/lib/utils/cors.ts`.
@@ -80,6 +82,7 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 - Configured in `src/auth.ts`.
 - Adapter: `@auth/prisma-adapter`. Sessions are JWT — no server-side session table.
 - JWT carries: `id`, `role` (`patient | staff`), `patientId`, `staffId`, `staffRole`, `phone`.
+- Idle timeout: sessions expire after **45 minutes** (`maxAge: 60 * 45` in `src/auth.ts`), refreshed at most every 5 minutes (`updateAge: 60 * 5`).
 - `AUTH_SECRET` rotation cadence: every 90 days, see [DEPLOYMENT_RUNBOOK.md §6](DEPLOYMENT_RUNBOOK.md).
 
 ### 4.2 Providers
@@ -106,9 +109,9 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 - Resolution is server-side, in `src/features/ehr/clinician-physio/data.ts` (and equivalents). The session never trusts a `patientId` from the client.
 
 ### 4.6 Caregiver consent scopes
-- A patient's caregiver gets **no** default access. Every scope (`profile | visits | vitals | notes | tasks | files | care-team | messaging`) is granted by an active FHIR `Consent` resource.
+- A patient's caregiver gets **no** default access. Each of the five scopes the platform implements (`profile | visits | vitals | notes | tasks` — the `PortalScope` union in `consent-policy.ts`) is granted only by an active FHIR `Consent` resource.
 - `src/lib/medplum/consent-policy.ts` resolves an authenticated caregiver session to its current scope set on every render.
-- See [FHIR_CATALOG.md §14](FHIR_CATALOG.md) for the resource shape.
+- See [FHIR_CATALOG.md](FHIR_CATALOG.md) for the resource shape.
 
 ### 4.7 Break-glass overrides
 - For restricted-tier records (mental health, HIV, reproductive health, DV) or destructive operations (delete patient, force-close visit), the platform issues a `DestructiveApprovalToken`.
@@ -138,7 +141,7 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 - The "platform" tenant is the default for back-compat. Hospital partners will get their own tenant codes.
 
 ### 5.4 Visit state machine
-- `Visit.state` has 22 states. Direct `prisma.visit.update({ state })` is **forbidden**.
+- `Visit.state` has 23 states. Direct `prisma.visit.update({ state })` is **forbidden**.
 - All transitions go through a helper that: validates the transition is legal from the current state, writes a `VisitStateTransition` audit row (with actor, reason, geo, override metadata), and emits an `AuditLog` row.
 
 ### 5.5 Outbound calls
@@ -203,15 +206,16 @@ We protect electronic Protected Health Information (ePHI) — Egyptian and (soon
 
 ### 7.2 Where audit lives
 - **Durable primary:** Postgres `AuditLog` — written by `recordAudit` / `writeAuditLog` (retried, non-swallowing; `critical` actions throw if un-auditable); login/logout by `writeLoginAudit`.
-- **Interoperable mirror:** FHIR `AuditEvent` in Medplum, written off the critical path via `after()` for clinical writes + break-glass overrides (Phase 1, 2026-06-18). Login/logout + `access_denied` mirror is pending — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1.
+- **Tamper-evidence:** `AuditLog` rows are hash-chained (migration `20260620000000_audit_hash_chain`), so a deleted or altered row breaks the chain. The login-audit chain is a follow-up (see [EHR_NOW.md](EHR_NOW.md)).
+- **Interoperable mirror:** FHIR `AuditEvent` in Medplum, written off the critical path via `after()` for clinical writes + break-glass overrides (see `src/lib/medplum/audit-event.ts`). Login/logout + `access_denied` mirror is pending — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1.
 - Retention: indefinite (regulatory). Archival to cold storage is a Phase 2 task.
 
 ### 7.3 What the compliance dashboard shows
 - `/admin/compliance` lets a `compliance_officer` (or `admin`) browse: recent break-glass overrides, restricted-tier access events, login/logout history, and failed access attempts. It is read-only over `AuditLog`.
 
-### 7.4 Observability gap
-- **No Sentry, no log aggregator, no APM today.** Errors surface only in server logs on the VPS.
-- Targeted for EHR_NOW Sprint 5. The CSP must be widened to allow Sentry once we adopt it.
+### 7.4 Observability
+- **Sentry is wired but DSN-gated.** `@sentry/nextjs` is installed; `src/instrumentation.ts`, `src/instrumentation-client.ts`, and the `reportError` seam (`src/lib/utils/observability.ts`) forward errors to Sentry **only when `SENTRY_DSN` / `NEXT_PUBLIC_SENTRY_DSN` are set** — otherwise the seam falls back to the structured logger. All five error boundaries route through the seam, and the CSP already allow-lists Sentry. Until the DSN is configured in production, errors surface only in server logs on the VPS.
+- Still outstanding: a log aggregator / APM, and `withSentryConfig` source-map upload. Tracked in [EHR_NOW.md](EHR_NOW.md).
 
 ---
 
@@ -247,7 +251,7 @@ See `.env.local` template in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) and [DE
 ## 9. Vulnerability management
 
 ### 9.1 Dependencies
-- Renovate / Dependabot is planned (EHR_NOW Sprint 5). Today, `npm audit` is run manually before each release.
+- **Renovate is configured** (`renovate.json`) to raise dependency-update PRs, and CI (`.github/workflows/ci.yml`) runs an `npm audit` gate alongside the `quality`, `test`, and `migrations` jobs (which also run `lint:rbac`, `test:security-policy`, and the tenant-scope + CSS/colour guards).
 - Lockfile (`package-lock.json`) is committed and version-pinned.
 
 ### 9.2 Uploads
@@ -255,7 +259,7 @@ See `.env.local` template in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) and [DE
 - Allowed MIME types are enforced server-side at the upload endpoint.
 
 ### 9.3 SAST / DAST
-- Not yet in place. Planned: ESLint security plugin, `npm audit --omit=dev` in CI, optional Snyk for prod scans.
+- The CI `npm audit` gate is live (§9.1). Still planned: an ESLint security plugin and optional Snyk for prod scans. No DAST yet.
 
 ---
 
@@ -264,7 +268,7 @@ See `.env.local` template in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) and [DE
 > **Goal:** detect within 1 hour, contain within 4 hours, notify regulators / partners within the deadlines required by Egypt's DPL 151/2020 (72 hours).
 
 ### 10.1 Detection
-- Server logs + (planned) Sentry + (planned) Cloudflare WAF alerts.
+- Server logs + Sentry (wired, DSN-gated) + (planned) Cloudflare WAF alerts.
 - `/admin/compliance` daily review by the compliance officer.
 - Any unscheduled `override` audit row triggers an email to the on-call engineer.
 
@@ -299,11 +303,11 @@ See `.env.local` template in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) and [DE
 
 | Gap | Severity | Owner | Target |
 |---|---|---|---|
-| No Sentry / log aggregator | Medium | Engineering | EHR_NOW Sprint 5 |
+| Sentry wired but DSN unset in prod; no log aggregator / APM | Medium | Engineering | EHR_NOW |
 | Postgres-only audit coverage incomplete | Medium | Engineering | EHR_NOW Sprint 1 (continuation) |
 | Multi-tenancy enforced per query (no RLS) | Medium | Engineering | When hospital #2 onboards |
 | Production malware scanner not yet wired | High | Engineering + Ops | Before hospital go-live |
-| No automated SAST / dep scanning | Medium | Engineering | EHR_NOW Sprint 5 |
+| No formal SAST (Renovate + CI audit gate live; SAST still pending) | Medium | Engineering | EHR_NOW |
 | No formal pen test | Medium | External + Owner | Before MENA expansion |
 | No DDoS load test | Low | Engineering | Pre Series-A |
 | `HASH_SALT` rotation strategy not defined | Low | Engineering | Backlog |

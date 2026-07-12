@@ -28,7 +28,7 @@ If your suggestion would contradict any of the above, do not make the suggestion
 3. **Medplum access goes through `getMedplumClient()`** in `src/lib/medplum/client.ts`. Prefer module-scoped helpers (e.g. `listPatientEncounters`).
 4. **R2 access goes through `src/lib/storage/r2-medical.ts`.** Never construct an S3 client directly. Keys via `buildObjectKey`; filenames via `sanitizeFilename`.
 5. **Server-first by default.** Add `'use client'` only when a component needs interactivity.
-6. **Server actions for EHR writes**, not API routes. Follow `src/features/ehr/admin-patient/actions.ts` shape.
+6. **Server actions for EHR writes**, not API routes. Follow the domain-split `src/features/ehr/admin-patient/actions/` shape — one file per clinical domain, `index.ts` barrel, shared helpers under `actions/shared/`. New actions go in the matching domain file, never a new monolith.
 7. **Zod-parse every server-action input and every API JSON body.** Never trust `formData.get()` directly into a DB call.
 8. **Tenant-scope every query** on `Patient`, `Provider`, `Visit`, `CarePlan`, `Invoice`, `OnlineBooking`, `Staff`, `Coverage`, `PriorAuth`, `Claim`, `ControlledSubstanceLedger`. Default tenant is `"platform"`.
 9. **Every clinical write checks `canSignClinical(staff, discipline)`** for license validity.

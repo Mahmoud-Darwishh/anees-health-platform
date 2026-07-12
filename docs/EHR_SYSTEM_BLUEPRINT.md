@@ -1,6 +1,6 @@
 # Anees Care OS — Full System Blueprint
 
-> **Date:** 2026-07-02 · **Basis:** full-codebase scan (8 parallel subsystem audits, every claim grounded in file:line evidence; headline findings re-verified by hand).
+> **Last refresh:** 2026-07-12 · **Original scan:** 2026-07-02 · **Basis:** full-codebase scan (8 parallel subsystem audits, every claim grounded in file:line evidence; headline findings re-verified by hand; resolution markers re-verified against code on refresh).
 > **Audience:** owner + engineering. Written in plain language first, with technical evidence for engineers.
 > **Companion docs:** [CTO_AUDIT_2026-07-01.md](CTO_AUDIT_2026-07-01.md) (infrastructure/risk), [EHR_AUDIT.md](EHR_AUDIT.md) (clinical gaps), [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md) (RBAC). This document is the **system design**: what exists, what's broken, and what the target looks like.
 
@@ -46,8 +46,8 @@ The owner's instinct — *"the flow is not logic"* — is correct, and the scan 
 
 ### A2. Visit lifecycle & tracking reality
 
-- **State machine:** 23 enum states; only 16 are reachable. `draft`, `documenting`, `signed`, `amended`, `completed` (as state), `force_closed_by_admin`, `abandoned` have **no writer**. On finished visits `state` and `status` permanently disagree (`checked_out` vs `completed`).
-- **No transition-legality map:** journey steps use ad-hoc timestamp guards; disruption transitions have **zero** sequence guards — once wired, a completed visit could be re-marked "refused at door" and its money rewritten (`visit-workflow.ts:495-560`).
+- **State machine:** 23 enum states; only ~16 are reachable. `draft`, `documenting`, `signed`, `amended`, `completed` (as state), and `abandoned` have **no writer** (`force_closed_by_admin` has since been wired via ops dispute force-close — see Part B). On finished visits `state` and `status` permanently disagree (`checked_out` vs `completed`).
+- ✅ ~~**No transition-legality map:** journey steps use ad-hoc timestamp guards; disruption transitions have **zero** sequence guards — once wired, a completed visit could be re-marked "refused at door" and its money rewritten.~~ **Shipped (B15):** a single legality map (`shared/workflow-legality.ts`) is now enforced server-side inside `persistWorkflowStateTransition` (`shared/workflow-state.ts:188-191`) and unit-tested (`tests/unit/visit-state-machine.test.ts`) — a closed visit can no longer be moved off-map.
 - **GPS:** one-shot browser fix at check-in/out, entirely client-asserted (spoofable). `VisitLocationPing` (breadcrumb trail): zero references in code. No live map, no ETA, despite the role matrix advertising an "Uber-style live view".
 - **Geofence:** enforced at check-in but the override is self-service (clinician picks "Med Ops unlock" from a dropdown + 6-char reason; nothing verifies approval; "door photo proof" is a free-text ID with no photo upload). Check-out geofence has **no** override path at all — a legitimately-overridden check-in strands the clinician at check-out.
 - **Arrival protocol:** identity confirmation, consent reaffirmation, safety clearance, companions, patient signature — all schema columns, all permanently empty.
@@ -133,11 +133,11 @@ Ordered by build priority. "Fix cost" is relative engineering effort.
 5. **Ops dispute resolution.** `resolveDisputeAction` + `DisputeResolveControl` on `/admin/ops/disputes` — **uphold** (`disputed → completed`) or admin **force-close** (`disputed → force_closed_by_admin`, terminal). Both go through the transition helper (ledger + TOCTOU guard); force-close is audited as `action='override'`. `force_closed_by_admin` is now a **reachable** state (added to the legality map + `CLOSED_WORKFLOW_STATES`, with a unit test).
 6. **Portal upcoming-visits bridge + self-service.** The portal now reads the operational schedule (Postgres `Visit`) alongside Medplum encounters (`loadUpcomingVisits`, tenant + session scoped). Patients (and consented caregivers with the `visits` scope) can **request** a reschedule/cancellation (`requestVisitChangeAction`) — a request, not a mutation: it flags the visit for ops (`[PORTAL_REQUEST_PENDING]` marker + dispatch push) and audits the ask; ops action it from the board. Uses the pre-existing bilingual `requests.*` message keys.
 
-Verified: `tsc --noEmit` clean, `vitest` 72/72 passing, tenant-scope + db-push guards green, ESLint clean.
+Verified: `tsc --noEmit` clean, the full Vitest suite passing, tenant-scope + db-push guards green, ESLint clean.
 
 **Dead-schema inventory** (tables/columns with zero writers — decide per item: wire it in the roadmap phase below, or drop it): `VisitLocationPing`, `VisitParticipant`, `Visit.identityConfirmedBy/consentReaffirmed/safetyClearance/companionsPresent/patientAcknowledgementMediaId`, `Visit.cashCollectedEgp/cashGratuityEgp/receiptDeliveryChannels`, `Visit.patientRating`, `Visit.checkOutAccuracyM`, `ProviderPayout`, `Expense`, `TrialVisitScorecard`, `PhysioProfile` (no create path), `PhysioProfile.publicRating/publicReviewCount/publicVisitCount`, `Provider.baseRateEgp`, ~~7 unreachable `VisitState` values~~ (`force_closed_by_admin` is now reachable via ops dispute force-close; the remaining unreachable values are fewer), policy actions defined-but-never-enforced (`discharge_summary.create`, `goal.*`, `task.start/complete`), co-sign machinery (detector, sweep, queue — nothing creates the task), FHIR handoff acknowledgement component (read, never written). *(Newly written this build: `PushSubscription.userId`, `CarePlan` via series generator, `Visit` via the ops scheduling service.)*
 
-**Docs drift to fix:** `.claude/CLAUDE.md` still says `/clinician` is physio-only — nurse + doctor field workspaces ship live PHI-touching code. `EHR_ROLE_MATRIX.md:747` claims "VisitLocationPing now live" — false. `EHR_PHYSIO_SPEC.md` (the canonical journey spec) was deleted from the repo in commit `b6e4935` while 6 files still reference it — restore it from git history.
+**Docs drift to fix:** `.claude/CLAUDE.md` still says `/clinician` is physio-only — nurse + doctor field workspaces ship live PHI-touching code. `EHR_ROLE_MATRIX.md` claims "VisitLocationPing now live" — false. The old standalone physiotherapist journey spec that was deleted from the repo is **not being restored** (owner decision): the physio field journey is now covered here (Parts A and C) plus [EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md), so the remaining stale references to that deleted spec across the repo should be dropped and never re-linked.
 
 ---
 

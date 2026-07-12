@@ -1,7 +1,7 @@
 # HIPAA & Egypt DPL Compliance Map — Anees Health Platform
 
 > **Audience:** the owner, the compliance officer, hospital procurement, future auditors.
-> **Last refresh:** 2026-06-18.
+> **Last refresh:** 2026-07-12.
 > **Plain-English summary:** we are *not yet* HIPAA-certified (no formal audit, no signed BAAs across every vendor) — and we don't have to be today because we operate in Egypt under DPL 151/2020. But every architectural decision is made *as if* HIPAA applies, because the hospital MOU and the planned MENA expansion will force the question soon. This document tells you exactly where we stand against the HIPAA Security Rule (§164.308 administrative, §164.310 physical, §164.312 technical safeguards), plus Egypt's DPL, and what's left to close.
 
 ---
@@ -27,8 +27,8 @@ These are the items only the owner can do or commission. Each is doable in a wee
 ### Next quarter (engineering will do; you approve scope + budget)
 
 9. Multi-tenant query-level enforcement and row-level security (Postgres RLS).
-10. Sentry + log aggregator wired (Sprint 5 in EHR_NOW).
-11. Automated dependency scanning (Renovate / Dependabot) + SAST in CI.
+10. Activate Sentry (the code seam is already wired and DSN-gated — set `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN`) and add a log aggregator. See EHR_NOW.
+11. Renovate dependency scanning is live (`renovate.json`); still to add is SAST in CI.
 12. Encrypted backups with off-site retention (S3 Glacier or OVH cold storage).
 13. Incident-response tabletop exercise with the medical director and lead engineer.
 
@@ -63,7 +63,7 @@ These are the items only the owner can do or commission. Each is doable in a wee
 
 - **Covered Entity:** Anees, when a US-based healthcare provider or insurer sends us PHI.
 - **Business Associate:** Anees, when a covered entity contracts us to handle PHI.
-- **Sub-processors (our vendors):** Medplum, Cloudflare R2, Hostinger (→ OVH), Wapilot, Kashier, Daily.co (planned), Sentry (planned).
+- **Sub-processors (our vendors):** Medplum, Cloudflare R2, Hostinger (→ OVH), Wapilot, Kashier, Daily.co (planned), Sentry (code wired, DSN-gated — inactive until the DSN envs are set).
 
 A signed Business Associate Agreement (BAA) is required between Anees and every sub-processor that touches PHI. The DPA/BAA status of each vendor is tracked in §10 below.
 
@@ -121,7 +121,7 @@ This is where our architecture maps tightest. Most controls are implemented in c
 |---|---|---|---|---|
 | **Access Control** §164.312(a)(1) | Unique User ID — Required | Every staff and patient has a unique `User` row. JWT carries `id`. | `src/auth.ts`, `prisma/schema.prisma` | None. |
 | | Emergency Access — Required | `DestructiveApprovalToken` (break-glass) flow. | `prisma/schema.prisma`, `/admin/compliance` | UI flow partial. |
-| | Automatic Logoff — Addressable | JWT expiry (24h). Idle-timeout-in-UI not enforced. | `src/auth.ts` | Add 30-min idle logout in admin/clinician shells. |
+| | Automatic Logoff — Addressable | JWT session expiry is **45 min** (`maxAge: 60*45`), refreshed at most every 5 min of activity (`updateAge`). A separate in-UI idle-timeout prompt is not enforced. | `src/auth.ts` | Optional: add an explicit idle-logout prompt in admin/clinician shells. |
 | | Encryption and Decryption — Addressable | TLS in transit; R2 server-side at rest; Postgres at-rest depends on host. | TLS + R2 + Postgres | Move to OVH managed Postgres for native at-rest encryption. |
 | **Audit Controls** §164.312(b) | Hardware/software mechanisms to record activity. | **Dual-store** for clinical writes + break-glass overrides: durable Postgres `AuditLog` (retried, non-swallowing; `critical` actions throw if un-auditable) **+ FHIR `AuditEvent`** mirror to Medplum off the critical path. Login/logout/override also in Postgres. | `src/lib/utils/audit.ts`, `src/lib/medplum/audit-event.ts`, `src/auth.ts` | 🟡 Extend the FHIR mirror to login/logout + `access_denied`; finish operational-write coverage (promocode/invoice/payout). ([EHR_AUDIT.md](EHR_AUDIT.md) Phase 1) |
 | **Integrity** §164.312(c)(1) | Mechanism to authenticate ePHI. — Addressable | Soft delete only on clinical. `Composition` becomes immutable on sign. FHIR resource versioning is built-in. | Medplum versioning, `Patient.deletedAt` | Periodic integrity check (planned, low priority). |
@@ -207,7 +207,7 @@ Every vendor that touches PHI needs either a BAA (HIPAA) or a DPA (DPL/GDPR), de
 | **Kashier** (payments) | No (booking/financial data only) | 🟡 ToS / PCI-DSS responsibility flow | ❌ n/a | Confirm PCI-DSS attestation. |
 | **Google OAuth** (sign-in) | No (only email + name) | 🟡 Google Cloud DPA | ❌ n/a | None — covered. |
 | **Daily.co** (planned, telemed video) | **Yes** — video + audio = PHI | ❌ Need DPA | ❌ **Daily offers BAA on paid plans** — sign before launch | Pre-launch action. |
-| **Sentry** (planned, error tracking) | Possibly — error messages may leak PHI | ❌ Need DPA | ❌ Sentry offers BAA on Business plans | Configure PII scrubbing **and** sign BAA. |
+| **Sentry** (error tracking — code wired, DSN-gated, inactive) | Possibly — error messages may leak PHI once active | ❌ Need DPA | ❌ Sentry offers BAA on Business plans | Before activating the DSN: configure PII scrubbing **and** sign the BAA. |
 | **Cloudflare DNS + WAF** (in use) | Yes — sees all PHI in transit | 🟡 Cloudflare DPA | ❌ Enterprise only | Defer BAA until US-customer onboarding. |
 | **GitHub** (source code) | No | 🟡 Microsoft DPA | ❌ n/a | None. |
 | **NPM / package registry** | No | n/a | n/a | None. |
@@ -255,6 +255,7 @@ This document is reviewed every quarter. Each review captures:
 | Quarter | Reviewer | Date | Notes |
 |---|---|---|---|
 | Q2 2026 | (Owner) | 2026-06-05 | Initial version. |
+| Q3 2026 | (Owner) | 2026-07-12 | Corrected automatic-logoff figure (45-min JWT session, not 24h). Marked the Sentry seam + FHIR `AuditEvent` mirror + Renovate as shipped in code. |
 
 ---
 

@@ -1,7 +1,7 @@
 # Deployment & Operations Runbook — Anees Health Platform
 
 > **Audience:** lead engineer, on-call engineer, and the owner (so they know what's involved).
-> **Last refresh:** 2026-06-05.
+> **Last refresh:** 2026-07-12.
 > Pairs with [SECURITY_ARCHITECTURE.md](SECURITY_ARCHITECTURE.md) (controls) and [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.md) (compliance posture).
 
 This runbook is the answer to "how do we rebuild from scratch in under two hours" and "what do we do when something is on fire". Keep it current; it is the single document the on-call engineer reads during an incident.
@@ -35,7 +35,7 @@ This is a single-host architecture with one obvious risk: the host is also the d
 | Postgres | **OVH Managed Postgres** (separate from app host) | Native at-rest encryption, point-in-time recovery, managed backups. |
 | Medplum (FHIR) | **OVH dedicated host** (separate from app) | Isolates clinical data from app crashes; lets us scale independently. |
 | Medical files | **Cloudflare R2** (unchanged) | Already encrypted, signed-URL-only. |
-| Logs / metrics | **Sentry** (web + server) + **Better Stack / Grafana Cloud** (planned) | No central observability today. |
+| Logs / metrics | **Sentry** (web + server) — installed + wired, DSN-gated (`src/instrumentation.ts` + `instrumentation-client.ts` + `reportError` seam); **Better Stack / Grafana Cloud** (planned) | Sentry is inactive until `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN` are set. No metrics/log aggregation yet. |
 | Backups | **Postgres PITR (managed) + R2 versioning + nightly snapshots to OVH cold storage** | Off-site retention. |
 
 Migration plan and decision rationale: see [CTO_STRATEGY.md §8 Phase 0](CTO_STRATEGY.md) and [EHR_NOW.md Sprint 0](EHR_NOW.md).
@@ -125,7 +125,7 @@ Three environments. Local dev runs on a developer machine; staging mirrors prod 
 2. `nvm use 22` (or system Node 22).
 3. `npm ci`.
 4. Create `.env.local` (or `/etc/anees.env`) with every variable from §6.
-5. `npm run db:migrate:deploy` — applies every migration in `prisma/migrations/`.
+5. `npm run db:migrate:deploy` — applies every migration in `prisma/migrations/` (~19 today).
 6. `npm run db:seed` — seeds lookup tables, areas, doctors.
 7. `npm run build`.
 8. Start with PM2: `pm2 start npm --name anees -- start`.
@@ -169,7 +169,7 @@ Every rotation event must produce an `AuditLog` row with `action = update` and a
 | Postgres (operational) | Managed PITR (target) + nightly `pg_dump` (today) | 30 days PITR + 90 days dumps | Monthly restore drill |
 | Medplum (FHIR resources) | Bulk export via `$export` job + Postgres backing-store backup | 30 days + 90 days | Monthly restore drill |
 | R2 medical files | R2 bucket versioning + monthly snapshot to OVH cold storage | Versioning indefinite + 7 years cold | Quarterly restore spot-check |
-| Audit log | Postgres `AuditLog` (FHIR `AuditEvent` not built yet — EHR_AUDIT Phase 1) | Same as above + planned archive | Annual review |
+| Audit log | Postgres `AuditLog` (durable, retried) **+ FHIR `AuditEvent` mirror** (live, off-critical-path via `recordAudit`) for clinical writes + break-glass overrides | Same as above + planned archive | Annual review |
 | Application code | GitHub | Forever | n/a |
 | `.env.local` (and equivalents) | Out-of-band — printed, sealed, locked. **Never** in cloud storage outside a secret manager. | Forever | Owner |
 
@@ -192,7 +192,7 @@ Every rotation event must produce an `AuditLog` row with `action = update` and a
 
 ### 8.1 Normal release
 
-1. Open PR. CI runs `lint + tsc --noEmit + build`.
+1. Open PR. CI (`.github/workflows/ci.yml`) runs four jobs: **quality** (lint + CSS/colour guards + type-check + runtime `npm audit`), **test** (Vitest unit suite + RBAC / security-policy / tenant-scope guards), **migrations** (schema/migration drift guard against a throwaway Postgres), and **build** (`next build`). No real secrets touch CI; the production DB is never touched.
 2. Review.
 3. Merge to `master`.
 4. CI builds, copies the build to staging, runs smoke tests.
@@ -228,7 +228,7 @@ Every rotation event must produce an `AuditLog` row with `action = update` and a
 
 ### 10.1 Detection
 - Cloudflare WAF alerts (planned).
-- Sentry (planned).
+- Sentry — installed + wired (DSN-gated); **inactive until `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN` are set**. Set the DSNs to turn on error capture.
 - Manual: server logs on the VPS (`pm2 logs anees`).
 
 ### 10.2 Triage

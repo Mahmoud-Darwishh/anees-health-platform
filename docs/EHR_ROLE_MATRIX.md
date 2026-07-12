@@ -2,8 +2,8 @@
 
 **Status:** Draft v1 — authoritative reference for who sees what, who can write what, how clinical workflows behave, and how field operations work.
 **Owner:** Founder + CTO.
-**Last reviewed:** 2026-06-05.
-**Companion docs:** [`CTO_STRATEGY.md`](./CTO_STRATEGY.md) (long-term architecture), [`EHR_NOW.md`](./EHR_NOW.md) (active sprint), [`HIPAA_COMPLIANCE.md`](./HIPAA_COMPLIANCE.md) (control mapping), [`SECURITY_ARCHITECTURE.md`](./SECURITY_ARCHITECTURE.md) (defense-in-depth), [`FHIR_CATALOG.md`](./FHIR_CATALOG.md) (resource catalog), [`EHR_PHYSIO_SPEC.md`](./EHR_PHYSIO_SPEC.md) (physio workspace).
+**Last reviewed:** 2026-07-12.
+**Companion docs:** [`CTO_STRATEGY.md`](./CTO_STRATEGY.md) (long-term architecture), [`EHR_NOW.md`](./EHR_NOW.md) (active sprint), [`HIPAA_COMPLIANCE.md`](./HIPAA_COMPLIANCE.md) (control mapping), [`SECURITY_ARCHITECTURE.md`](./SECURITY_ARCHITECTURE.md) (defense-in-depth), [`FHIR_CATALOG.md`](./FHIR_CATALOG.md) (resource catalog), [`EHR_SYSTEM_BLUEPRINT.md`](./EHR_SYSTEM_BLUEPRINT.md) (canonical system design; also covers the physio workspace).
 
 > **Landed since last review (2026-06-04 → 2026-06-05):** New StaffRole values `medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin` are now in the schema. License gating via `Staff.licenseType/Number/Expiry` + `PhysioProfile`. Visit state machine (22 states + 16 disruption codes + `VisitStateTransition`). Break-glass governance via `DestructiveApprovalToken`. Cloudflare R2 + malware scanning for medical files. Login + logout audit live. Multi-tenancy `tenantId` columns on core tables. Clinician workspace at `/clinician/*`.
 
@@ -11,7 +11,7 @@
 
 > This document is the **single source of truth** for the EHR's business logic. When code conflicts with this doc, fix the code. When reality conflicts with this doc, update the doc.
 
-> **Launch-scope alignment (owner decision, 2026-06-19 — see [`PRODUCT_LAUNCH_AUDIT.md`](./PRODUCT_LAUNCH_AUDIT.md)):** This matrix stays the canonical permission grid and **no cell value below is edited by this note** — it only records which roles are *turned on* for the first direct-care launch (Greater Cairo, prepaid, no cash):
+> **Launch-scope alignment (owner decision, 2026-06-19 — launch decisions now tracked in [`EHR_NOW.md`](./EHR_NOW.md)):** This matrix stays the canonical permission grid and **no cell value below is edited by this note** — it only records which roles are *turned on* for the first direct-care launch (Greater Cairo, prepaid, no cash):
 > - **ON at launch:** Portal User (patient/caregiver) · Nurse · Physio · **Doctor (review + sign only — no doctor field/home-visit app yet)** · Medical-Ops / Case-Manager · Admin · Superadmin.
 > - **Light at launch:** Compliance Officer (audit oversight only).
 > - **Finance functions ON, insurance *claims* OFF:** prepayment needs refunds + InstaPay reconciliation + clinician-payout *visibility*, but **not** insurer claims/pre-auth — so the **Insurance Coordinator role and the claims modules are deferred**, while finance-ops (`billing_invoices`, `provider_payouts`) stay live for Admin.
@@ -136,7 +136,7 @@ The **type** of note/diagnosis/assessment is bound to the author's licensed disc
 | Physio | Physio notes, movement-system diagnoses, gait/ROM/strength assessments, exercise progress |
 | Doctor | Medical notes, ICD-10 diagnoses, prescriptions, lab orders, lab interpretations, care-plan authorship, standing orders |
 
-This is enforced **server-side** in `actions.ts`. A nurse calling `signMedicalNoteAction` must be rejected even if the request reaches the server. UI hiding is convenience; server enforcement is the law.
+This is enforced **server-side** by the policy layer (`can()` in `src/lib/auth/policy/`, backed by `canSignClinical()` in `rbac.ts`) — see § 4A. A nurse calling `signMedicalNoteAction` must be rejected even if the request reaches the server. UI hiding is convenience; server enforcement is the law.
 
 ---
 
@@ -146,25 +146,35 @@ This section is the **bridge between the human-readable matrix above and the
 runtime code** that enforces it. Read this section before changing any RBAC
 behavior.
 
-### The three files that implement the matrix
+### The policy module (`src/lib/auth/policy/`)
 
 ```
-src/lib/auth/
+src/lib/auth/policy/
+  ├── ehr-matrix.ts ← THE MODULE × ROLE GRID
+  │                   The readable capability grid (module → per-role
+  │                   read / write / sign). Mirrors § 3 above and is the
+  │                   source § 22 is generated from. Edited by hand.
+  │
   ├── actions.ts    ← THE ACTION CATALOG
-  │                   Every permission-bearing action as a typed string with a
-  │                   description, discipline tag, and runtime constraints.
-  │                   ~80 actions today. Adding one here is a type-level
-  │                   change that forces matrix.ts to also be updated.
+  │                   Every permission-bearing action as a typed key with a
+  │                   module, required capability, discipline tag, and runtime
+  │                   constraints. ~75 actions today.
   │
-  ├── matrix.ts     ← THE ROLE → ACTION MATRIX
-  │                   Canonical mapping of role → allowed actions. Mirrors
-  │                   § 3 above. Edited by hand. Anything not listed is
-  │                   DENIED BY DEFAULT (allowlist model).
+  ├── matrix.ts     ← THE ROLE → ACTION LOOKUP
+  │                   `roleAllowsAction(role, action)` derived from the grid.
+  │                   Anything not listed is DENIED BY DEFAULT (allowlist model).
   │
-  └── can.ts        ← THE CENTRAL `can()` FUNCTION
-                      One function, called by every server action. Applies
-                      all 4 enforcement layers, writes audit on deny, and
-                      returns { allow, reason, detail }.
+  ├── pip.ts        ← POLICY INFORMATION POINT
+  │                   Loads the facts a decision needs — CareTeam case-scope,
+  │                   license snapshot, tenant — for the actor + target.
+  │
+  ├── can.ts        ← THE CENTRAL `can()` DECISION
+  │                   One function applying all 4 enforcement layers; returns
+  │                   { allow, reason, detail }.
+  │
+  └── enforce.ts    ← SERVER-ACTION WRAPPER
+                      Resolves the session actor, calls `can()`, and writes the
+                      `access_denied` audit row on deny.
 ```
 
 Plus the existing helpers in `src/lib/auth/rbac.ts` (`canSignClinical`,
@@ -203,7 +213,7 @@ Plus the existing helpers in `src/lib/auth/rbac.ts` (`canSignClinical`,
 
 ```ts
 import { getSessionUser } from '@/lib/auth/rbac';
-import { can, must } from '@/lib/auth/can';
+import { can, must } from '@/lib/auth/policy/can';
 
 export async function signNursingNoteAction(input: SignNoteInput) {
   const user = await getSessionUser();
@@ -508,7 +518,7 @@ URL: `/admin/clinician` *(new — to be built; see § 16)*
 
 #### Patient Detail tabs (rendered inside Patient Detail)
 
-The current admin patient page lists **14 tabs**. Proposed cleanup → **9 tabs** + always-visible banner:
+The original admin patient page listed **14 tabs**. The consolidation below was proposed and has since **shipped** — the live workspace now renders a slimmer, role-filtered set (see the current list under the table). The mapping records the rationale:
 
 | Current tab | Decision |
 |---|---|
@@ -527,7 +537,7 @@ The current admin patient page lists **14 tabs**. Proposed cleanup → **9 tabs*
 | Tasks | **Keep** (absorb Coordination) |
 | Reports | **Keep** (rename → "Activity & Audit") |
 
-**Final patient detail tab list (9):** Overview · Diagnoses · Vitals · Notes · Visits · Labs · Assessments · Documents · Care Team · Tasks · Activity
+**Shipped patient detail tab list (~11, `src/features/ehr/admin-patient/workspace-tabs.ts`):** Snapshot · Problems & Risks · Medications & MAR · Care Plan & Goals · Visits & Encounters · Measurements · Labs & Imaging · Documents · Care Team & Consent · Orders & Tasks · Activity & Audit — plus the always-visible banner. Tabs are role-filtered at render.
 
 **Always-visible patient banner (top of every tab):**
 - Name + Arabic name + age + gender + photo
@@ -724,10 +734,10 @@ Don't build the partner UI yet. Just make sure we can backfill `tenantId='platfo
 | NurseShiftAssignment | Primary + incoming nurse, acknowledgement, escalation task linkage |
 | Staff model | `medplumPractitionerId`, `providerId`, `lastLoginAt`, password hash |
 | Audit log | Generic `AuditLog` table with prev/new JSON; `writeMedplumAuditMirror` for clinical writes |
-| Medplum integration | 29 files (~22 FHIR-resource modules) in `src/lib/medplum/` covering Patient, Practitioner, Encounter, Observation, Condition, AllergyIntolerance, MedicationStatement (intended: MedicationRequest), MedicationAdministration, Assessment (QuestionnaireResponse), ClinicalNote (Composition), CarePlan, CareTeam, Task, Communication, Consent, DocumentReference+Binary, ServiceRequest+DiagnosticReport, Goal. Several are free-text/uncoded — see [EHR_AUDIT.md](EHR_AUDIT.md) |
-| 30 admin server actions | Visits, vitals, notes (draft + sign), care team, tasks, nursing reports, physio reports, conditions, allergies, meds, med administration, incidents, documents, labs, assessments, communications, escalations, appointments, shift handoffs, geo policy, caregiver consent, demographics |
-| Patient portal | 8-tab workspace with consent-scoped rendering (`src/app/[locale]/portal/page.tsx`) |
-| Admin patient detail | 14-tab workspace (`src/features/ehr/admin-patient/page-view.tsx`) |
+| Medplum integration | ~35 files (~22 FHIR-resource modules) in `src/lib/medplum/` covering Patient, Practitioner, Encounter, Observation, Condition, AllergyIntolerance, MedicationStatement (intended: MedicationRequest), MedicationAdministration, Assessment (QuestionnaireResponse), ClinicalNote (Composition), CarePlan, CareTeam, Task, Communication, Consent, DocumentReference+Binary, ServiceRequest+DiagnosticReport, Goal. Several are free-text/uncoded — see [EHR_AUDIT.md](EHR_AUDIT.md) |
+| Admin server actions | Domain-split into `src/features/ehr/admin-patient/actions/` (~16 files, one per clinical domain + `index.ts` barrel): visits, vitals, notes (draft + sign), care team, tasks, nursing reports, physio reports, conditions, allergies, meds, med administration, incidents, documents, labs, assessments, communications, escalations, appointments, shift handoffs, geo policy, caregiver consent, demographics |
+| Patient portal | Tabbed, consent-scoped workspace (`src/app/[locale]/portal/page.tsx`) |
+| Admin patient detail | ~11-tab workspace (`src/features/ehr/admin-patient/page-view.tsx`) |
 | Caregiver consent system | `src/lib/medplum/consents.ts` + `consent-policy.ts` |
 | Document streaming | `/api/ehr/documents/[id]` with RBAC + consent check |
 | Nurse shift handoff with geolocation | `NursingHandoffLocationCapture.tsx` already in admin-patient module |

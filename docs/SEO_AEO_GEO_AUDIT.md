@@ -1,8 +1,8 @@
 # Anees Health — SEO / AEO / GEO / AI-Search Visibility Audit & Strategy
 
-> **Prepared:** 25 Jun 2026 · **Domain:** aneeshealth.com · **Scope:** bilingual EN/AR public marketing surface (`src/app/[locale]/`) · **Stack:** Next.js 16 App Router.
+> **Prepared:** 25 Jun 2026 · **Last refresh:** 12 Jul 2026 · **Domain:** aneeshealth.com · **Scope:** bilingual EN/AR public marketing surface (`src/app/[locale]/`) · **Stack:** Next.js 16 App Router.
 > **Method:** grounded in the actual repo (SEO layer, robots, sitemaps, schema, config, home components) + live web research. 9 competitors individually verified. Current 2026 AEO/GEO standards confirmed. Off-site footprint reviewed.
-> **Status of this doc:** strategy + implementation plan. No code has been changed yet.
+> **Status of this doc:** strategy + living implementation tracker — Sprints 0–3 have largely shipped in code (see the §21 implementation log); the remaining owner/marketing tasks (Google Business Profile, reviews, canonical NAP, redeploy) are still open.
 
 ---
 

@@ -3,11 +3,13 @@
 > Short-term execution plan, based on the **actual state of the codebase** (audited).
 > Companion to `CTO_STRATEGY.md` and `.claude/CLAUDE.md` — those are the long view and the reference; this one is **what we do this week, this sprint, this quarter**.
 > Horizon: **next 12 weeks (6 sprints × 2 weeks)**.
-> **Last updated:** 2026-06-18.
+> **Last updated:** 2026-07-12.
 >
-> **2026-06-18 — clinical-core audit landed.** A deep audit of `src/lib/medplum/*` found several clinical modules are free-text/uncoded and thinner than the catalog implied, plus doc-vs-code mismatches (notably: no FHIR `AuditEvent` despite the docs). The full gap register and a 10-phase remediation plan now live in **[EHR_AUDIT.md](EHR_AUDIT.md)**. Done so far: Phase 0 (docs truth pass), Phase 1 core (audit-trail integrity — durable non-swallowing Postgres `AuditLog` + real FHIR `AuditEvent` mirror), Phase 2 core (coded meds + allergies + drug–allergy/drug–drug interaction screening + controlled-substance ledger), Phase 3 core (physio outcome measures → discrete LOINC/UCUM-coded Observations + trend reader), Phase 4 (validated assessment instruments — Braden/Morse/MMSE/Berg/TUG/NPRS with range validation + risk banding), Phase 5 (vitals completeness — respiratory rate + height + BMI + per-vital `interpretation` flags + at-entry warnings), Phase 6 (clinical note legal signing — `Composition.attester` + `Provenance` — plus condition maturity), and Phase 7 (labs: discrete LOINC-coded results with reference ranges + abnormal flags + order→result review tasks). and Phase 8 (role depth + **matrix enforcement**: UI permission flags now derive from the role matrix via `roleAllowsAction` — no UI/server drift; FHIR `EpisodeOfCare` discharge/closure; a "My Access" page that renders effective permissions live from the matrix). **All staff roles are live with matrix-accurate access** — compliance_officer has global chart read (no writes), viewer/hospital_partner_admin get a role-aware landing. and Phase 9 (cross-cutting hardening: **Vitest + 39 unit tests** for the RBAC matrix + clinical-safety engines; a **tenant-scope CI ratchet**; **production-readiness fail-fast** at boot — a `mock_clean` malware scanner or missing secrets won't start in prod; an **observability seam + error boundaries**, CSP already Sentry-ready). **All 10 audit phases now have their core landed.** Queued: phase residuals (auth-event FHIR mirror, operational-write audit coverage, `MedicationRequest` split, notes-UI co-sign, doctor rounds/order-sets, lab `presentedForm`, Playwright E2E, `@sentry/nextjs` SDK install with a DSN).
+> **2026-07-12 — docs hygiene pass.** All docs reconciled to code. The older dated audits (`ENTERPRISE_AUDIT_2026-06-20`, `PRODUCT_LAUNCH_AUDIT`, `PRODUCT_LAUNCH_AUDIT_2026-06-19`) were removed; their durable launch decisions are preserved in **"Locked launch decisions (B1)"** below, and **[CTO_AUDIT_2026-07-01.md](CTO_AUDIT_2026-07-01.md)** is now the current audit of record.
+>
+> **2026-06-18 — clinical-core audit landed.** A deep audit of `src/lib/medplum/*` found several clinical modules are free-text/uncoded and thinner than the catalog implied, plus doc-vs-code mismatches (notably: no FHIR `AuditEvent` despite the docs). The full gap register and a 10-phase remediation plan now live in **[EHR_AUDIT.md](EHR_AUDIT.md)**. Done so far: Phase 0 (docs truth pass), Phase 1 core (audit-trail integrity — durable non-swallowing Postgres `AuditLog` + real FHIR `AuditEvent` mirror), Phase 2 core (coded meds + allergies + drug–allergy/drug–drug interaction screening + controlled-substance ledger), Phase 3 core (physio outcome measures → discrete LOINC/UCUM-coded Observations + trend reader), Phase 4 (validated assessment instruments — Braden/Morse/MMSE/Berg/TUG/NPRS with range validation + risk banding), Phase 5 (vitals completeness — respiratory rate + height + BMI + per-vital `interpretation` flags + at-entry warnings), Phase 6 (clinical note legal signing — `Composition.attester` + `Provenance` — plus condition maturity), and Phase 7 (labs: discrete LOINC-coded results with reference ranges + abnormal flags + order→result review tasks). and Phase 8 (role depth + **matrix enforcement**: UI permission flags now derive from the role matrix via `roleAllowsAction` — no UI/server drift; FHIR `EpisodeOfCare` discharge/closure; a "My Access" page that renders effective permissions live from the matrix). **All staff roles are live with matrix-accurate access** — compliance_officer has global chart read (no writes), viewer/hospital_partner_admin get a role-aware landing. and Phase 9 (cross-cutting hardening: **Vitest + ~87 test cases** for the RBAC matrix + clinical-safety engines; a **tenant-scope CI ratchet**; **production-readiness fail-fast** at boot — a `mock_clean` malware scanner or missing secrets won't start in prod; an **observability seam + error boundaries**). **All 10 audit phases now have their core landed.** Queued: phase residuals (operational-write audit coverage, `MedicationRequest` split, notes-UI co-sign, doctor rounds/order-sets, lab `presentedForm`, Playwright E2E). *(Since resolved: the FHIR `AuditEvent` mirror and `@sentry/nextjs` are now installed + wired — DSN-gated.)*
 
-> **Status snapshot:** Sprint 1 audit-gap work is partially done (login/logout audit ✅; operational Postgres writes still gap). Sprint 2 multi-tenancy foundations landed as Phase 1A (`Tenant` model + `tenantId` columns). New tracks landed out of sequence: clinician workspace at `/clinician/*` (physio pilot), Cloudflare R2 + malware scanning, break-glass governance, insurance + claims schema. Sprint 0 (Hostinger → OVH) is **still in flight** — that gates everything else.
+> **Status snapshot:** Sprint 1 audit-gap work is partially done (login/logout audit ✅; operational Postgres writes still gap). Sprint 2 multi-tenancy foundations landed as Phase 1A (`Tenant` model + `tenantId` columns). New tracks landed out of sequence: clinician workspace at `/clinician/*` (physiotherapy + doctor + nursing), Cloudflare R2 + malware scanning, break-glass governance, insurance + claims schema. Sprint 0 (Hostinger → OVH) is **still in flight** — that gates everything else.
 
 ---
 
@@ -15,30 +17,77 @@
 
 Before planning the next sprint, this is what already exists in the repo (so we don't rebuild it):
 
-✅ **NextAuth v5** installed and live (Google + patient creds + staff creds + JWT sessions + RBAC + **login/logout audit**)
+✅ **NextAuth v5** installed and live (Google + patient creds + staff creds + JWT sessions + RBAC + **login/logout audit**, 45-min sessions)
 ✅ **WhatsApp OTP** via Wapilot (send + verify)
-🟡 **Medplum FHIR broadly integrated** — **29 files** (~22 FHIR-resource modules, including `goals.ts`), patient sync, all major clinical resources present — but several are free-text/uncoded and thinner than they look ([EHR_AUDIT.md](EHR_AUDIT.md))
-✅ **Admin patient EHR detail page** with 30+ server actions
+🟡 **Medplum FHIR broadly integrated** — **~35 files** (~22 FHIR-resource modules, including `goals.ts`), patient sync, all major clinical resources present — but several are free-text/uncoded and thinner than they look ([EHR_AUDIT.md](EHR_AUDIT.md))
+✅ **Admin patient EHR detail page** with server actions split by clinical domain (`admin-patient/actions/`)
 ✅ **Patient portal** at `/[locale]/portal` with tabbed workspace, bilingual, caregiver-consent-scoped
-✅ **Clinician workspace** at `/clinician/*` — physiotherapy pilot, mobile-first, license-gated, case-scoped (today, patients, session, tasks, earnings, profile)
+✅ **Clinician workspace** at `/clinician/*` — physiotherapy + doctor + nursing, mobile-first, license-gated, case-scoped (today, patients, session, tasks, earnings, profile)
+✅ **Clinician availability** on FHIR `PractitionerRole` + **ops dispatch board** answering "who's free, which area, today"
 ✅ **Nursing dashboard** + **escalations queue**
 ✅ **Document streaming** with auth + case-scope + consent enforcement
 ✅ **Cloudflare R2** medical-file storage + **malware scanning** background job (`/api/internal/ehr/documents/scan`)
 ✅ **Multi-tenancy foundations (Phase 1A)** — `Tenant` model + `tenantId` columns on 11 core tables, defaulted to `"platform"`
-✅ **Visit state machine** — 22 states + 16 disruption codes + `VisitStateTransition` ledger + `VisitParticipant` + `VisitLocationPing`
+✅ **Visit state machine** — 23 states + 16 disruption codes + `VisitStateTransition` ledger + `VisitParticipant` + `VisitLocationPing`
 ✅ **Break-glass governance schema** — `DestructiveApprovalToken`, `StandingOrder`, `StandingOrderExecution`
 ✅ **Insurance + claims schema** — `InsurerProfile`, `Coverage`, `PriorAuth`, `Claim`, `ClaimLineItem`, `ControlledSubstanceLedger` + admin dashboard skeleton at `/admin/insurance`
 ✅ **Admin compliance dashboard** at `/admin/compliance` for audit log review
+✅ **Dual-store audit trail** — durable Postgres `AuditLog` (hash-chained) + **FHIR `AuditEvent` mirror** (`audit-event.ts`) for clinical writes + break-glass overrides
+🟡 **Observability** — `@sentry/nextjs` installed + wired (`src/instrumentation*.ts` + `reportError` seam), DSN-gated (inactive until a DSN is set)
 ✅ **New staff roles** — `medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin`
 ✅ **License gating** via `Staff.license*` fields + `PhysioProfile` + `canSignClinical()` helper
 ✅ **Patient ↔ Medplum** identity link (`Patient.medplumPatientId`, `Staff.medplumPractitionerId`); **FHIR Goal round-trip** (`PatientGoal.fhirGoalId`)
-✅ **Prisma Migrate** workflow (9 migrations applied)
+✅ **Prisma Migrate** workflow (~19 migrations applied)
 ✅ **Zod** in EHR schemas
 ✅ **PWA** + VAPID push
 ✅ **HEP feature removed** — dropped from schema (parked behind protocol gate)
 ✅ **Caregiver scaffolding deleted** — caregivers access via `/[locale]/portal` + FHIR `Consent`
 
 The original draft of this file proposed building most of the above — that was wrong. The real gaps are smaller, more specific, and listed below.
+
+---
+
+## Locked launch decisions (B1) — the direct-care launch
+
+> Preserved from the retired product-launch audits (removed 2026-07-12). This is the **owner's written launch policy** for our own direct clients — the "why" behind the whole B1 launch. Not recorded anywhere else. Treat as authoritative unless the owner revises it here.
+
+| Decision | Locked value |
+|---|---|
+| **Disciplines at launch** | Doctor + Nurse + Physiotherapist — all three, now |
+| **Back-office at launch** | Admin, Superadmin, Medical-Ops / Case-Manager |
+| **Patient** | Read/view + booking + prepay (full self-service portal staged after the clinical core works) |
+| **Payment** | **Prepayment only. NO CASH.** Card via gateway (Kashier) **+ InstaPay** |
+| **Coverage area** | **Greater Cairo = Cairo + Giza only** |
+| **Pricing & commission** | **Manual, per case** — every case quoted/priced by hand; no automated price catalog or commission engine at launch |
+| **Clinician pay / payouts** | Not automated now — rates per discipline not defined yet; payouts handled offline; earnings automation deferred |
+| **Doctor scope** | ⚠️ **HISTORICAL — reversed.** Originally "review + sign only (chart-based)"; the owner later reversed this and a full doctor field app now ships (`/clinician/doctor/*`). Kept only as decision history. |
+| **InstaPay confirmation** | **Either ops or finance may confirm; no proof required** (a screenshot may be requested if needed) |
+| **SLA** | **No hard SLA** (testing phase); **target < 24h** booking-to-visit; **no emergency service** |
+| **Receipts** | **Simple receipt** (not a compliant e-invoice) at launch |
+| **Notifications** | Deferred — except WhatsApp OTP needed to claim an account (auth, not marketing) |
+| **Hospital partner portal (B2)** | Deferred |
+| **White-label / multi-tenant (B3)** | Deferred |
+| **Goal of launch** | A working EHR + operations for our own direct clients, all main roles live |
+
+**The one launch rule:** *No screen, role, or tab ships at launch unless it serves the direct-care money loop or clinical safety. Everything else is hidden behind a flag, not deleted.* (One cheap piece of forward-thinking: build the patient/case intake pipe so a hospital referral can reuse it later — same pipe, different source.)
+
+**Why the InstaPay reconciliation queue exists:** InstaPay is bank-to-bank with **no merchant webhook**, so there is no automatic payment signal — hence the mandatory manual `payment_pending → payment_confirmed` queue shared by ops + finance. "No cash, prepayment only" *increases* the need for a finance function (refunds, InstaPay reconciliation, payouts) even though insurance **claims** are parked.
+
+**Launch success metric:** number of **clean end-to-end cases** — *booked → prepaid (either rail) → visited by the assigned clinician → documented & signed → receipt issued, with zero manual database edits.* First-month goal: **10 clean cases, including at least one multi-discipline case.** Guardrails: 0 cases needing a manual DB fix; visits within 24h of payment; zero ungated clinical writes / zero clinical hard-deletes; a short 1–5 post-visit rating.
+
+> **Note on cancellation/refund numbers:** concrete figures are now encoded in `src/lib/billing/cancellation-policy.ts` (they differ from the audit's original recommendation). **Owner to confirm these are the intended numbers** rather than treating this as still-open.
+
+---
+
+## Open findings carried forward from retired audits
+
+> Verified still-open against code on 2026-07-12 (findings already fixed in code were dropped; the technical P0/P1 cluster lives in [CTO_AUDIT_2026-07-01.md](CTO_AUDIT_2026-07-01.md)).
+
+1. **🔴 Medplum has no data-tier access control.** The app logs into Medplum as a single client-credentials superuser; all RBAC is app-layer only, so one missed guard = full PHI exposure with no backstop. Fix = per-user Medplum AccessPolicies / scoped identities. *(Not covered by CTO_AUDIT, which addresses only Postgres tenant isolation — a different layer.)*
+2. **🟡 The "average patient rating" KPI is structurally dead.** `Visit.patientRating` is read/aggregated by the nursing dashboard but **never written** anywhere, so the displayed average is always 0. Either wire the post-visit rating write path or hide the KPI.
+3. **🟡 Document-window rule is inconsistent by discipline.** Physio can document only while `checked_in`; nurse can document while `checked_in` **or** `checked_out`. Pick one rule.
+4. **🟢 Design principle — the case "conductor".** One patient can now have doctor + nurse + physio at once; the data model supports it (`CareTeam`, `VisitParticipant`, care plan) but the product doesn't yet orchestrate it. Intended spine: care plan + care team per case, case-manager as conductor, doctor as clinical lead, standing orders letting nurse/physio act safely between doctor visits, cross-discipline handoffs + red-flag co-sign routed to the right doctor.
+5. **🟢 Design guardrail — charts vs dashboards vs portal.** Keep three surfaces distinct: the clinical chart (`/admin/patients/[id]`, staff drill-down) ≠ dashboards (aggregate worklists/KPIs — a role *starts* here then drills in) ≠ patient portal (friendly narrative, not mirrored FHIR tabs). Vitals trends belong *inside* the relevant section, never as a standalone "charts" destination.
 
 ---
 
@@ -57,7 +106,7 @@ Multi-tenancy foundations already landed (Phase 1A). The remaining gates are inf
 3. **No multi-tenancy retrofit later.** Add `tenantId` now while we have one tenant.
 4. **One sprint = one demo.** No "infrastructure sprints" with nothing to show. Even Sprint 0 (migration) ends with the founder confirming `/portal` works on the new server.
 5. **Delete dead code as you touch it.** Keep the repo aligned to reality; remove stale scaffolding and broken script references as soon as discovered.
-6. **Caregiver app is not a separate app.** Caregivers use `/portal` via Consent. The empty `/caregiver/*` folders should be deleted unless we make a deliberate, costed decision to build a separate surface.
+6. **Caregiver app is not a separate app.** Caregivers use `/portal` via Consent (the old `/caregiver/*` scaffolding was deleted). Don't rebuild a separate surface without a deliberate, costed decision.
 7. **Hospital portal is the unlock.** The MOU is signed. Build to make that hospital successful — not to chase generic features.
 
 ---
@@ -372,7 +421,7 @@ Stop work and escalate if:
 - Infra: `docs/DEPLOYMENT_RUNBOOK.md` — the **migration plan** and on-call runbooks
 - FHIR: `docs/FHIR_CATALOG.md` — the **clinical resource catalog**
 - Roles: `docs/EHR_ROLE_MATRIX.md` — the **RBAC source of truth**
-- Physio: `docs/EHR_PHYSIO_SPEC.md` — the **clinician workspace spec**
+- System design: `docs/EHR_SYSTEM_BLUEPRINT.md` — the **canonical flow + architecture of record** (covers the clinician workspace)
 
 Update this file **at the end of every sprint**. Move done sprints to a "Completed" section at the bottom. Add the next sprint's plan to the top of the queue. Keep it ruthlessly current — a stale plan is worse than no plan.
 

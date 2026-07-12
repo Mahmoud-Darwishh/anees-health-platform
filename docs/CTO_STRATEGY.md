@@ -13,10 +13,10 @@
 > - `docs/SECURITY_ARCHITECTURE.md` — defense-in-depth layers (NEW)
 > - `docs/FHIR_CATALOG.md` — Medplum resource catalog (NEW)
 > - `docs/DEPLOYMENT_RUNBOOK.md` — infra runbook + IR (NEW)
-> - `docs/EHR_PHYSIO_SPEC.md` — physiotherapist workspace spec
+> - `docs/EHR_SYSTEM_BLUEPRINT.md` — canonical system-design doc of record
 > - `docs/EHR_ROLE_MATRIX.md` — definitive RBAC + clinical workflows
 >
-> **State alignment (2026-06-05):** A second codebase audit was performed in June 2026 against the post-Phase-0 work. Since the previous version of this document, the following have **landed in production**: multi-tenancy foundations (Phase 1A — `Tenant` model + `tenantId` columns), the **clinician workspace** at `/clinician/*` with the physiotherapy pilot, **Cloudflare R2** as medical-file storage (replacing the dead local-storage abstraction), **malware scanning** (`src/lib/security/malware-scan.ts`) with a background job at `/api/internal/ehr/documents/scan`, four new staff roles (`medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin`), license gating via `PhysioProfile`, the visit-state machine (22 states + 16 disruption codes + transition ledger), break-glass governance (`DestructiveApprovalToken`), standing orders, insurance + claims tables, FHIR `Goal` round-trip, and login/logout audit. Phase 0 status is refreshed in §8 below; new decisions are appended in §17.
+> **State alignment (2026-06-05):** A second codebase audit was performed in June 2026 against the post-Phase-0 work. Since the previous version of this document, the following have **landed in production**: multi-tenancy foundations (Phase 1A — `Tenant` model + `tenantId` columns), the **clinician workspace** at `/clinician/*` (now spanning physiotherapy, doctor, and nursing), **Cloudflare R2** as the sole medical-file backend (replacing the dead local-storage abstraction), **malware scanning** (`src/lib/security/malware-scan.ts`) with a background job at `/api/internal/ehr/documents/scan`, four new staff roles (`medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin`), license gating via `PhysioProfile`, the visit-state machine (22 states + 16 disruption codes + transition ledger), break-glass governance (`DestructiveApprovalToken`), standing orders, insurance + claims tables, FHIR `Goal` round-trip, and login/logout audit. For current platform state, follow the living references pointed to from §8 below; new decisions are appended in §17.
 
 ---
 
@@ -301,7 +301,7 @@ Detailed §164.308/310/312 mapping is in [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.
 | Is the data encrypted? | TLS in transit always. R2 server-side encrypted at rest. Postgres at-rest will be native once on OVH managed Postgres. |
 | Who can see a patient's data? | Only roles in our RBAC matrix ([EHR_ROLE_MATRIX.md](EHR_ROLE_MATRIX.md)) with case scope, plus consented caregivers. Every read is logged. |
 | What happens on a breach? | Documented procedure in [SECURITY_ARCHITECTURE.md §10](SECURITY_ARCHITECTURE.md). 72-hour notification under Egypt DPL Art. 20. |
-| Can we audit access? | Partially. Postgres `AuditLog` captures clinical writes + login/logout (compliance officer reviews via `/admin/compliance`). The FHIR `AuditEvent` half is **not built yet**, and the write is best-effort — see [EHR_AUDIT.md](EHR_AUDIT.md) Phase 1. |
+| Can we audit access? | Yes, with gaps. Every clinical write + break-glass override **dual-stores** to Postgres `AuditLog` **and** a FHIR `AuditEvent` mirror (`src/lib/medplum/audit-event.ts`, off the critical path via `recordAudit`); login/logout is audited too, and compliance officers review via `/admin/compliance`. Still Postgres-only: `access_denied` and most operational (non-clinical) mutations — see [CTO_AUDIT_2026-07-01.md](CTO_AUDIT_2026-07-01.md). |
 | Can we use our own auth? | Planned (Phase 1) — hospital partner SSO via OIDC, scoped to the hospital tenant. |
 | What's your incident response time? | RPO 24h (target 1h), RTO 4h (target 1h). See DEPLOYMENT_RUNBOOK.md. |
 
@@ -408,65 +408,17 @@ Detailed §164.308/310/312 mapping is in [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.
 
 **Goal:** Close the remaining gaps in our current platform so it is genuinely hospital-credible and ready to onboard the MOU partner.
 
-### 8.0 What's already done (audited — refreshed 2026-06-05)
+### 8.0 Current state — read the living references
 
-**Landed since the previous audit (May → June 2026):**
+> This section previously embedded a hand-maintained "what's already done / what's still left" snapshot. That kind of list rots faster than anyone can keep it honest, so it has been removed. For the **authoritative, current** state of the platform, read the living sources:
+>
+> - [`.claude/CLAUDE.md`](../.claude/CLAUDE.md) — canonical engineering reference (stack, routes, schema, pitfalls; Medplum is ~35 modules, ~19 Prisma migrations applied)
+> - [`docs/EHR_NOW.md`](EHR_NOW.md) — living sprint / execution tracker (what's in flight, what's next, owner action items)
+> - [`docs/CTO_AUDIT_2026-07-01.md`](CTO_AUDIT_2026-07-01.md) — current audit of record (honest, dimension-by-dimension status)
 
-- ✅ **Multi-tenancy foundations (Phase 1A)** — `Tenant` model + `tenantId` columns on Patient/Provider/Visit/CarePlan/Invoice/OnlineBooking/Staff/Coverage/PriorAuth/Claim/ControlledSubstanceLedger; default `"platform"` tenant for back-compat. Query-level enforcement still per-call.
-- ✅ **Clinician workspace** at `/clinician/*` — mobile-first, license-gated, physiotherapy pilot. Routes: today, patients, visits/:id/session, tasks, earnings, profile.
-- ✅ **Cloudflare R2** as medical-file storage. `src/lib/storage/r2-medical.ts` is the only access path. The local-storage abstraction is deleted.
-- ✅ **Malware scanning** (`src/lib/security/malware-scan.ts`) with a background scan job at `/api/internal/ehr/documents/scan`. Mock backend in dev; HTTP scanner in prod.
-- ✅ **New staff roles** — `medical_ops`, `insurance_coordinator`, `compliance_officer`, `hospital_partner_admin` (alongside existing roles). License-gated via `Staff.license*` fields + `PhysioProfile` sidecar.
-- ✅ **Visit state machine** — 22-state `VisitState`, 16 `VisitDisruptionCode`, append-only `VisitStateTransition` ledger, `VisitParticipant`, `VisitLocationPing` (geofence).
-- ✅ **Break-glass governance** — `DestructiveApprovalToken` schema landed; UI partial under `/admin/compliance`.
-- ✅ **Standing orders** — `StandingOrder` + `StandingOrderExecution` for solo-visit pre-authorisation.
-- ✅ **Insurance + claims schema** — `InsurerProfile`, `Coverage`, `PriorAuth`, `Claim`, `ClaimLineItem`, `ControlledSubstanceLedger`. Admin dashboard skeleton at `/admin/insurance`.
-- ✅ **FHIR Goal round-trip** — `src/lib/medplum/goals.ts` + `PatientGoal.fhirGoalId` linkage.
-- ✅ **Login + logout audit** — `writeLoginAudit` in `src/auth.ts`; `/api/auth/logout-audit` route.
-- ✅ **Admin navigation policy** — `src/lib/auth/admin-nav-policy.ts` is the single source of truth for role-visibility.
-- ✅ **HEP removed** — exercises / patient-HEP tables dropped (parked behind a clinical-protocol gate).
+**What stays true at the strategic level:** Phase 0 is about making the platform genuinely hospital-credible before the MOU partner onboards. The open workstreams are the Hostinger → OVH Bahrain migration, closing the operational (non-clinical) Postgres audit gap, activating the already-wired observability stack (Sentry is installed and DSN-gated), hardening per-query multi-tenancy enforcement, and finishing the compliance/legal groundwork (Medplum BAA, DPL counsel, a production malware-scan backend, external pen test). The clinical core — FHIR-native EHR, R2 as the sole medical-file backend, dual-store audit (Postgres `AuditLog` + FHIR `AuditEvent`), license gating, and the physiotherapy/doctor/nursing clinician workspaces — is live. The definition of done and target stack below still stand.
 
-**Already shipped previously (still true):**
-
-- ✅ **NextAuth v5** with Prisma adapter (Google OAuth + patient credentials + staff credentials, JWT sessions)
-- ✅ **WhatsApp OTP** via Wapilot (`api.wapilot.net`) — patient onboarding
-- ✅ **Medplum FHIR** deeply integrated — 23 modules in `src/lib/medplum/`, covering Patient, Encounter, Observation, Condition, Allergy, Medication, MedicationAdministration, CarePlan, CareTeam, ClinicalNote (Composition with draft/sign), Task, Consent (caregiver scopes), DocumentReference + Binary, ServiceRequest + DiagnosticReport (labs), Communication, Appointment, Practitioner
-- ✅ **Admin EHR** at `/admin/patients/[id]` — 30 server actions covering every clinical write path
-- ✅ **Patient portal** at `/[locale]/portal` with tabbed workspace (overview, clinical, files, care, visits, vitals, notes, tasks), bilingual EN/AR, caregiver-consent-scoped
-- ✅ **Nursing dashboard** + **escalations queue**
-- ✅ **RBAC** with case-scoped roles
-- ✅ **Prisma Migrate** workflow (3 migrations applied)
-- ✅ **Zod** in EHR schemas
-- ✅ **Document streaming** via `/api/ehr/documents/[id]` with auth + scope + consent enforcement
-- ✅ **File storage** — handled by Medplum (FHIR Binary), not by our app
-- ✅ **PWA** + VAPID push
-- ✅ **Bilingual i18n** with full EN/AR coverage of portal + EHR + admin
-
-### 8.1 What's actually left for Phase 0 (refreshed 2026-06-05)
-
-| # | Workstream | Outcome | Owner | Status |
-|---|---|---|---|---|
-| 1 | Migrate from **Hostinger → OVH VPS Bahrain** (and OVH Managed Postgres + dedicated Medplum host) | Production on healthcare-credible infrastructure | DevOps / senior engineer | 🟡 In flight — see DEPLOYMENT_RUNBOOK.md §3 |
-| 2 | **Cloudflare R2** as medical-file backend | File storage off VPS disk | DevOps | ✅ Done (app-level via `r2-medical.ts`). Medplum-side binary backend config pending for FHIR-attached files. |
-| 3 | **Close the Postgres audit gap** — enforce explicit per-action auditing for `User`, `Staff`, `Patient` demographics, `Invoice`, `Payment`, `OnlineBooking`, `Visit`, `CarePlan` | Every Postgres mutation auto-audits | Senior engineer | 🟡 Login/logout + clinical writes done. Operational writes partial. |
-| 4 | Emit **staff login audit event** | Login activity traceable | Senior engineer | ✅ Done — `writeLoginAudit` in `src/auth.ts` |
-| 5 | Wire **Sentry + log aggregator (Better Stack / Grafana) + UptimeRobot + status page** | Production visibility | Senior engineer | ❌ Not yet — EHR_NOW Sprint 5 |
-| 6 | Update CSP in `next.config.ts` for Sentry + Daily.co | New third-parties don't break | Senior engineer | ❌ — paired with task #5 |
-| 7 | **Multi-tenancy schema** — `Tenant` + `tenantId` columns | Hospital B2B possible without retrofit | Senior engineer | ✅ Phase 1A done. Query-level enforcement remains per-call. |
-| 8 | Move **DNS + CDN to Cloudflare** | Free protection + caching | DevOps | ✅ Done |
-| 9 | Move all **secrets to Doppler / 1Password Secrets Automation / OVH-native** | No secrets on laptops for prod | Senior engineer | 🟡 Local `.env.local` today; managed in flight |
-| 10 | Establish **staging environment** | New features land here before production | DevOps | 🟡 Same host as prod today; separates with OVH migration |
-| 11 | Automated **daily Postgres + Medplum backup → R2** + monthly restore drill | Real disaster recovery | DevOps | 🟡 Nightly dumps live; PITR + restore drill pending OVH |
-| 12 | Write **DR runbook** | Anyone can rebuild in <2h | Senior engineer | ✅ Done — see [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) |
-| 13 | **Cleanup**: dead-code, scaffolding (HEP, caregiver folder) | Repo reflects reality | Senior engineer | ✅ Continuous — HEP + caregiver folders deleted Jun 2026 |
-| 14 | Sign up **Apple Developer + Google Play** | Long approval starts running | Owner | ❌ Pending |
-| 15 | Sign up **Sentry, Cloudflare, R2** if not already | Foundational service accounts | Owner | ✅ Cloudflare + R2 live; Sentry pending |
-| 16 🆕 | **Malware scanner — production backend** | Real engine in place of `mock_clean` | DevOps + Owner (budget) | 🟡 Code ready, vendor decision pending |
-| 17 🆕 | **Medplum BAA** signed | Legal cover for clinical data hosting | Owner | ❌ Pending — Owner action #1 in HIPAA_COMPLIANCE.md |
-| 18 🆕 | **DPL lawyer engagement** | DPA templates + privacy policy review | Owner | ❌ Pending — Owner action #5 in HIPAA_COMPLIANCE.md |
-| 19 🆕 | **Pen test commissioned** | Independent security review | Owner | ❌ Pending — Owner action #6 in HIPAA_COMPLIANCE.md |
-
-### 8.2 Definition of done for Phase 0
+### 8.1 Definition of done for Phase 0
 
 - Production migrated to OVH Bahrain; Hostinger decommissioned after 7-day rollback window
 - Medplum Binary backend is R2-backed
@@ -477,7 +429,7 @@ Detailed §164.308/310/312 mapping is in [HIPAA_COMPLIANCE.md](HIPAA_COMPLIANCE.
 - All dead code identified in the audit is either deleted or wired in
 - Compliance one-pager exists describing our security posture (sufficient for hospital procurement first-pass)
 
-### 8.3 Phase 0 stack snapshot (target state)
+### 8.2 Phase 0 stack snapshot (target state)
 
 ```
 Compute:    OVH VPS Comfort, Bahrain region (production) + smaller OVH (staging)
@@ -816,7 +768,7 @@ Decisions made and the rationale. **Append-only — do not edit past entries.** 
 | 2026-06-04 | **Break-glass governance** — `DestructiveApprovalToken` for restricted-data overrides + destructive operations | Replaces ad-hoc admin overrides. Every issued token is audited via `AuditLog.action = override`. |
 | 2026-06-04 | **Insurance + claims schema in place** — `InsurerProfile`, `Coverage`, `PriorAuth`, `Claim`, `ClaimLineItem` | Foundation for direct billing in Phase 3. Admin dashboard skeleton at `/admin/insurance`. No live adjudication yet. |
 | 2026-06-04 | **`ControlledSubstanceLedger`** added — Postgres audit trail for EDA-controlled medication dispensation | Parallel write alongside FHIR `MedicationAdministration`. Required by Egyptian Drug Authority. |
-| 2026-06-05 | **Clinician workspace shipped (physiotherapy pilot)** at `/clinician/*` — mobile-first, license-gated, case-scoped | First discipline-specific workspace. Doctor + nurse equivalents will follow the same shape (see EHR_PHYSIO_SPEC.md). |
+| 2026-06-05 | **Clinician workspace shipped (physiotherapy pilot)** at `/clinician/*` — mobile-first, license-gated, case-scoped | First discipline-specific workspace. Doctor + nurse equivalents followed the same shape (see EHR_SYSTEM_BLUEPRINT.md + EHR_ROLE_MATRIX.md). |
 | 2026-06-05 | **Cloudflare R2 is sole medical-file backend** — `src/lib/storage/r2-medical.ts` is the only access path | Replaces dead local-storage abstraction. Files surfaced via FHIR `DocumentReference` + `Binary` for clinical metadata. |
 | 2026-06-05 | **Malware scanning required for all medical-file uploads** — `src/lib/security/malware-scan.ts`, pluggable backend (`mock_clean` dev, HTTP scanner prod) | Files must reach `clean` verdict before any user can stream them. Background job at `/api/internal/ehr/documents/scan`. |
 | 2026-06-05 | **FHIR `Goal` round-trip** — `src/lib/medplum/goals.ts` bridges Postgres `PatientGoal` ↔ Medplum `Goal` | Physio workspace edits goals heavily during sessions; bidirectional sync keeps Postgres fast and Medplum authoritative. |
