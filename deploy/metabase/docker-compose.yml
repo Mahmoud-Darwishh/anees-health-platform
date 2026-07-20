@@ -13,7 +13,7 @@
 
 services:
   metabase:
-    image: metabase/metabase:v0.54.0        # PIN a tag — never :latest. Check the current stable release before deploying.
+    image: metabase/metabase:v0.63.1.2       # PIN a tag — never :latest. Verified current stable as of 2026-07-20.
     container_name: anees-metabase
     restart: unless-stopped
     ports:
