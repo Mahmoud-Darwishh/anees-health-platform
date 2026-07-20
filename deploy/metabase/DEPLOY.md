@@ -74,18 +74,29 @@ is created over HTTPS.
 
 ## Phase 3 — Expose it safely
 
+> **Real-topology note (found during the 2026-07-20 live deploy):** this VPS already
+> runs **Traefik** as the one public door on 80/443 for every service on the box
+> (net: host, `providers.docker=true`, auto Let's Encrypt via HTTP challenge). Plain
+> Nginx is installed but **not** running/bound — starting it would collide with
+> Traefik on 80/443. So Metabase is exposed via **Traefik labels** (already added to
+> `docker-compose.yml`), which also gets it its HTTPS certificate automatically — no
+> manual `certbot` step needed. `nginx-metabase.conf` is kept only as a reference for
+> a plain-Nginx environment; it is **not used** on this VPS.
+
 1. **DNS (Vercel dashboard):** aneeshealth.com → DNS → add an **A record**:
-   name `metabase`, value `152.239.112.57`.
-2. **TLS + proxy (VPS):**
+   name `analytics`, value `152.239.112.57`.
+2. **Apply the Traefik labels** (already in `docker-compose.yml` — `traefik.enable=true`,
+   host rule `analytics.aneeshealth.com`, entrypoint `websecure`, certresolver
+   `letsencrypt`, target port `3000`):
    ```bash
-   sudo cp nginx-metabase.conf /etc/nginx/sites-available/analytics.aneeshealth.com
-   sudo ln -s /etc/nginx/sites-available/analytics.aneeshealth.com /etc/nginx/sites-enabled/
-   sudo certbot --nginx -d analytics.aneeshealth.com   # fills in the TLS lines
-   sudo nginx -t && sudo systemctl reload nginx
+   docker compose up -d      # re-creates the container with the labels applied
+   docker compose logs -f traefik 2>/dev/null || true   # (traefik is a separate stack; skip if not reachable here)
    ```
-3. **Firewall:** `sudo ufw allow 'Nginx Full'` (80/443). Metabase's 3002 stays on localhost.
-4. **(Recommended) lock-down:** if staff IPs are stable, uncomment the `allow`/`deny`
-   block in `nginx-metabase.conf`. Otherwise rely on SSO + short sessions (Phase 4).
+3. **Firewall:** already open — Traefik already serves Medplum on 80/443, so no `ufw`
+   change is needed for Metabase.
+4. **(Recommended) lock-down:** if staff IPs are stable, add an IP allow-list via a
+   Traefik IPAllowList middleware label instead of the Nginx `allow`/`deny` block.
+   Otherwise rely on SSO + short sessions (Phase 4).
 
 ✅ **Done when:** `https://analytics.aneeshealth.com` loads with a valid cert.
 

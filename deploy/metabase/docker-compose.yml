@@ -6,10 +6,16 @@
 #
 #   cd /opt/metabase && docker compose up -d && docker compose logs -f metabase
 #
-# It binds to 127.0.0.1:3002 only (3000 was already taken by another process on
-# this VPS) — Nginx (nginx-metabase.conf) terminates TLS
-# and is the sole public entrypoint. It reports on the operational database via a
-# read-only user (see 01/02 SQL); it is NEVER pointed at Medplum's database.
+# TLS/public routing: this VPS already runs Traefik (net: host, providers.docker=true,
+# exposedbydefault=false, Let's Encrypt via HTTP challenge) as the ONE public door on
+# 80/443 for every service on the box, including Medplum. So Metabase is NOT fronted by
+# its own Nginx — it's discovered by Traefik via the `traefik.*` labels below, which also
+# get it its HTTPS certificate automatically. (nginx-metabase.conf in this folder is kept
+# only as a reference for a plain-Nginx environment; it is NOT used on this VPS.)
+#
+# The host port binding below (3002) is for LOCAL curl/debug only — Traefik reaches the
+# container directly over the Docker network using the label-declared port 3000, not the
+# host mapping.
 # =============================================================================
 
 services:
@@ -17,8 +23,14 @@ services:
     image: metabase/metabase:v0.63.1.2       # PIN a tag — never :latest. Verified current stable as of 2026-07-20.
     container_name: anees-metabase
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.metabase.rule=Host(`analytics.aneeshealth.com`)"
+      - "traefik.http.routers.metabase.entrypoints=websecure"
+      - "traefik.http.routers.metabase.tls.certresolver=letsencrypt"
+      - "traefik.http.services.metabase.loadbalancer.server.port=3000"
     ports:
-      - "127.0.0.1:3002:3000"               # host 3002 (3000 taken); localhost only, Nginx does TLS + public exposure
+      - "127.0.0.1:3002:3000"               # local debug only; Traefik routes via the labels above, not this mapping
     environment:
       MB_DB_TYPE: postgres
       MB_DB_HOST: metabase-db
