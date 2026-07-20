@@ -1,10 +1,15 @@
 -- =============================================================================
--- Anees Health · Metabase · starter dashboard queries
+-- Anees Health · Metabase · dashboard queries (reference / rebuild source)
 -- =============================================================================
--- Paste each into a Metabase "SQL question" (admins only — non-admin groups are
--- query-builder-only). They read ONLY the masked bi.* views. Enum label values
--- (e.g. 'completed', 'paid') are illustrative — check them against your actual
--- data the first time and adjust. Business definitions match the app's code.
+-- STATUS: already applied (2026-07-20) — all 10 queries below are live as saved
+-- questions in the "BI Dashboards" collection, branded, and assembled into 3
+-- dashboards (Booking Funnel & Demand · Visit Operations · Finance & Insurance).
+-- This file remains the canonical source: if a dashboard is ever lost or needs
+-- rebuilding, paste these into a Metabase "SQL question" (admins only —
+-- non-admin groups are query-builder-only) or replay them via the Metabase MCP
+-- connector. They read ONLY the masked bi.* views. Enum label values (e.g.
+-- 'completed', 'paid') are illustrative — check them against live data if
+-- rebuilding. Business definitions match the app's code.
 -- =============================================================================
 
 -- 1) Revenue by month

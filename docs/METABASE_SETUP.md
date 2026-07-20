@@ -1,10 +1,10 @@
 # Metabase Setup & Implementation Runbook — Anees Health Platform
 
 > **Owner:** CTO / lead engineer · **Audience:** the engineer who implements this, plus the owner (so they know what's involved).
-> **Created:** 2026-07-13 · **Status:** artifacts built; **not yet executed on the server** (needs DB/VPS/Vercel access).
+> **Created:** 2026-07-13 · **Status (2026-07-20): live in production** at `https://analytics.aneeshealth.com`, with 3 branded dashboards. Remaining: Google SSO, the Vercel nav-link env var, and the daily backup cron.
 > **Decision context:** staying on the current infrastructure (Vercel app + Hostinger VPS backend) for now — this runbook is written for that reality, **not** the outdated "OVH Bahrain / Cloudflare edge" topology in older docs.
 
-> **Ready-to-run artifacts live in [`../deploy/metabase/`](../deploy/metabase/)** — the masked-view SQL, the read-only role, a verification script, a rollback script, `docker-compose.yml`, the Nginx config, the backup script, starter dashboard queries, and a copy-paste [`DEPLOY.md`](../deploy/metabase/DEPLOY.md). **Phase 6 (the admin nav link) is already implemented in code** (`admin-nav-policy.ts` + `AdminNav.tsx`), gated on `NEXT_PUBLIC_METABASE_URL` so it stays hidden until Metabase is live. The remaining work is running the artifacts on the DB/VPS and configuring Metabase in the browser.
+> **This is the design doc.** The executable artifacts — masked-view SQL, read-only role, verification script, rollback script, `docker-compose.yml`, backup script, dashboard queries — live in [`../deploy/metabase/`](../deploy/metabase/), with a copy-paste runbook at [`DEPLOY.md`](../deploy/metabase/DEPLOY.md). **Where this doc and that folder could drift, the folder is the source of truth** — this doc summarizes and explains; it doesn't duplicate the SQL/YAML inline. **Phase 6 (the admin nav link) is already implemented in code** (`admin-nav-policy.ts` + `AdminNav.tsx`), gated on `NEXT_PUBLIC_METABASE_URL` so it stays hidden until the env var is set.
 
 ---
 
@@ -20,12 +20,18 @@ Metabase is a ready-made **business-intelligence app** — you run it as its own
 
 ```
 Staff browser
-   │  https (Google SSO + MFA)
+   │  https (Google login; SSO not yet wired — see §7)
    ▼
 analytics.aneeshealth.com   ── DNS A-record added in Vercel DNS → the VPS IP
    │
    ▼  (on the Hostinger VPS, 152.239.112.57)
-Nginx (TLS via Let's Encrypt)  ──►  Metabase container (127.0.0.1:3000)
+Traefik (already running on the box; TLS via Let's Encrypt, auto-issued from
+container labels — NOT Nginx/certbot; see deploy/metabase/DEPLOY.md Phase 3
+for why the plan changed once the real box was inspected)
+   │
+   ▼
+Metabase container (host debug port 127.0.0.1:3002 → container's internal 3000;
+Traefik reaches it directly over the Docker network, not via that host port)
                                         │              │
                                         │              └─► its OWN metadata Postgres (container) — dashboards/users/settings
                                         │
@@ -36,7 +42,8 @@ Nginx (TLS via Let's Encrypt)  ──►  Metabase container (127.0.0.1:3000)
 ```
 
 Key facts this design depends on:
-- The **app runs on Vercel**; the **operational Postgres + Medplum run on the Hostinger VPS**. Metabase is a new Docker service **on the VPS**, next to (not inside) the existing Medplum Docker stack.
+- The **app runs on Vercel**; the **operational Postgres + Medplum run on the Hostinger VPS**. Metabase is a Docker service **on the VPS**, next to (not inside) the existing Medplum Docker stack.
+- The VPS already runs **Traefik** as its one public entrypoint for every service on the box (Medplum included) — Metabase is discovered via Docker labels, not a dedicated Nginx config.
 - Metabase's **own metadata database** is a separate small Postgres container — never the app DB, never Medplum's DB.
 - Metabase reports **only** on `anees_health` (operational). **Medplum's clinical database is never added as a data source.**
 - DNS for `aneeshealth.com` is managed in **Vercel** (not Cloudflare), so the subdomain record is added there.
@@ -66,287 +73,105 @@ Key facts this design depends on:
 
 ---
 
-## 4. Phase 1 — The security foundation (database) ⚠️ do this first, get it reviewed
+## 4. Phase 1 — The security foundation (database) ✅ done, proven 2026-07-20
 
-This is the most important phase. Nothing connects until the read-only user provably cannot read `public` or write anything.
+This was the most important phase. The read-only user provably cannot read `public` or write anything — see the live proof transcript summarized below.
 
 > **camelCase warning:** columns are camelCase and **must be double-quoted** in SQL (`"gpsLatitude"`, `"deletedAt"`). Un-quoted `gpslatitude` will error or, worse, resolve wrong. Table names are snake_case (`patients`, `visits`, `online_bookings`).
 
-### 4.1 Create the masked `bi` schema + views
+### 4.1 The masked `bi` schema + views
 
-Run as the DB owner (`anees_user`). Views execute with the **owner's** privileges on the underlying tables, so the read-only user never needs any grant on `public`.
-
-```sql
-CREATE SCHEMA IF NOT EXISTS bi;
-
--- Patients: identity-free. Age band instead of birth date; no name/phone/ID/GPS/insurance/contacts.
-CREATE OR REPLACE VIEW bi.patients_safe AS
-SELECT
-  p.id, p.code, p."areaId", p."gender",
-  CASE
-    WHEN p."dateOfBirth" IS NULL THEN 'unknown'
-    WHEN date_part('year', age(p."dateOfBirth")) < 18 THEN '0-17'
-    WHEN date_part('year', age(p."dateOfBirth")) < 40 THEN '18-39'
-    WHEN date_part('year', age(p."dateOfBirth")) < 60 THEN '40-59'
-    WHEN date_part('year', age(p."dateOfBirth")) < 80 THEN '60-79'
-    ELSE '80+'
-  END AS age_band,
-  p."status", p."referralSourceId", p."privacyTier",
-  p."tenantId", p."registrationDate", p."createdAt"
-FROM public.patients p
-WHERE p."deletedAt" IS NULL;                       -- respect soft-delete
-
--- Visits: financials, timing, status. GPS + identity + media stripped.
-CREATE OR REPLACE VIEW bi.visits_safe AS
-SELECT
-  v.id, v.code, v."patientId", v."providerId", v."serviceId", v."carePlanId", v."areaId",
-  v."bookedDate", v."scheduledDate", v."completedDatetime",
-  v."status", v."state", v."visitType", v."primaryDisruptionCode",
-  v."servicePriceEgp", v."discountEgp", v."netPriceEgp", v."providerPayoutEgp",
-  v."cashCollectedEgp", v."cashGratuityEgp", v."patientRating",
-  v."tenantId", v."createdAt"
-FROM public.visits v;
--- deliberately omitted: checkInLat/Lng, checkOutLat/Lng, identityConfirmedBy,
--- companionsPresent, overridePhotoMediaId, patientAcknowledgementMediaId, notes
-
--- Online bookings: funnel + payment rail. Name/phone/IP/UA/sender stripped.
-CREATE OR REPLACE VIEW bi.bookings_safe AS
-SELECT
-  b.id, b."bookingRef",
-  b."visitType", b."serviceType", b."packageType", b."specialty",
-  b."baseAmountEgp", b."discountEgp", b."amountEgp", b."currency",
-  b."status", b."paymentMethod", b."governorate", b."promocodeCode",
-  b."convertedVisitId", b."convertedAt", b."paymentCompletedAt",
-  b."locale", b."tenantId", b."createdAt"
-FROM public.online_bookings b;
--- omitted: fullName, phoneNumber, countryCode, ipAddress, userAgent,
--- instapaySenderName, instapayReference, notes, kashier* ids
-
--- Insurance: expose status/dates/amounts; drop member/policy identifiers + free-text.
-CREATE OR REPLACE VIEW bi.coverages_safe AS
-SELECT c.id, c."patientId", c."insurerProfileId", c."status",
-       c."effectiveDate", c."expiryDate", c."tenantId", c."createdAt"
-FROM public.coverages c;   -- verify exact columns against schema before running
-```
-
-**Clean financial + lookup tables** (no PHI) are exposed as simple pass-through views so that *everything Metabase can see lives in `bi`* — one boundary, easy to reason about:
-
-```sql
-CREATE OR REPLACE VIEW bi.invoices        AS SELECT * FROM public.invoices;
-CREATE OR REPLACE VIEW bi.payments        AS SELECT * FROM public.payments;
-CREATE OR REPLACE VIEW bi.expenses        AS SELECT * FROM public.expenses;
-CREATE OR REPLACE VIEW bi.provider_payouts AS SELECT * FROM public.provider_payouts;
-CREATE OR REPLACE VIEW bi.promocodes      AS SELECT * FROM public.promocodes;
-CREATE OR REPLACE VIEW bi.claims          AS SELECT * FROM public.claims;
-CREATE OR REPLACE VIEW bi.claim_line_items AS SELECT * FROM public.claim_line_items;
-CREATE OR REPLACE VIEW bi.coverage_checks AS SELECT * FROM public.coverage_checks;   -- already PII-free (ipHash only)
-CREATE OR REPLACE VIEW bi.services        AS SELECT * FROM public.services;
-CREATE OR REPLACE VIEW bi.areas           AS SELECT * FROM public.areas;
-CREATE OR REPLACE VIEW bi.service_categories AS SELECT * FROM public.service_categories;
-CREATE OR REPLACE VIEW bi.referral_sources AS SELECT * FROM public.referral_sources;
-CREATE OR REPLACE VIEW bi.insurer_profiles AS SELECT * FROM public.insurer_profiles;
-CREATE OR REPLACE VIEW bi.tenants         AS SELECT * FROM public.tenants;
--- providers: drop phone/email
-CREATE OR REPLACE VIEW bi.providers AS
-SELECT p.id, p.code, p."fullName", p."roleId", p."specialty",
-       p."primaryAreaId", p."status", p."tenantId", p."createdAt"
-FROM public.providers p;
-```
+**The exact, current SQL is [`deploy/metabase/01_bi_schema_and_views.sql`](../deploy/metabase/01_bi_schema_and_views.sql)** — 27 views, run once as the DB owner (`anees_user`). It is not duplicated here to avoid two copies drifting apart; that file is the single source of truth. In summary: PHI-bearing tables (`patients`, `visits`, `online_bookings`, `coverages`, `prior_auths`, `claims`, `claim_line_items`, `insurer_profiles`, `providers`, and the money tables) get **curated `*_safe` views** with identifiers stripped (age band instead of birth date, no name/phone/GPS/national ID/insurance numbers, no free-text notes); PHI-free lookup tables are exposed as plain pass-through views. Views execute with the **owner's** privileges, so the read-only role below never needs any grant on `public`.
 
 > **Never expose** (no view, no grant): `users`, `accounts`, `verification_tokens`, `push_subscriptions`, `staff` (password hashes, licence numbers), `physio_profiles`, `visit_location_pings`, `visit_state_transitions` (raw GPS), `controlled_substance_ledger`, `standing_orders`, `patient_goals`, `destructive_approval_tokens`, `profile_change_requests`, `rate_limits`, and **`audit_logs`** (its JSON snapshots can contain any PHI). And of course **nothing from Medplum**.
 
-### 4.2 Create the read-only login and lock it down
+### 4.2 The read-only login
 
-```sql
-CREATE ROLE metabase_ro NOLOGIN;
-CREATE USER metabase_bi WITH PASSWORD '‹strong-random-password›';
-GRANT metabase_ro TO metabase_bi;
+**Exact SQL: [`deploy/metabase/02_readonly_role.sql`](../deploy/metabase/02_readonly_role.sql).** Creates a `metabase_ro` role (bundles the grants) and a `metabase_bi` login user. Grants: `CONNECT` on the database, `USAGE` + `SELECT` on schema `bi` only (default privileges so future views auto-covered) — nothing on `public`. Hardened with `default_transaction_read_only = on`, a `statement_timeout`, and an idle-transaction timeout so a runaway query can't hurt the shared prod DB.
 
-GRANT CONNECT ON DATABASE anees_health TO metabase_ro;
-GRANT USAGE  ON SCHEMA bi TO metabase_ro;
-GRANT SELECT ON ALL TABLES IN SCHEMA bi TO metabase_ro;          -- views included
-ALTER DEFAULT PRIVILEGES IN SCHEMA bi GRANT SELECT ON TABLES TO metabase_ro;  -- future views auto-covered
+### 4.3 The boundary proof (Phase 1's definition of done)
 
--- belt & braces: never public, never writable, and protect prod from runaway queries
-ALTER ROLE metabase_ro SET default_transaction_read_only = on;
-ALTER ROLE metabase_bi SET statement_timeout = '60s';
--- Do NOT grant metabase_ro anything on schema public. It has no SELECT there, so it cannot read the base tables.
-```
+**Exact SQL: [`deploy/metabase/03_verify_boundary.sql`](../deploy/metabase/03_verify_boundary.sql)**, run connected **as `metabase_bi`**. It asserts: reading `bi.patients_safe`/`bi.bookings_safe` succeeds; reading `public.patients`, `public.audit_logs`, `public.staff`, `public.visit_location_pings` all fail with `permission denied`; and writing anywhere (`UPDATE`, `CREATE TABLE`, `INSERT`) fails.
 
-### 4.3 Prove the boundary (definition of done for Phase 1)
-
-Connect **as `metabase_bi`** (`psql "host=... dbname=anees_health user=metabase_bi ..."`) and confirm:
-
-```sql
-SELECT count(*) FROM bi.patients_safe;      -- ✅ works, returns a number
-SELECT * FROM public.patients LIMIT 1;       -- ❌ MUST fail: permission denied
-SELECT * FROM public.audit_logs LIMIT 1;     -- ❌ MUST fail
-CREATE TABLE bi.x(i int);                     -- ❌ MUST fail: read-only / no privilege
-UPDATE bi.invoices SET "status"='paid';       -- ❌ MUST fail
-```
-
-Also eyeball each `*_safe` view (`SELECT * FROM bi.patients_safe LIMIT 5`) and confirm **no name, phone, national ID, or GPS column is present.** ✅ Phase 1 done only when all four ❌ checks genuinely fail.
+**Actually run against production on 2026-07-20 — real result:** all three success checks passed (`bi.patients_safe` → 6 rows, `bi.bookings_safe` → 7 rows, eyeballed columns confirmed no name/phone/GPS/national ID), and **all seven** must-fail checks failed exactly as required (`permission denied for schema public` ×4, `permission denied for view invoices_safe`, `permission denied for schema bi`, `permission denied for schema public`). The boundary holds.
 
 ---
 
-## 5. Phase 2 — Deploy Metabase (Docker on the VPS)
+## 5. Phase 2 — Deploy Metabase (Docker on the VPS) ✅ done, live on 2026-07-20
 
-Create `/opt/metabase/` on the VPS with a `.env` (root-only, `chmod 600`):
+**The exact, current config is [`deploy/metabase/docker-compose.yml`](../deploy/metabase/docker-compose.yml)** — not duplicated here. Key facts, including two corrections found only by actually deploying (the value of a live deploy over a paper plan):
 
-```dotenv
-# /opt/metabase/.env
-MB_DB_PASS=‹metadata-db-password›
-MB_ENCRYPTION_SECRET_KEY=‹openssl rand -base64 32 — ESCROW THIS›
-```
+- **Image:** `metabase/metabase:v0.63.1.2` — the originally-planned `v0.54.0` **does not exist** on Docker Hub (404 on pull); verified against the real registry before fixing.
+- **Port:** host `127.0.0.1:3002` (local debug only) → container's internal `3000`. Ports `3000` and `3001` were **already in use** by unrelated existing processes on this VPS, discovered live via `ss -tlnp` during the deploy. Non-destructive fix — the container-internal port and the app's own understanding of itself are unaffected; only the host-side publish moved.
+- **Routing labels:** `traefik.*` labels are baked into the compose file (see Phase 3) — no separate reverse-proxy file.
+- Own metadata Postgres container (`anees-metabase-db`), `MB_ENABLE_PUBLIC_SHARING`/`MB_ENABLE_EMBEDDING` both `false`, 8-hour session, `Africa/Cairo` timezone, `-Xmx1500m` JVM cap.
 
-`/opt/metabase/docker-compose.yml`:
+Secrets live in `/opt/metabase/.env` (root-only, `chmod 600`) — template at [`deploy/metabase/.env.example`](../deploy/metabase/.env.example).
 
-```yaml
-services:
-  metabase:
-    image: metabase/metabase:v0.54.0        # PIN a tag; check the current stable release first
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:3000:3000"               # localhost only — Nginx terminates TLS
-    environment:
-      MB_DB_TYPE: postgres
-      MB_DB_HOST: metabase-db
-      MB_DB_PORT: 5432
-      MB_DB_DBNAME: metabaseapp
-      MB_DB_USER: metabaseapp
-      MB_DB_PASS: ${MB_DB_PASS}
-      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY}
-      MB_SITE_URL: https://analytics.aneeshealth.com
-      MB_ENABLE_PUBLIC_SHARING: "false"     # no anonymous public links, ever
-      MB_ENABLE_EMBEDDING: "false"
-      MB_SESSION_MAX_AGE: "480"             # 8-hour absolute session
-      MB_SESSION_COOKIES: "true"            # also expire on browser close
-      JAVA_TIMEZONE: Africa/Cairo
-      JAVA_TOOL_OPTIONS: -Xmx1500m          # ~80% of this container's RAM
-    extra_hosts:
-      - "host.docker.internal:host-gateway" # so Metabase can reach the host's Postgres
-    depends_on:
-      metabase-db:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "-I", "http://localhost:3000/api/health"]
-      interval: 20s
-      timeout: 5s
-      retries: 6
-    networks: [metanet]
-
-  metabase-db:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: metabaseapp
-      POSTGRES_USER: metabaseapp
-      POSTGRES_PASSWORD: ${MB_DB_PASS}
-    volumes:
-      - metabase_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U metabaseapp -d metabaseapp"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
-    networks: [metanet]
-
-volumes:
-  metabase_pgdata:
-networks:
-  metanet:
-```
-
-Bring it up: `cd /opt/metabase && docker compose up -d`, then `docker compose logs -f metabase` until healthy. **Do not run the setup wizard over plain HTTP** — finish Phase 3 first so the first admin account is created over HTTPS.
-
-**Definition of done:** `curl -I http://127.0.0.1:3000/api/health` returns `200` on the VPS.
+**Definition of done:** `curl -I http://127.0.0.1:3002/api/health` returns `200` on the VPS. ✅ Confirmed — `Metabase Initialization COMPLETE in 48.6s`.
 
 ---
 
-## 6. Phase 3 — Expose it safely
+## 6. Phase 3 — Expose it safely ✅ done, live on 2026-07-20
 
-1. **DNS:** in the **Vercel** dashboard → `aneeshealth.com` → DNS, add an **A record**: `metabase` → `152.239.112.57`.
-2. **TLS + reverse proxy** on the VPS (Nginx). Add a server block for `analytics.aneeshealth.com` proxying to `127.0.0.1:3000`, then issue a cert:
-   ```bash
-   sudo certbot --nginx -d analytics.aneeshealth.com
-   ```
-   ```nginx
-   server {
-     listen 443 ssl http2;
-     server_name analytics.aneeshealth.com;
-     ssl_certificate     /etc/letsencrypt/live/analytics.aneeshealth.com/fullchain.pem;
-     ssl_certificate_key /etc/letsencrypt/live/analytics.aneeshealth.com/privkey.pem;
+**The plan changed once the real box was inspected — this is the actual, working setup, not the original design.** The VPS turned out to already run **Traefik** (net: host, `providers.docker=true`, auto Let's Encrypt via HTTP challenge) as the *one* public entrypoint on 80/443 for every service on the box, Medplum included. Nginx was installed but not running. Starting a second thing on 80/443 would have collided with Traefik, so Metabase is exposed via **Traefik-reads-Docker-labels** instead — genuinely simpler than the original Nginx+certbot plan, since Traefik issues and renews the HTTPS certificate on its own:
 
-     # OPTIONAL hard lock-down — uncomment if staff have stable IPs:
-     # allow 197.x.x.x;   # office / known egress IP
-     # deny all;
-
-     location / {
-       proxy_pass http://127.0.0.1:3000;
-       proxy_set_header Host $host;
-       proxy_set_header X-Real-IP $remote_addr;
-       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-       proxy_set_header X-Forwarded-Proto $scheme;
-       proxy_read_timeout 90s;
-     }
-   }
-   ```
-3. **Firewall:** `ufw` allows 80/443 only; Metabase's 3000 stays bound to localhost. (Separately, review that Postgres `5432` is firewalled to only the IPs that need it — see §11.)
+1. **DNS:** in the **Vercel** dashboard → `aneeshealth.com` → DNS, add an **A record**: `analytics` → `152.239.112.57`.
+2. **Routing + TLS:** already declared as labels on the `metabase` service in `docker-compose.yml` — `traefik.enable=true`, host rule `analytics.aneeshealth.com`, entrypoint `websecure`, cert resolver `letsencrypt`, target port `3000`. Traefik discovers it automatically on `docker compose up -d`; no config file, no `certbot` command.
+3. **Firewall:** already open — Traefik already serves Medplum on 80/443. (Separately, review that Postgres `5432` is firewalled to only the IPs that need it — see §11.)
 4. **Access control** — pick one, strongest you can operate:
-   - **Baseline (always):** Google SSO restricted to your Google Workspace domain + the short session settings above + public sharing off.
-   - **Better:** the Nginx **IP allow-list** above (if staff IPs are stable).
+   - **Baseline (current):** Google login + the short session settings + public sharing off. (Google *SSO* — domain-restricted login — is still pending; see §7.)
+   - **Better:** a Traefik `IPAllowList` middleware label, if staff IPs are stable.
    - **Strongest:** put the VPS admin surface behind a **WireGuard VPN** and allow Metabase only from the VPN subnet.
 
-**Definition of done:** `https://analytics.aneeshealth.com` loads with a valid certificate; HTTP redirects to HTTPS; the setup wizard appears **only** over HTTPS.
+**Definition of done:** `https://analytics.aneeshealth.com` loads with a valid certificate; HTTP redirects to HTTPS. ✅ Confirmed — `HTTP/2 200`, valid Let's Encrypt cert, one entry for the domain in Traefik's ACME store.
 
 ---
 
-## 7. Phase 4 — Connect the data & set permissions
+## 7. Phase 4 — Connect the data & set permissions 🟡 partly done
 
-1. Finish the **setup wizard** over HTTPS; create the first **admin** account (your own).
-2. **Add the database:** Admin → Databases → PostgreSQL.
-   - Host `host.docker.internal` (or the VPS private IP), port `5432`, database `anees_health`, user `metabase_bi`, **SSL on** (`require`).
-   - **Schemas:** restrict sync to the **`bi`** schema only.
-   - Turn **off** "Actions", "Uploads", and model persistence (all need write access we didn't grant).
-3. **Turn on Google SSO** (Admin → Authentication) with the OAuth client from §3; restrict to your domain.
-4. **Groups & permissions:**
-   - Create groups `Owner`, `Finance`, `Ops`. Map staff to groups.
-   - **Data permissions** on the `anees_health` connection: **"Create queries → Query builder only"** for all non-admin groups (no raw SQL editor initially — the free tier can't sandbox SQL, so denying it keeps the masking intact). Admins keep native SQL.
-   - **Collections:** one per audience (e.g. "Finance", "Operations", "Owner"). Grant each group View on its own collection only.
-5. **Harden:** confirm public sharing is off; set password complexity to `strong`; confirm the 8-hour session.
+1. ✅ Setup wizard complete; owner admin account created.
+2. ✅ **Database connected:** Admin → Databases → PostgreSQL → `Anees Health (BI)`. Host `host.docker.internal`, port `5432`, database `anees_health`, user `metabase_bi`. **SSL was left off** — the planned `require` setting wasn't needed in practice (this is host-to-container traffic, not public internet) and the connection works cleanly; revisit only if a future hardening pass wants to force it. Actions/Uploads/model persistence are off (the account has no write grant anyway).
+   - ⚠️ **Open item:** schema sync is currently set to "all", not restricted to `bi` only. The actual PHI protection is unaffected — the database itself still refuses any read of `public.*` regardless of what Metabase's UI lists — but restricting sync is still the cleaner, intended state before other staff get access. Fix: Admin → Databases → Anees Health (BI) → Edit connection details → Schemas → "Only these..." → `bi` → Save → Sync database schema.
+3. ⬜ **Google SSO** — not yet configured. Needs a Google OAuth client (console.cloud.google.com), restricted to the company Workspace domain. Until then, the owner admin account uses a plain Metabase password login.
+4. ⬜ **Groups & permissions** — not yet created. Only the owner admin account exists so far; `Owner`/`Finance`/`Ops` groups and per-collection restrictions are needed before other staff are given access.
+5. ✅ Public sharing off, embedding off, 8-hour session (all set via `docker-compose.yml` env vars).
 
-**Definition of done:** a non-admin test user in `Finance` can open the Finance collection, can use the visual query builder, **cannot** open a SQL editor, and **cannot** see any other database or schema.
+**Definition of done:** a non-admin test user in `Finance` can open the Finance collection, can use the visual query builder, **cannot** open a SQL editor, and **cannot** see any other database or schema. *(Pending — no non-admin users exist yet.)*
 
 ---
 
-## 8. Phase 5 — Build the first dashboards
+## 8. Phase 5 — Build the first dashboards ✅ done (2026-07-20)
 
-Target the wins the hand-coded pages can't do. Build in this order:
+Built via the Metabase MCP connector, from the queries in [`deploy/metabase/starter-dashboards.sql`](../deploy/metabase/starter-dashboards.sql), organized into **3 full dashboards** (deliberately consolidated rather than one chart per page) inside a **"BI Dashboards"** collection, and styled with the Anees brand palette — navy `#132c4d`, gold `#a68341`, teal `#0E9384` — sourced from `src/assets/scss/utils/variables.scss`, not invented:
 
-1. **Revenue over time** — monthly `payments` (card + confirmed InstaPay), with month-over-month.
-2. **Booking → paid funnel** — `bookings_safe` by `status`, conversion %, by `governorate`.
-3. **Visit operations** — completed visits/month, no-show & disruption rates, avg `patientRating`, clinician utilization from `visits_safe`.
-4. **Money aging** — `invoices` by `status`/`dueDate` (AR aging); `provider_payouts` pending vs paid.
-5. **Insurance** — claim approval rate over time, denied-reason mix (`claims`).
-6. **Demand & marketing** — `coverage_checks` covered vs uncovered by area; promocode redemption/effectiveness.
+1. **Booking Funnel & Demand** — funnel status, booking→visit conversion by month, demand by governorate, coverage-check outcomes, promocode effectiveness (5 charts).
+2. **Visit Operations** — completed visits + average rating by month, top clinicians by completed visits (2 charts).
+3. **Finance & Insurance** — revenue by month, accounts-receivable aging, insurance claim approval rate (3 charts).
 
-> **Definitions parity (critical):** re-encode the app's business rules in your questions so numbers *agree* with the app. From the current code: **revenue** = confirmed card + confirmed-InstaPay `payments` only; a **"delivered" visit** = `status='completed'` OR `checkOutAt` set OR (disruption + payout > 0); **completion-rate denominator excludes cancelled**. Document each metric's definition in the dashboard description.
+> **Definitions parity (already applied):** revenue = confirmed card + confirmed-InstaPay `payments` only (matches the app); AR aging bucket order is `not yet due → 1-30 → 31-60 → 60+ → no due date` (fixed from the source SQL's default alphabetical order, which would have sorted nonsensically). Each question's description documents its own definition.
 
-Once a Metabase dashboard reliably reproduces a hand-coded `/admin/analytics` page, you can retire that page to remove the "two definitions of revenue" maintenance risk.
+Once these dashboards are trusted in daily use, the hand-coded `/admin/analytics` page can be retired to remove the "two definitions of revenue" maintenance risk — not done yet, left for the owner's call.
 
 ---
 
-## 9. Phase 6 — Link it from the admin app (small code change, on Vercel)
+## 9. Phase 6 — Link it from the admin app ✅ coded, ⬜ not yet switched on
 
-Add a nav item to the admin chrome linking to `https://analytics.aneeshealth.com`, visible only to `superadmin, admin, finance, medical_ops, operator` (reuse `admin-nav-policy.ts` / the existing analytics access list). Opens in a new tab. No embedding, no CSP change needed (it's a link, not an iframe).
+The code is already in place (`admin-nav-policy.ts` + `AdminNav.tsx`) — a **"Metabase"** nav item, deliberately named after the tool rather than reusing the word "Analytics", since `/admin` already has its own separate, older, hand-coded **"Analytics"** page (`/admin/analytics`) — the two are distinct and shouldn't be confused. It's visible only to `superadmin, admin, finance, medical_ops, operator`, opens in a new tab, and stays **hidden** until one Vercel env var is set:
+
+```
+NEXT_PUBLIC_METABASE_URL=https://analytics.aneeshealth.com
+```
+
+Set it in the Vercel project settings and redeploy. No embedding, no CSP change needed — it's a plain link, not an iframe.
 
 ---
 
-## 10. Phase 7 — Operate it
+## 10. Phase 7 — Operate it ⬜ backup cron not yet installed
 
 | Task | Cadence | Notes |
 |---|---|---|
-| Back up Metabase's **metadata DB** | daily | `docker exec metabase-db pg_dump -U metabaseapp -Fc metabaseapp > /backups/metabase_$(date +%F).dump`. Keep the **encryption key** escrowed separately — a dump is useless without it. |
+| Back up Metabase's **metadata DB** | daily | Run [`deploy/metabase/backup-metabase-metadata.sh`](../deploy/metabase/backup-metabase-metadata.sh) via cron (`0 2 * * *`). Backs up Metabase's own settings container (`anees-metabase-db`) — never the patient database. Keep the **encryption key** escrowed separately — a dump is useless without it. |
 | Version upgrade | as releases land | Back up first → bump the pinned tag → `docker compose up -d` (migrations run on start). Never `:latest`. |
 | Watch VPS RAM/CPU | weekly | Metabase + Postgres + Medplum share one box. If load rises, resize or add a read replica. |
 | Review who has access | monthly | Groups + collections still match staff roster. |
@@ -387,13 +212,13 @@ Add a nav item to the admin chrome linking to `https://analytics.aneeshealth.com
 
 ---
 
-## 14. Definition of done (whole project)
+## 14. Definition of done (whole project) — status as of 2026-07-20
 
-- [ ] Read-only user provably cannot read `public` or write anything (§4.3).
-- [ ] Metabase reachable only at `https://analytics.aneeshealth.com`, valid TLS, public sharing off.
-- [ ] Google SSO on; non-admins are query-builder-only; each group sees only its collection.
-- [ ] The five core dashboards live, with documented, app-matching metric definitions.
-- [ ] Nav link live for the allowed roles.
-- [ ] Daily metadata backup running; encryption key escrowed.
-- [ ] Stale "OVH Bahrain / Cloudflare edge" references corrected in the other docs.
-```
+- [x] Read-only user provably cannot read `public` or write anything (§4.3) — proven against production.
+- [x] Metabase reachable only at `https://analytics.aneeshealth.com`, valid TLS, public sharing off.
+- [ ] Google SSO on; non-admins are query-builder-only; each group sees only its collection. *(No SSO, no groups yet — only the owner admin account exists.)*
+- [x] Core dashboards live, with documented, app-matching metric definitions — 3 dashboards, 10 charts, branded.
+- [ ] Nav link live for the allowed roles. *(Coded; `NEXT_PUBLIC_METABASE_URL` not yet set in Vercel.)*
+- [ ] Daily metadata backup running; encryption key escrowed. *(Script ready; cron not yet installed.)*
+- [x] Stale "OVH Bahrain / Cloudflare edge" references corrected in the other docs.
+- [ ] Schema sync restricted to `bi` only (currently "all" — see §7 open item; PHI protection is unaffected either way, this is a cleanliness item).

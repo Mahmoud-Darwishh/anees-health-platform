@@ -10,8 +10,7 @@
 # exposedbydefault=false, Let's Encrypt via HTTP challenge) as the ONE public door on
 # 80/443 for every service on the box, including Medplum. So Metabase is NOT fronted by
 # its own Nginx — it's discovered by Traefik via the `traefik.*` labels below, which also
-# get it its HTTPS certificate automatically. (nginx-metabase.conf in this folder is kept
-# only as a reference for a plain-Nginx environment; it is NOT used on this VPS.)
+# get it its HTTPS certificate automatically.
 #
 # The host port binding below (3002) is for LOCAL curl/debug only — Traefik reaches the
 # container directly over the Docker network using the label-declared port 3000, not the

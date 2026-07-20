@@ -1,9 +1,15 @@
 # Metabase — execution guide (copy-paste)
 
-Everything in this folder is ready to run. The steps below are the parts that
-must happen **on your Hostinger VPS, in your Vercel dashboard, and in the Google
-console** — the things an AI can't do for you. Follow them in order. The
-companion design doc is [`../../docs/METABASE_SETUP.md`](../../docs/METABASE_SETUP.md).
+> **Status (2026-07-20): live in production.** Phases 1–5 below are complete —
+> `https://analytics.aneeshealth.com` is deployed, secured, connected, and carrying
+> 3 branded dashboards. What's left is Phases 6–7 (the in-app nav link + the backup
+> cron) plus Google SSO. This guide is kept accurate as a rebuild/audit reference,
+> not just a to-do list.
+
+The steps below are the parts that must happen **on the Hostinger VPS, in the
+Vercel dashboard, and in the Google console** — the things an AI can't do on its
+own. Follow them in order. The companion design doc is
+[`../../docs/METABASE_SETUP.md`](../../docs/METABASE_SETUP.md).
 
 Files in this folder:
 
@@ -13,11 +19,14 @@ Files in this folder:
 | `02_readonly_role.sql` | The read-only `metabase_bi` login | Operational Postgres, as the DB owner |
 | `03_verify_boundary.sql` | Proof the boundary holds | Operational Postgres, **as `metabase_bi`** |
 | `99_rollback.sql` | Full teardown of the above | Operational Postgres, as the DB owner |
-| `docker-compose.yml` | Metabase + its metadata DB | `/opt/metabase/` on the VPS |
+| `docker-compose.yml` | Metabase + its metadata DB, incl. the Traefik routing labels | `/opt/metabase/` on the VPS |
 | `.env.example` | Secrets template | copy to `/opt/metabase/.env` |
-| `nginx-metabase.conf` | Reverse proxy | `/etc/nginx/sites-available/` |
-| `backup-metabase.sh` | Daily metadata backup | VPS cron |
-| `starter-dashboards.sql` | Ready dashboard queries | Metabase SQL editor |
+| `backup-metabase-metadata.sh` | Daily backup of Metabase's *own* settings DB (not patient data) | VPS cron |
+| `starter-dashboards.sql` | The 10 dashboard queries (already applied — kept as the rebuild/reference source) | Metabase SQL editor, or re-run via the connector |
+
+There is no Nginx config in this folder — the VPS already runs **Traefik** as its
+one public entrypoint (see Phase 3), so Metabase is exposed via container labels,
+not a separate reverse-proxy file.
 
 ---
 
@@ -80,8 +89,7 @@ is created over HTTPS.
 > Nginx is installed but **not** running/bound — starting it would collide with
 > Traefik on 80/443. So Metabase is exposed via **Traefik labels** (already added to
 > `docker-compose.yml`), which also gets it its HTTPS certificate automatically — no
-> manual `certbot` step needed. `nginx-metabase.conf` is kept only as a reference for
-> a plain-Nginx environment; it is **not used** on this VPS.
+> Nginx config and no manual `certbot` step needed.
 
 1. **DNS (Vercel dashboard):** aneeshealth.com → DNS → add an **A record**:
    name `analytics`, value `152.239.112.57`.
@@ -102,52 +110,75 @@ is created over HTTPS.
 
 ---
 
-## Phase 4 — Configure Metabase (in the browser, one-time)
+## Phase 4 — Configure Metabase (in the browser, one-time) 🟡 partly done
 
-1. Finish the **setup wizard** over HTTPS; create your **admin** account.
-2. **Google SSO** (needs a Google OAuth client — [console.cloud.google.com](https://console.cloud.google.com));
-   redirect URL `https://analytics.aneeshealth.com/auth/sso`. Admin → Settings →
-   Authentication → Google; restrict to your Workspace domain.
-3. **Add the database** (Admin → Databases → PostgreSQL):
+1. ✅ **Setup wizard complete**; owner admin account created.
+2. ⬜ **Google SSO** — not yet configured (needs a Google OAuth client —
+   [console.cloud.google.com](https://console.cloud.google.com); redirect URL
+   `https://analytics.aneeshealth.com/auth/sso`. Admin → Settings → Authentication →
+   Google; restrict to your Workspace domain). Currently using plain Metabase
+   password login for the one admin account.
+3. ✅ **Database connected** (Admin → Databases → PostgreSQL → `Anees Health (BI)`):
    - Host `host.docker.internal`, port `5432`, database `anees_health`
-   - User `metabase_bi`, password (from `02`), **SSL: on**
-   - **Schemas:** choose "only these" → **`bi`**
-   - Turn **OFF** Actions, Uploads, and model persistence
-4. **Groups & permissions:**
+   - User `metabase_bi`, password (from `02`)
+   - **SSL:** left off — not required for this host-to-container connection in
+     practice; the plan originally called for `require`, revisit only as an
+     optional later hardening step
+   - **Schemas:** ⚠️ currently "all", not restricted to "only these → `bi`" as
+     planned. PHI is still protected (the database itself refuses any `public.*`
+     read regardless), but restricting sync is the cleaner intended state —
+     fix via Edit connection details → Schemas → "Only these..." → `bi` → Sync
+   - Actions, Uploads, model persistence: OFF
+4. ⬜ **Groups & permissions** — not yet created:
    - Create groups `Owner`, `Finance`, `Ops`; add staff.
    - Data permissions on `anees_health` → **"Create queries: Query builder only"**
      for every non-admin group (no raw SQL editor — the free tier can't sandbox SQL).
    - One collection per group; grant each group View on its own collection only.
-5. **Harden:** confirm Public Sharing is OFF (Admin → Settings → Public Sharing);
-   password complexity `strong`; the 8-hour session is set via env.
+5. ✅ **Hardened:** Public Sharing OFF, embedding OFF, 8-hour session (all via env).
 
 ✅ **Done when:** a non-admin test user sees only their collection, can use the
 visual query builder, cannot open a SQL editor, and cannot see any schema but `bi`.
+*(Pending — no non-admin users exist yet.)*
 
 ---
 
-## Phase 5 — First dashboards
+## Phase 5 — First dashboards ✅ done (2026-07-20)
 
-Paste the queries from `starter-dashboards.sql` as SQL questions (as admin), save
-them into the right collections, and assemble dashboards. Document each metric's
-definition in its description so the numbers match the app.
+All 10 queries in `starter-dashboards.sql` are live as saved questions in the
+**"BI Dashboards"** collection, styled with the Anees brand palette (navy
+`#132c4d` / gold `#a68341` / teal `#0E9384`, sourced from
+`src/assets/scss/utils/variables.scss`), and assembled into 3 full dashboards
+(not one chart per page):
 
-## Phase 6 — Admin nav link (already in code)
+- **Booking Funnel & Demand** — funnel status, conversion trend, demand by
+  governorate, coverage checks, promocode effectiveness
+- **Visit Operations** — completed visits + rating trend, top clinicians
+- **Finance & Insurance** — revenue by month, AR aging, insurance approval rate
+
+Each question's description documents its metric definition so the numbers
+agree with the app. To rebuild from scratch, re-run the queries in
+`starter-dashboards.sql` (via the Metabase SQL editor or the Metabase MCP
+connector) against database `Anees Health (BI)`.
+
+## Phase 6 — Admin nav link (already in code) ⬜ env var not yet set
 
 The `/admin` nav shows a **Metabase ↗** link for `superadmin, admin, finance,
-medical_ops, operator` — **automatically, once you set this env var in Vercel**:
+medical_ops, operator` — **automatically, once you set this env var in Vercel**.
+It's named "Metabase" specifically (not "Analytics") because `/admin` already has
+a separate, older, hand-coded "Analytics" page — the two are distinct:
 
 ```
 NEXT_PUBLIC_METABASE_URL=https://analytics.aneeshealth.com
 ```
 
-Until it's set, the link stays hidden (no dead link). Set it after Phase 3, redeploy.
+Until it's set, the link stays hidden (no dead link). Set it in Vercel project
+settings and redeploy.
 
-## Phase 7 — Operate
+## Phase 7 — Operate ⬜ backup cron not yet installed
 
 ```bash
-# daily metadata backup (cron)
-0 2 * * *  /opt/metabase/backup-metabase.sh >> /var/log/metabase-backup.log 2>&1
+# daily metadata backup (cron) — backs up Metabase's OWN settings DB, not patient data
+0 2 * * *  /opt/metabase/backup-metabase-metadata.sh >> /var/log/metabase-backup.log 2>&1
 ```
 Upgrades: back up → bump the pinned image tag in `docker-compose.yml` → `docker compose up -d`.
 Buy Pro only when a dashboard must show identifiable PHI, or for the hospital portal.
