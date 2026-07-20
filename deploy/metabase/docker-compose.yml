@@ -6,7 +6,8 @@
 #
 #   cd /opt/metabase && docker compose up -d && docker compose logs -f metabase
 #
-# It binds to 127.0.0.1:3000 only — Nginx (nginx-metabase.conf) terminates TLS
+# It binds to 127.0.0.1:3001 only (3000 was already taken by another process on
+# this VPS) — Nginx (nginx-metabase.conf) terminates TLS
 # and is the sole public entrypoint. It reports on the operational database via a
 # read-only user (see 01/02 SQL); it is NEVER pointed at Medplum's database.
 # =============================================================================
@@ -17,7 +18,7 @@ services:
     container_name: anees-metabase
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"               # localhost only; Nginx does TLS + public exposure
+      - "127.0.0.1:3001:3000"               # host 3001 (3000 taken); localhost only, Nginx does TLS + public exposure
     environment:
       MB_DB_TYPE: postgres
       MB_DB_HOST: metabase-db
