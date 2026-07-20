@@ -14,6 +14,13 @@ export type AdminNavItem = {
    * `/admin/clinician` forwards into the `/clinician/*` workspace).
    */
   matchPrefixes?: string[];
+  /**
+   * When true, this is an EXTERNAL link (a separate app, e.g. Metabase). It
+   * opens in a new tab and is never highlighted as the active section. External
+   * items are NOT gated by `canAccessRoute` (that only governs internal
+   * `/admin/*` routes) — they carry their own role gate where they are added.
+   */
+  external?: boolean;
 };
 
 /**
@@ -86,8 +93,31 @@ const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   },
 ];
 
+/**
+ * Roles that may see the external Metabase (BI) link. Mirrors the
+ * `/admin/analytics` audience exactly — the same people who see in-app KPIs.
+ */
+const METABASE_AUDIENCE: StaffRole[] = ['superadmin', 'admin', 'finance', 'medical_ops', 'operator'];
+
 export function getAdminNavItems(staffRole: StaffRole | null | undefined): AdminNavItem[] {
-  return ADMIN_NAV_ITEMS.filter((item) => canAccessRoute(item.href, staffRole ?? null));
+  const items = ADMIN_NAV_ITEMS.filter((item) => canAccessRoute(item.href, staffRole ?? null));
+
+  // External BI (Metabase). Shown ONLY once it is actually configured
+  // (`NEXT_PUBLIC_METABASE_URL` is set) AND the role is in the analytics
+  // audience — so the link never dangles before Metabase exists, and never
+  // leaks to a role that shouldn't see business analytics. It's an external URL,
+  // so it is gated by this explicit role list rather than by `canAccessRoute`.
+  const metabaseUrl = process.env.NEXT_PUBLIC_METABASE_URL?.trim();
+  if (metabaseUrl && staffRole && METABASE_AUDIENCE.includes(staffRole)) {
+    items.push({
+      href: metabaseUrl,
+      label: 'Metabase',
+      description: 'Self-serve dashboards and trends — opens the Metabase analytics app.',
+      external: true,
+    });
+  }
+
+  return items;
 }
 
 /**
@@ -96,6 +126,8 @@ export function getAdminNavItems(staffRole: StaffRole | null | undefined): Admin
  * prefix (so `/admin/patients/123` still highlights "Patients").
  */
 export function isAdminNavItemActive(item: AdminNavItem, pathname: string): boolean {
+  // External links (e.g. Metabase) are a different app — never the "current" section.
+  if (item.external) return false;
   const targets = [item.href, ...(item.matchPrefixes ?? [])];
   return targets.some((target) => pathname === target || pathname.startsWith(`${target}/`));
 }

@@ -15,6 +15,23 @@ export function AdminNav({ items }: { items: AdminNavItem[] }) {
   return (
     <div className="anees-admin-nav-links" aria-label="Admin workspace sections">
       {items.map((item) => {
+        // External links (e.g. Metabase) open in a new tab and are never active.
+        if (item.external) {
+          return (
+            <a
+              key={item.href}
+              href={item.href}
+              title={item.description}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="anees-admin-nav-link"
+            >
+              {item.label}
+              <span aria-hidden="true"> ↗</span>
+            </a>
+          );
+        }
+
         const active = isAdminNavItemActive(item, pathname);
         return (
           <Link

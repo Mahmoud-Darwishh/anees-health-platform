@@ -1,0 +1,71 @@
+# =============================================================================
+# Anees Health · Metabase · self-hosted stack (Hostinger VPS)
+# =============================================================================
+# Metabase (open-source) + its OWN metadata Postgres. This is a SEPARATE stack
+# from the Medplum compose — put it in /opt/metabase/ on the VPS.
+#
+#   cd /opt/metabase && docker compose up -d && docker compose logs -f metabase
+#
+# It binds to 127.0.0.1:3000 only — Nginx (nginx-metabase.conf) terminates TLS
+# and is the sole public entrypoint. It reports on the operational database via a
+# read-only user (see 01/02 SQL); it is NEVER pointed at Medplum's database.
+# =============================================================================
+
+services:
+  metabase:
+    image: metabase/metabase:v0.54.0        # PIN a tag — never :latest. Check the current stable release before deploying.
+    container_name: anees-metabase
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"               # localhost only; Nginx does TLS + public exposure
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: metabase-db
+      MB_DB_PORT: 5432
+      MB_DB_DBNAME: metabaseapp
+      MB_DB_USER: metabaseapp
+      MB_DB_PASS: ${MB_DB_PASS}
+      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY}   # ESCROW THIS — losing it means re-entering data-source creds
+      MB_SITE_URL: https://analytics.aneeshealth.com
+      MB_ENABLE_PUBLIC_SHARING: "false"     # no anonymous public links, ever (PHI-adjacent data)
+      MB_ENABLE_EMBEDDING: "false"
+      MB_SESSION_MAX_AGE: "480"             # 8-hour absolute session
+      MB_SESSION_COOKIES: "true"            # also expire on browser close
+      MB_PASSWORD_COMPLEXITY: strong
+      JAVA_TIMEZONE: Africa/Cairo
+      JAVA_TOOL_OPTIONS: -Xmx1500m          # ~80% of this container's RAM — raise only if the VPS has headroom
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # lets Metabase reach the operational Postgres on the host
+    depends_on:
+      metabase-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-I", "http://localhost:3000/api/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+    networks: [metanet]
+
+  metabase-db:
+    image: postgres:16
+    container_name: anees-metabase-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: metabaseapp
+      POSTGRES_USER: metabaseapp
+      POSTGRES_PASSWORD: ${MB_DB_PASS}
+    volumes:
+      - metabase_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metabaseapp -d metabaseapp"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [metanet]
+
+volumes:
+  metabase_pgdata:
+
+networks:
+  metanet:
+    driver: bridge
