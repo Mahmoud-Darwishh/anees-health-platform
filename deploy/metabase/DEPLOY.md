@@ -64,7 +64,7 @@ free -h
 
 docker compose up -d
 docker compose logs -f metabase     # wait for "Metabase Initialization COMPLETE"
-curl -I http://127.0.0.1:3001/api/health   # → HTTP/1.1 200 OK
+curl -I http://127.0.0.1:3002/api/health   # → HTTP/1.1 200 OK
 ```
 
 Do **not** open the setup wizard yet — finish Phase 3 so the first admin account
@@ -83,7 +83,7 @@ is created over HTTPS.
    sudo certbot --nginx -d analytics.aneeshealth.com   # fills in the TLS lines
    sudo nginx -t && sudo systemctl reload nginx
    ```
-3. **Firewall:** `sudo ufw allow 'Nginx Full'` (80/443). Metabase's 3001 stays on localhost.
+3. **Firewall:** `sudo ufw allow 'Nginx Full'` (80/443). Metabase's 3002 stays on localhost.
 4. **(Recommended) lock-down:** if staff IPs are stable, uncomment the `allow`/`deny`
    block in `nginx-metabase.conf`. Otherwise rely on SSO + short sessions (Phase 4).
 

@@ -40,7 +40,7 @@ The click-by-click runbook is [`DEPLOY.md`](DEPLOY.md). This file is the summary
 | # | Step | Where | Done when |
 |---|---|---|---|
 | 1 | Run `01`+`02` SQL, then `03` as `metabase_bi` | operational Postgres | `bi.patients_safe` returns a count; **every** `public.*` read and every write in `03` FAILS |
-| 2 | `docker compose up -d` (after `free -h` RAM check) | `/opt/metabase/` on VPS | `curl -I http://127.0.0.1:3001/api/health` → 200 |
+| 2 | `docker compose up -d` (after `free -h` RAM check) | `/opt/metabase/` on VPS | `curl -I http://127.0.0.1:3002/api/health` → 200 |
 | 3 | DNS A-record `analytics` → `152.239.112.57`; Nginx + `certbot` | Vercel + VPS | `https://analytics.aneeshealth.com` loads with valid TLS |
 | 4 | Setup wizard, Google SSO, add DB (schema = `bi` only), groups/permissions | browser | non-admin test user sees only their collection, query-builder only, only the `bi` schema |
 | 5 | Build the 5 starter dashboards from `starter-dashboards.sql` | browser | revenue / funnel / visits / AR aging / insurance dashboards live |
