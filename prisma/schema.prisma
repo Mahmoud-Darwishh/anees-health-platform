@@ -26,6 +26,44 @@ enum VisitType {
   telemedicine
 }
 
+// ── Partner/catalog model additions (data architecture session) ──
+enum OrganizationType {
+  hospital
+  lab
+  imaging
+  insurer
+}
+
+enum EngagementType {
+  referral
+  fulfillment_arm
+  lab_partner
+  insurer_billing
+}
+
+enum ContractStatus {
+  active
+  expired
+  terminated
+}
+
+enum ServiceModality {
+  home
+  video
+  partner_site
+}
+
+enum PackageStatus {
+  active
+  retired
+}
+
+enum PayerType {
+  patient
+  insurer
+  organization
+}
+
 enum PatientGender {
   M
   F
@@ -457,75 +495,75 @@ model Family {
 }
 
 model Patient {
-  id               String        @id @default(cuid())
-  code             String        @unique
-  familyId         String?
-  fullName         String
-  arabicName       String?
-  phone            String
-  gender           PatientGender?
-  dateOfBirth      DateTime?     @db.Date
-  nationalId       String?
-  passportNumber   String?
-  bloodGroup       BloodGroup?
-  maritalStatus    MaritalStatus?
-  preferredLanguage Locale?
-  religion         String?
-  occupation       String?
-  insuranceProvider String?
-  insuranceMemberId String?
-  insurancePolicyNumber String?
-  insuranceExpiry  DateTime?     @db.Date
-  dnrStatus        DnrStatus?
-  areaId           String?
-  addressDetail    String?
-  landmark         String?
-  gpsLatitude      Decimal?      @db.Decimal(10, 7)
-  gpsLongitude     Decimal?      @db.Decimal(10, 7)
-  addressMapUrl    String?
+  id                          String         @id @default(cuid())
+  code                        String         @unique
+  familyId                    String?
+  fullName                    String
+  arabicName                  String?
+  phone                       String
+  gender                      PatientGender?
+  dateOfBirth                 DateTime?      @db.Date
+  nationalId                  String?
+  passportNumber              String?
+  bloodGroup                  BloodGroup?
+  maritalStatus               MaritalStatus?
+  preferredLanguage           Locale?
+  religion                    String?
+  occupation                  String?
+  insuranceProvider           String?
+  insuranceMemberId           String?
+  insurancePolicyNumber       String?
+  insuranceExpiry             DateTime?      @db.Date
+  dnrStatus                   DnrStatus?
+  areaId                      String?
+  addressDetail               String?
+  landmark                    String?
+  gpsLatitude                 Decimal?       @db.Decimal(10, 7)
+  gpsLongitude                Decimal?       @db.Decimal(10, 7)
+  addressMapUrl               String?
   handoffGeofenceRadiusMeters Int?
-  addressVerifiedAt           DateTime?  // First-visit address-truth ritual (Sprint 0)
-  addressFidelity             String?    // 'precise' | 'approximate' | 'rural' — drives override leniency
-  safetyFlags                 Json?      // string[] e.g. ['aggressive_dog','unsafe_stairs','infection_isolation']
-  privacyTier                 String?    @default("standard") // 'standard' | 'enhanced' | 'restricted'
-  temporarilyAwayUntil DateTime?
-  temporarilyAwayNote String?
-  temporarilyAwayAddress String?
-  emergencyContactName String?
-  emergencyContactPhone String?
-  emergencyContactRelation String?
-  registrationDate DateTime      @db.Date @default(now())
-  primaryCaregiver String?
-  primaryCaregiverPhone String?
-  primaryCaregiverWhatsapp String?
-  primaryCaregiverEmail String?
-  caregiverRelation String?
-  chiefComplaint   String?
-  referralSourceId String?
-  status           PatientStatus @default(new)
-  notes            String?
-  medplumPatientId String?       @unique
-  tenantId         String        @default("platform")
-  deletedAt        DateTime?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  addressVerifiedAt           DateTime? // First-visit address-truth ritual (Sprint 0)
+  addressFidelity             String? // 'precise' | 'approximate' | 'rural' — drives override leniency
+  safetyFlags                 Json? // string[] e.g. ['aggressive_dog','unsafe_stairs','infection_isolation']
+  privacyTier                 String?        @default("standard") // 'standard' | 'enhanced' | 'restricted'
+  temporarilyAwayUntil        DateTime?
+  temporarilyAwayNote         String?
+  temporarilyAwayAddress      String?
+  emergencyContactName        String?
+  emergencyContactPhone       String?
+  emergencyContactRelation    String?
+  registrationDate            DateTime       @default(now()) @db.Date
+  primaryCaregiver            String?
+  primaryCaregiverPhone       String?
+  primaryCaregiverWhatsapp    String?
+  primaryCaregiverEmail       String?
+  caregiverRelation           String?
+  chiefComplaint              String?
+  referralSourceId            String?
+  status                      PatientStatus  @default(new)
+  notes                       String?
+  medplumPatientId            String?        @unique
+  tenantId                    String         @default("platform")
+  deletedAt                   DateTime?
+  createdAt                   DateTime       @default(now())
+  updatedAt                   DateTime       @updatedAt
 
-  family         Family?         @relation(fields: [familyId], references: [id])
-  area           Area?           @relation(fields: [areaId], references: [id])
-  referralSource ReferralSource? @relation(fields: [referralSourceId], references: [id])
-  visits         Visit[]
-  carePlans      CarePlan[]
-  invoices       Invoice[]
-  payments       Payment[]
-  nurseShiftAssignments NurseShiftAssignment[]
-  standingOrders StandingOrder[]
-  coverages      Coverage[]
-  priorAuths     PriorAuth[]
-  claims         Claim[]
+  family                           Family?                     @relation(fields: [familyId], references: [id])
+  area                             Area?                       @relation(fields: [areaId], references: [id])
+  referralSource                   ReferralSource?             @relation(fields: [referralSourceId], references: [id])
+  visits                           Visit[]
+  carePlans                        CarePlan[]
+  invoices                         Invoice[]
+  payments                         Payment[]
+  nurseShiftAssignments            NurseShiftAssignment[]
+  standingOrders                   StandingOrder[]
+  coverages                        Coverage[]
+  priorAuths                       PriorAuth[]
+  claims                           Claim[]
   controlledSubstanceLedgerEntries ControlledSubstanceLedger[]
-  userAccount    User?
-  goals          PatientGoal[]          @relation("PatientGoals")
-  visitTransitionsAsActor VisitStateTransition[] @relation("VisitTransitionActorPatient")
+  userAccount                      User?
+  goals                            PatientGoal[]               @relation("PatientGoals")
+  visitTransitionsAsActor          VisitStateTransition[]      @relation("VisitTransitionActorPatient")
 
   @@index([familyId])
   @@index([areaId])
@@ -573,22 +611,25 @@ model Provider {
 }
 
 model Service {
-  id                       String        @id @default(cuid())
-  code                     String        @unique
+  id                       String          @id @default(cuid())
+  code                     String          @unique
   name                     String
   categoryId               String
   requiredRoleId           String?
   durationMins             Int
-  listPriceEgp             Decimal       @db.Decimal(10, 2)
-  defaultProviderPayoutEgp Decimal       @db.Decimal(10, 2)
+  listPriceEgp             Decimal         @db.Decimal(10, 2)
+  defaultProviderPayoutEgp Decimal         @db.Decimal(10, 2)
   description              String?
-  status                   ServiceStatus @default(active)
-  createdAt                DateTime      @default(now())
-  updatedAt                DateTime      @updatedAt
+  status                   ServiceStatus   @default(active)
+  modality                 ServiceModality @default(home)
+  sellableStandalone       Boolean         @default(true) // false = package-only (e.g. Physiotherapy Session)
+  createdAt                DateTime        @default(now())
+  updatedAt                DateTime        @updatedAt
 
-  category     ServiceCategory @relation(fields: [categoryId], references: [id])
-  requiredRole ProviderRole?   @relation(fields: [requiredRoleId], references: [id])
-  visits       Visit[]
+  category          ServiceCategory    @relation(fields: [categoryId], references: [id])
+  requiredRole      ProviderRole?      @relation(fields: [requiredRoleId], references: [id])
+  visits            Visit[]
+  packageComponents PackageComponent[]
 
   @@index([categoryId])
   @@index([status])
@@ -596,71 +637,77 @@ model Service {
 }
 
 model Visit {
-  id                String      @id @default(cuid())
-  code              String      @unique
-  patientId         String
-  providerId        String?
-  serviceId         String
-  carePlanId        String?
-  bookedDate        DateTime    @db.Date
-  scheduledDate     DateTime    @db.Date
-  scheduledTime     String?
-  completedDatetime DateTime?
-  durationActualMin Int?
-  status            VisitStatus @default(scheduled)
-  areaId            String?
-  visitType         VisitType   @default(in_home)
-  servicePriceEgp   Decimal     @db.Decimal(10, 2)
-  discountEgp       Decimal     @db.Decimal(10, 2) @default(0)
-  netPriceEgp       Decimal     @db.Decimal(10, 2)
-  providerPayoutEgp Decimal     @db.Decimal(10, 2)
-  patientRating     Int?
-  bookedBy          String?
-  notes             String?
-  acknowledgedAt    DateTime?
-  enRouteAt         DateTime?
-  arrivedAt         DateTime?
-  checkInAt         DateTime?
-  checkInLat        Decimal?    @db.Decimal(10, 7)
-  checkInLng        Decimal?    @db.Decimal(10, 7)
-  checkInAccuracyM  Int?
-  checkOutAt        DateTime?
-  checkOutLat       Decimal?    @db.Decimal(10, 7)
-  checkOutLng       Decimal?    @db.Decimal(10, 7)
-  checkOutAccuracyM Int?
+  id                            String               @id @default(cuid())
+  code                          String               @unique
+  patientId                     String
+  providerId                    String?
+  serviceId                     String
+  carePlanId                    String?
+  bookedDate                    DateTime             @db.Date
+  scheduledDate                 DateTime             @db.Date
+  scheduledTime                 String?
+  completedDatetime             DateTime?
+  durationActualMin             Int?
+  status                        VisitStatus          @default(scheduled)
+  areaId                        String?
+  visitType                     VisitType            @default(in_home)
+  servicePriceEgp               Decimal              @db.Decimal(10, 2)
+  discountEgp                   Decimal              @default(0) @db.Decimal(10, 2)
+  netPriceEgp                   Decimal              @db.Decimal(10, 2)
+  providerPayoutEgp             Decimal              @db.Decimal(10, 2)
+  patientRating                 Int?
+  bookedBy                      String?
+  notes                         String?
+  acknowledgedAt                DateTime?
+  enRouteAt                     DateTime?
+  arrivedAt                     DateTime?
+  checkInAt                     DateTime?
+  checkInLat                    Decimal?             @db.Decimal(10, 7)
+  checkInLng                    Decimal?             @db.Decimal(10, 7)
+  checkInAccuracyM              Int?
+  checkOutAt                    DateTime?
+  checkOutLat                   Decimal?             @db.Decimal(10, 7)
+  checkOutLng                   Decimal?             @db.Decimal(10, 7)
+  checkOutAccuracyM             Int?
   // ── New state machine + check-in protocol fields (Sprint 0) ──
-  state                    VisitState? @default(scheduled)
-  identityConfirmedBy      String?     // 'patient' | 'caregiver:{name}' | 'unable'
-  consentReaffirmed        Boolean?
-  safetyClearance          Boolean?
-  companionsPresent        Json?       // string[] e.g. ['caregiver_primary','family_member']
-  geofencePassed           Boolean?
-  geofenceOverrideMethod   String?     // 'photo' | 'code' | 'med_ops' | null
-  overridePhotoMediaId     String?     // FHIR Media id
+  state                         VisitState?          @default(scheduled)
+  identityConfirmedBy           String? // 'patient' | 'caregiver:{name}' | 'unable'
+  consentReaffirmed             Boolean?
+  safetyClearance               Boolean?
+  companionsPresent             Json? // string[] e.g. ['caregiver_primary','family_member']
+  geofencePassed                Boolean?
+  geofenceOverrideMethod        String? // 'photo' | 'code' | 'med_ops' | null
+  overridePhotoMediaId          String? // FHIR Media id
   patientAcknowledgementMediaId String? // Signature image FHIR Media id
-  cashGratuityEgp          Decimal?    @db.Decimal(10, 2)
-  cashCollectedEgp         Decimal?    @db.Decimal(10, 2)
-  receiptDeliveryChannels  Json?       // string[] e.g. ['whatsapp','print']
-  primaryDisruptionCode    VisitDisruptionCode?
+  cashGratuityEgp               Decimal?             @db.Decimal(10, 2)
+  cashCollectedEgp              Decimal?             @db.Decimal(10, 2)
+  receiptDeliveryChannels       Json? // string[] e.g. ['whatsapp','print']
+  primaryDisruptionCode         VisitDisruptionCode?
+  // ── Partner/catalog model additions (data architecture session) ──
+  modality                      ServiceModality      @default(home)
+  contractId                    String? // set only when fulfilled under a partner/hospital contract
+  packageTermId                 String? // set only when delivered as part of a package
   // ── Tenant + audit ──
-  tenantId          String      @default("platform")
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  tenantId                      String               @default("platform")
+  createdAt                     DateTime             @default(now())
+  updatedAt                     DateTime             @updatedAt
 
-  patient       Patient       @relation(fields: [patientId], references: [id])
-  provider      Provider?     @relation(fields: [providerId], references: [id])
-  service       Service       @relation(fields: [serviceId], references: [id])
-  carePlan      CarePlan?     @relation(fields: [carePlanId], references: [id])
-  area          Area?         @relation(fields: [areaId], references: [id])
-  invoices      Invoice[]
-  expenses      Expense[]
-  onlineBooking OnlineBooking?
-  standingOrderExecutions StandingOrderExecution[]
-  locationPings  VisitLocationPing[]
-  claims         Claim[]
+  patient                          Patient                     @relation(fields: [patientId], references: [id])
+  provider                         Provider?                   @relation(fields: [providerId], references: [id])
+  service                          Service                     @relation(fields: [serviceId], references: [id])
+  carePlan                         CarePlan?                   @relation(fields: [carePlanId], references: [id])
+  area                             Area?                       @relation(fields: [areaId], references: [id])
+  contract                         Contract?                   @relation(fields: [contractId], references: [id])
+  packageTerm                      PackageTerm?                @relation(fields: [packageTermId], references: [id])
+  invoices                         Invoice[]
+  expenses                         Expense[]
+  onlineBooking                    OnlineBooking?
+  standingOrderExecutions          StandingOrderExecution[]
+  locationPings                    VisitLocationPing[]
+  claims                           Claim[]
   controlledSubstanceLedgerEntries ControlledSubstanceLedger[]
-  stateTransitions VisitStateTransition[]
-  participants     VisitParticipant[]
+  stateTransitions                 VisitStateTransition[]
+  participants                     VisitParticipant[]
 
   @@index([patientId])
   @@index([providerId])
@@ -671,6 +718,8 @@ model Visit {
   @@index([scheduledDate])
   @@index([areaId])
   @@index([carePlanId])
+  @@index([contractId])
+  @@index([packageTermId])
   @@map("visits")
 }
 
@@ -700,27 +749,31 @@ model CarePlan {
 }
 
 model Invoice {
-  id               String            @id @default(cuid())
-  code             String            @unique
-  patientId        String
-  invoiceDate      DateTime          @db.Date @default(now())
-  linkedType       InvoiceLinkedType
-  linkedVisitId    String?
-  linkedCarePlanId String?
-  grossAmountEgp   Decimal           @db.Decimal(10, 2)
-  discountPct      Decimal           @db.Decimal(5, 2) @default(0)
-  netAmountEgp     Decimal           @db.Decimal(10, 2)
-  dueDate          DateTime?         @db.Date
-  status           InvoiceStatus     @default(issued)
-  notes            String?
-  tenantId         String            @default("platform")
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  id                  String            @id @default(cuid())
+  code                String            @unique
+  patientId           String
+  invoiceDate         DateTime          @default(now()) @db.Date
+  linkedType          InvoiceLinkedType
+  linkedVisitId       String?
+  linkedCarePlanId    String?
+  grossAmountEgp      Decimal           @db.Decimal(10, 2)
+  discountPct         Decimal           @default(0) @db.Decimal(5, 2)
+  netAmountEgp        Decimal           @db.Decimal(10, 2)
+  dueDate             DateTime?         @db.Date
+  status              InvoiceStatus     @default(issued)
+  notes               String?
+  // ── Partner/catalog model additions (data architecture session) ──
+  payerType           PayerType         @default(patient) // patient | insurer | organization
+  payerOrganizationId String? // set when payerType = organization (e.g. hospital pays)
+  tenantId            String            @default("platform")
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
-  patient        Patient    @relation(fields: [patientId], references: [id])
-  linkedVisit    Visit?     @relation(fields: [linkedVisitId], references: [id])
-  linkedCarePlan CarePlan?  @relation(fields: [linkedCarePlanId], references: [id])
-  payments       Payment[]
+  patient           Patient       @relation(fields: [patientId], references: [id])
+  linkedVisit       Visit?        @relation(fields: [linkedVisitId], references: [id])
+  linkedCarePlan    CarePlan?     @relation(fields: [linkedCarePlanId], references: [id])
+  payerOrganization Organization? @relation(fields: [payerOrganizationId], references: [id])
+  payments          Payment[]
 
   @@index([patientId])
   @@index([status])
@@ -728,7 +781,108 @@ model Invoice {
   @@index([dueDate])
   @@index([linkedVisitId])
   @@index([linkedCarePlanId])
+  @@index([payerOrganizationId])
   @@map("invoices")
+}
+
+// ============================================================================
+// PARTNER / CATALOG MODEL (data architecture session — see docs artifact)
+// ============================================================================
+
+// Every outside party you have a relationship with — hospital, lab, imaging, insurer
+model Organization {
+  id                    String           @id @default(cuid())
+  code                  String           @unique
+  name                  String
+  type                  OrganizationType
+  medplumOrganizationId String?          @unique // bridge to a matching FHIR Organization,
+  // used to attribute partner-sourced results
+  tenantId              String           @default("platform")
+  isActive              Boolean          @default(true)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  contracts       Contract[]
+  invoicesAsPayer Invoice[]
+
+  @@index([type])
+  @@index([tenantId])
+  @@map("organizations")
+}
+
+// The terms of one relationship — an Organization can hold more than one over time
+model Contract {
+  id             String         @id @default(cuid())
+  organizationId String
+  engagementType EngagementType
+  startsAt       DateTime       @db.Date
+  endsAt         DateTime?      @db.Date
+  status         ContractStatus @default(active)
+  notes          String?
+  tenantId       String         @default("platform")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  visits       Visit[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([tenantId])
+  @@map("contracts")
+}
+
+// The named program — "Sanad", "Haraka" — brand and clinical focus, not price
+model Package {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  name        String
+  specialtyId String?
+  description String?
+  status      PackageStatus @default(active)
+  tenantId    String        @default("platform")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  terms PackageTerm[]
+
+  @@index([status])
+  @@index([tenantId])
+  @@map("packages")
+}
+
+// The sellable variant — the actual SKU with a real price (e.g. Sanad 3mo vs 1yr)
+model PackageTerm {
+  id             String   @id @default(cuid())
+  packageId      String
+  durationMonths Int
+  priceEgp       Decimal  @db.Decimal(10, 2)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  package    Package            @relation(fields: [packageId], references: [id])
+  components PackageComponent[]
+  visits     Visit[]
+
+  @@index([packageId])
+  @@map("package_terms")
+}
+
+// The actual recipe — what's really inside a given term
+model PackageComponent {
+  id            String  @id @default(cuid())
+  packageTermId String
+  serviceId     String
+  quantity      Int
+  cadenceNote   String? // free text for now — "weekly", "first 2 weeks daily"
+
+  packageTerm PackageTerm @relation(fields: [packageTermId], references: [id])
+  service     Service     @relation(fields: [serviceId], references: [id])
+
+  @@index([packageTermId])
+  @@index([serviceId])
+  @@map("package_components")
 }
 
 model Payment {
@@ -736,7 +890,7 @@ model Payment {
   code            String   @unique
   invoiceId       String
   patientId       String
-  paymentDate     DateTime @db.Date @default(now())
+  paymentDate     DateTime @default(now()) @db.Date
   amountEgp       Decimal  @db.Decimal(10, 2)
   paymentMethodId String
   referenceNumber String?
@@ -771,10 +925,10 @@ model Expense {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  category        ExpenseCategory @relation(fields: [categoryId], references: [id])
-  paymentMethod   PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
-  linkedVisit     Visit?          @relation(fields: [linkedVisitId], references: [id])
-  linkedProvider  Provider?       @relation(fields: [linkedProviderId], references: [id])
+  category       ExpenseCategory @relation(fields: [categoryId], references: [id])
+  paymentMethod  PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
+  linkedVisit    Visit?          @relation(fields: [linkedVisitId], references: [id])
+  linkedProvider Provider?       @relation(fields: [linkedProviderId], references: [id])
 
   @@index([categoryId])
   @@index([expenseDate])
@@ -792,7 +946,7 @@ model ProviderPayout {
   payoutDate      DateTime @db.Date
   totalVisits     Int
   grossAmountEgp  Decimal  @db.Decimal(10, 2)
-  deductionsEgp   Decimal  @db.Decimal(10, 2) @default(0)
+  deductionsEgp   Decimal  @default(0) @db.Decimal(10, 2)
   netAmountEgp    Decimal  @db.Decimal(10, 2)
   paymentMethodId String?
   referenceNumber String?
@@ -813,61 +967,61 @@ model ProviderPayout {
 // ============================================================================
 
 model OnlineBooking {
-  id                   String              @id @default(cuid())
-  bookingRef           String              @unique
-  fullName             String
-  countryCode          String
-  phoneNumber          String
-  visitType            OnlineVisitType
-  serviceType          OnlineServiceType?
-  specialty            String?
-  packageType          OnlinePackageType?
-  packageDuration      String?
-  preferredDate        DateTime?           @db.Date
-  timePreference       String?
-  sessionCount         String?
-  caseType             String?
-  nursingType          String?
-  nursingHoursPerDay   String?
-  nursingDuration      String?
-  baseAmountEgp        Decimal             @db.Decimal(10, 2) @default(0)
-  discountEgp          Decimal             @db.Decimal(10, 2) @default(0)
-  amountEgp            Decimal             @db.Decimal(10, 2)
-  currency             String              @default("EGP")
-  status               OnlineBookingStatus @default(pending)
+  id                 String              @id @default(cuid())
+  bookingRef         String              @unique
+  fullName           String
+  countryCode        String
+  phoneNumber        String
+  visitType          OnlineVisitType
+  serviceType        OnlineServiceType?
+  specialty          String?
+  packageType        OnlinePackageType?
+  packageDuration    String?
+  preferredDate      DateTime?           @db.Date
+  timePreference     String?
+  sessionCount       String?
+  caseType           String?
+  nursingType        String?
+  nursingHoursPerDay String?
+  nursingDuration    String?
+  baseAmountEgp      Decimal             @default(0) @db.Decimal(10, 2)
+  discountEgp        Decimal             @default(0) @db.Decimal(10, 2)
+  amountEgp          Decimal             @db.Decimal(10, 2)
+  currency           String              @default("EGP")
+  status             OnlineBookingStatus @default(pending)
 
-  promocodeId          String?
-  promocodeCode        String?
-  promocode            Promocode?          @relation(fields: [promocodeId], references: [id])
+  promocodeId   String?
+  promocodeCode String?
+  promocode     Promocode? @relation(fields: [promocodeId], references: [id])
 
   kashierSessionId     String?
   kashierOrderId       String?
   kashierTransactionId String?
   paymentCompletedAt   DateTime?
 
-  confirmationSentAt   DateTime?
+  confirmationSentAt DateTime?
 
-  convertedVisitId     String?  @unique
-  convertedAt          DateTime?
+  convertedVisitId String?   @unique
+  convertedAt      DateTime?
 
-  locale               Locale   @default(ar)
-  tenantId             String   @default("platform")
-  ipAddress            String?
-  userAgent            String?
-  notes                String?
+  locale    Locale  @default(ar)
+  tenantId  String  @default("platform")
+  ipAddress String?
+  userAgent String?
+  notes     String?
 
   // ── Phase 3: prepayment rail + coverage gate + portal-claim invite ──
   // All nullable / additive — existing bookings and the card flow are unaffected.
-  paymentMethod        String?   // 'card' | 'instapay'
-  instapayReference    String?   // patient-submitted transfer reference (optional proof)
-  instapaySenderName   String?   // optional sender name on the transfer
-  paymentConfirmedAt   DateTime? // when an InstaPay transfer was manually confirmed
-  paymentConfirmedBy   String?   // staff id who confirmed the InstaPay transfer
-  governorate          String?   // coverage gate: 'cairo' | 'giza' | other (free text)
-  inviteSentAt         DateTime? // portal-claim invite sent (WhatsApp)
+  paymentMethod      String? // 'card' | 'instapay'
+  instapayReference  String? // patient-submitted transfer reference (optional proof)
+  instapaySenderName String? // optional sender name on the transfer
+  paymentConfirmedAt DateTime? // when an InstaPay transfer was manually confirmed
+  paymentConfirmedBy String? // staff id who confirmed the InstaPay transfer
+  governorate        String? // coverage gate: 'cairo' | 'giza' | other (free text)
+  inviteSentAt       DateTime? // portal-claim invite sent (WhatsApp)
 
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   convertedVisit Visit? @relation(fields: [convertedVisitId], references: [id])
 
@@ -893,26 +1047,26 @@ enum PromocodeKind {
 }
 
 model Promocode {
-  id              String        @id @default(cuid())
-  code            String        @unique // Stored uppercase; lookups normalise input
-  description     String?
-  kind            PromocodeKind @default(percentage)
+  id             String        @id @default(cuid())
+  code           String        @unique // Stored uppercase; lookups normalise input
+  description    String?
+  kind           PromocodeKind @default(percentage)
   /// When kind=percentage, value is 0-100. When kind=fixed, value is EGP.
-  value           Decimal       @db.Decimal(10, 2)
+  value          Decimal       @db.Decimal(10, 2)
   /// Optional minimum booking amount before discount applies (EGP).
-  minAmountEgp    Decimal?      @db.Decimal(10, 2)
+  minAmountEgp   Decimal?      @db.Decimal(10, 2)
   /// Optional cap on the absolute discount applied (EGP).
-  maxDiscountEgp  Decimal?      @db.Decimal(10, 2)
+  maxDiscountEgp Decimal?      @db.Decimal(10, 2)
   /// Total redemption cap across all bookings. null = unlimited.
-  maxRedemptions  Int?
-  redeemedCount   Int           @default(0)
-  startsAt        DateTime?
-  expiresAt       DateTime?
-  isActive        Boolean       @default(true)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  maxRedemptions Int?
+  redeemedCount  Int           @default(0)
+  startsAt       DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
-  bookings        OnlineBooking[]
+  bookings OnlineBooking[]
 
   @@index([isActive, expiresAt])
   @@map("promocodes")
@@ -930,7 +1084,7 @@ model Refund {
   bookingRef         String
   patientId          String?
   amountPaidEgp      Decimal   @db.Decimal(10, 2)
-  feeEgp             Decimal   @db.Decimal(10, 2) @default(0)
+  feeEgp             Decimal   @default(0) @db.Decimal(10, 2)
   refundEgp          Decimal   @db.Decimal(10, 2)
   reasonCode         String
   reasonNote         String?
@@ -994,7 +1148,7 @@ model PushSubscription {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([locale])
   @@index([userId])
@@ -1006,40 +1160,40 @@ model PushSubscription {
 // ============================================================================
 
 model Staff {
-  id          String      @id @default(cuid())
-  name        String
-  email       String      @unique
-  passwordHash String
-  providerId  String?     @unique
-  medplumPractitionerId String? @unique
-  role        StaffRole   @default(viewer)
-  status      StaffStatus @default(active)
+  id                    String       @id @default(cuid())
+  name                  String
+  email                 String       @unique
+  passwordHash          String
+  providerId            String?      @unique
+  medplumPractitionerId String?      @unique
+  role                  StaffRole    @default(viewer)
+  status                StaffStatus  @default(active)
   clinicalLicenseType   LicenseType?
   clinicalLicenseNumber String?
   clinicalLicenseExpiry DateTime?
   licenseIssuingBody    String?
-  isOnCall              Boolean     @default(false)
-  isClinicalDirector    Boolean     @default(false)
-  tenantId              String      @default("platform")
+  isOnCall              Boolean      @default(false)
+  isClinicalDirector    Boolean      @default(false)
+  tenantId              String       @default("platform")
   // Optional link to a public Doctor profile (marketing data, Int id). When set,
   // an approved profile-change-request publishes to that public profile. Loose
   // ref (no FK) — Doctor is denormalised marketing data, not staff-owned.
   publicDoctorId        Int?
-  lastLoginAt DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  lastLoginAt           DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
 
-  provider               Provider? @relation("StaffProviderLink", fields: [providerId], references: [id])
-  primaryNurseAssignments NurseShiftAssignment[] @relation("PrimaryNurseAssignments")
-  incomingNurseAssignments NurseShiftAssignment[] @relation("IncomingNurseAssignments")
-  userAccount            User?
+  provider                     Provider?              @relation("StaffProviderLink", fields: [providerId], references: [id])
+  primaryNurseAssignments      NurseShiftAssignment[] @relation("PrimaryNurseAssignments")
+  incomingNurseAssignments     NurseShiftAssignment[] @relation("IncomingNurseAssignments")
+  userAccount                  User?
   // Physio workspace back-relations (Sprint 0)
-  physioProfile          PhysioProfile? @relation("PhysioProfileStaff")
-  trialVisitScorecardsAsPhysio TrialVisitScorecard[] @relation("TrialPhysio")
-  trialVisitScorecardsAsScorer TrialVisitScorecard[] @relation("TrialScorer")
-  visitStateTransitions  VisitStateTransition[] @relation("VisitTransitionActorStaff")
-  visitParticipations    VisitParticipant[]     @relation("VisitParticipantStaff")
-  authoredPatientGoals   PatientGoal[]          @relation("PatientGoalAuthor")
+  physioProfile                PhysioProfile?         @relation("PhysioProfileStaff")
+  trialVisitScorecardsAsPhysio TrialVisitScorecard[]  @relation("TrialPhysio")
+  trialVisitScorecardsAsScorer TrialVisitScorecard[]  @relation("TrialScorer")
+  visitStateTransitions        VisitStateTransition[] @relation("VisitTransitionActorStaff")
+  visitParticipations          VisitParticipant[]     @relation("VisitParticipantStaff")
+  authoredPatientGoals         PatientGoal[]          @relation("PatientGoalAuthor")
 
   @@index([email])
   @@index([role])
@@ -1050,23 +1204,23 @@ model Staff {
 }
 
 model NurseShiftAssignment {
-  id                  String  @id @default(cuid())
-  patientId           String
-  primaryNurseStaffId String
-  shiftStartAt        DateTime
-  shiftEndAt          DateTime
-  status              NurseShiftAssignmentStatus @default(scheduled)
+  id                   String                     @id @default(cuid())
+  patientId            String
+  primaryNurseStaffId  String
+  shiftStartAt         DateTime
+  shiftEndAt           DateTime
+  status               NurseShiftAssignmentStatus @default(scheduled)
   incomingNurseStaffId String?
-  acknowledgedAt      DateTime?
-  escalationTaskId    String?
-  notes               String?
-  createdByStaffId    String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  acknowledgedAt       DateTime?
+  escalationTaskId     String?
+  notes                String?
+  createdByStaffId     String?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
 
-  patient        Patient @relation(fields: [patientId], references: [id])
-  primaryNurse   Staff   @relation("PrimaryNurseAssignments", fields: [primaryNurseStaffId], references: [id])
-  incomingNurse  Staff?  @relation("IncomingNurseAssignments", fields: [incomingNurseStaffId], references: [id])
+  patient       Patient @relation(fields: [patientId], references: [id])
+  primaryNurse  Staff   @relation("PrimaryNurseAssignments", fields: [primaryNurseStaffId], references: [id])
+  incomingNurse Staff?  @relation("IncomingNurseAssignments", fields: [incomingNurseStaffId], references: [id])
 
   @@index([patientId, shiftStartAt])
   @@index([primaryNurseStaffId, shiftStartAt])
@@ -1080,64 +1234,64 @@ model NurseShiftAssignment {
 // ============================================================================
 
 model Doctor {
-  id                    Int      @id
-  slug                  String   @unique
-  image                 String
-  rating                Float
-  gender                String
-  location              String
-  experienceYears       Int
-  successRate           String
-  avgWaitTime           String
-  totalPatients         String
-  availabilityStatus    String
+  id                     Int    @id
+  slug                   String @unique
+  image                  String
+  rating                 Float
+  gender                 String
+  location               String
+  experienceYears        Int
+  successRate            String
+  avgWaitTime            String
+  totalPatients          String
+  availabilityStatus     String
   availabilityBadgeClass String
-  specialityColorClass  String
-  specialityTextClass   String
-  duration              String
-  channels              Json
-  languages             Json
-  clinics               Json
-  areaCoverage          Json
-  clinicDetails         Json
-  testimonials          Json
-  workHistory           Json?
+  specialityColorClass   String
+  specialityTextClass    String
+  duration               String
+  channels               Json
+  languages              Json
+  clinics                Json
+  areaCoverage           Json
+  clinicDetails          Json
+  testimonials           Json
+  workHistory            Json?
 
   // Pricing (stored as strings to match existing format e.g. "EGP 1500" / "N/A")
-  priceTelemedicine     String
-  priceHomeVisit        String
-  priceClinicVisit      String
-  consultationFee       String
-  maxConsultationFee    String
+  priceTelemedicine  String
+  priceHomeVisit     String
+  priceClinicVisit   String
+  consultationFee    String
+  maxConsultationFee String
 
   // English content
-  nameEn                String
-  specialityEn          String
-  professionalTitleEn   String
-  bioEn                 String?
-  certificationsEn      Json
-  educationEn           Json
+  nameEn              String
+  specialityEn        String
+  professionalTitleEn String
+  bioEn               String?
+  certificationsEn    Json
+  educationEn         Json
 
   // Arabic content
-  nameAr                String
-  specialityAr          String
-  professionalTitleAr   String
-  bioAr                 String?
-  certificationsAr      Json
-  educationAr           Json
+  nameAr              String
+  specialityAr        String
+  professionalTitleAr String
+  bioAr               String?
+  certificationsAr    Json
+  educationAr         Json
 
-  isActive              Boolean  @default(true)
+  isActive         Boolean  @default(true)
   // Consent to a PUBLIC, search-indexable profile. Defaults true (all existing
   // doctors stay public). Set false to hide a clinician from every public
   // surface — listing, grids, sitemap, static build, and the direct URL.
-  isPublic              Boolean  @default(true)
+  isPublic         Boolean  @default(true)
   // Verified external profile URLs (Vezeeta / LinkedIn / syndicate page),
   // emitted as schema.org `sameAs` to consolidate the clinician's identity for
   // search + AI engines. Stored as Json (array of strings) to match the
   // channels/languages/clinics convention on this model.
-  externalProfiles      Json?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  externalProfiles Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   @@index([slug])
   @@index([specialityEn])
@@ -1173,20 +1327,20 @@ model AuditLog {
 }
 
 model StandingOrder {
-  id             String   @id @default(cuid())
-  patientId      String
-  discipline     String
-  title          String
-  instructions   String
-  validFrom      DateTime?
-  validUntil     DateTime?
-  isActive       Boolean  @default(true)
+  id               String    @id @default(cuid())
+  patientId        String
+  discipline       String
+  title            String
+  instructions     String
+  validFrom        DateTime?
+  validUntil       DateTime?
+  isActive         Boolean   @default(true)
   createdByStaffId String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  patient        Patient  @relation(fields: [patientId], references: [id])
-  executions     StandingOrderExecution[]
+  patient    Patient                  @relation(fields: [patientId], references: [id])
+  executions StandingOrderExecution[]
 
   @@index([patientId, isActive])
   @@index([discipline])
@@ -1195,16 +1349,16 @@ model StandingOrder {
 }
 
 model StandingOrderExecution {
-  id               String   @id @default(cuid())
-  standingOrderId  String
-  visitId          String?
+  id                String   @id @default(cuid())
+  standingOrderId   String
+  visitId           String?
   executedByStaffId String
-  executedAt       DateTime @default(now())
-  executionNote    String?
-  createdAt        DateTime @default(now())
+  executedAt        DateTime @default(now())
+  executionNote     String?
+  createdAt         DateTime @default(now())
 
-  standingOrder    StandingOrder @relation(fields: [standingOrderId], references: [id], onDelete: Cascade)
-  visit            Visit?        @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  standingOrder StandingOrder @relation(fields: [standingOrderId], references: [id], onDelete: Cascade)
+  visit         Visit?        @relation(fields: [visitId], references: [id], onDelete: SetNull)
 
   @@index([standingOrderId, executedAt])
   @@index([visitId])
@@ -1212,20 +1366,20 @@ model StandingOrderExecution {
 }
 
 model DestructiveApprovalToken {
-  id              String   @id @default(cuid())
+  id               String    @id @default(cuid())
   medplumPatientId String
-  actionType      String
-  targetRecordId  String
-  payload         Json?
-  requestedBy     String
-  approvedBy      String?
-  approvedAt      DateTime?
-  consumedBy      String?
-  consumedAt      DateTime?
-  expiresAt       DateTime
-  status          String   @default("pending")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  actionType       String
+  targetRecordId   String
+  payload          Json?
+  requestedBy      String
+  approvedBy       String?
+  approvedAt       DateTime?
+  consumedBy       String?
+  consumedAt       DateTime?
+  expiresAt        DateTime
+  status           String    @default("pending")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([medplumPatientId, actionType, status])
   @@index([targetRecordId, actionType])
@@ -1234,19 +1388,19 @@ model DestructiveApprovalToken {
 }
 
 model InsurerProfile {
-  id                String   @id @default(cuid())
-  code              String   @unique
-  name              String
-  payerType         String?
-  supportsDirectBilling Boolean @default(true)
-  isActive          Boolean  @default(true)
-  notes             String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  code                  String   @unique
+  name                  String
+  payerType             String?
+  supportsDirectBilling Boolean  @default(true)
+  isActive              Boolean  @default(true)
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  coverages         Coverage[]
-  priorAuths        PriorAuth[]
-  claims            Claim[]
+  coverages  Coverage[]
+  priorAuths PriorAuth[]
+  claims     Claim[]
 
   @@index([isActive])
   @@map("insurer_profiles")
@@ -1267,8 +1421,8 @@ model Coverage {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
-  patient          Patient        @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  insurerProfile   InsurerProfile? @relation(fields: [insurerProfileId], references: [id], onDelete: SetNull)
+  patient        Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  insurerProfile InsurerProfile? @relation(fields: [insurerProfileId], references: [id], onDelete: SetNull)
 
   @@index([patientId, status])
   @@index([insurerProfileId])
@@ -1291,9 +1445,9 @@ model PriorAuth {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  patient          Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  insurerProfile   InsurerProfile? @relation(fields: [insurerProfileId], references: [id], onDelete: SetNull)
-  claims           Claim[]
+  patient        Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  insurerProfile InsurerProfile? @relation(fields: [insurerProfileId], references: [id], onDelete: SetNull)
+  claims         Claim[]
 
   @@index([patientId, status])
   @@index([insurerProfileId])
@@ -1302,27 +1456,27 @@ model PriorAuth {
 }
 
 model Claim {
-  id               String      @id @default(cuid())
-  code             String      @unique
-  patientId        String
-  visitId          String?
-  insurerProfileId String?
-  priorAuthId      String?
-  status           ClaimStatus @default(draft)
-  submittedAt      DateTime?
-  adjudicatedAt    DateTime?
-  totalAmountEgp   Decimal     @db.Decimal(10, 2)
-  approvedAmountEgp Decimal?   @db.Decimal(10, 2)
-  deniedReason     String?
-  tenantId         String      @default("platform")
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id                String      @id @default(cuid())
+  code              String      @unique
+  patientId         String
+  visitId           String?
+  insurerProfileId  String?
+  priorAuthId       String?
+  status            ClaimStatus @default(draft)
+  submittedAt       DateTime?
+  adjudicatedAt     DateTime?
+  totalAmountEgp    Decimal     @db.Decimal(10, 2)
+  approvedAmountEgp Decimal?    @db.Decimal(10, 2)
+  deniedReason      String?
+  tenantId          String      @default("platform")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
-  patient          Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  visit            Visit?        @relation(fields: [visitId], references: [id], onDelete: SetNull)
-  insurerProfile   InsurerProfile? @relation(fields: [insurerProfileId], references: [id], onDelete: SetNull)
-  priorAuth        PriorAuth?    @relation(fields: [priorAuthId], references: [id], onDelete: SetNull)
-  lineItems        ClaimLineItem[]
+  patient        Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  visit          Visit?          @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  insurerProfile InsurerProfile? @relation(fields: [insurerProfileId], references: [id], onDelete: SetNull)
+  priorAuth      PriorAuth?      @relation(fields: [priorAuthId], references: [id], onDelete: SetNull)
+  lineItems      ClaimLineItem[]
 
   @@index([patientId, status])
   @@index([visitId])
@@ -1333,19 +1487,19 @@ model Claim {
 }
 
 model ClaimLineItem {
-  id             String          @id @default(cuid())
-  claimId        String
-  serviceCode    String?
-  description    String
-  quantity       Int             @default(1)
-  unitPriceEgp   Decimal         @db.Decimal(10, 2)
-  amountEgp      Decimal         @db.Decimal(10, 2)
-  status         ClaimLineStatus @default(pending)
-  notes          String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id           String          @id @default(cuid())
+  claimId      String
+  serviceCode  String?
+  description  String
+  quantity     Int             @default(1)
+  unitPriceEgp Decimal         @db.Decimal(10, 2)
+  amountEgp    Decimal         @db.Decimal(10, 2)
+  status       ClaimLineStatus @default(pending)
+  notes        String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
-  claim          Claim           @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  claim Claim @relation(fields: [claimId], references: [id], onDelete: Cascade)
 
   @@index([claimId])
   @@index([status])
@@ -1353,42 +1507,42 @@ model ClaimLineItem {
 }
 
 model VisitLocationPing {
-  id              String   @id @default(cuid())
-  visitId         String
-  pingedAt        DateTime @default(now())
-  latitude        Decimal  @db.Decimal(10, 7)
-  longitude       Decimal  @db.Decimal(10, 7)
-  accuracyMeters  Int?
+  id                String   @id @default(cuid())
+  visitId           String
+  pingedAt          DateTime @default(now())
+  latitude          Decimal  @db.Decimal(10, 7)
+  longitude         Decimal  @db.Decimal(10, 7)
+  accuracyMeters    Int?
   speedMetersPerSec Decimal? @db.Decimal(8, 3)
-  headingDegrees  Decimal? @db.Decimal(6, 2)
-  source          String?  // e.g. gps, network
-  createdAt       DateTime @default(now())
+  headingDegrees    Decimal? @db.Decimal(6, 2)
+  source            String? // e.g. gps, network
+  createdAt         DateTime @default(now())
 
-  visit           Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
 
   @@index([visitId, pingedAt])
   @@map("visit_location_pings")
 }
 
 model ControlledSubstanceLedger {
-  id                 String                     @id @default(cuid())
-  patientId          String
-  visitId            String?
-  medicationName     String
-  dosage             String?
-  route              String?
-  quantity           Decimal?                   @db.Decimal(10, 3)
-  unit               String?
-  actionType         ControlledSubstanceAction
-  referenceNumber    String?
-  recordedBy         String?
-  notes              String?
-  tenantId           String                     @default("platform")
-  occurredAt         DateTime                   @default(now())
-  createdAt          DateTime                   @default(now())
+  id              String                    @id @default(cuid())
+  patientId       String
+  visitId         String?
+  medicationName  String
+  dosage          String?
+  route           String?
+  quantity        Decimal?                  @db.Decimal(10, 3)
+  unit            String?
+  actionType      ControlledSubstanceAction
+  referenceNumber String?
+  recordedBy      String?
+  notes           String?
+  tenantId        String                    @default("platform")
+  occurredAt      DateTime                  @default(now())
+  createdAt       DateTime                  @default(now())
 
-  patient            Patient                    @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  visit              Visit?                     @relation(fields: [visitId], references: [id], onDelete: SetNull)
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
 
   @@index([patientId, occurredAt])
   @@index([visitId])
@@ -1404,7 +1558,7 @@ model ControlledSubstanceLedger {
 model BookingPrice {
   id        String   @id @default(cuid())
   key       String   @unique // e.g. "telemedicine", "homeVisit:doctorVisit"
-  label     String           // Human-readable for admin display
+  label     String // Human-readable for admin display
   priceEgp  Int
   isActive  Boolean  @default(true)
   updatedAt DateTime @updatedAt
@@ -1417,12 +1571,12 @@ model BookingPrice {
 // ============================================================================
 
 model Specialty {
-  id        String   @id @default(cuid())
-  code      String   @unique // e.g. "geriatrics", "cardiology"
+  id        String  @id @default(cuid())
+  code      String  @unique // e.g. "geriatrics", "cardiology"
   nameEn    String
   nameAr    String
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
 
   @@index([isActive, sortOrder])
   @@map("specialties")
@@ -1433,12 +1587,12 @@ model Specialty {
 // ============================================================================
 
 model ContentService {
-  id          String   @id @default(cuid())
-  code        String   @unique // matches translation key, e.g. "doctorVisits"
-  iconClass   String           // e.g. "isax isax-health"
-  landingSlug String?          // e.g. "doctor-at-home" — null if no landing page
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
+  id          String  @id @default(cuid())
+  code        String  @unique // matches translation key, e.g. "doctorVisits"
+  iconClass   String // e.g. "isax isax-health"
+  landingSlug String? // e.g. "doctor-at-home" — null if no landing page
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
 
   @@map("content_services")
 }
@@ -1469,7 +1623,7 @@ model CoverageCheck {
   longitude Float
   covered   Boolean
   areaName  String?
-  ipHash    String?  // SHA-256 prefix of visitor IP — no PII stored
+  ipHash    String? // SHA-256 prefix of visitor IP — no PII stored
   userAgent String?
 
   @@index([createdAt])
@@ -1499,9 +1653,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  patient  Patient? @relation(fields: [patientId], references: [id])
-  staff    Staff?   @relation(fields: [staffId], references: [id])
-  accounts Account[]
+  patient           Patient?           @relation(fields: [patientId], references: [id])
+  staff             Staff?             @relation(fields: [staffId], references: [id])
+  accounts          Account[]
   pushSubscriptions PushSubscription[]
 
   @@index([role])
@@ -1545,52 +1699,52 @@ model VerificationToken {
 
 /// One-to-one sidecar on Staff for physiotherapists.
 model PhysioProfile {
-  id                    String   @id @default(cuid())
-  staffId               String   @unique
+  id                     String                @id @default(cuid())
+  staffId                String                @unique
   // Identity & verification
-  syndicateNumber       String?
-  syndicateIssuedAt     DateTime?
-  syndicateExpiresAt    DateTime?
-  nationalId            String?
-  passportNumber        String?
-  yearsOfExperience     Int?
+  syndicateNumber        String?
+  syndicateIssuedAt      DateTime?
+  syndicateExpiresAt     DateTime?
+  nationalId             String?
+  passportNumber         String?
+  yearsOfExperience      Int?
   // Education
-  degree                String?
-  graduationYear        Int?
+  degree                 String?
+  graduationYear         Int?
   postGradQualifications Json?
-  certifications        Json?
+  certifications         Json?
   // Practice
-  specialties           Json?       // ["orthopedic","neuro","geriatric","pediatric","sports","respiratory","pelvic_floor","vestibular"]
-  languages             Json?       // ["ar","en","fr"]
-  yearsInHomeCare       Int?
+  specialties            Json? // ["orthopedic","neuro","geriatric","pediatric","sports","respiratory","pelvic_floor","vestibular"]
+  languages              Json? // ["ar","en","fr"]
+  yearsInHomeCare        Int?
   // Onboarding state
-  onboardingState       PhysioOnboardingState @default(invited)
-  documentsSubmittedAt  DateTime?
-  interviewedAt         DateTime?
-  trialVisitCompletedAt DateTime?
-  approvedAt            DateTime?
-  approvedByStaffId     String?
+  onboardingState        PhysioOnboardingState @default(invited)
+  documentsSubmittedAt   DateTime?
+  interviewedAt          DateTime?
+  trialVisitCompletedAt  DateTime?
+  approvedAt             DateTime?
+  approvedByStaffId      String?
   // Operational
-  primaryAreaCodes      Json?
-  preferredVisitTimes   Json?
-  maxVisitsPerDay       Int?
-  canAcceptUrgent       Boolean  @default(true)
+  primaryAreaCodes       Json?
+  preferredVisitTimes    Json?
+  maxVisitsPerDay        Int?
+  canAcceptUrgent        Boolean               @default(true)
   // Public profile
-  bioEn                 String?
-  bioAr                 String?
-  publicPhotoUrl        String?
-  publicSlug            String?  @unique
-  publicRating          Decimal? @db.Decimal(3, 2)
-  publicReviewCount     Int      @default(0)
-  publicVisitCount      Int      @default(0)
-  isPublic              Boolean  @default(false)
+  bioEn                  String?
+  bioAr                  String?
+  publicPhotoUrl         String?
+  publicSlug             String?               @unique
+  publicRating           Decimal?              @db.Decimal(3, 2)
+  publicReviewCount      Int                   @default(0)
+  publicVisitCount       Int                   @default(0)
+  isPublic               Boolean               @default(false)
   // Self-service
-  acceptingNewPatients  Boolean  @default(true)
-  outOfOfficeUntil      DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  acceptingNewPatients   Boolean               @default(true)
+  outOfOfficeUntil       DateTime?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
 
-  staff                 Staff    @relation("PhysioProfileStaff", fields: [staffId], references: [id])
+  staff Staff @relation("PhysioProfileStaff", fields: [staffId], references: [id])
 
   @@index([onboardingState])
   @@index([isPublic])
@@ -1599,28 +1753,28 @@ model PhysioProfile {
 
 /// Outcome record from a physio's trial (shadowed) visit during onboarding.
 model TrialVisitScorecard {
-  id                  String   @id @default(cuid())
-  physioStaffId       String
-  scorerStaffId       String
-  scheduledAt         DateTime
-  completedAt         DateTime?
+  id                        String            @id @default(cuid())
+  physioStaffId             String
+  scorerStaffId             String
+  scheduledAt               DateTime
+  completedAt               DateTime?
   // 7-domain rubric (1–5)
-  clinicalReasoning   Int?
-  handsOnTechnique    Int?
+  clinicalReasoning         Int?
+  handsOnTechnique          Int?
   documentationCompleteness Int?
-  patientRapport      Int?
-  timeManagement      Int?
-  safetyAdherence     Int?
-  professionalism     Int?
-  meanScore           Decimal? @db.Decimal(3, 2)
-  minDomainScore      Int?
-  outcome             TrialVisitOutcome @default(pending)
-  notes               String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  patientRapport            Int?
+  timeManagement            Int?
+  safetyAdherence           Int?
+  professionalism           Int?
+  meanScore                 Decimal?          @db.Decimal(3, 2)
+  minDomainScore            Int?
+  outcome                   TrialVisitOutcome @default(pending)
+  notes                     String?
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
 
-  physio              Staff @relation("TrialPhysio", fields: [physioStaffId], references: [id])
-  scorer              Staff @relation("TrialScorer", fields: [scorerStaffId], references: [id])
+  physio Staff @relation("TrialPhysio", fields: [physioStaffId], references: [id])
+  scorer Staff @relation("TrialScorer", fields: [scorerStaffId], references: [id])
 
   @@index([physioStaffId])
   @@index([scorerStaffId])
@@ -1630,26 +1784,26 @@ model TrialVisitScorecard {
 
 /// Append-only ledger of every visit state change. Source of truth for the lifecycle.
 model VisitStateTransition {
-  id              String   @id @default(cuid())
-  visitId         String
-  fromState       VisitState?
-  toState         VisitState
-  actorStaffId    String?
-  actorPatientId  String?
-  actorSystem     Boolean  @default(false)
-  reasonCode      VisitDisruptionCode?
-  reasonNote      String?
-  contextJson     Json?    // captured payload (identity confirmation, companions present, etc.)
-  latitude        Decimal? @db.Decimal(10, 7)
-  longitude       Decimal? @db.Decimal(10, 7)
-  accuracyMeters  Int?
-  isOverride      Boolean  @default(false)
-  overrideMethod  String?
-  createdAt       DateTime @default(now())
+  id             String               @id @default(cuid())
+  visitId        String
+  fromState      VisitState?
+  toState        VisitState
+  actorStaffId   String?
+  actorPatientId String?
+  actorSystem    Boolean              @default(false)
+  reasonCode     VisitDisruptionCode?
+  reasonNote     String?
+  contextJson    Json? // captured payload (identity confirmation, companions present, etc.)
+  latitude       Decimal?             @db.Decimal(10, 7)
+  longitude      Decimal?             @db.Decimal(10, 7)
+  accuracyMeters Int?
+  isOverride     Boolean              @default(false)
+  overrideMethod String?
+  createdAt      DateTime             @default(now())
 
-  visit           Visit    @relation(fields: [visitId], references: [id])
-  actorStaff      Staff?   @relation("VisitTransitionActorStaff", fields: [actorStaffId], references: [id])
-  actorPatient    Patient? @relation("VisitTransitionActorPatient", fields: [actorPatientId], references: [id])
+  visit        Visit    @relation(fields: [visitId], references: [id])
+  actorStaff   Staff?   @relation("VisitTransitionActorStaff", fields: [actorStaffId], references: [id])
+  actorPatient Patient? @relation("VisitTransitionActorPatient", fields: [actorPatientId], references: [id])
 
   @@index([visitId, createdAt])
   @@index([toState])
@@ -1659,17 +1813,17 @@ model VisitStateTransition {
 
 /// Multi-clinician participants for joint visits (physio + nurse, observer shadowing, etc.).
 model VisitParticipant {
-  id              String              @id @default(cuid())
-  visitId         String
-  staffId         String
-  role            VisitParticipantRole @default(primary_clinician)
-  joinedAt        DateTime?
-  leftAt          DateTime?
-  notes           String?
-  createdAt       DateTime            @default(now())
+  id        String               @id @default(cuid())
+  visitId   String
+  staffId   String
+  role      VisitParticipantRole @default(primary_clinician)
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  notes     String?
+  createdAt DateTime             @default(now())
 
-  visit           Visit @relation(fields: [visitId], references: [id])
-  staff           Staff @relation("VisitParticipantStaff", fields: [staffId], references: [id])
+  visit Visit @relation(fields: [visitId], references: [id])
+  staff Staff @relation("VisitParticipantStaff", fields: [staffId], references: [id])
 
   @@unique([visitId, staffId])
   @@index([staffId])
@@ -1678,26 +1832,26 @@ model VisitParticipant {
 
 /// SMART patient goal authored by a physio (or other clinician). Visualized on patient banner.
 model PatientGoal {
-  id              String   @id @default(cuid())
-  fhirGoalId      String?  @unique @map("fhir_goal_id")
-  patientId       String
-  carePlanId      String?
-  authorStaffId   String
-  text            String
-  category        String?  // 'mobility' | 'strength' | 'pain' | 'function' | 'endurance' | 'balance'
-  baselineValue   String?
-  currentValue    String?
-  targetValue     String?
-  measurementUnit String?
-  targetDate      DateTime? @db.Date
-  status          GoalStatus @default(in_progress)
-  metAt           DateTime?
+  id                 String     @id @default(cuid())
+  fhirGoalId         String?    @unique @map("fhir_goal_id")
+  patientId          String
+  carePlanId         String?
+  authorStaffId      String
+  text               String
+  category           String? // 'mobility' | 'strength' | 'pain' | 'function' | 'endurance' | 'balance'
+  baselineValue      String?
+  currentValue       String?
+  targetValue        String?
+  measurementUnit    String?
+  targetDate         DateTime?  @db.Date
+  status             GoalStatus @default(in_progress)
+  metAt              DateTime?
   discontinuedReason String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
 
-  patient         Patient @relation("PatientGoals", fields: [patientId], references: [id])
-  author          Staff   @relation("PatientGoalAuthor", fields: [authorStaffId], references: [id])
+  patient Patient @relation("PatientGoals", fields: [patientId], references: [id])
+  author  Staff   @relation("PatientGoalAuthor", fields: [authorStaffId], references: [id])
 
   @@index([patientId, status])
   @@index([authorStaffId])
